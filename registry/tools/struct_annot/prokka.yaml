@@ -1,0 +1,25 @@
+id: prokka
+name: Prokka
+version: "1.14.6"
+category: struct_annot
+stage: [genome_assembly.step5]
+input_types: [assembly_fasta]
+output_types: [structural_gff, structural_gbk, protein_faa]
+applicable:
+  species: [prokaryote]
+  read_type: [any]
+  mode: [any]
+container:
+  image: staphb/prokka:1.14.6
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4,  disk_gb: 5 }
+  recommended: { cpu: 8, ram_gb: 16, disk_gb: 20 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  prokka --outdir {out_dir} --prefix {sample_id} --cpus {cpu}
+         --force --fast {assembly_fasta}
+citation: "Seemann 2014, PMID 24642063"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

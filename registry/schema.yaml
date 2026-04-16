@@ -1,0 +1,83 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://bioflow.local/registry/tool.schema.yaml"
+title: bioflow tool registry entry
+type: object
+required:
+  - id
+  - name
+  - version
+  - category
+  - stage
+  - applicable
+  - container
+  - resources
+  - command_template
+additionalProperties: false
+properties:
+  id:          { type: string, pattern: "^[a-z0-9_]+$" }
+  name:        { type: string }
+  version:     { type: string }
+  category:
+    type: string
+    enum: [qc, assembly, assembly_qc, repeat, struct_annot, func_annot,
+           rnaseq_align, deg, enrichment]
+  stage:
+    type: array
+    items: { type: string }
+    minItems: 1
+  input_types:  { type: array, items: { type: string } }
+  output_types: { type: array, items: { type: string } }
+  applicable:
+    type: object
+    additionalProperties: false
+    properties:
+      species:
+        type: array
+        items:
+          type: string
+          enum: [prokaryote, eukaryote, eukaryote_small, any]
+      read_type:
+        type: array
+        items:
+          type: string
+          enum: [short, long_hifi, long_ont, hybrid, any]
+      mode:
+        type: array
+        items:
+          type: string
+          enum: [de_novo, resequencing, any]
+  container:
+    type: object
+    required: [image]
+    additionalProperties: false
+    properties:
+      image:       { type: string }
+      pull_policy: { type: string, enum: [always, if_not_present, never] }
+  resources:
+    type: object
+    required: [min, recommended]
+    additionalProperties: false
+    properties:
+      min:
+        type: object
+        required: [cpu, ram_gb]
+        properties:
+          cpu:     { type: integer, minimum: 1 }
+          ram_gb:  { type: number, minimum: 0 }
+          disk_gb: { type: number, minimum: 0 }
+      recommended:
+        type: object
+        required: [cpu, ram_gb]
+        properties:
+          cpu:     { type: integer, minimum: 1 }
+          ram_gb:  { type: number, minimum: 0 }
+          disk_gb: { type: number, minimum: 0 }
+      gpu:         { type: boolean }
+      arch:
+        type: array
+        items: { type: string, enum: [x86_64, amd64, arm64, aarch64] }
+  command_template: { type: string }
+  references:      { type: array, items: { type: string } }
+  citation:        { type: string }
+  added:           { type: string, format: date }
+  last_reviewed:   { type: string, format: date }

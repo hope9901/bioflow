@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bioflow"
+version = "0.1.0"
+description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "bioflow" }]
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "jsonschema>=4.22",
+    "docker>=7.1",
+    "psutil>=5.9",
+    "questionary>=2.0",
+    "pynvml>=11.5; platform_system != 'Darwin'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+bioflow = "bioflow.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["bioflow"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"

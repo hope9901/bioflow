@@ -1,0 +1,19 @@
+# Example saved custom pipeline (produced by `bioflow custom ... -o`).
+pipeline: rnaseq_deg
+species: eukaryote
+read_type: short
+mode: de_novo
+inputs:
+  sample_sheet: /workspace/in/samples.csv
+  reference_genome: /refs/genomes/GRCh38.fa
+  annotation_gtf: /refs/genomes/GRCh38.gtf
+workdir: /workspace/out/rnaseq1
+stages:
+  - stage_id: rnaseq_deg.step1
+    tool_id: fastp
+  - stage_id: rnaseq_deg.step2
+    tool_id: salmon
+  - stage_id: rnaseq_deg.step3
+    tool_id: deseq2
+  - stage_id: rnaseq_deg.step4
+    tool_id: clusterprofiler

@@ -1,0 +1,13 @@
+services:
+  bioflow:
+    build:
+      context: ..
+      dockerfile: docker/core/Dockerfile
+    image: bioflow:dev
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   # sibling-container pattern
+      - ../data:/workspace                          # pipeline I/O
+      - ../data/references:/refs                    # reference DBs
+    working_dir: /workspace
+    environment:
+      - BIOFLOW_REGISTRY=/app/registry

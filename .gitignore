@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Bioflow runtime
+.bioflow_state.json
+data/test/**/out/
+data/references/dbs/**
+data/references/genomes/**
+!data/references/.gitkeep
+!data/references/dbs/.gitkeep
+!data/references/genomes/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

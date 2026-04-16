@@ -1,0 +1,28 @@
+id: fastp
+name: fastp
+version: "0.23.4"
+category: qc
+stage:
+  - genome_assembly.step1
+  - rnaseq_deg.step1
+input_types: [fastq_short_paired]
+output_types: [fastq_short_paired_clean, qc_json, qc_html]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/fastp:0.23.4--h5f740d0_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 2,  disk_gb: 1 }
+  recommended: { cpu: 8, ram_gb: 8,  disk_gb: 5 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  fastp -i {r1} -I {r2} -o {out_dir}/clean_R1.fastq.gz -O {out_dir}/clean_R2.fastq.gz
+        --json {out_dir}/fastp.json --html {out_dir}/fastp.html
+        --thread {cpu}
+citation: "Chen 2018, PMID 30423086"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

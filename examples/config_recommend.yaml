@@ -1,0 +1,10 @@
+# Example input config for `bioflow recommend --preset prokaryote_denovo_short`
+pipeline: genome_assembly
+preset: prokaryote_denovo_short
+species: prokaryote
+read_type: short
+mode: de_novo
+inputs:
+  reads_r1: /workspace/in/sample_R1.fastq.gz
+  reads_r2: /workspace/in/sample_R2.fastq.gz
+workdir: /workspace/out/sample1
