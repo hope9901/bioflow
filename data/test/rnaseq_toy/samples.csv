@@ -1,0 +1,2 @@
+sample_id,fastq_r1,fastq_r2,condition,batch
+ctl_1,/data/R1.fastq.gz,/data/R2.fastq.gz,control,1
