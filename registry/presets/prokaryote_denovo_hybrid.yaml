@@ -1,0 +1,30 @@
+id: prokaryote_denovo_hybrid
+pipeline: genome_assembly
+description: >
+  Prokaryote de-novo hybrid assembly (Illumina + ONT long reads).
+  fastp (short QC) → Unicycler → QUAST+CheckM2 →
+  (repeat masking skipped) → Bakta → eggNOG-mapper.
+  Unicycler produces complete circular chromosomes when coverage is sufficient.
+applies_to:
+  species: [prokaryote]
+  read_type: [hybrid]
+  mode: [de_novo]
+stages:
+  - stage_id: genome_assembly.step1
+    tool_id: fastp
+
+  - stage_id: genome_assembly.step2
+    tool_id: unicycler
+
+  - stage_id: genome_assembly.step3
+    tool_id: quast
+
+  - stage_id: genome_assembly.step4
+    skip: true
+    reason: "Repeat masking not required for prokaryote genomes"
+
+  - stage_id: genome_assembly.step5
+    tool_id: bakta
+
+  - stage_id: genome_assembly.step6
+    tool_id: eggnog_mapper

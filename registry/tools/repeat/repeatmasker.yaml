@@ -1,0 +1,26 @@
+id: repeatmasker
+name: RepeatMasker
+version: "4.1.7"
+category: repeat
+stage: [genome_assembly.step4]
+input_types: [assembly_fasta, repeat_library]
+output_types: [masked_assembly_fasta]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [any]
+container:
+  image: dfam/tetools:1.89
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,   disk_gb: 20 }
+  recommended: { cpu: 32, ram_gb: 32,  disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  RepeatMasker -lib {repeat_library} -pa {cpu} -xsmall -gff
+               -dir {out_dir} {assembly_fasta}
+references: ["/refs/dbs/dfam"]
+citation: "Smit 2015 (repeatmasker.org)"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

@@ -1,0 +1,36 @@
+id: limma_voom
+name: limma-voom
+version: "3.60.0"
+category: deg
+stage: [rnaseq_deg.step3]
+input_types: [count_matrix, sample_sheet]
+output_types: [deg_table, deg_plots]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/bioconductor-limma:3.60.0--r43hf17093f_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4,  disk_gb: 2 }
+  recommended: { cpu: 4, ram_gb: 16, disk_gb: 5 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  Rscript -e "
+    library(limma); library(edgeR)
+    counts <- read.table('{count_matrix}', header=TRUE, row.names=1)
+    coldata <- read.csv('{sample_sheet}')
+    group <- factor(coldata\$condition)
+    dge <- DGEList(counts=round(counts), group=group)
+    dge <- calcNormFactors(dge)
+    design <- model.matrix(~group)
+    v <- voom(dge, design, plot=FALSE)
+    fit <- lmFit(v, design); fit <- eBayes(fit)
+    res <- topTable(fit, coef=ncol(design), n=Inf, sort.by='P')
+    write.csv(res, file='{out_dir}/deg_results.tsv', quote=FALSE)
+  "
+citation: "Law 2014, PMID 24485249"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

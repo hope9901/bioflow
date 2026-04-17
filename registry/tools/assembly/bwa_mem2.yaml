@@ -1,0 +1,28 @@
+id: bwa_mem2
+name: BWA-MEM2
+version: "2.2.1"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [fastq_short_paired_clean, reference_genome]
+output_types: [assembly_fasta]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [resequencing]
+container:
+  image: quay.io/biocontainers/bwa-mem2:2.2.1--he513fc3_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 20 }
+  recommended: { cpu: 16, ram_gb: 64,  disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  bwa-mem2 index {reference_genome} &&
+  bwa-mem2 mem -t {cpu} {reference_genome} {r1} {r2} |
+  samtools sort -@ {cpu} -o {out_dir}/aligned.bam &&
+  samtools index {out_dir}/aligned.bam &&
+  samtools consensus -@ {cpu} -o {out_dir}/consensus.fasta {out_dir}/aligned.bam
+citation: "Vasimuddin 2019, PMID 31355760"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

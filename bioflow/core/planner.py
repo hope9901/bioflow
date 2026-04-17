@@ -97,29 +97,65 @@ class _UserConfig(BaseModel):
 # "tool_id=None" means the convention applies regardless of which tool runs the stage.
 _ARTIFACT_FILENAMES: dict[tuple[str, Optional[str]], dict[str, str]] = {
     # Genome assembly
-    ("genome_assembly.step1", None):         {"r1": "clean_R1.fastq.gz",
+    # ── Genome assembly ────────────────────────────────────────────────────
+    # step1: short-read QC → clean paired FASTQ
+    ("genome_assembly.step1", "fastp"):      {"r1": "clean_R1.fastq.gz",
                                               "r2": "clean_R2.fastq.gz"},
+    ("genome_assembly.step1", "fastqc"):     {"r1": "clean_R1.fastq.gz",
+                                              "r2": "clean_R2.fastq.gz"},
+    # step1: long-read QC/filter → filtered single-end FASTQ
+    ("genome_assembly.step1", "filtlong"):   {"r1_long": "filtered.fastq.gz"},
+    ("genome_assembly.step1", "nanoplot"):   {},  # report only, no downstream artifact
+
+    # step2: de-novo assemblers
     ("genome_assembly.step2", "spades"):     {"assembly_fasta": "scaffolds.fasta"},
     ("genome_assembly.step2", "hifiasm"):    {"assembly_fasta": "asm.bp.p_ctg.fa"},
     ("genome_assembly.step2", "flye"):       {"assembly_fasta": "assembly.fasta"},
     ("genome_assembly.step2", "unicycler"):  {"assembly_fasta": "assembly.fasta"},
-    ("genome_assembly.step4", None):         {"masked_assembly_fasta": "genome.masked.fasta"},
+    # step2: resequencing
+    ("genome_assembly.step2", "bwa_mem2"):   {"assembly_fasta": "consensus.fasta"},
+
+    # step3: assembly QC (output is a report — not chained further)
+    ("genome_assembly.step3", "quast"):      {"assembly_qc_report": "report.html"},
+    ("genome_assembly.step3", "busco"):      {"assembly_qc_report": "short_summary.txt"},
+    ("genome_assembly.step3", "checkm2"):    {"assembly_qc_report": "quality_report.tsv"},
+    ("genome_assembly.step3", "merqury"):    {"assembly_qc_report": "merqury.qv"},
+
+    # step4: repeat masking → masked FASTA  (also exposes repeat_library)
+    ("genome_assembly.step4", "earlgrey"):        {"masked_assembly_fasta": "genome.masked.fasta",
+                                                    "repeat_library": "repeats.fasta"},
+    ("genome_assembly.step4", "repeatmasker"):    {"masked_assembly_fasta": "genome.masked.fasta"},
+    ("genome_assembly.step4", "repeatmodeler"):   {"repeat_library": "consensi.fa.classified"},
+
+    # step5: structural annotation → GFF + protein FASTA
     ("genome_assembly.step5", "prokka"):     {"structural_gff": "{sample_id}.gff",
                                               "protein_faa":    "{sample_id}.faa"},
     ("genome_assembly.step5", "bakta"):      {"structural_gff": "{sample_id}.gff",
                                               "protein_faa":    "{sample_id}.faa"},
     ("genome_assembly.step5", "braker3"):    {"structural_gff": "braker.gff3",
                                               "protein_faa":    "braker.aa"},
-    # RNA-seq DEG
+
+    # step6: functional annotation
+    ("genome_assembly.step6", "eggnog_mapper"):   {"func_annotation_tsv": "annotations.tsv"},
+    ("genome_assembly.step6", "interproscan"):    {"func_annotation_tsv": "annotations.tsv"},
+
+    # ── RNA-seq DEG ─────────────────────────────────────────────────────────
+    # step1: QC → clean paired FASTQ (long-read RNA-seq not yet supported)
     ("rnaseq_deg.step1", None):              {"r1": "clean_R1.fastq.gz",
                                               "r2": "clean_R2.fastq.gz"},
+
+    # step2: alignment / quantification → count matrix
     ("rnaseq_deg.step2", "salmon"):          {"count_matrix": "quant.sf"},
     ("rnaseq_deg.step2", "kallisto"):        {"count_matrix": "abundance.tsv"},
     ("rnaseq_deg.step2", "hisat2"):          {"alignment_bam": "aligned.bam",
                                               "count_matrix":  "counts.tsv"},
     ("rnaseq_deg.step2", "star"):            {"alignment_bam": "Aligned.sortedByCoord.out.bam",
                                               "count_matrix":  "ReadsPerGene.out.tab"},
+
+    # step3: DEG → results table
     ("rnaseq_deg.step3", None):              {"deg_table": "deg_results.tsv"},
+
+    # step4: enrichment → HTML report
     ("rnaseq_deg.step4", None):              {"enrichment_report": "enrichment_report.html"},
 }
 
@@ -283,9 +319,14 @@ def _chain_artifact_params(
 
     # Genome assembly
     if stage_id == "genome_assembly.step2":
+        # Short-read assemblers (spades, unicycler, bwa_mem2)
         if _get("r1") and "genome_assembly.step1" in completed_stage_ids:
             params["r1"] = running_inputs["r1"]
-            params["r2"] = running_inputs["r2"]
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
+        # Long-read assemblers (hifiasm, flye)
+        if _get("r1_long") and "genome_assembly.step1" in completed_stage_ids:
+            params["r1_long"] = running_inputs["r1_long"]
 
     elif stage_id in ("genome_assembly.step3",):
         if _get("assembly_fasta"):

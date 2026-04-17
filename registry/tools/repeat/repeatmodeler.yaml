@@ -1,0 +1,25 @@
+id: repeatmodeler
+name: RepeatModeler
+version: "2.0.5"
+category: repeat
+stage: [genome_assembly.step4]
+input_types: [assembly_fasta]
+output_types: [repeat_library]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [any]
+container:
+  image: dfam/tetools:1.89
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 30 }
+  recommended: { cpu: 32, ram_gb: 64,  disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  BuildDatabase -name {sample_id} {assembly_fasta} &&
+  RepeatModeler -database {sample_id} -pa {cpu} -LTRStruct
+citation: "Flynn 2020, PMID 32591352"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

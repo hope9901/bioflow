@@ -1,0 +1,29 @@
+id: eukaryote_denovo_hybrid
+pipeline: genome_assembly
+description: >
+  Eukaryote de-novo hybrid assembly (Illumina short + ONT/HiFi long reads).
+  fastp (short QC) → Unicycler → BUSCO → RepeatModeler+RepeatMasker →
+  BRAKER3 → eggNOG-mapper.
+  Short reads provide accuracy; long reads provide contiguity.
+applies_to:
+  species: [eukaryote_small]
+  read_type: [hybrid]
+  mode: [de_novo]
+stages:
+  - stage_id: genome_assembly.step1
+    tool_id: fastp
+
+  - stage_id: genome_assembly.step2
+    tool_id: unicycler
+
+  - stage_id: genome_assembly.step3
+    tool_id: busco
+
+  - stage_id: genome_assembly.step4
+    tool_id: earlgrey
+
+  - stage_id: genome_assembly.step5
+    tool_id: braker3
+
+  - stage_id: genome_assembly.step6
+    tool_id: eggnog_mapper

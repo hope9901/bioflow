@@ -1,0 +1,25 @@
+id: interproscan
+name: InterProScan
+version: "5.67-99.0"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [protein_faa]
+output_types: [functional_annotation_tsv, go_terms_tsv]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/interproscan:5.67.99.0--hec16e2b_1
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 20 }
+  recommended: { cpu: 16, ram_gb: 64,  disk_gb: 60 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  interproscan.sh -i {protein_faa} -d {out_dir} -f TSV,GFF3
+                  -cpu {cpu} --goterms --pathways
+citation: "Blum 2021, PMID 33220566"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

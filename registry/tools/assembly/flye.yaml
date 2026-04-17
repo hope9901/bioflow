@@ -1,0 +1,25 @@
+id: flye
+name: Flye
+version: "2.9.5"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [fastq_long]
+output_types: [assembly_fasta, assembly_graph]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [long_ont, long_hifi]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/flye:2.9.5--py39h3d6084e_1
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
+  recommended: { cpu: 32, ram_gb: 128, disk_gb: 300 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  flye --nano-raw {r1_long} --out-dir {out_dir} --threads {cpu}
+       --genome-size {genome_size}
+citation: "Kolmogorov 2019, PMID 31907358"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

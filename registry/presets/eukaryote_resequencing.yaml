@@ -1,0 +1,30 @@
+id: eukaryote_resequencing
+pipeline: genome_assembly
+description: >
+  Eukaryote resequencing: map Illumina short reads to a reference genome,
+  call consensus, then annotate.
+  fastp → BWA-MEM2 (consensus) → QUAST → Earl Grey →
+  BRAKER3 → eggNOG-mapper.
+  Suitable when a high-quality reference genome already exists.
+applies_to:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [resequencing]
+stages:
+  - stage_id: genome_assembly.step1
+    tool_id: fastp
+
+  - stage_id: genome_assembly.step2
+    tool_id: bwa_mem2
+
+  - stage_id: genome_assembly.step3
+    tool_id: quast
+
+  - stage_id: genome_assembly.step4
+    tool_id: earlgrey
+
+  - stage_id: genome_assembly.step5
+    tool_id: braker3
+
+  - stage_id: genome_assembly.step6
+    tool_id: eggnog_mapper
