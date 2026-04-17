@@ -146,7 +146,7 @@ def test_run_multiqc_calls_backend_and_returns_path(tmp_path):
     out_dir = tmp_path / "out"
 
     # Fake MultiQC that writes the expected output file
-    def fake_run(image, command, volumes, environment, timeout):
+    def fake_run(*, image, command, mounts, cpu, ram_gb, workdir):
         (out_dir / "multiqc_report.html").write_text("<html/>", encoding="utf-8")
 
     mock_backend = MagicMock()

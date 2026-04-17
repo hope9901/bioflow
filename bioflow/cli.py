@@ -229,10 +229,102 @@ def db_cmd(
 
 @app.command("update")
 def update_cmd(
-    action: str = typer.Argument("run", help="run | status | approve"),
+    action: str = typer.Argument(..., help="approve"),
+    candidate: Optional[Path] = typer.Option(
+        None, "--candidate", "-c",
+        help="Path to a single candidate YAML to approve.",
+    ),
+    candidates_dir: Optional[Path] = typer.Option(
+        None, "--candidates-dir",
+        help="Approve every .yaml in this directory.",
+    ),
+    registry_dir: Path = typer.Option(
+        Path("registry"), "--registry",
+        help="Root of the tool registry.",
+    ),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing entries."),
+    delete_candidate: bool = typer.Option(
+        False, "--delete-candidate",
+        help="Delete candidate file(s) after successful approval.",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would happen without writing."),
 ) -> None:
-    """Run the monthly Deep Research registry-update workflow (semi-automated)."""
-    raise typer.Exit(code=1)  # TODO: implement in step 10
+    """Registry update utilities.
+
+    \b
+    approve   Promote a candidate YAML (or a whole directory) to the registry.
+    """
+    from bioflow.core.approve import (  # noqa: PLC0415
+        ApprovalError,
+        approve_all_candidates,
+        approve_candidate,
+    )
+
+    if action == "approve":
+        if candidate and candidates_dir:
+            rprint("[red]Specify --candidate OR --candidates-dir, not both.[/]")
+            raise typer.Exit(code=1)
+
+        if candidate:
+            if dry_run:
+                rprint(f"[dim][DRY RUN] Would approve {candidate}[/]")
+            try:
+                dest = approve_candidate(
+                    candidate,
+                    registry_dir=registry_dir,
+                    overwrite=overwrite,
+                    delete_candidate=delete_candidate,
+                    dry_run=dry_run,
+                )
+                if not dry_run:
+                    rprint(f"[green]✓ Approved:[/] {candidate.name} → [cyan]{dest}[/]")
+                else:
+                    rprint(f"[dim]Would write → {dest}[/]")
+            except ApprovalError as exc:
+                rprint(f"[red]Approval failed:[/] {exc}")
+                raise typer.Exit(code=1)
+
+        elif candidates_dir:
+            if not candidates_dir.is_dir():
+                rprint(f"[red]Not a directory:[/] {candidates_dir}")
+                raise typer.Exit(code=1)
+            results = approve_all_candidates(
+                candidates_dir,
+                registry_dir=registry_dir,
+                overwrite=overwrite,
+                delete_candidates=delete_candidate,
+                dry_run=dry_run,
+            )
+            if not results:
+                rprint("[yellow]No candidate YAML files found.[/]")
+                raise typer.Exit(code=0)
+
+            approved = [r for r in results if r["status"] == "approved"]
+            skipped  = [r for r in results if r["status"] == "skipped"]
+            errors   = [r for r in results if r["status"] == "error"]
+
+            for r in approved:
+                rprint(f"[green]✓ approved[/]  {r['file']} → {r.get('dest','')}")
+            for r in skipped:
+                rprint(f"[yellow]⚠ skipped[/]   {r['file']}: {r.get('error','')}")
+            for r in errors:
+                rprint(f"[red]✗ error[/]     {r['file']}: {r.get('error','')}")
+
+            rprint(
+                f"\n[bold]Total:[/] {len(results)}  "
+                f"[green]approved={len(approved)}[/]  "
+                f"[yellow]skipped={len(skipped)}[/]  "
+                f"[red]errors={len(errors)}[/]"
+            )
+            if errors:
+                raise typer.Exit(code=1)
+        else:
+            rprint("[red]--candidate or --candidates-dir is required for 'approve'.[/]")
+            raise typer.Exit(code=1)
+
+    else:
+        rprint(f"[red]Unknown action '{action}'.[/] Available: approve")
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

@@ -73,12 +73,13 @@ def run_multiqc(
         backend.run(
             image=MULTIQC_IMAGE,
             command=cmd,
-            volumes={
-                str(workdir): {"bind": "/data/workdir", "mode": "ro"},
-                str(out_dir): {"bind": "/data/out",     "mode": "rw"},
+            mounts={
+                str(workdir): "/data/workdir",
+                str(out_dir): "/data/out",
             },
-            environment={},
-            timeout=timeout,
+            cpu=1,
+            ram_gb=2,
+            workdir="/data/out",
         )
     except Exception as exc:
         log.warning(f"MultiQC container failed: {exc}")

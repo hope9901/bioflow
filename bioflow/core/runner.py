@@ -136,6 +136,7 @@ class DockerBackend:
         ram_gb: float,
         workdir: str,
         log_callback: Optional[Callable[[str], None]] = None,
+        timeout: Optional[int] = None,   # seconds; None = no limit
     ) -> CommandResult:
         volumes = {h: {"bind": c, "mode": "rw"} for h, c in mounts.items()}
         try:
@@ -157,7 +158,7 @@ class DockerBackend:
                 if log_callback:
                     log_callback(line)
 
-            result = container.wait()
+            result = container.wait(timeout=timeout)
             container.remove(force=True)
 
             return CommandResult(
@@ -165,6 +166,11 @@ class DockerBackend:
                 stdout="\n".join(stdout_lines),
             )
         except Exception as exc:
+            # If timeout expired, the container may still be running — remove it
+            try:
+                container.remove(force=True)  # type: ignore[possibly-undefined]
+            except Exception:
+                pass
             return CommandResult(exit_code=1, stderr=str(exc))
 
 
@@ -276,6 +282,7 @@ def run_plan(
     backend: Optional[ContainerBackend] = None,
     registry_dir: Optional[Path] = None,
     show_progress: bool = True,
+    stage_timeout: Optional[int] = None,   # seconds per stage; None = no limit
 ) -> None:
     """Execute every stage in plan.stages in declared order.
 
@@ -342,6 +349,8 @@ def run_plan(
                 run_kwargs["log_callback"] = lambda line: log.debug(
                     f"  [{stage.stage_id}] {line}"
                 )
+                if stage_timeout is not None:
+                    run_kwargs["timeout"] = stage_timeout
 
             try:
                 result = backend.run(**run_kwargs)
