@@ -1,0 +1,36 @@
+id: deseq2
+name: DESeq2
+version: "1.44.0"
+category: deg
+stage: [rnaseq_deg.step3]
+input_types: [count_matrix, sample_sheet]
+output_types: [deg_table, deg_plots]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/bioconductor-deseq2:1.44.0--r43hf17093f_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 8,  disk_gb: 5 }
+  recommended: { cpu: 8, ram_gb: 32, disk_gb: 10 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  Rscript -e "
+    library(DESeq2)
+    counts <- read.table('{count_matrix}', header=TRUE, row.names=1)
+    coldata <- read.csv('{sample_sheet}')
+    dds <- DESeqDataSetFromMatrix(countData=round(counts), colData=coldata,
+                                  design=~condition)
+    dds <- DESeq(dds)
+    res <- results(dds)
+    write.csv(as.data.frame(res), file='{out_dir}/deg_results.tsv', quote=FALSE)
+    pdf('{out_dir}/deg_plots.pdf')
+    plotMA(res, main='DESeq2 MA-plot')
+    dev.off()
+  "
+citation: "Love 2014, PMID 25516281"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

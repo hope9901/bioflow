@@ -1,0 +1,30 @@
+id: hisat2
+name: HISAT2
+version: "2.2.1"
+category: rnaseq_align
+stage: [rnaseq_deg.step2]
+input_types: [fastq_short_paired_clean, reference_genome, annotation_gtf]
+output_types: [alignment_bam, count_matrix]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/hisat2:2.2.1--h87f3376_4
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
+  recommended: { cpu: 16, ram_gb: 32, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  hisat2-build -p {cpu} {reference_genome} {out_dir}/genome_index &&
+  hisat2 -x {out_dir}/genome_index -1 {r1} -2 {r2} -p {cpu}
+         --dta -S {out_dir}/aligned.sam &&
+  samtools sort -@ {cpu} -o {out_dir}/aligned.bam {out_dir}/aligned.sam &&
+  samtools index {out_dir}/aligned.bam &&
+  featureCounts -T {cpu} -a {annotation_gtf} -o {out_dir}/counts.tsv
+                {out_dir}/aligned.bam
+citation: "Kim 2019, PMID 31375807"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

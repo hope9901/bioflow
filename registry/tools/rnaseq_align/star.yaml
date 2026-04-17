@@ -1,0 +1,33 @@
+id: star
+name: STAR
+version: "2.7.11b"
+category: rnaseq_align
+stage: [rnaseq_deg.step2]
+input_types: [fastq_short_paired_clean, reference_genome, annotation_gtf]
+output_types: [alignment_bam, count_matrix]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/star:2.7.11b--h43eeafb_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 32, disk_gb: 30 }
+  recommended: { cpu: 16, ram_gb: 64, disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  STAR --runThreadN {cpu}
+       --runMode genomeGenerate --genomeDir {out_dir}/genome_index
+       --genomeFastaFiles {reference_genome} --sjdbGTFfile {annotation_gtf} &&
+  STAR --runThreadN {cpu}
+       --genomeDir {out_dir}/genome_index
+       --readFilesIn {r1} {r2} --readFilesCommand zcat
+       --outSAMtype BAM SortedByCoordinate
+       --outSAMattributes NH HI AS NM
+       --quantMode GeneCounts
+       --outFileNamePrefix {out_dir}/
+citation: "Dobin 2013, PMID 23104886"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

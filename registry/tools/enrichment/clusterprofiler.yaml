@@ -1,0 +1,41 @@
+id: clusterprofiler
+name: clusterProfiler
+version: "4.12.0"
+category: enrichment
+stage: [rnaseq_deg.step4]
+input_types: [deg_table, annotation_gtf]
+output_types: [enrichment_report, go_results_tsv, kegg_results_tsv]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/bioconductor-clusterprofiler:4.12.0--r43hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 8,  disk_gb: 3 }
+  recommended: { cpu: 4, ram_gb: 16, disk_gb: 5 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  Rscript -e "
+    library(clusterProfiler)
+    library(org.Hs.eg.db)
+    deg <- read.csv('{deg_table}')
+    sig <- deg[!is.na(deg\$padj) & deg\$padj < 0.05, ]
+    gene_list <- sig\$log2FoldChange
+    names(gene_list) <- sig\$gene_id
+    go_bp <- enrichGO(gene = names(gene_list), OrgDb = org.Hs.eg.db,
+                      keyType = 'SYMBOL', ont = 'BP',
+                      pAdjustMethod = 'BH', pvalueCutoff = 0.05)
+    write.csv(as.data.frame(go_bp), '{out_dir}/go_results.tsv', quote=FALSE)
+    kegg <- enrichKEGG(gene = names(gene_list), organism = '{kegg_organism}',
+                       pvalueCutoff = 0.05)
+    write.csv(as.data.frame(kegg), '{out_dir}/kegg_results.tsv', quote=FALSE)
+    pdf('{out_dir}/enrichment_plots.pdf')
+    dotplot(go_bp, showCategory=20, title='GO Biological Process')
+    dev.off()
+  "
+citation: "Wu 2021, PMID 34557778"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"

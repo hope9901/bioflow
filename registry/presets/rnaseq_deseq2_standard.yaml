@@ -1,0 +1,22 @@
+id: rnaseq_deseq2_standard
+pipeline: rnaseq_deg
+description: >
+  Standard RNA-seq DEG pipeline with Salmon (alignment-free quantification) +
+  DESeq2 (differential expression) + clusterProfiler (GO & KEGG enrichment).
+  Fastest path for eukaryote short-read RNA-seq. Prokaryote also supported.
+applies_to:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [any]
+stages:
+  - stage_id: rnaseq_deg.step1
+    tool_id: fastp
+
+  - stage_id: rnaseq_deg.step2
+    tool_id: salmon
+
+  - stage_id: rnaseq_deg.step3
+    tool_id: deseq2
+
+  - stage_id: rnaseq_deg.step4
+    tool_id: clusterprofiler
