@@ -1,0 +1,39 @@
+update_meta:
+  month: "2026-05"
+  replaces: []
+  benchmark_note: "hypothetical example candidate for smoke-test demo"
+  risks:
+    - "example tool — not real"
+
+id: hypo_assembler
+name: HypoAssembler
+version: "1.0.0"
+category: assembly
+stage:
+  - genome_assembly.step2
+input_types: [short_paired]
+output_types: [assembly_fasta]
+applicable:
+  species: [prokaryote]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: alpine:3.19
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 2
+    ram_gb: 4
+    disk_gb: 10
+  recommended:
+    cpu: 8
+    ram_gb: 16
+    disk_gb: 50
+  gpu: false
+  arch: [x86_64, arm64]
+command_template: |
+  echo "hypo_assembler -1 {r1} -2 {r2} -o {out_dir}"
+references: []
+citation: "Hypothetical 2026"
+added: "2026-05-01"
+last_reviewed: "2026-05-01"
