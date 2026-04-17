@@ -2,6 +2,15 @@
 
 Detects CPU / RAM / GPU / disk / architecture / Docker availability on the host.
 Returned as a Pydantic model for easy JSON serialization and registry matching.
+
+Architecture normalisation
+--------------------------
+``platform.machine()`` returns platform-specific strings that don't match the
+values used in tool YAML ``arch`` lists.  We normalise to a small canonical set:
+
+* ``x86_64`` — Intel/AMD 64-bit (Linux, macOS Intel, Windows AMD64/x86_64)
+* ``arm64``  — ARM 64-bit (macOS Apple Silicon M1/M2/M3, Linux aarch64)
+* ``i686``   — Intel/AMD 32-bit (rare)
 """
 
 from __future__ import annotations
@@ -14,6 +23,17 @@ from typing import Optional
 
 import psutil
 from pydantic import BaseModel
+
+# Map raw platform.machine() values (lowercased) → canonical arch token
+_ARCH_ALIASES: dict[str, str] = {
+    "amd64":   "x86_64",   # Windows 64-bit
+    "x86_64":  "x86_64",   # Linux / macOS Intel
+    "aarch64": "arm64",    # Linux ARM 64-bit (Graviton, Raspberry Pi 64, etc.)
+    "arm64":   "arm64",    # macOS Apple Silicon
+    "x86":     "i686",
+    "i386":    "i686",
+    "i686":    "i686",
+}
 
 
 class HardwareProfile(BaseModel):
@@ -68,11 +88,14 @@ def detect(data_dir: Path = Path.cwd()) -> HardwareProfile:
     ram_gb = psutil.virtual_memory().total / (1024**3)
     disk_free_gb = shutil.disk_usage(data_dir).free / (1024**3)
     gpu_present, gpu_names, cuda = _detect_gpu()
+    raw_arch = platform.machine()
+    arch = _ARCH_ALIASES.get(raw_arch.lower(), raw_arch.lower())
+
     return HardwareProfile(
         cpu_count=cpu,
         ram_gb=round(ram_gb, 2),
         disk_free_gb=round(disk_free_gb, 2),
-        arch=platform.machine().lower(),
+        arch=arch,
         os=platform.system().lower(),
         gpu_present=gpu_present,
         gpu_names=gpu_names,

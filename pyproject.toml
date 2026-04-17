@@ -18,7 +18,7 @@ dependencies = [
     "docker>=7.1",
     "psutil>=5.9",
     "questionary>=2.0",
-    "pynvml>=11.5; platform_system != 'Darwin'",
+    "pynvml>=11.5; platform_system == 'Linux'",
 ]
 
 [project.optional-dependencies]

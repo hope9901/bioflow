@@ -1,4 +1,13 @@
-"""Hardware <-> tool compatibility classification and preset recommendation."""
+"""Hardware <-> tool compatibility classification and preset recommendation.
+
+Architecture compatibility matrix
+----------------------------------
+* Exact match                  → no penalty
+* arm64 host + x86_64-only tool → ``runnable_slow``
+  Docker Desktop (macOS/Windows) and QEMU (Linux) can run x86_64 images on
+  arm64 hosts via emulation/Rosetta, but with a performance cost.
+* Any other arch mismatch      → ``incompatible``
+"""
 
 from __future__ import annotations
 
@@ -12,10 +21,28 @@ from bioflow.core.registry import Tool
 
 Status = Literal["installable", "runnable_slow", "incompatible"]
 
+# Architectures that can run x86_64 Docker images via emulation (Rosetta 2 /
+# QEMU binfmt_misc).  Emulation works but incurs a performance penalty, so
+# we classify such combinations as runnable_slow rather than incompatible.
+_EMULATES_X86_64: frozenset[str] = frozenset({"arm64", "aarch64"})
+
+
+def _arch_status(tool_arches: list[str], hw_arch: str) -> Status:
+    """Return arch-level status for a (tool_arches, hw_arch) combination."""
+    if not tool_arches:
+        return "installable"                     # no restriction declared
+    if hw_arch in tool_arches:
+        return "installable"                     # exact match
+    # arm64 / aarch64 host + x86_64-only tool → emulation possible
+    if hw_arch in _EMULATES_X86_64 and "x86_64" in tool_arches:
+        return "runnable_slow"
+    return "incompatible"
+
 
 def _status(tool: Tool, hw: HardwareProfile) -> Status:
     # Architecture
-    if tool.resources.arch and hw.arch not in tool.resources.arch:
+    arch_st = _arch_status(tool.resources.arch, hw.arch)
+    if arch_st == "incompatible":
         return "incompatible"
     # GPU
     if tool.resources.gpu and not hw.gpu_present:
@@ -30,6 +57,9 @@ def _status(tool: Tool, hw: HardwareProfile) -> Status:
     # Recommended resources → runnable but possibly slow
     rec = tool.resources.recommended
     if hw.cpu_count < rec.cpu or hw.ram_gb < rec.ram_gb:
+        return "runnable_slow"
+    # Propagate arch emulation penalty even when resources are fine
+    if arch_st == "runnable_slow":
         return "runnable_slow"
     return "installable"
 

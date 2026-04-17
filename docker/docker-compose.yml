@@ -5,7 +5,14 @@ services:
       dockerfile: docker/core/Dockerfile
     image: bioflow:dev
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock   # sibling-container pattern
+      # ── Docker socket (sibling-container pattern) ──────────────────────────
+      # Linux:   /var/run/docker.sock   (default; used as-is)
+      # macOS:   Docker Desktop exposes the same path via a compatibility shim.
+      # Windows: Docker Desktop with WSL2 backend exposes the socket at
+      #          /var/run/docker.sock inside WSL2 — this mount works unchanged.
+      #          Named-pipe users (Hyper-V backend) must set DOCKER_HOST instead:
+      #            DOCKER_HOST=npipe:////./pipe/docker_engine docker compose up
+      - /var/run/docker.sock:/var/run/docker.sock
       - ../data:/workspace                          # pipeline I/O
       - ../data/references:/refs                    # reference DBs
     working_dir: /workspace
