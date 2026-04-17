@@ -45,14 +45,49 @@ def tools_cmd(
         help="Path to tool registry directory.",
     ),
     category: Optional[str] = typer.Option(None, "--category", "-c"),
+    recommend: Optional[str] = typer.Option(
+        None, "--recommend",
+        help="Score and rank presets for this pipeline on the current host "
+             "(genome_assembly | rnaseq_deg).",
+    ),
 ) -> None:
     """List tools available on this host, classified by hardware compatibility."""
-    from bioflow.core.compatibility import classify
+    from bioflow.core.compatibility import classify, recommend_presets
     from bioflow.core.hardware import detect
     from bioflow.core.registry import load_registry
 
     hw = detect()
     tools = load_registry(registry_dir)
+
+    if recommend:
+        recs = recommend_presets(tools, hw, recommend, registry_dir=registry_dir)
+        if not recs:
+            console.print(f"[yellow]No presets found for pipeline '{recommend}'[/]")
+            return
+        console.print(f"\n[bold]Preset recommendations for [cyan]{recommend}[/] on this host:[/]\n")
+        for r in recs:
+            runnable_tag = "[green]✓ runnable[/]" if r["runnable"] else "[red]✗ incompatible tools[/]"
+            score_color = "green" if r["score"] >= 80 else "yellow" if r["score"] >= 50 else "red"
+            console.print(
+                f"  [{score_color}]{r['score']:3d}[/]  [bold]{r['preset']}[/]  {runnable_tag}"
+            )
+            if r["applies_to"]:
+                at = r["applies_to"]
+                console.print(
+                    f"       species={at.get('species',[])}  "
+                    f"read_type={at.get('read_type',[])}  "
+                    f"mode={at.get('mode',[])}"
+                )
+            if r["incompatible_tools"]:
+                console.print(
+                    f"       [red]incompatible:[/] {', '.join(r['incompatible_tools'])}"
+                )
+            if r["slow_tools"]:
+                console.print(
+                    f"       [yellow]slow:[/] {', '.join(r['slow_tools'])}"
+                )
+        return
+
     if category:
         tools = [t for t in tools if t.category == category]
     classified = classify(tools, hw)
@@ -138,10 +173,58 @@ def run_cmd(config: Path = typer.Argument(..., exists=True)) -> None:
 @app.command("db")
 def db_cmd(
     action: str = typer.Argument(..., help="fetch | list | verify"),
-    name: Optional[str] = typer.Argument(None),
+    name: Optional[str] = typer.Argument(None, help="Database key (see 'bioflow db list')."),
+    dest: Path = typer.Option(
+        Path("data/references"),
+        "--dest", "-d",
+        help="Root directory for downloaded databases.",
+    ),
+    force: bool = typer.Option(False, "--force", "-f", help="Re-download even if file exists."),
 ) -> None:
-    """Fetch or verify reference databases (Pfam/Dfam/UniProt/eggNOG/KEGG/...)."""
-    raise typer.Exit(code=1)  # TODO: implement in step 2+
+    """Fetch or verify reference databases (eggNOG / Pfam / Dfam / BUSCO / UniProt)."""
+    from bioflow.core.db import fetch_db, list_dbs, verify_db  # noqa: PLC0415
+
+    if action == "list":
+        rows = list_dbs()
+        console.print("\n[bold]Available reference databases:[/]\n")
+        for r in rows:
+            used = ", ".join(r["used_by"])
+            console.print(
+                f"  [cyan]{r['key']:<20}[/]  {r['size_gb']:5.1f} GB  "
+                f"used by: {used}"
+            )
+            console.print(f"    {r['name']}")
+            if r["notes"]:
+                console.print(f"    [dim]{r['notes']}[/]")
+        return
+
+    if not name:
+        rprint("[red]Error:[/] 'name' argument required for fetch/verify.")
+        raise typer.Exit(code=1)
+
+    if action == "fetch":
+        try:
+            path = fetch_db(name, dest, skip_if_exists=not force)
+            rprint(f"[green]✓[/] {name} → {path}")
+        except (KeyError, RuntimeError) as exc:
+            rprint(f"[red]Error:[/] {exc}")
+            raise typer.Exit(code=1) from exc
+
+    elif action == "verify":
+        try:
+            ok = verify_db(name, dest)
+            if ok:
+                rprint(f"[green]✓[/] {name} — OK")
+            else:
+                rprint(f"[red]✗[/] {name} — FAILED or missing")
+                raise typer.Exit(code=1)
+        except KeyError as exc:
+            rprint(f"[red]Error:[/] {exc}")
+            raise typer.Exit(code=1) from exc
+
+    else:
+        rprint(f"[red]Unknown action '{action}'.[/] Use: fetch | list | verify")
+        raise typer.Exit(code=1)
 
 
 @app.command("update")

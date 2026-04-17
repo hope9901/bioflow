@@ -151,23 +151,26 @@ _ROW_TMPL = Template("""\
         <td><code>$tool_id</code></td>
         <td><code>$stage_dir</code></td>
         <td>$outputs</td>
-        <td class="$status_cls">$status_label</td>
+        <td class="$status_cls">$status_label$error_detail</td>
       </tr>""")
 
 
 def _status_from_checkpoint(stage_id: str, workdir: Path) -> tuple:
-    """Return (css_class, label) based on checkpoint state."""
+    """Return (css_class, label, error_detail) based on checkpoint state."""
     state_file = workdir / ".bioflow_state.json"
     if not state_file.exists():
-        return ("skip", "not run")
+        return ("skip", "not run", "")
     try:
         state = json.loads(state_file.read_text(encoding="utf-8"))
-        completed = state.get("completed_stages", [])
-        if stage_id in completed:
-            return ("ok", "&#10003; done")
-        return ("skip", "pending")
+        if stage_id in state.get("completed_stages", []):
+            return ("ok", "&#10003; done", "")
+        failed = state.get("failed_stages", {}).get(stage_id)
+        if failed:
+            err = failed.get("error", "")
+            return ("err", "&#10007; failed", err)
+        return ("skip", "pending", "")
     except Exception:
-        return ("warn", "unknown")
+        return ("warn", "unknown", "")
 
 
 def render_summary(
@@ -209,7 +212,14 @@ def render_summary(
             f"<code>{f}</code>" for f in output_files
         ) if output_files else "—"
 
-        status_cls, status_label = _status_from_checkpoint(stage.stage_id, workdir)
+        status_cls, status_label, error_detail = _status_from_checkpoint(
+            stage.stage_id, workdir
+        )
+        error_html = (
+            f'<br><small style="color:#dc3545;font-family:monospace">'
+            f'{error_detail[:300]}</small>'
+            if error_detail else ""
+        )
 
         rows.append(
             _ROW_TMPL.substitute(
@@ -220,6 +230,7 @@ def render_summary(
                 outputs=outputs_html,
                 status_cls=status_cls,
                 status_label=status_label,
+                error_detail=error_html,
             )
         )
 

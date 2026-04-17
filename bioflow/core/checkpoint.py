@@ -30,4 +30,16 @@ def mark_completed(workdir: Path, stage_id: str, outputs: dict) -> None:
     if stage_id not in state["completed_stages"]:
         state["completed_stages"].append(stage_id)
     state["artifacts"][stage_id] = outputs
+    # If it was previously recorded as failed, clear that entry
+    state.get("failed_stages", {}).pop(stage_id, None)
+    save(workdir, state)
+
+
+def mark_failed(workdir: Path, stage_id: str, error: str, stderr: str = "") -> None:
+    """Record a failed stage with error details for post-run reporting."""
+    state = load(workdir)
+    state.setdefault("failed_stages", {})[stage_id] = {
+        "error": error,
+        "stderr_tail": stderr[-2000:] if stderr else "",
+    }
     save(workdir, state)

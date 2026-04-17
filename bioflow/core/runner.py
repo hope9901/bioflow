@@ -8,19 +8,42 @@ stage container so artifacts flow between stages as files.
 
 The backend is abstracted behind ContainerBackend so tests can use MockBackend
 (records calls, touches declared output files) without a Docker daemon.
+
+Progress display
+----------------
+``run_plan`` uses a Rich progress bar when *rich* is installed (it is listed as
+a dependency).  Each active stage is shown with a spinner, tool name, and
+elapsed time.  Pass ``show_progress=False`` to suppress it.
+
+Log streaming
+-------------
+``DockerBackend`` streams container stdout/stderr in real time via
+``container.logs(stream=True)``.  The decoded lines are passed to an optional
+``log_callback`` so the caller can display or buffer them.
 """
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Protocol, runtime_checkable
+from typing import Callable, Optional, Protocol, runtime_checkable
 
-from bioflow.core.checkpoint import load as _load_state, mark_completed
+from bioflow.core.checkpoint import (
+    load as _load_state,
+    mark_completed,
+    mark_failed,
+)
 from bioflow.core.logger import get_logger
 from bioflow.core.planner import ExecutionPlan, StagePlan
 from bioflow.core.registry import Tool, load_registry
 
+log = get_logger()
+
+
+# ---------------------------------------------------------------------------
+# Data types
+# ---------------------------------------------------------------------------
 
 @dataclass
 class CommandResult:
@@ -42,6 +65,10 @@ class ContainerBackend(Protocol):
         workdir: str,
     ) -> CommandResult: ...
 
+
+# ---------------------------------------------------------------------------
+# Mock backend (tests)
+# ---------------------------------------------------------------------------
 
 class MockBackend:
     """Records calls and touches declared output files. Used in unit tests."""
@@ -81,12 +108,22 @@ class MockBackend:
         return CommandResult(exit_code=0)
 
 
+# ---------------------------------------------------------------------------
+# Docker backend (production)
+# ---------------------------------------------------------------------------
+
 class DockerBackend:
-    """Real Docker SDK backend (sibling-container pattern)."""
+    """Real Docker SDK backend (sibling-container pattern).
+
+    Streams container stdout/stderr in real time via
+    ``container.logs(stream=True, follow=True)`` and surfaces them through
+    an optional ``log_callback`` so callers can display or buffer them.
+    """
+
+    _STREAMING_SUPPORTED = True    # sentinel for run_plan
 
     def __init__(self) -> None:
         import docker  # type: ignore[import-not-found]
-
         self.client = docker.from_env()
 
     def run(
@@ -98,6 +135,7 @@ class DockerBackend:
         cpu: int,
         ram_gb: float,
         workdir: str,
+        log_callback: Optional[Callable[[str], None]] = None,
     ) -> CommandResult:
         volumes = {h: {"bind": c, "mode": "rw"} for h, c in mounts.items()}
         try:
@@ -111,16 +149,99 @@ class DockerBackend:
                 detach=True,
                 remove=False,
             )
+
+            stdout_lines: list[str] = []
+            for chunk in container.logs(stream=True, follow=True):
+                line = chunk.decode(errors="replace").rstrip("\n")
+                stdout_lines.append(line)
+                if log_callback:
+                    log_callback(line)
+
             result = container.wait()
-            logs = container.logs().decode(errors="replace")
             container.remove(force=True)
+
             return CommandResult(
                 exit_code=int(result.get("StatusCode", 1)),
-                stdout=logs,
+                stdout="\n".join(stdout_lines),
             )
-        except Exception as e:  # docker.errors.APIError, ImageNotFound, etc.
-            return CommandResult(exit_code=1, stderr=str(e))
+        except Exception as exc:
+            return CommandResult(exit_code=1, stderr=str(exc))
 
+
+# ---------------------------------------------------------------------------
+# Rich progress context
+# ---------------------------------------------------------------------------
+
+class _NoOpProgress:
+    """Fallback when Rich is not available or progress is suppressed."""
+    def __enter__(self) -> "_NoOpProgress":
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        pass
+
+    def update_stage(self, stage_id: str, tool_id: str) -> None:
+        pass
+
+    def mark_done(self, failed: bool = False) -> None:
+        pass
+
+
+class _RichProgress:
+    """Thin wrapper around ``rich.progress.Progress`` for pipeline stages."""
+
+    def __init__(self, total: int) -> None:
+        from rich.progress import (  # noqa: PLC0415
+            BarColumn,
+            MofNCompleteColumn,
+            Progress,
+            SpinnerColumn,
+            TextColumn,
+            TimeElapsedColumn,
+        )
+        self._prog = Progress(
+            SpinnerColumn(),
+            TextColumn("[bold cyan]{task.description:<50}"),
+            BarColumn(bar_width=30),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+        )
+        self._total = total
+        self._task_id = None
+
+    def __enter__(self) -> "_RichProgress":
+        self._prog.__enter__()
+        self._task_id = self._prog.add_task("Initialising…", total=self._total)
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self._prog.__exit__(*args)
+
+    def update_stage(self, stage_id: str, tool_id: str) -> None:
+        self._prog.update(
+            self._task_id,
+            description=f"[{stage_id}]  {tool_id}",
+        )
+
+    def mark_done(self, failed: bool = False) -> None:
+        if failed:
+            self._prog.update(self._task_id, description="[red]FAILED")
+        else:
+            self._prog.advance(self._task_id)
+
+
+def _progress_ctx(total: int, show: bool) -> "_NoOpProgress | _RichProgress":
+    if not show or total == 0:
+        return _NoOpProgress()
+    try:
+        return _RichProgress(total)
+    except ImportError:
+        return _NoOpProgress()
+
+
+# ---------------------------------------------------------------------------
+# Command template rendering
+# ---------------------------------------------------------------------------
 
 def _render_command(
     tool: Tool, stage: StagePlan, plan: ExecutionPlan, stage_dir: Path
@@ -128,8 +249,7 @@ def _render_command(
     """Minimal template substitution for MVP.
 
     Provides {out_dir}, {cpu}, {ram_gb}, plus every key in plan.inputs and
-    stage.params. Unresolved placeholders are left verbatim — a richer planner
-    will fill them in step 5+.
+    stage.params.  Unresolved placeholders are left verbatim.
     """
     ctx: dict[str, object] = {
         "out_dir": str(stage_dir),
@@ -140,64 +260,111 @@ def _render_command(
     ctx.update(stage.params or {})
 
     class _Safe(dict):
-        def __missing__(self, key: str) -> str:  # type: ignore[override]
+        def __missing__(self, key: str) -> str:
             return "{" + key + "}"
 
     return tool.command_template.format_map(_Safe(ctx)).strip()
 
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
 
 def run_plan(
     plan: ExecutionPlan,
     *,
     backend: Optional[ContainerBackend] = None,
     registry_dir: Optional[Path] = None,
+    show_progress: bool = True,
 ) -> None:
-    """Execute every stage in plan.stages (declared order).
+    """Execute every stage in plan.stages in declared order.
 
-    - Looks up each stage's tool in the registry.
-    - Renders the command template.
-    - Invokes the container backend with a shared /workspace mount.
-    - Persists a checkpoint after each successful stage so `bioflow run` can
-      resume after a failure.
+    Features
+    --------
+    * Loads checkpoint — already-completed stages are skipped automatically.
+    * Rich progress bar shows stage/tool/elapsed time (suppressed when
+      ``show_progress=False`` or rich is not installed).
+    * ``DockerBackend`` streams container logs via logger.debug in real time.
+    * On failure, records the error in the checkpoint (``mark_failed``) so
+      ``report.py`` can highlight it in the HTML summary.
     """
-    log = get_logger()
     backend = backend or DockerBackend()
     tools_by_id = {t.id: t for t in load_registry(registry_dir or plan.registry_dir)}
     workdir = Path(plan.workdir)
     workdir.mkdir(parents=True, exist_ok=True)
     state = _load_state(workdir)
 
-    for stage in plan.stages:
-        if stage.stage_id in state["completed_stages"]:
-            log.info(f"SKIP {stage.stage_id} (checkpointed)")
-            continue
-        if stage.tool_id not in tools_by_id:
-            raise ValueError(
-                f"Tool '{stage.tool_id}' not found in registry "
-                f"(stage {stage.stage_id})"
-            )
-        tool = tools_by_id[stage.tool_id]
-        stage_dir = workdir / stage.stage_id.replace(".", "_")
-        stage_dir.mkdir(parents=True, exist_ok=True)
+    active = [
+        s for s in plan.stages
+        if s.stage_id not in state.get("completed_stages", [])
+    ]
 
-        command = _render_command(tool, stage, plan, stage_dir)
-        mounts = {str(workdir.resolve()): "/workspace"}
+    # Decide whether backend supports streaming log_callback
+    supports_streaming = getattr(backend, "_STREAMING_SUPPORTED", False)
 
-        log.info(
-            f"RUN  {stage.stage_id}  tool={tool.id}  image={tool.container.image}"
-        )
-        result = backend.run(
-            image=tool.container.image,
-            command=command,
-            mounts=mounts,
-            cpu=tool.resources.min.cpu,
-            ram_gb=tool.resources.min.ram_gb,
-            workdir="/workspace",
-        )
-        if result.exit_code != 0:
-            raise RuntimeError(
-                f"Stage {stage.stage_id} failed (exit={result.exit_code}): "
-                f"{result.stderr or result.stdout}"
+    with _progress_ctx(len(active), show_progress) as prog:
+        for stage in plan.stages:
+            if stage.stage_id in state.get("completed_stages", []):
+                log.info(f"SKIP {stage.stage_id} (checkpointed)")
+                continue
+
+            if stage.tool_id not in tools_by_id:
+                err = (
+                    f"Tool '{stage.tool_id}' not found in registry "
+                    f"(stage {stage.stage_id})"
+                )
+                mark_failed(workdir, stage.stage_id, err)
+                prog.mark_done(failed=True)
+                raise ValueError(err)
+
+            tool = tools_by_id[stage.tool_id]
+            stage_dir = workdir / stage.stage_id.replace(".", "_")
+            stage_dir.mkdir(parents=True, exist_ok=True)
+
+            command = _render_command(tool, stage, plan, stage_dir)
+            mounts = {str(workdir.resolve()): "/workspace"}
+
+            log.info(
+                f"RUN  {stage.stage_id}  tool={tool.id}  image={tool.container.image}"
             )
-        mark_completed(workdir, stage.stage_id, {"stage_dir": str(stage_dir)})
-        log.info(f"DONE {stage.stage_id}")
+            prog.update_stage(stage.stage_id, tool.id)
+
+            # Build kwargs — only pass log_callback if backend supports it
+            run_kwargs: dict = dict(
+                image=tool.container.image,
+                command=command,
+                mounts=mounts,
+                cpu=tool.resources.min.cpu,
+                ram_gb=tool.resources.min.ram_gb,
+                workdir="/workspace",
+            )
+            if supports_streaming:
+                run_kwargs["log_callback"] = lambda line: log.debug(
+                    f"  [{stage.stage_id}] {line}"
+                )
+
+            try:
+                result = backend.run(**run_kwargs)
+            except Exception as exc:
+                mark_failed(workdir, stage.stage_id, str(exc))
+                prog.mark_done(failed=True)
+                raise RuntimeError(
+                    f"Stage {stage.stage_id} errored unexpectedly: {exc}"
+                ) from exc
+
+            if result.exit_code != 0:
+                err_msg = (result.stderr or result.stdout or "")[:1000]
+                mark_failed(
+                    workdir, stage.stage_id,
+                    f"exit_code={result.exit_code}",
+                    result.stderr or result.stdout,
+                )
+                prog.mark_done(failed=True)
+                raise RuntimeError(
+                    f"Stage {stage.stage_id} failed "
+                    f"(exit={result.exit_code}): {err_msg}"
+                )
+
+            mark_completed(workdir, stage.stage_id, {"stage_dir": str(stage_dir)})
+            log.info(f"DONE {stage.stage_id}")
+            prog.mark_done()

@@ -1,8 +1,11 @@
-"""Hardware <-> tool compatibility classification."""
+"""Hardware <-> tool compatibility classification and preset recommendation."""
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal, Optional
+
+import yaml
 
 from bioflow.core.hardware import HardwareProfile
 from bioflow.core.registry import Tool
@@ -69,3 +72,77 @@ def filter_applicable(
             continue
         out.append(t)
     return out
+
+
+# ---------------------------------------------------------------------------
+# Preset recommendation
+# ---------------------------------------------------------------------------
+
+def recommend_presets(
+    tools: list[Tool],
+    hw: HardwareProfile,
+    pipeline: str,
+    *,
+    registry_dir: Path = Path("registry"),
+) -> list[dict]:
+    """Score every preset for *pipeline* against *hw* and return recommendations.
+
+    Scoring
+    -------
+    Each preset starts at 100 points.
+
+    * ``-50`` per tool that is **incompatible** (below minimum resources or
+      wrong arch).  A preset with any incompatible tool is marked
+      ``runnable=False``.
+    * ``-10`` per tool that is **runnable_slow** (below recommended resources).
+
+    The returned list is sorted descending by score.
+
+    Returns
+    -------
+    list[dict]
+        Each entry has keys:
+        ``preset``, ``score``, ``runnable``, ``description``,
+        ``applies_to``, ``incompatible_tools``, ``slow_tools``.
+    """
+    preset_dir = registry_dir / "presets"
+    if not preset_dir.exists():
+        return []
+
+    classified = classify(tools, hw)
+    slow_ids: set[str] = {t.id for t in classified["runnable_slow"]}
+    bad_ids:  set[str] = {t.id for t in classified["incompatible"]}
+
+    results: list[dict] = []
+
+    for preset_path in sorted(preset_dir.glob("*.yaml")):
+        try:
+            data = yaml.safe_load(preset_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        if data.get("pipeline") != pipeline:
+            continue
+
+        stage_tool_ids: list[str] = [
+            s["tool_id"]
+            for s in data.get("stages", [])
+            if not s.get("skip") and s.get("tool_id")
+        ]
+
+        incompatible = [t for t in stage_tool_ids if t in bad_ids]
+        slow         = [t for t in stage_tool_ids if t in slow_ids]
+
+        score = 100 - len(incompatible) * 50 - len(slow) * 10
+
+        results.append({
+            "preset":            data["id"],
+            "score":             score,
+            "runnable":          len(incompatible) == 0,
+            "description":       data.get("description", "").strip().replace("\n", " "),
+            "applies_to":        data.get("applies_to", {}),
+            "incompatible_tools": incompatible,
+            "slow_tools":        slow,
+        })
+
+    return sorted(results, key=lambda x: x["score"], reverse=True)
