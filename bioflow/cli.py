@@ -67,12 +67,48 @@ def tools_cmd(
 def recommend_cmd(
     preset: str = typer.Option(..., "--preset", "-p"),
     config: Path = typer.Option(..., "--config", "-c", exists=True),
+    registry: Path = typer.Option(Path("registry"), "--registry", "-r"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print the plan without executing."),
 ) -> None:
     """Run a preset (recommended) pipeline against an input config."""
-    from bioflow.core.planner import plan_from_preset
-    from bioflow.core.runner import run_plan
+    import yaml  # noqa: PLC0415
+
+    from bioflow.core.compatibility import classify  # noqa: PLC0415
+    from bioflow.core.hardware import detect  # noqa: PLC0415
+    from bioflow.core.planner import plan_from_preset  # noqa: PLC0415
+    from bioflow.core.registry import load_registry  # noqa: PLC0415
+    from bioflow.core.runner import run_plan  # noqa: PLC0415
+
+    # Resolve registry_dir from config file (may override --registry)
+    with config.open("r", encoding="utf-8") as f:
+        raw = yaml.safe_load(f)
+    reg_dir = Path(raw.get("registry_dir", str(registry)))
+
+    # Hardware + compatibility summary
+    hw = detect()
+    tools = load_registry(reg_dir)
+    classified = classify(tools, hw)
+    slow = classified["runnable_slow"]
+    bad  = classified["incompatible"]
+    if bad:
+        console.print(
+            f"[red]⚠  {len(bad)} tool(s) incompatible with this host:[/] "
+            + ", ".join(t.id for t in bad)
+        )
+    if slow:
+        console.print(
+            f"[yellow]⚡ {len(slow)} tool(s) may run slowly on this host:[/] "
+            + ", ".join(t.id for t in slow)
+        )
 
     execution_plan = plan_from_preset(preset, config)
+
+    if dry_run:
+        console.print("\n[bold]Execution plan (dry-run):[/]")
+        for s in execution_plan.stages:
+            console.print(f"  {s.stage_id}  →  [cyan]{s.tool_id}[/]")
+        return
+
     run_plan(execution_plan)
 
 
@@ -80,12 +116,13 @@ def recommend_cmd(
 def custom_cmd(
     pipeline: str = typer.Option(..., "--pipeline", help="genome_assembly | rnaseq_deg"),
     out: Path = typer.Option(Path("custom_config.yaml"), "--out", "-o"),
+    registry: Path = typer.Option(Path("registry"), "--registry", "-r"),
 ) -> None:
     """Interactively pick tools per stage (only hardware-compatible ones shown)."""
-    from bioflow.core.planner import interactive_build
+    from bioflow.core.planner import interactive_build  # noqa: PLC0415
 
-    interactive_build(pipeline, out)
-    rprint(f"[green]Saved custom pipeline config to[/] {out}")
+    interactive_build(pipeline, out, registry_dir=registry)
+    rprint(f"[green]✓ Saved custom pipeline config →[/] {out}")
 
 
 @app.command("run")

@@ -372,6 +372,249 @@ def plan_from_config(config: Path) -> ExecutionPlan:
     return ExecutionPlan.model_validate(data)
 
 
-def interactive_build(pipeline: str, out: Path) -> None:
-    """Interactive `bioflow custom` tool-selection flow — implemented in step 8."""
-    raise NotImplementedError("Implement in step 8 (custom mode).")
+# ---------------------------------------------------------------------------
+# Interactive custom-mode helpers
+# ---------------------------------------------------------------------------
+
+# Canonical ordered stage list for each pipeline.
+# Tuple: (stage_id, human_label, is_optional)
+_PIPELINE_STAGES: dict[str, list[tuple[str, str, bool]]] = {
+    "genome_assembly": [
+        ("genome_assembly.step1", "Read QC",                False),
+        ("genome_assembly.step2", "Assembly",               False),
+        ("genome_assembly.step3", "Assembly QC",            False),
+        ("genome_assembly.step4", "Repeat Masking",         True),   # optional for prokaryote
+        ("genome_assembly.step5", "Structural Annotation",  False),
+        ("genome_assembly.step6", "Functional Annotation",  False),
+    ],
+    "rnaseq_deg": [
+        ("rnaseq_deg.step1", "RNA-seq QC",                  False),
+        ("rnaseq_deg.step2", "Alignment / Quantification",  False),
+        ("rnaseq_deg.step3", "DEG Analysis",                False),
+        ("rnaseq_deg.step4", "Enrichment Analysis",         False),
+    ],
+}
+
+# Required input keys per (pipeline, read_type).
+# Each entry: (key, human_description)
+_REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
+    ("genome_assembly", "short"): [
+        ("sample_id",   "Sample identifier (e.g. ecoli_test)"),
+        ("r1",          "Read 1 FASTQ path"),
+        ("r2",          "Read 2 FASTQ path"),
+    ],
+    ("genome_assembly", "long_hifi"): [
+        ("sample_id",   "Sample identifier"),
+        ("r1_long",     "Long-read (HiFi) FASTQ path"),
+        ("busco_lineage",    "BUSCO lineage dataset (e.g. insecta_odb10)"),
+        ("genome_size",      "Estimated genome size (e.g. 130m)"),
+        ("eggnog_db_dir",    "eggNOG database directory"),
+    ],
+    ("genome_assembly", "long_ont"): [
+        ("sample_id",   "Sample identifier"),
+        ("r1_long",     "Long-read (ONT) FASTQ path"),
+    ],
+    ("genome_assembly", "hybrid"): [
+        ("sample_id",   "Sample identifier"),
+        ("r1",          "Short Read 1 FASTQ path"),
+        ("r2",          "Short Read 2 FASTQ path"),
+        ("r1_long",     "Long-read FASTQ path"),
+    ],
+    ("rnaseq_deg", "short"): [
+        ("sample_id",        "Sample identifier"),
+        ("sample_sheet",     "Sample sheet CSV path"),
+        ("reference_genome", "Reference genome FASTA path"),
+        ("annotation_gtf",   "Annotation GTF path"),
+    ],
+}
+
+
+def _required_inputs_for(pipeline: str, read_type: str) -> list[tuple[str, str]]:
+    return _REQUIRED_INPUTS.get(
+        (pipeline, read_type),
+        [("sample_id", "Sample identifier")],
+    )
+
+
+def interactive_build(pipeline: str, out: Path, *, registry_dir: Path = Path("registry")) -> None:
+    """Interactive ``bioflow custom`` tool-selection flow.
+
+    Uses *questionary* to prompt the user for:
+      1. Pipeline metadata (species, read_type, mode, workdir)
+      2. Per-stage tool selection (only applicable + hw-compatible tools shown)
+      3. Required input paths
+
+    The resulting :class:`ExecutionPlan` is serialised as YAML to *out*.
+    """
+    # Validate pipeline name early (before any import of questionary)
+    if pipeline not in _PIPELINE_STAGES:
+        raise ValueError(
+            f"Unknown pipeline '{pipeline}'. Available: {list(_PIPELINE_STAGES)}"
+        )
+
+    try:
+        import questionary  # noqa: PLC0415
+    except ImportError as exc:
+        raise RuntimeError(
+            "questionary is required for interactive mode: pip install questionary"
+        ) from exc
+
+    from rich.console import Console  # noqa: PLC0415
+
+    from bioflow.core.compatibility import classify, filter_applicable  # noqa: PLC0415
+
+    console = Console()
+
+    console.print(f"\n[bold cyan]bioflow custom — {pipeline}[/]\n")
+
+    # ── 1. Gather pipeline metadata ──────────────────────────────────────────
+    species = questionary.select(
+        "Species type:",
+        choices=["prokaryote", "eukaryote", "eukaryote_small"],
+    ).ask()
+    if species is None:
+        raise KeyboardInterrupt
+
+    read_type = questionary.select(
+        "Read type:",
+        choices=["short", "long_hifi", "long_ont", "hybrid"],
+    ).ask()
+    if read_type is None:
+        raise KeyboardInterrupt
+
+    mode = questionary.select(
+        "Analysis mode:",
+        choices=["de_novo", "resequencing"],
+    ).ask()
+    if mode is None:
+        raise KeyboardInterrupt
+
+    workdir_str = questionary.text(
+        "Output working directory:",
+        default="./output",
+    ).ask()
+    if workdir_str is None:
+        raise KeyboardInterrupt
+    workdir_path = Path(workdir_str)
+
+    reg_str = questionary.text(
+        "Registry directory:",
+        default=str(registry_dir),
+    ).ask()
+    if reg_str is None:
+        raise KeyboardInterrupt
+    registry_dir = Path(reg_str)
+
+    # ── 2. Load tools + hardware ─────────────────────────────────────────────
+    tools = load_registry(registry_dir)
+    hw = detect()
+    classified = classify(tools, hw)
+
+    slow_ids: set[str] = {t.id for t in classified["runnable_slow"]}
+    bad_ids:  set[str] = {t.id for t in classified["incompatible"]}
+
+    if bad_ids:
+        console.print(
+            f"[red]⚠ {len(bad_ids)} tool(s) incompatible with this host:[/] "
+            + ", ".join(sorted(bad_ids))
+        )
+    if slow_ids:
+        console.print(
+            f"[yellow]⚠ {len(slow_ids)} tool(s) may run slowly:[/] "
+            + ", ".join(sorted(slow_ids))
+        )
+
+    # ── 3. Per-stage tool selection ──────────────────────────────────────────
+    running_inputs: dict[str, str] = {}
+    completed_stage_ids: list[str] = []
+    stage_plans: list[StagePlan] = []
+
+    for stage_id, stage_label, is_optional in _PIPELINE_STAGES[pipeline]:
+        applicable = filter_applicable(
+            tools,
+            species=species,
+            read_type=read_type,
+            mode=mode,
+            stage=stage_id,
+        )
+
+        if not applicable:
+            console.print(
+                f"[dim]  {stage_id} ({stage_label}): no applicable tools — skipping[/]"
+            )
+            continue
+
+        console.print(f"\n[bold]Stage {stage_id}[/] — {stage_label}")
+
+        # Build choice labels with HW status badges
+        choices: list[questionary.Choice] = []
+        for t in applicable:
+            if t.id in bad_ids:
+                label = f"{t.id}  [incompatible]"
+            elif t.id in slow_ids:
+                label = f"{t.id}  [slow]"
+            else:
+                label = t.id
+            choices.append(questionary.Choice(title=label, value=t.id))
+
+        if is_optional:
+            choices.append(questionary.Choice(title="[skip this stage]", value="__skip__"))
+
+        selected = questionary.select(
+            f"Choose tool for '{stage_label}':",
+            choices=choices,
+        ).ask()
+
+        if selected is None:
+            raise KeyboardInterrupt
+        if selected == "__skip__":
+            log.info(f"SKIP  {stage_id}  (user skipped)")
+            continue
+
+        stage_dir = _stage_dir(workdir_path, stage_id)
+        stage_params = _chain_artifact_params(
+            stage_id=stage_id,
+            tool_id=selected,
+            completed_stage_ids=completed_stage_ids,
+            workdir=workdir_path,
+            running_inputs=running_inputs,
+        )
+
+        stage_plans.append(
+            StagePlan(stage_id=stage_id, tool_id=selected, params=stage_params)
+        )
+        artifacts = _artifact_paths(stage_id, selected, stage_dir, running_inputs)
+        running_inputs.update(artifacts)
+        completed_stage_ids.append(stage_id)
+
+    # ── 4. Gather required inputs ────────────────────────────────────────────
+    console.print("\n[bold]Required inputs:[/]")
+    inputs: dict[str, str] = {}
+    for key, description in _required_inputs_for(pipeline, read_type):
+        val = questionary.text(f"  {description} [{key}]:").ask()
+        if val is None:
+            raise KeyboardInterrupt
+        if val:
+            inputs[key] = val
+
+    # ── 5. Build & persist ExecutionPlan ─────────────────────────────────────
+    plan = ExecutionPlan(
+        pipeline=pipeline,
+        preset=None,
+        species=species,
+        read_type=read_type,
+        mode=mode,
+        inputs=inputs,
+        stages=stage_plans,
+        workdir=workdir_path,
+        registry_dir=registry_dir,
+    )
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8") as fh:
+        yaml.dump(plan.model_dump(mode="json"), fh, allow_unicode=True, sort_keys=False)
+
+    console.print(
+        f"\n[green]✓ Custom plan saved → {out}[/]  "
+        f"({len(stage_plans)} active stages)"
+    )
