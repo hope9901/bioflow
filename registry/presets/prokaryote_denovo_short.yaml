@@ -1,0 +1,30 @@
+id: prokaryote_denovo_short
+pipeline: genome_assembly
+description: >
+  Prokaryote de-novo assembly from Illumina short reads.
+  Includes QC → SPAdes assembly → QUAST evaluation →
+  (repeat masking skipped) → Prokka annotation → eggNOG-mapper
+  functional annotation.
+applies_to:
+  species: [prokaryote]
+  read_type: [short]
+  mode: [de_novo]
+stages:
+  - stage_id: genome_assembly.step1
+    tool_id: fastp
+
+  - stage_id: genome_assembly.step2
+    tool_id: spades
+
+  - stage_id: genome_assembly.step3
+    tool_id: quast
+
+  - stage_id: genome_assembly.step4
+    skip: true
+    reason: "Repeat masking is not required for prokaryote genomes"
+
+  - stage_id: genome_assembly.step5
+    tool_id: prokka
+
+  - stage_id: genome_assembly.step6
+    tool_id: eggnog_mapper

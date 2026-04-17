@@ -1,0 +1,27 @@
+id: eggnog_mapper
+name: eggNOG-mapper
+version: "2.1.12"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [protein_faa, structural_gff]
+output_types: [functional_annotation_tsv, go_terms_tsv, kegg_tsv]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 5 }
+  recommended: { cpu: 16, ram_gb: 32,  disk_gb: 20 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  emapper.py -i {protein_faa} --output {sample_id} --output_dir {out_dir}
+             --cpu {cpu} --data_dir {eggnog_db_dir}
+             --override
+references: ["/refs/dbs/eggnog"]
+citation: "Cantalapiedra 2021, PMID 34597405"
+added: "2026-04-16"
+last_reviewed: "2026-04-16"
