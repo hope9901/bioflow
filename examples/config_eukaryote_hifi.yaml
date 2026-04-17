@@ -1,0 +1,20 @@
+# bioflow recommend config — eukaryote de-novo HiFi long-read assembly
+#
+# Usage:
+#   bioflow recommend --preset eukaryote_denovo_hifi --config examples/config_eukaryote_hifi.yaml
+
+pipeline:  genome_assembly
+species:   eukaryote
+read_type: long_hifi
+mode:      de_novo
+
+inputs:
+  sample_id:      dmel_iso1
+  r1_long:        /workspace/in/dmel.hifi.fastq.gz
+  busco_lineage:  insecta_odb10
+  repeat_species: Drosophila
+  genome_size:    130m
+  eggnog_db_dir:  /refs/dbs/eggnog
+
+workdir:      /workspace/out/dmel_iso1
+registry_dir: registry

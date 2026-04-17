@@ -1,0 +1,17 @@
+# bioflow recommend config — prokaryote de-novo short-read assembly
+#
+# Usage:
+#   bioflow recommend --preset prokaryote_denovo_short --config examples/config_prokaryote_short.yaml
+
+pipeline:  genome_assembly
+species:   prokaryote
+read_type: short
+mode:      de_novo
+
+inputs:
+  sample_id:  ecoli_k12
+  r1:         /workspace/in/SRR_1_R1.fastq.gz
+  r2:         /workspace/in/SRR_1_R2.fastq.gz
+
+workdir:      /workspace/out/ecoli_k12
+registry_dir: registry

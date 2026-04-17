@@ -1,0 +1,19 @@
+# bioflow recommend config — RNA-seq DEG (DESeq2 standard preset)
+#
+# Usage:
+#   bioflow recommend --preset rnaseq_deseq2_standard --config examples/config_rnaseq.yaml
+
+pipeline:  rnaseq_deg
+species:   eukaryote
+read_type: short
+mode:      de_novo
+
+inputs:
+  sample_id:        human_rnaseq
+  sample_sheet:     /workspace/in/samples.csv   # columns: sample_id,fastq_r1,fastq_r2,condition,batch
+  reference_genome: /refs/genomes/hg38.fa
+  annotation_gtf:   /refs/genomes/hg38.gtf
+  kegg_organism:    hsa                          # KEGG organism code
+
+workdir:      /workspace/out/human_rnaseq
+registry_dir: registry

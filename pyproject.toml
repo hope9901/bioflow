@@ -7,7 +7,7 @@ name = "bioflow"
 version = "0.1.0"
 description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 authors = [{ name = "bioflow" }]
 dependencies = [
     "typer>=0.12",
@@ -42,3 +42,7 @@ target-version = "py311"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+markers = [
+    "docker: marks tests that require a running Docker daemon (deselect with '-m not docker')",
+    "slow: marks tests that take a long time to run",
+]
