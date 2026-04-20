@@ -218,7 +218,8 @@ _ARTIFACT_FILENAMES: dict[tuple[str, Optional[str]], dict[str, str]] = {
     ("methylation.step4", "methylkit"):      {"dmr_results":           "dmr_results.csv"},
 
     # ── Proteomics (LC-MS/MS) ────────────────────────────────────────────────
-    ("proteomics.step1", "msconvert"):       {"mzml_dir": "{out_dir}"},
+    # msconvert writes .mzML files into its stage dir — the dir itself is the artifact
+    ("proteomics.step1", "msconvert"):       {"mzml_dir": ""},
     ("proteomics.step2", "msfragger"):       {"psm_tsv":  "psm.tsv"},
     ("proteomics.step3", "percolator"):      {"filtered_psm": "percolator.psms.xml"},
     ("proteomics.step4", "fragpipe"):        {"quant_matrix": "combined_protein.tsv"},
@@ -232,11 +233,19 @@ def _stage_dir(workdir: Path, stage_id: str) -> Path:
 
 
 def _resolve_filename(filename: str, user_inputs: dict) -> str:
-    """Expand {sample_id} and similar user-provided tokens in filenames."""
+    """Expand {sample_id} and similar user-provided tokens in filenames.
+
+    If a placeholder cannot be resolved, the raw filename is returned verbatim
+    and a warning is emitted so the user knows the artifact path is incomplete.
+    """
     try:
         return filename.format(**user_inputs)
-    except KeyError:
-        return filename  # leave unresolved; runner will warn
+    except KeyError as exc:
+        log.warning(
+            f"Artifact filename '{filename}' contains unresolved placeholder {exc}. "
+            "Provide the missing key in the config inputs section."
+        )
+        return filename
 
 
 def _artifact_paths(
@@ -245,12 +254,19 @@ def _artifact_paths(
     stage_dir: Path,
     user_inputs: dict,
 ) -> dict[str, str]:
-    """Return {param_key: absolute_path} for the standard outputs of a stage."""
+    """Return {param_key: absolute_path} for the standard outputs of a stage.
+
+    An empty-string filename means the stage directory itself is the artifact
+    (used for tools that write multiple files to their output dir, e.g. msconvert).
+    """
     result: dict[str, str] = {}
     for key in [(stage_id, tool_id), (stage_id, None)]:
         if key in _ARTIFACT_FILENAMES:
             for param, fname in _ARTIFACT_FILENAMES[key].items():
-                result[param] = str(stage_dir / _resolve_filename(fname, user_inputs))
+                if fname == "":
+                    result[param] = str(stage_dir)
+                else:
+                    result[param] = str(stage_dir / _resolve_filename(fname, user_inputs))
             break
     return result
 
@@ -303,7 +319,11 @@ def plan_from_preset(preset_name: str, config: Path) -> ExecutionPlan:
         if ps.skip:
             log.info(f"SKIP  {ps.stage_id}  ({ps.reason})")
             continue
-        assert ps.tool_id is not None
+        if ps.tool_id is None:
+            raise ValueError(
+                f"Preset '{preset_name}' stage '{ps.stage_id}' has no tool_id "
+                "and skip=false. Add a tool_id or set skip: true."
+            )
 
         if ps.tool_id not in tools_by_id:
             raise ValueError(
@@ -419,7 +439,9 @@ def _chain_artifact_params(
     elif stage_id == "rnaseq_deg.step2":
         if _get("r1") and "rnaseq_deg.step1" in completed_stage_ids:
             params["r1"] = running_inputs["r1"]
-            params["r2"] = running_inputs["r2"]
+            # r2 may be absent for single-end RNA-seq libraries
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
 
     elif stage_id == "rnaseq_deg.step3":
         if _get("count_matrix"):

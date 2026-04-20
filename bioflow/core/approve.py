@@ -87,9 +87,15 @@ def approve_candidate(
 
     try:
         import jsonschema  # noqa: PLC0415
-        jsonschema.validate(instance=raw, schema=schema)
     except ImportError:
-        log.warning("jsonschema not installed — skipping schema validation")
+        raise ApprovalError(
+            "jsonschema is required for tool approval: pip install jsonschema. "
+            "Skipping validation would allow invalid tool definitions into the "
+            "registry and break pipelines at runtime."
+        )
+
+    try:
+        jsonschema.validate(instance=raw, schema=schema)
     except jsonschema.ValidationError as exc:
         raise ApprovalError(f"Schema validation failed: {exc.message}") from exc
 

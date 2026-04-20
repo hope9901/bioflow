@@ -265,11 +265,22 @@ def _render_command(
     ctx.update(plan.inputs or {})
     ctx.update(stage.params or {})
 
+    _unresolved: list[str] = []
+
     class _Safe(dict):
         def __missing__(self, key: str) -> str:
+            _unresolved.append(key)
             return "{" + key + "}"
 
-    return tool.command_template.format_map(_Safe(ctx)).strip()
+    rendered = tool.command_template.format_map(_Safe(ctx)).strip()
+    if _unresolved:
+        log.warning(
+            f"[{stage.stage_id}] Command template has unresolved placeholder(s): "
+            + ", ".join(f"{{{k}}}" for k in _unresolved)
+            + " — the container will receive the literal placeholder text. "
+            "Check that all required inputs are provided in the config."
+        )
+    return rendered
 
 
 # ---------------------------------------------------------------------------

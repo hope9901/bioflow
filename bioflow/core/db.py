@@ -214,6 +214,17 @@ def fetch_db(
             dest.unlink()
         raise RuntimeError(f"Failed to download '{name}': {exc}") from exc
 
+    # Validate downloaded size against Content-Length (when header was present)
+    if total and dest.exists():
+        actual_size = dest.stat().st_size
+        if actual_size != total:
+            dest.unlink()
+            raise RuntimeError(
+                f"Download of '{name}' appears truncated: "
+                f"expected {total} bytes but received {actual_size} bytes. "
+                "Re-run 'bioflow db fetch' to retry."
+            )
+
     # Optional MD5 verify
     expected_md5 = entry.get("md5")
     if expected_md5:

@@ -528,11 +528,32 @@ def download_genomes(
                 else:
                     dest_name = fname
 
-                dest_path = out_dir / dest_name
+                # ── Path-traversal guard ─────────────────────────────────────
+                # Resolve the destination inside out_dir and confirm it stays there.
+                dest_path = (out_dir / dest_name).resolve()
+                try:
+                    dest_path.relative_to(out_dir.resolve())
+                except ValueError:
+                    log.warning(
+                        f"Skipping ZIP member '{member}': resolved path "
+                        f"'{dest_path}' is outside output directory '{out_dir}'. "
+                        "This may indicate a malicious ZIP."
+                    )
+                    continue
+
                 with zf.open(member) as src:
                     dest_path.write_bytes(src.read())
                 extracted.append(dest_path)
                 log.info(f"Extracted: {dest_path.name}")
+    except zipfile.BadZipFile as exc:
+        raise NcbiError(
+            f"Downloaded file is not a valid ZIP archive: {exc}. "
+            "The download may have been truncated or corrupted. "
+            "Try again or check your network connection."
+        ) from exc
+    except RuntimeError as exc:
+        # zipfile raises RuntimeError for encrypted ZIPs
+        raise NcbiError(f"ZIP extraction failed: {exc}") from exc
     finally:
         zip_path.unlink(missing_ok=True)
 
