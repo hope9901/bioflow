@@ -70,12 +70,28 @@ def load_registry(registry_dir: Path) -> list[Tool]:
     tools_root = registry_dir / "tools"
     if not tools_root.exists():
         return tools
+    from bioflow.core.logger import get_logger  # noqa: PLC0415
+    log = get_logger()
     for path in tools_root.rglob("*.yaml"):
-        with path.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as exc:
+            log.warning(f"Skipping unparseable YAML {path}: {exc}")
+            continue
+        if data is None or not isinstance(data, dict):
+            log.warning(f"Skipping empty/non-mapping YAML {path}")
+            continue
         errors = sorted(validator.iter_errors(data), key=lambda e: e.path)
         if errors:
             msgs = "\n  ".join(f"{list(e.path)}: {e.message}" for e in errors)
-            raise ValueError(f"Invalid tool registry file {path}:\n  {msgs}")
-        tools.append(Tool.model_validate(data))
+            log.warning(
+                f"Skipping invalid tool registry file {path}:\n  {msgs}"
+            )
+            continue
+        try:
+            tools.append(Tool.model_validate(data))
+        except Exception as exc:
+            log.warning(f"Skipping {path}: Tool model validation failed: {exc}")
+            continue
     return tools

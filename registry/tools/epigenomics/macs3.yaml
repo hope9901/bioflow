@@ -18,7 +18,7 @@ resources:
   gpu: false
   arch: [x86_64]
 command_template: |
-  macs3 callpeak -t {alignment_bam} -c {control_bam} -f BAMPE -g {genome_size}
+  macs3 callpeak -t {alignment_bam} {control_arg} -f BAMPE -g {genome_size}
   -n {sample_id} --outdir {out_dir} -B --SPMR 2>{out_dir}/macs3.log
 references: []
 citation: "Zhang et al. 2008, PMID 18798982"

@@ -24,6 +24,7 @@ Design notes
 from __future__ import annotations
 
 import datetime
+import html
 import json
 from pathlib import Path
 from string import Template
@@ -210,7 +211,7 @@ def render_summary(
             if isinstance(v, str) and Path(v).suffix
         ]
         outputs_html = "<br>".join(
-            f"<code>{f}</code>" for f in output_files
+            f"<code>{html.escape(str(f))}</code>" for f in output_files
         ) if output_files else "—"
 
         status_cls, status_label, error_detail = _status_from_checkpoint(
@@ -218,7 +219,7 @@ def render_summary(
         )
         error_html = (
             f'<br><small style="color:#dc3545;font-family:monospace">'
-            f'{error_detail[:300]}</small>'
+            f'{html.escape(str(error_detail)[:300])}</small>'
             if error_detail else ""
         )
 
@@ -245,7 +246,7 @@ def render_summary(
             f'<p><a href="{rel}" target="_blank">&#128202; Open MultiQC report</a></p>'
         )
 
-    html = _SUMMARY_TMPL.substitute(
+    rendered_html = _SUMMARY_TMPL.substitute(
         pipeline=plan.pipeline,
         preset=plan.preset or "custom",
         species=plan.species,
@@ -257,7 +258,7 @@ def render_summary(
     )
 
     out_file = out_dir / "pipeline_summary.html"
-    out_file.write_text(html, encoding="utf-8")
+    out_file.write_text(rendered_html, encoding="utf-8")
     log.info(f"Pipeline summary written to {out_file}")
     return out_file
 

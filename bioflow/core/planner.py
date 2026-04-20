@@ -427,6 +427,14 @@ def _chain_artifact_params(
         src = _get("masked_assembly_fasta") or _get("assembly_fasta")
         if src:
             params["assembly_fasta"] = src
+        # BRAKER3's template has a {rnaseq_bam_arg} slot — must always be
+        # defined (defaulting to an empty string if no RNA-seq BAM is given).
+        # If the user supplied rnaseq_bam, expand it into a CLI arg.
+        if tool_id == "braker3":
+            rnaseq_bam = _get("rnaseq_bam")
+            params["rnaseq_bam_arg"] = (
+                f"--bam={rnaseq_bam}" if rnaseq_bam else ""
+            )
 
     elif stage_id == "genome_assembly.step6":
         if _get("protein_faa"):
@@ -517,6 +525,10 @@ def _chain_artifact_params(
     elif stage_id == "chip_seq.step3":
         if _get("alignment_bam"):
             params["alignment_bam"] = running_inputs["alignment_bam"]
+        # MACS3 template uses {control_arg} — expand to "-c <bam>" when a
+        # control BAM is provided, empty string otherwise (no-control mode).
+        control = _get("control_bam")
+        params["control_arg"] = f"-c {control}" if control else ""
 
     elif stage_id == "chip_seq.step4":
         if _get("alignment_bam"):
@@ -538,6 +550,8 @@ def _chain_artifact_params(
     elif stage_id == "atac_seq.step3":
         if _get("alignment_bam"):
             params["alignment_bam"] = running_inputs["alignment_bam"]
+        # ATAC-seq never uses a control sample → empty control_arg
+        params["control_arg"] = ""
 
     elif stage_id == "atac_seq.step4":
         if _get("alignment_bam"):
@@ -665,26 +679,38 @@ _PIPELINE_STAGES: dict[str, list[tuple[str, str, bool]]] = {
 # Each entry: (key, human_description)
 _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
     ("genome_assembly", "short"): [
-        ("sample_id",   "Sample identifier (e.g. ecoli_test)"),
-        ("r1",          "Read 1 FASTQ path"),
-        ("r2",          "Read 2 FASTQ path"),
+        ("sample_id",     "Sample identifier (e.g. ecoli_test)"),
+        ("r1",            "Read 1 FASTQ path"),
+        ("r2",            "Read 2 FASTQ path"),
+        # step4/5 optional keys — required only when the chosen tool needs them
+        ("bakta_db_dir",  "Bakta DB directory (only if using Bakta for annotation)"),
+        ("repeat_species","Repeat library species (only if using EarlGrey, e.g. 'Insecta')"),
+        ("eggnog_db_dir", "eggNOG database directory"),
     ],
     ("genome_assembly", "long_hifi"): [
-        ("sample_id",   "Sample identifier"),
-        ("r1_long",     "Long-read (HiFi) FASTQ path"),
-        ("busco_lineage",    "BUSCO lineage dataset (e.g. insecta_odb10)"),
-        ("genome_size",      "Estimated genome size (e.g. 130m)"),
-        ("eggnog_db_dir",    "eggNOG database directory"),
+        ("sample_id",     "Sample identifier"),
+        ("r1_long",       "Long-read (HiFi) FASTQ path"),
+        ("busco_lineage", "BUSCO lineage dataset (e.g. insecta_odb10)"),
+        ("genome_size",   "Estimated genome size (e.g. 130m)"),
+        ("eggnog_db_dir", "eggNOG database directory"),
+        ("bakta_db_dir",  "Bakta DB directory (only if using Bakta)"),
+        ("repeat_species","Repeat library species (only if using EarlGrey, e.g. 'Insecta')"),
     ],
     ("genome_assembly", "long_ont"): [
-        ("sample_id",   "Sample identifier"),
-        ("r1_long",     "Long-read (ONT) FASTQ path"),
+        ("sample_id",     "Sample identifier"),
+        ("r1_long",       "Long-read (ONT) FASTQ path"),
+        ("eggnog_db_dir", "eggNOG database directory"),
+        ("bakta_db_dir",  "Bakta DB directory (only if using Bakta)"),
+        ("repeat_species","Repeat library species (only if using EarlGrey)"),
     ],
     ("genome_assembly", "hybrid"): [
-        ("sample_id",   "Sample identifier"),
-        ("r1",          "Short Read 1 FASTQ path"),
-        ("r2",          "Short Read 2 FASTQ path"),
-        ("r1_long",     "Long-read FASTQ path"),
+        ("sample_id",     "Sample identifier"),
+        ("r1",            "Short Read 1 FASTQ path"),
+        ("r2",            "Short Read 2 FASTQ path"),
+        ("r1_long",       "Long-read FASTQ path"),
+        ("eggnog_db_dir", "eggNOG database directory"),
+        ("bakta_db_dir",  "Bakta DB directory (only if using Bakta)"),
+        ("repeat_species","Repeat library species (only if using EarlGrey)"),
     ],
     ("rnaseq_deg", "short"): [
         ("sample_id",        "Sample identifier"),
@@ -694,13 +720,15 @@ _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
     ],
     # Metagenomics
     ("metagenomics", "short"): [
-        ("sample_id",       "Sample identifier"),
-        ("sample_sheet",    "Sample sheet CSV path (sample_id, fastq_r1, fastq_r2, group)"),
-        ("host_db",         "Host genome Bowtie2 index for KneadData (leave blank to skip host removal)"),
-        ("kraken2_db",      "Kraken2 database directory"),
-        ("metaphlan_db",    "MetaPhlAn4 database directory (optional, leave blank if using Kraken2)"),
-        ("chocophlan_db",   "HUMAnN3 ChocoPhlAn DB directory (optional)"),
-        ("uniref_db",       "HUMAnN3 UniRef DB directory (optional)"),
+        ("sample_id",         "Sample identifier"),
+        ("sample_sheet",      "Sample sheet CSV path (sample_id, fastq_r1, fastq_r2, group)"),
+        ("host_db",           "Host genome Bowtie2 index for KneadData (leave blank to skip host removal)"),
+        ("kraken2_db",        "Kraken2 database directory"),
+        ("read_length",       "Read length for Bracken (e.g. 150)"),
+        ("bracken_threshold", "Bracken minimum hit threshold (e.g. 10)"),
+        ("metaphlan_db",      "MetaPhlAn4 database directory (optional, leave blank if using Kraken2)"),
+        ("chocophlan_db",     "HUMAnN3 ChocoPhlAn DB directory (optional)"),
+        ("uniref_db",         "HUMAnN3 UniRef DB directory (optional)"),
     ],
     # Single-cell RNA-seq (10x Chromium)
     ("scrna_seq", "short"): [
@@ -719,6 +747,7 @@ _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
         ("bowtie2_index",   "Bowtie2 genome index prefix"),
         ("genome_size",     "Effective genome size (hs/mm/ce/dm or integer)"),
         ("annotation_gtf",  "Gene annotation GTF path"),
+        ("control_bam",     "Control/Input BAM for MACS3 (leave blank if none)"),
     ],
     # ATAC-seq
     ("atac_seq", "short"): [
@@ -739,20 +768,22 @@ _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
     ],
     # Proteomics (DDA)
     ("proteomics", "ms_dda"): [
-        ("sample_id",       "Experiment identifier"),
-        ("raw_file_dir",    "Directory containing raw mass-spec files (.raw/.d/.wiff)"),
-        ("protein_db",      "FASTA protein database for database search"),
-        ("msfragger_params","MSFragger parameter file (.params)"),
-        ("fragpipe_workflow","FragPipe workflow file (.workflow)"),
-        ("manifest_file",   "FragPipe manifest file listing mzML paths"),
+        ("sample_id",          "Experiment identifier"),
+        ("raw_file_dir",       "Directory containing raw mass-spec files (.raw/.d/.wiff)"),
+        ("protein_db",         "FASTA protein database for database search"),
+        ("msfragger_params",   "MSFragger parameter file (.params)"),
+        ("fragpipe_workflow",  "FragPipe workflow file (.workflow)"),
+        ("manifest_file",      "FragPipe manifest file listing mzML paths"),
+        ("maxquant_params_xml","MaxQuant mqpar.xml (only if using MaxQuant)"),
     ],
     # Proteomics (DIA)
     ("proteomics", "ms_dia"): [
-        ("sample_id",       "Experiment identifier"),
-        ("raw_file_dir",    "Directory containing raw DIA files"),
-        ("protein_db",      "FASTA protein database"),
-        ("fragpipe_workflow","FragPipe DIA workflow file"),
-        ("manifest_file",   "FragPipe manifest file"),
+        ("sample_id",          "Experiment identifier"),
+        ("raw_file_dir",       "Directory containing raw DIA files"),
+        ("protein_db",         "FASTA protein database"),
+        ("fragpipe_workflow",  "FragPipe DIA workflow file"),
+        ("manifest_file",      "FragPipe manifest file"),
+        ("maxquant_params_xml","MaxQuant mqpar.xml (only if using MaxQuant)"),
     ],
 }
 

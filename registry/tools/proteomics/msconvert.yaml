@@ -18,7 +18,9 @@ resources:
   gpu: false
   arch: [x86_64]
 command_template: |
-  msconvert {raw_file} --mzML --filter "peakPicking vendor msLevel=1-" --outdir {out_dir}
+  for f in {raw_file_dir}/*.raw {raw_file_dir}/*.d {raw_file_dir}/*.wiff; do
+    [ -e "$f" ] && msconvert "$f" --mzML --filter "peakPicking vendor msLevel=1-" --outdir {out_dir}
+  done
 references: []
 citation: "Chambers et al. 2012, PMID 22796944"
 added: "2026-04-20"

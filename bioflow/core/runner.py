@@ -25,6 +25,7 @@ Log streaming
 from __future__ import annotations
 
 import contextlib
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional, Protocol, runtime_checkable
@@ -139,13 +140,14 @@ class DockerBackend:
         timeout: Optional[int] = None,   # seconds; None = no limit
     ) -> CommandResult:
         volumes = {h: {"bind": c, "mode": "rw"} for h, c in mounts.items()}
+        container = None
         try:
             container = self.client.containers.run(
                 image=image,
                 command=["sh", "-c", command],
                 volumes=volumes,
                 working_dir=workdir,
-                mem_limit=f"{max(int(ram_gb), 1)}g",
+                mem_limit=f"{max(math.ceil(ram_gb), 1)}g",
                 nano_cpus=int(cpu * 1_000_000_000),
                 detach=True,
                 remove=False,
@@ -167,10 +169,11 @@ class DockerBackend:
             )
         except Exception as exc:
             # If timeout expired, the container may still be running — remove it
-            try:
-                container.remove(force=True)  # type: ignore[possibly-undefined]
-            except Exception:
-                pass
+            if container is not None:
+                try:
+                    container.remove(force=True)
+                except Exception:
+                    pass
             return CommandResult(exit_code=1, stderr=str(exc))
 
 

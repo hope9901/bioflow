@@ -75,6 +75,9 @@ def test_interactive_build_prokaryote_short_writes_yaml(tmp_path):
         "ecoli_test",                  # sample_id
         "/data/R1.fastq.gz",           # r1
         "/data/R2.fastq.gz",           # r2
+        "",                            # bakta_db_dir (optional)
+        "",                            # repeat_species (optional)
+        "/refs/eggnog",                # eggnog_db_dir
     ])
 
     def select_side_effect(question, choices=None, **kw):
@@ -133,6 +136,9 @@ def test_interactive_build_artifact_chaining(tmp_path):
         "test_sample",
         "/in/R1.fastq.gz",
         "/in/R2.fastq.gz",
+        "",                   # bakta_db_dir (optional)
+        "",                   # repeat_species (optional)
+        "/refs/eggnog",       # eggnog_db_dir
     ])
 
     def _sel(q, choices=None, **kw):

@@ -485,3 +485,148 @@ class TestDbSizeValidation:
         dest = fetch_db("busco_bacteria", tmp_path, _opener=fake_opener)
         assert dest.exists()
         assert dest.stat().st_size == len(fake_data)
+
+
+# ===========================================================================
+# Second-pass audit fixes
+# ===========================================================================
+
+class TestReportXssEscape:
+    """BUG: render_summary embedded checkpoint error strings verbatim into the
+    HTML output.  A malicious error (e.g. containing '<script>') would be
+    executed when the user opens the summary in a browser."""
+
+    def test_error_detail_is_html_escaped(self, tmp_path):
+        import yaml as _y
+        from bioflow.core.planner import plan_from_preset
+        from bioflow.core.report import render_summary
+        from bioflow.core.checkpoint import save
+
+        cfg_path = tmp_path / "cfg.yaml"
+        cfg_path.write_text(_y.safe_dump({
+            "pipeline": "genome_assembly",
+            "species": "prokaryote",
+            "read_type": "short",
+            "mode": "de_novo",
+            "workdir": str(tmp_path),
+            "registry_dir": str(Path(__file__).resolve().parents[2] / "registry"),
+            "inputs": {
+                "sample_id": "s1",
+                "r1": "/x/R1.fq",
+                "r2": "/x/R2.fq",
+                "eggnog_db_dir": "/refs/eggnog",
+            },
+        }), encoding="utf-8")
+        plan = plan_from_preset("prokaryote_denovo_short", cfg_path)
+        # Inject a malicious error into the checkpoint for the first stage
+        first_stage = plan.stages[0].stage_id
+        save(tmp_path, {
+            "completed_stages": [],
+            "artifacts": {},
+            "failed_stages": {
+                first_stage: {"error": "<script>alert('xss')</script>"}
+            },
+        })
+
+        out_dir = tmp_path / "report"
+        out_dir.mkdir()
+        summary = render_summary(plan, out_dir)
+        content = summary.read_text(encoding="utf-8")
+
+        assert "<script>alert" not in content
+        assert "&lt;script&gt;" in content
+
+
+class TestRegistryGracefulDegradation:
+    """BUG: load_registry() raised ValueError on a single invalid YAML file,
+    preventing all other tools from loading.  A bad tool shipped from a
+    Deep-Research update could brick every pipeline."""
+
+    def test_invalid_yaml_is_skipped_not_fatal(self, tmp_path):
+        import shutil
+        from bioflow.core.registry import load_registry
+
+        src = Path(__file__).resolve().parents[2] / "registry"
+        dst = tmp_path / "registry"
+        shutil.copytree(src, dst)
+
+        # Drop a garbage YAML file under tools/
+        bad_dir = dst / "tools" / "qc"
+        bad_dir.mkdir(parents=True, exist_ok=True)
+        (bad_dir / "__bad__.yaml").write_text(
+            "id: broken\nversion: 1.0\n# missing required fields\n",
+            encoding="utf-8",
+        )
+
+        tools = load_registry(dst)
+        # The real tools should still load (fastp etc.)
+        ids = {t.id for t in tools}
+        assert "fastp" in ids
+        assert "broken" not in ids
+
+
+class TestRunnerRamCeiling:
+    """BUG: DockerBackend.run() used int(ram_gb) which truncates 7.9 → 7,
+    starving the container vs what the tool registry promised."""
+
+    def test_mem_limit_rounds_up(self):
+        import math
+        # Mirror the math.ceil-based formula used in runner.py.
+        ram_gb = 7.5
+        assert max(math.ceil(ram_gb), 1) == 8
+
+    def test_docker_backend_uses_ceil(self, monkeypatch):
+        import math
+        captured = {}
+
+        class FakeContainer:
+            id = "c1"
+            def logs(self, stream, follow): return iter([b""])
+            def wait(self, timeout=None): return {"StatusCode": 0}
+            def remove(self, force=False): pass
+
+        class FakeContainers:
+            def run(self, **kw):
+                captured.update(kw)
+                return FakeContainer()
+
+        class FakeClient:
+            containers = FakeContainers()
+
+        from bioflow.core import runner
+        backend = runner.DockerBackend.__new__(runner.DockerBackend)
+        backend.client = FakeClient()
+        backend.run(
+            image="img", command="echo", mounts={}, cpu=1, ram_gb=7.3,
+            workdir="/w",
+        )
+        # math.ceil(7.3) == 8 (not int() == 7)
+        assert captured["mem_limit"] == "8g"
+
+
+class TestMsconvertRawFileGlob:
+    """BUG: proteomics.step1 planner provided {raw_file_dir} but the msconvert
+    YAML template still referenced {raw_file}, so msconvert received the
+    literal '{raw_file}' string and crashed in real runs."""
+
+    def test_template_no_longer_references_raw_file(self):
+        import yaml as _y
+        tpl = Path(__file__).resolve().parents[2] / "registry" / "tools" / "proteomics" / "msconvert.yaml"
+        data = _y.safe_load(tpl.read_text(encoding="utf-8"))
+        cmd = data["command_template"]
+        assert "{raw_file}" not in cmd or "{raw_file_dir}" in cmd
+        assert "{raw_file_dir}" in cmd
+
+
+class TestMacs3ControlArg:
+    """BUG: MACS3 YAML previously required {control_bam} and planner had no
+    chaining for it; the default was literal '{control_bam}' or invalid
+    path.  Now planner emits '{control_arg}' ('' or '-c <bam>')."""
+
+    def test_macs3_template_uses_control_arg(self):
+        import yaml as _y
+        tpl = Path(__file__).resolve().parents[2] / "registry" / "tools" / "epigenomics" / "macs3.yaml"
+        data = _y.safe_load(tpl.read_text(encoding="utf-8"))
+        cmd = data["command_template"]
+        assert "{control_arg}" in cmd
+        assert "{control_bam}" not in cmd
