@@ -1,0 +1,20 @@
+# bioflow scRNA-seq example config
+# Usage: bioflow recommend --preset scrna_seq_10x_seurat --config config_scrna_seq.yaml
+#    OR: bioflow recommend --preset scrna_seq_10x_scanpy --config config_scrna_seq.yaml
+
+pipeline: scrna_seq
+species: eukaryote
+read_type: short
+mode: de_novo
+workdir: ./output/scrna_run
+registry_dir: registry
+
+inputs:
+  sample_id: pbmc_10k
+  fastq_dir: /data/scrna/fastqs        # directory containing *_R1_001.fastq.gz etc.
+  # For Cell Ranger (scrna_seq_10x_seurat preset)
+  cellranger_ref: /refs/cellranger/refdata-gex-GRCh38-2024-A
+  # For STARsolo (scrna_seq_10x_scanpy preset)
+  star_index: /refs/star/GRCh38_index
+  whitelist: /refs/cellranger/3M-february-2018.txt.gz
+  expected_cells: "5000"

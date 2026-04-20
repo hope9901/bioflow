@@ -1,0 +1,27 @@
+id: bowtie2
+name: bowtie2
+version: "2.5.4"
+category: alignment
+stage: [chip_seq.step2, atac_seq.step2, metagenomics.step2]
+input_types: [short_paired]
+output_types: [bam]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, profiling, differential]
+container:
+  image: quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  bowtie2 -x {index} -1 {r1} -2 {r2} -S {out_dir}/aligned.sam -p {cpu} 2>{out_dir}/bowtie2.log
+  && samtools sort -@ {cpu} -o {out_dir}/aligned.bam {out_dir}/aligned.sam
+  && samtools index {out_dir}/aligned.bam
+references: []
+citation: "Langmead & Salzberg 2012, PMID 22388286"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

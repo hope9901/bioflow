@@ -1,0 +1,21 @@
+id: chip_seq_standard
+pipeline: chip_seq
+description: |
+  Standard ChIP-seq workflow: adapter trimming (TrimGalore) → Bowtie2 alignment
+  → MACS3 peak calling → deepTools coverage tracks + HOMER peak annotation →
+  HOMER motif analysis. Suitable for histone mark and TF ChIP experiments.
+applies_to:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling]
+stages:
+  - stage_id: chip_seq.step1
+    tool_id: trimgalore
+  - stage_id: chip_seq.step2
+    tool_id: bowtie2
+  - stage_id: chip_seq.step3
+    tool_id: macs3
+  - stage_id: chip_seq.step4
+    tool_id: homer
+  - stage_id: chip_seq.step5
+    tool_id: homer

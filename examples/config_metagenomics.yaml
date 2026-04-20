@@ -1,0 +1,25 @@
+# bioflow metagenomics example config
+# Usage: bioflow recommend --preset metagenomics_kraken2_standard --config config_metagenomics.yaml
+
+pipeline: metagenomics
+species: any
+read_type: short
+mode: profiling
+workdir: ./output/metagenomics_run
+registry_dir: registry
+
+inputs:
+  sample_id: gut_microbiome_study
+  sample_sheet: /data/metagenomics/sample_sheet.csv  # columns: sample_id, fastq_r1, fastq_r2, group
+  # Host removal DB (KneadData) — set to human reference or leave blank to skip
+  host_db: /refs/kneaddata/hg38
+  # Kraken2 standard database (download: kraken2-build --standard --db /refs/kraken2_db)
+  kraken2_db: /refs/kraken2_db
+  # MetaPhlAn4 DB (optional — only needed for metaphlan4 preset)
+  # metaphlan_db: /refs/metaphlan4_db
+  # HUMAnN3 databases (optional — only for functional profiling step)
+  # chocophlan_db: /refs/humann3/chocophlan
+  # uniref_db: /refs/humann3/uniref
+  # Bracken settings
+  read_length: "150"
+  bracken_threshold: "10"

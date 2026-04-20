@@ -1,0 +1,26 @@
+id: fragpipe
+name: fragpipe
+version: "22.0"
+category: proteomics
+stage: [proteomics.step4]
+input_types: [mzml]
+output_types: [fragpipe_results]
+applicable:
+  species: [any]
+  read_type: [ms_dda, ms_dia]
+  mode: [dda, dia]
+container:
+  image: fcyu/fragpipe:22.0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 32, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  fragpipe --headless --workflow {fragpipe_workflow} --manifest {manifest_file}
+  --workdir {out_dir} --ram {ram_gb} --threads {cpu}
+references: []
+citation: "Yu et al. 2020, PMID 33338430"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

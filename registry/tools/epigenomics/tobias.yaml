@@ -1,0 +1,28 @@
+id: tobias
+name: tobias
+version: "0.16.1"
+category: epigenomics
+stage: [atac_seq.step5]
+input_types: [bam, peaks_bed]
+output_types: [footprints_bigwig]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [differential, peak_calling]
+container:
+  image: quay.io/biocontainers/tobias:0.16.1--py310h590aeec_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  TOBIAS ATACorrect --bam {alignment_bam} --genome {reference_genome}
+  --peaks {peaks_bed} --outdir {out_dir} --cores {cpu}
+  && TOBIAS ScoreBigwig --signal {out_dir}/corrected.bw
+  --regions {peaks_bed} --output {out_dir}/footprints.bw --cores {cpu}
+references: []
+citation: "Bentsen et al. 2020, PMID 32024838"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

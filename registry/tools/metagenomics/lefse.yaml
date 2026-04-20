@@ -1,0 +1,27 @@
+id: lefse
+name: lefse
+version: "1.1.2"
+category: metagenomics
+stage: [metagenomics.step5]
+input_types: [taxonomy_table]
+output_types: [lefse_results]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+container:
+  image: quay.io/biocontainers/lefse:1.1.2--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  lefse_format_input.py {taxonomy_table} {out_dir}/lefse_input.in -c 1 -s 2 -u 3
+  && lefse_run.py {out_dir}/lefse_input.in {out_dir}/lefse_results.res
+  && lefse_plot_res.py {out_dir}/lefse_results.res {out_dir}/lefse_plot.pdf
+references: []
+citation: "Segata et al. 2011, PMID 21702898"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

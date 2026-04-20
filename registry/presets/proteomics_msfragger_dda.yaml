@@ -1,0 +1,22 @@
+id: proteomics_msfragger_dda
+pipeline: proteomics
+description: |
+  Data-dependent acquisition (DDA) proteomics workflow: ProteoWizard msconvert
+  raw→mzML → MSFragger database search → Percolator FDR → FragPipe label-free
+  quantification. High-sensitivity identification and quantification pipeline.
+applies_to:
+  species: [any]
+  read_type: [ms_dda]
+  mode: [dda]
+stages:
+  - stage_id: proteomics.step1
+    tool_id: msconvert
+  - stage_id: proteomics.step2
+    tool_id: msfragger
+  - stage_id: proteomics.step3
+    tool_id: percolator
+  - stage_id: proteomics.step4
+    tool_id: fragpipe
+  - stage_id: proteomics.step5
+    skip: true
+    reason: Statistical analysis performed within FragPipe; run separately if needed

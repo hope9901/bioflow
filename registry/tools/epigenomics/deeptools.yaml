@@ -1,0 +1,29 @@
+id: deeptools
+name: deeptools
+version: "3.5.5"
+category: epigenomics
+stage: [chip_seq.step4, atac_seq.step4]
+input_types: [bam]
+output_types: [bigwig, heatmap_pdf]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, differential]
+container:
+  image: quay.io/biocontainers/deeptools:3.5.5--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  bamCoverage -b {alignment_bam} -o {out_dir}/{sample_id}.bw
+  --binSize 10 --normalizeUsing RPKM -p {cpu}
+  && computeMatrix reference-point -S {out_dir}/{sample_id}.bw
+  -R {peaks_bed} -b 2000 -a 2000 -o {out_dir}/matrix.gz --skipZeros
+  && plotHeatmap -m {out_dir}/matrix.gz -out {out_dir}/heatmap.pdf
+references: []
+citation: "Ramirez et al. 2016, PMID 27079975"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

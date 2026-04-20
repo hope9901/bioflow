@@ -1,11 +1,13 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-86%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-153%20passed-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-Bioinformatics pipeline platform — genome assembly/annotation and RNA-seq DEG —
-orchestrated from Python over per-tool Docker containers (sibling-container pattern).
+Multi-omics bioinformatics pipeline platform — covering genome assembly/annotation,
+RNA-seq, metagenomics, single-cell RNA-seq, ChIP-seq, ATAC-seq, bisulfite methylation,
+and LC-MS/MS proteomics — orchestrated from Python over per-tool Docker containers
+(sibling-container pattern).
 
 ---
 
@@ -13,12 +15,13 @@ orchestrated from Python over per-tool Docker containers (sibling-container patt
 
 | | |
 |---|---|
-| **Two pipelines** | Genome Assembly & Annotation (6 stages) · RNA-seq DEG (4 stages) |
+| **8 pipelines** | Genome Assembly · RNA-seq DEG · Metagenomics · scRNA-seq · ChIP-seq · ATAC-seq · Methylation · Proteomics |
 | **Two modes** | `recommend` (fixed curated preset) · `custom` (interactive, hardware-filtered) |
-| **Read types** | Illumina short · PacBio HiFi · ONT long · hybrid |
-| **Species** | Prokaryote · Eukaryote · Eukaryote (small genome) |
-| **29 tools registered** | QC, assembly, annotation, DEG, enrichment — BioContainers images |
+| **Read / data types** | Illumina short · PacBio HiFi · ONT long · hybrid · LC-MS/MS DDA/DIA |
+| **Species** | Prokaryote · Eukaryote · Eukaryote (small) · Any |
+| **53 tools registered** | QC, assembly, annotation, DEG, taxonomic profiling, scRNA, peak calling, methylation, proteomics |
 | **Hardware checks** | CPU / RAM / GPU / disk / arch → installable / runnable_slow / incompatible |
+| **arm64 aware** | Apple Silicon & Linux ARM: x86_64 tools auto-classified as `runnable_slow` (emulation) |
 | **Preset recommendation** | `bioflow tools --recommend` scores all presets against your hardware |
 | **Artifact chaining** | Planner auto-fills inter-stage file paths at plan time |
 | **Checkpoint / resume** | `.bioflow_state.json` — completed stages skipped on re-run |
@@ -26,7 +29,9 @@ orchestrated from Python over per-tool Docker containers (sibling-container patt
 | **Live log streaming** | DockerBackend streams container stdout/stderr in real time |
 | **Failure report** | Failed stages shown in red with error detail in HTML summary |
 | **Reports** | MultiQC aggregation + HTML pipeline summary |
+| **NCBI downloader** | `bioflow ncbi genome/protein` — direct NCBI Datasets & Entrez download |
 | **Reference DB management** | `bioflow db fetch/list/verify` — 7 catalog entries with progress bar |
+| **Registry approval** | `bioflow update approve` — validate + promote candidate tool YAMLs |
 | **Monthly updates** | Deep Research → smoke-test → manual approval → registry PR |
 
 ---
@@ -125,18 +130,85 @@ docker compose run --rm -v /path/to/data:/workspace bioflow recommend \
 | step3 | DEG | DESeq2 · edgeR · limma-voom |
 | step4 | Enrichment | clusterProfiler · topGO · GSEA |
 
+### Metagenomics (5 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | Read QC | fastp |
+| step2 | Host removal | KneadData |
+| step3 | Taxonomic profiling | Kraken2+Bracken · MetaPhlAn4 |
+| step4 | Functional profiling | HUMAnN3 |
+| step5 | Differential abundance | LEfSe |
+
+### Single-cell RNA-seq (5 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | Demux / Alignment | Cell Ranger (10x) · STARsolo |
+| step2 | QC & Filtering | Seurat · Scanpy |
+| step3 | Clustering & Dim. Reduction | Seurat · Scanpy |
+| step4 | Marker gene / DEG | Seurat · Scanpy |
+| step5 | Trajectory / Pseudotime *(optional)* | Monocle3 |
+
+### ChIP-seq (5 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | QC & Trimming | TrimGalore |
+| step2 | Alignment | Bowtie2 |
+| step3 | Peak calling | MACS3 |
+| step4 | Peak annotation / Coverage | HOMER · deepTools |
+| step5 | Motif analysis *(optional)* | HOMER |
+
+### ATAC-seq (5 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | QC & Trimming | TrimGalore |
+| step2 | Alignment | Bowtie2 |
+| step3 | Peak calling | MACS3 |
+| step4 | Coverage & Differential | deepTools |
+| step5 | Footprinting & Motif *(optional)* | TOBIAS · HOMER |
+
+### Bisulfite Methylation / WGBS (4 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | QC & Trimming | TrimGalore |
+| step2 | Bisulfite Alignment | Bismark |
+| step3 | Methylation Extraction | Bismark |
+| step4 | DMR Analysis *(optional)* | MethylKit |
+
+### Proteomics LC-MS/MS (5 stages)
+
+| Stage | Content | Example tools |
+|---|---|---|
+| step1 | Format Conversion | msconvert (ProteoWizard) |
+| step2 | Database Search | MSFragger |
+| step3 | FDR Control | Percolator |
+| step4 | Quantification | FragPipe · MaxQuant |
+| step5 | Statistical Analysis *(optional)* | FragPipe built-in |
+
 ---
 
 ## Available presets
 
-| Preset | Pipeline | Species | Read type | Mode |
+| Preset | Pipeline | Species | Data type | Mode |
 |---|---|---|---|---|
-| `prokaryote_denovo_short`   | genome_assembly | prokaryote     | short    | de_novo |
-| `prokaryote_denovo_hybrid`  | genome_assembly | prokaryote     | hybrid   | de_novo |
-| `eukaryote_denovo_hifi`     | genome_assembly | eukaryote      | long_hifi | de_novo |
-| `eukaryote_denovo_hybrid`   | genome_assembly | eukaryote_small | hybrid  | de_novo |
-| `eukaryote_resequencing`    | genome_assembly | eukaryote      | short    | resequencing |
-| `rnaseq_deseq2_standard`    | rnaseq_deg      | eukaryote      | short    | de_novo |
+| `prokaryote_denovo_short`        | genome_assembly | prokaryote      | short     | de_novo |
+| `prokaryote_denovo_hybrid`       | genome_assembly | prokaryote      | hybrid    | de_novo |
+| `eukaryote_denovo_hifi`          | genome_assembly | eukaryote       | long_hifi | de_novo |
+| `eukaryote_denovo_hybrid`        | genome_assembly | eukaryote_small | hybrid    | de_novo |
+| `eukaryote_resequencing`         | genome_assembly | eukaryote       | short     | resequencing |
+| `rnaseq_deseq2_standard`         | rnaseq_deg      | eukaryote       | short     | de_novo |
+| `metagenomics_kraken2_standard`  | metagenomics    | any             | short     | profiling |
+| `metagenomics_metaphlan4_standard` | metagenomics  | any             | short     | profiling |
+| `scrna_seq_10x_seurat`           | scrna_seq       | eukaryote       | short     | de_novo |
+| `scrna_seq_10x_scanpy`           | scrna_seq       | any             | short     | de_novo |
+| `chip_seq_standard`              | chip_seq        | any             | short     | peak_calling |
+| `atac_seq_standard`              | atac_seq        | any             | short     | peak_calling |
+| `methylation_bismark_wgbs`       | methylation     | any             | short     | wgbs |
+| `proteomics_msfragger_dda`       | proteomics      | any             | ms_dda    | dda |
 
 ---
 
@@ -160,35 +232,57 @@ docker compose run --rm -v /path/to/data:/workspace bioflow recommend \
 
 ```
 bioflow/                 Python orchestrator package
-  cli.py                 Typer CLI: hw / tools / recommend / custom / run / db / update
+  cli.py                 Typer CLI: hw / tools / recommend / custom / run / db / update / ncbi
   core/
-    hardware.py          CPU/RAM/GPU/disk/arch detection (psutil + pynvml)
+    hardware.py          CPU/RAM/GPU/disk/arch detection (psutil + pynvml); arch normalisation
     registry.py          Tool YAML loader + Pydantic models
-    compatibility.py     hw ↔ tool matching + recommend_presets()
-    planner.py           Preset loading, artifact chaining, interactive_build()
+    compatibility.py     hw ↔ tool matching + arm64 emulation + recommend_presets()
+    planner.py           Preset loading, artifact chaining, interactive_build() — 8 pipelines
     runner.py            Docker sibling-container executor + Rich progress bar
     dag.py               Topological stage sort (Kahn's algorithm)
     checkpoint.py        .bioflow_state.json — resume + failure tracking
     logger.py            Structured JSON logging
     report.py            MultiQC + HTML pipeline summary with failure highlights
     db.py                Reference DB catalog, fetch (with progress), verify
+    ncbi.py              NCBI Datasets API + Entrez genome/protein download
+    approve.py           Registry candidate validation & promotion
 
 registry/
   schema.yaml            JSON Schema (Draft 2020-12) for tool validation
-  tools/<category>/      29 tool YAML files
-  presets/               6 curated preset YAML files
+  tools/
+    qc/                  fastp · fastqc · filtlong · nanoplot · trimgalore
+    assembly/            spades · hifiasm · flye · unicycler · bwa_mem2
+    assembly_qc/         quast · busco · checkm2 · merqury
+    repeat/              earlgrey · repeatmodeler · repeatmasker
+    struct_annot/        braker3 · prokka · bakta
+    func_annot/          eggnog_mapper · interproscan · diamond_uniprot
+    rnaseq_align/        hisat2 · star · salmon · kallisto
+    deg/                 deseq2 · edger · limma_voom
+    enrichment/          clusterprofiler · topgo · gsea
+    alignment/           bowtie2 · trimgalore          ← NEW
+    metagenomics/        kraken2 · bracken · metaphlan4 · humann3 · kneaddata · lefse  ← NEW
+    single_cell/         cellranger · starsolo · seurat · scanpy · monocle3  ← NEW
+    epigenomics/         macs3 · deeptools · homer · bismark · methylkit · tobias  ← NEW
+    proteomics/          msconvert · msfragger · percolator · fragpipe · maxquant  ← NEW
+  presets/               14 curated preset YAML files
 
 docker/
   core/Dockerfile        python:3.12-slim + Docker CLI + bioflow
-  docker-compose.yml     mounts host Docker socket (sibling-container)
+  docker-compose.yml     mounts host Docker socket (Linux/macOS/Windows WSL2)
 
 examples/
-  config_prokaryote_short.yaml   prokaryote de-novo short config
-  config_eukaryote_hifi.yaml     eukaryote HiFi de-novo config
-  config_rnaseq.yaml             RNA-seq DEG config
+  config_prokaryote_short.yaml
+  config_eukaryote_hifi.yaml
+  config_rnaseq.yaml
+  config_metagenomics.yaml    ← NEW
+  config_scrna_seq.yaml       ← NEW
+  config_chip_seq.yaml        ← NEW
+  config_atac_seq.yaml        ← NEW
+  config_methylation.yaml     ← NEW
+  config_proteomics.yaml      ← NEW
 
 data/
-  test/ecoli_small/      Synthetic prokaryote test fixtures (FASTQ + reference)
+  test/ecoli_small/      Synthetic prokaryote test fixtures
   test/rnaseq_toy/       Synthetic RNA-seq test fixtures
   references/            Mount point for external DBs (not bundled)
 
@@ -199,9 +293,9 @@ update/
   CHANGELOG.md           Registry version history
 
 tests/
-  unit/                  63 unit tests
-  e2e/                   9 end-to-end tests (MockBackend, no Docker)
-  integration/           5 integration tests (require Docker, --real flag)
+  unit/                  unit tests (153 passed total)
+  e2e/                   end-to-end tests (MockBackend, no Docker)
+  integration/           integration tests (require Docker, --real flag)
 ```
 
 ---

@@ -1,0 +1,35 @@
+id: methylkit
+name: methylkit
+version: "1.28.0"
+category: epigenomics
+stage: [methylation.step4]
+input_types: [methylation_report]
+output_types: [dmr_results]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [wgbs, rrbs]
+container:
+  image: bioconductor/bioconductor_full:RELEASE_3_18
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 16, disk_gb: 10}
+  recommended: {cpu: 8, ram_gb: 32, disk_gb: 20}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  Rscript -e "
+  library(methylKit);
+  file.list<-as.list(strsplit('{methylation_files}',',')[[1]]);
+  myobj<-methRead(file.list,
+    sample.id=as.list(strsplit('{sample_ids}',',')[[1]]),
+    assembly='{genome_build}',pipeline='bismarkCoverage',
+    treatment=c(1,1,0,0),context='CpG');
+  meth<-unite(myobj);
+  myDiff<-calculateDiffMeth(meth,num.cores={cpu});
+  write.csv(getMethylDiff(myDiff,difference=25,qvalue=0.01),
+    '{out_dir}/dmr_results.csv')"
+references: []
+citation: "Akalin et al. 2012, PMID 23034086"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

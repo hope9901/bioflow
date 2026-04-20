@@ -1,0 +1,17 @@
+# bioflow proteomics (DDA) example config
+# Usage: bioflow recommend --preset proteomics_msfragger_dda --config config_proteomics.yaml
+
+pipeline: proteomics
+species: any
+read_type: ms_dda
+mode: dda
+workdir: ./output/proteomics_run
+registry_dir: registry
+
+inputs:
+  sample_id: lf_quantification_experiment
+  raw_file_dir: /data/proteomics/raw_files    # .raw, .d, or .wiff files
+  protein_db: /refs/proteomics/UniProt_Human_2024.fasta
+  msfragger_params: /refs/proteomics/LFQ_fragger.params
+  fragpipe_workflow: /refs/proteomics/LFQ-MBR.workflow
+  manifest_file: /data/proteomics/fragpipe_manifest.fp-manifest

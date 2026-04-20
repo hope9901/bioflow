@@ -1,0 +1,28 @@
+id: bismark
+name: bismark
+version: "0.24.2"
+category: epigenomics
+stage: [methylation.step2]
+input_types: [clean_fastq]
+output_types: [bam, methylation_report]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [wgbs, rrbs]
+container:
+  image: quay.io/biocontainers/bismark:0.24.2--hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 32, disk_gb: 50}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  bismark --genome {bismark_genome} -1 {r1} -2 {r2} -o {out_dir} -p {cpu}
+  && bismark_methylation_extractor --paired-end --comprehensive --CX_context
+  --cytosine_report --genome_folder {bismark_genome}
+  {out_dir}/*.bam -o {out_dir}
+references: []
+citation: "Krueger & Andrews 2011, PMID 21493656"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

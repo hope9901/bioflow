@@ -1,0 +1,25 @@
+id: trimgalore
+name: trimgalore
+version: "0.6.10"
+category: alignment
+stage: [chip_seq.step1, atac_seq.step1, methylation.step1]
+input_types: [short_paired]
+output_types: [clean_fastq]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, wgbs, rrbs, differential]
+container:
+  image: quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  trim_galore --paired --cores {cpu} --output_dir {out_dir} {r1} {r2}
+references: []
+citation: "Krueger 2015, https://github.com/FelixKrueger/TrimGalore"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

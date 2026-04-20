@@ -1,0 +1,34 @@
+id: monocle3
+name: monocle3
+version: "1.3.7"
+category: single_cell
+stage: [scrna_seq.step5]
+input_types: [count_matrix]
+output_types: [rds]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: bioconductor/bioconductor_full:RELEASE_3_18
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 16, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 20}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  Rscript -e "
+  library(monocle3);
+  cds<-load_cellranger_data('{count_matrix_dir}');
+  cds<-preprocess_cds(cds);
+  cds<-reduce_dimension(cds);
+  cds<-cluster_cells(cds);
+  cds<-learn_graph(cds);
+  cds<-order_cells(cds);
+  plot_cells(cds,color_cells_by='pseudotime',file='{out_dir}/trajectory.pdf');
+  saveRDS(cds,'{out_dir}/monocle3_cds.rds')"
+references: []
+citation: "Cao et al. 2019, PMID 30787392"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

@@ -1,0 +1,26 @@
+id: kneaddata
+name: kneaddata
+version: "0.12.0"
+category: metagenomics
+stage: [metagenomics.step2]
+input_types: [short_paired]
+output_types: [clean_fastq]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+container:
+  image: quay.io/biocontainers/kneaddata:0.12.0--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  kneaddata --input {r1} --input {r2} --reference-db {host_db} --output {out_dir}
+  --threads {cpu} --remove-intermediate-output
+references: []
+citation: "McIver et al. 2018, PMID 31616210"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

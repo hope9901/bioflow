@@ -19,8 +19,25 @@ properties:
   version:     { type: string }
   category:
     type: string
-    enum: [qc, assembly, assembly_qc, repeat, struct_annot, func_annot,
-           rnaseq_align, deg, enrichment]
+    enum:
+      # Genomics / assembly
+      - qc
+      - assembly
+      - assembly_qc
+      - repeat
+      - struct_annot
+      - func_annot
+      # RNA-seq
+      - rnaseq_align
+      - deg
+      - enrichment
+      # Multi-omics expansion
+      - alignment        # general-purpose aligners (Bowtie2, BWA)
+      - metagenomics     # taxonomic + functional profiling
+      - single_cell      # scRNA-seq, scATAC-seq
+      - epigenomics      # ChIP-seq, ATAC-seq, methylation
+      - proteomics       # LC-MS/MS proteomics
+      - metabolomics     # future
   stage:
     type: array
     items: { type: string }
@@ -40,12 +57,34 @@ properties:
         type: array
         items:
           type: string
-          enum: [short, long_hifi, long_ont, hybrid, any]
+          enum:
+            - short
+            - long_hifi
+            - long_ont
+            - hybrid
+            - any
+            # Proteomics
+            - ms_dda
+            - ms_dia
       mode:
         type: array
         items:
           type: string
-          enum: [de_novo, resequencing, any]
+          enum:
+            - de_novo
+            - resequencing
+            - any
+            # Metagenomics
+            - profiling
+            # Epigenomics
+            - peak_calling
+            - differential
+            # Methylation
+            - wgbs
+            - rrbs
+            # Proteomics
+            - dda
+            - dia
   container:
     type: object
     required: [image]

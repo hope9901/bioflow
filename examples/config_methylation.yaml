@@ -1,0 +1,19 @@
+# bioflow WGBS methylation example config
+# Usage: bioflow recommend --preset methylation_bismark_wgbs --config config_methylation.yaml
+
+pipeline: methylation
+species: eukaryote
+read_type: short
+mode: wgbs
+workdir: ./output/methylation_run
+registry_dir: registry
+
+inputs:
+  sample_id: wgbs_tumor_vs_normal
+  sample_sheet: /data/wgbs/sample_sheet.csv  # columns: sample_id, fastq_r1, fastq_r2, condition
+  # Bismark genome directory (prepare with: bismark_genome_preparation /path/to/genome/)
+  bismark_genome: /refs/bismark/hg38
+  genome_build: hg38
+  # For MethylKit DMR analysis — will be auto-populated after Bismark extraction
+  sample_ids: "tumor1,tumor2,normal1,normal2"
+  methylation_files: ""   # auto-populated by pipeline

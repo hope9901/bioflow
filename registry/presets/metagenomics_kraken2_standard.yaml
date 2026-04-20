@@ -1,0 +1,21 @@
+id: metagenomics_kraken2_standard
+pipeline: metagenomics
+description: |
+  Standard shotgun metagenomics workflow using Kraken2+Bracken for taxonomic
+  profiling and HUMAnN3 for functional pathway analysis. Suitable for human gut,
+  soil, or environmental samples. Host removal with KneadData is included.
+applies_to:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+stages:
+  - stage_id: metagenomics.step1
+    tool_id: fastp
+  - stage_id: metagenomics.step2
+    tool_id: kneaddata
+  - stage_id: metagenomics.step3
+    tool_id: kraken2
+  - stage_id: metagenomics.step4
+    tool_id: humann3
+  - stage_id: metagenomics.step5
+    tool_id: lefse

@@ -1,0 +1,38 @@
+id: seurat
+name: seurat
+version: "5.0.1"
+category: single_cell
+stage: [scrna_seq.step2, scrna_seq.step3, scrna_seq.step4]
+input_types: [count_matrix]
+output_types: [rds]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: satijalab/seurat:5.0.1
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 16, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  Rscript -e "
+  library(Seurat);
+  pbmc<-Read10X('{count_matrix_dir}');
+  so<-CreateSeuratObject(pbmc,min.cells=3,min.features=200);
+  so<-NormalizeData(so);
+  so<-FindVariableFeatures(so);
+  so<-ScaleData(so);
+  so<-RunPCA(so);
+  so<-FindNeighbors(so);
+  so<-FindClusters(so,resolution=0.5);
+  so<-RunUMAP(so,dims=1:10);
+  markers<-FindAllMarkers(so,only.pos=TRUE);
+  write.csv(markers,'{out_dir}/markers.csv');
+  saveRDS(so,'{out_dir}/seurat_object.rds')"
+references: []
+citation: "Hao et al. 2024, PMID 38066579"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

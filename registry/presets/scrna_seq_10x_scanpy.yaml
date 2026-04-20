@@ -1,0 +1,22 @@
+id: scrna_seq_10x_scanpy
+pipeline: scrna_seq
+description: |
+  10x Chromium scRNA-seq workflow using STARsolo for alignment and Scanpy
+  (Python) for downstream analysis. Scalable to large datasets and compatible
+  with AnnData/.h5ad ecosystem. Recommended for non-human or large-scale studies.
+applies_to:
+  species: [any]
+  read_type: [short]
+  mode: [de_novo]
+stages:
+  - stage_id: scrna_seq.step1
+    tool_id: starsolo
+  - stage_id: scrna_seq.step2
+    tool_id: scanpy
+  - stage_id: scrna_seq.step3
+    tool_id: scanpy
+  - stage_id: scrna_seq.step4
+    tool_id: scanpy
+  - stage_id: scrna_seq.step5
+    skip: true
+    reason: Trajectory analysis optional — run monocle3 separately if needed

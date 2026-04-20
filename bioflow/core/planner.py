@@ -157,6 +157,73 @@ _ARTIFACT_FILENAMES: dict[tuple[str, Optional[str]], dict[str, str]] = {
 
     # step4: enrichment → HTML report
     ("rnaseq_deg.step4", None):              {"enrichment_report": "enrichment_report.html"},
+
+    # ── Metagenomics ─────────────────────────────────────────────────────────
+    ("metagenomics.step1", None):            {"r1": "clean_R1.fastq.gz",
+                                              "r2": "clean_R2.fastq.gz"},
+    ("metagenomics.step2", "kneaddata"):     {"r1_clean": "kneaddata_paired_1.fastq.gz",
+                                              "r2_clean": "kneaddata_paired_2.fastq.gz"},
+    ("metagenomics.step2", None):            {"r1_clean": "host_removed_R1.fastq.gz",
+                                              "r2_clean": "host_removed_R2.fastq.gz"},
+    ("metagenomics.step3", "kraken2"):       {"taxonomy_report": "kraken2_report.txt"},
+    ("metagenomics.step3", "bracken"):       {"taxonomy_report": "bracken_output.txt",
+                                              "taxonomy_table":  "bracken_abundance.tsv"},
+    ("metagenomics.step3", "metaphlan4"):    {"taxonomy_report": "metaphlan_profile.tsv",
+                                              "taxonomy_table":  "metaphlan_profile.tsv"},
+    ("metagenomics.step4", "humann3"):       {"functional_profile": "pathcoverage.tsv",
+                                              "gene_families":      "genefamilies.tsv"},
+    ("metagenomics.step5", None):            {"diff_taxa_report": "lefse_results.res"},
+
+    # ── Single-cell RNA-seq ──────────────────────────────────────────────────
+    ("scrna_seq.step1", "cellranger"):       {"count_matrix_dir": "outs/filtered_feature_bc_matrix"},
+    ("scrna_seq.step1", "starsolo"):         {"count_matrix_dir": "Solo.out/GeneFull/filtered"},
+    ("scrna_seq.step2", "scanpy"):           {"filtered_h5ad":    "filtered.h5ad"},
+    ("scrna_seq.step2", "seurat"):           {"seurat_rds":        "seurat_object.rds",
+                                              "filtered_h5ad":     "filtered.h5ad"},
+    ("scrna_seq.step3", "scanpy"):           {"clustered_h5ad":   "analyzed.h5ad"},
+    ("scrna_seq.step3", "seurat"):           {"clustered_rds":     "seurat_clustered.rds"},
+    ("scrna_seq.step4", "scanpy"):           {"markers_tsv":       "markers.tsv"},
+    ("scrna_seq.step4", "seurat"):           {"markers_tsv":       "markers.csv"},
+    ("scrna_seq.step5", "monocle3"):         {"trajectory_rds":    "monocle3_cds.rds"},
+
+    # ── ChIP-seq ─────────────────────────────────────────────────────────────
+    ("chip_seq.step1", None):               {"r1": "trimmed_R1.fastq.gz",
+                                              "r2": "trimmed_R2.fastq.gz"},
+    ("chip_seq.step2", "bowtie2"):           {"alignment_bam": "aligned.bam"},
+    ("chip_seq.step3", "macs3"):             {"peaks_bed":     "{sample_id}_peaks.narrowPeak",
+                                              "peaks_bdg":     "{sample_id}_treat_pileup.bdg"},
+    ("chip_seq.step4", "deeptools"):         {"bigwig":        "{sample_id}.bw",
+                                              "heatmap_pdf":   "heatmap.pdf"},
+    ("chip_seq.step4", "homer"):             {"annotated_peaks": "annotated_peaks.txt"},
+    ("chip_seq.step5", "homer"):             {"motif_report":  "motifs/knownResults.html"},
+
+    # ── ATAC-seq ─────────────────────────────────────────────────────────────
+    ("atac_seq.step1", None):               {"r1": "trimmed_R1.fastq.gz",
+                                              "r2": "trimmed_R2.fastq.gz"},
+    ("atac_seq.step2", "bowtie2"):           {"alignment_bam": "aligned.bam"},
+    ("atac_seq.step3", "macs3"):             {"peaks_bed":     "{sample_id}_peaks.narrowPeak"},
+    ("atac_seq.step4", "deeptools"):         {"bigwig":        "{sample_id}.bw",
+                                              "diff_peaks":    "diff_peaks.tsv"},
+    ("atac_seq.step5", "tobias"):            {"footprints_bw": "footprints.bw",
+                                              "motif_report":  "motif_report.pdf"},
+    ("atac_seq.step5", "homer"):             {"motif_report":  "motifs/knownResults.html"},
+
+    # ── Bisulfite Methylation ─────────────────────────────────────────────────
+    ("methylation.step1", None):             {"r1": "trimmed_R1.fastq.gz",
+                                              "r2": "trimmed_R2.fastq.gz"},
+    ("methylation.step2", "bismark"):        {"bismark_bam":          "aligned.bam",
+                                              "methylation_coverage":  "CpG_report.txt.gz"},
+    ("methylation.step3", None):             {"methylation_coverage":  "CpG_coverage.bismark.gz",
+                                              "methylation_files":     "methylation_calls.txt"},
+    ("methylation.step4", "methylkit"):      {"dmr_results":           "dmr_results.csv"},
+
+    # ── Proteomics (LC-MS/MS) ────────────────────────────────────────────────
+    ("proteomics.step1", "msconvert"):       {"mzml_dir": "{out_dir}"},
+    ("proteomics.step2", "msfragger"):       {"psm_tsv":  "psm.tsv"},
+    ("proteomics.step3", "percolator"):      {"filtered_psm": "percolator.psms.xml"},
+    ("proteomics.step4", "fragpipe"):        {"quant_matrix": "combined_protein.tsv"},
+    ("proteomics.step4", "maxquant"):        {"quant_matrix": "proteinGroups.txt"},
+    ("proteomics.step5", None):             {"protein_diff": "protein_diff.tsv"},
 }
 
 
@@ -362,6 +429,142 @@ def _chain_artifact_params(
         if _get("deg_table"):
             params["deg_table"] = running_inputs["deg_table"]
 
+    # ── Metagenomics ─────────────────────────────────────────────────────────
+    elif stage_id == "metagenomics.step2":
+        # Host removal uses clean reads from step1
+        if _get("r1") and "metagenomics.step1" in completed_stage_ids:
+            params["r1"] = running_inputs["r1"]
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
+
+    elif stage_id == "metagenomics.step3":
+        # Taxonomic profiling uses host-removed reads (or raw clean if no host removal)
+        r1 = _get("r1_clean") or _get("r1")
+        r2 = _get("r2_clean") or _get("r2")
+        if r1:
+            params["r1_clean"] = r1
+            if r2:
+                params["r2_clean"] = r2
+
+    elif stage_id == "metagenomics.step4":
+        # Functional profiling uses clean reads + taxonomy report
+        r1 = _get("r1_clean") or _get("r1")
+        if r1:
+            params["r1_clean"] = r1
+        if _get("taxonomy_report"):
+            params["taxonomy_report"] = running_inputs["taxonomy_report"]
+
+    elif stage_id == "metagenomics.step5":
+        # Differential abundance uses taxonomy table
+        if _get("taxonomy_table"):
+            params["taxonomy_table"] = running_inputs["taxonomy_table"]
+
+    # ── Single-cell RNA-seq ──────────────────────────────────────────────────
+    elif stage_id == "scrna_seq.step2":
+        if _get("count_matrix_dir"):
+            params["count_matrix_dir"] = running_inputs["count_matrix_dir"]
+
+    elif stage_id == "scrna_seq.step3":
+        h5ad = _get("filtered_h5ad") or _get("count_matrix_dir")
+        rds  = _get("seurat_rds")
+        if h5ad:
+            params["count_matrix_dir"] = h5ad
+        if rds:
+            params["seurat_rds"] = rds
+
+    elif stage_id == "scrna_seq.step4":
+        for key in ("clustered_h5ad", "clustered_rds", "filtered_h5ad", "seurat_rds"):
+            if _get(key):
+                params[key] = running_inputs[key]
+                break
+
+    elif stage_id == "scrna_seq.step5":
+        for key in ("clustered_h5ad", "clustered_rds"):
+            if _get(key):
+                params[key] = running_inputs[key]
+        if _get("count_matrix_dir"):
+            params["count_matrix_dir"] = running_inputs["count_matrix_dir"]
+
+    # ── ChIP-seq ─────────────────────────────────────────────────────────────
+    elif stage_id == "chip_seq.step2":
+        if _get("r1") and "chip_seq.step1" in completed_stage_ids:
+            params["r1"] = running_inputs["r1"]
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
+
+    elif stage_id == "chip_seq.step3":
+        if _get("alignment_bam"):
+            params["alignment_bam"] = running_inputs["alignment_bam"]
+
+    elif stage_id == "chip_seq.step4":
+        if _get("alignment_bam"):
+            params["alignment_bam"] = running_inputs["alignment_bam"]
+        if _get("peaks_bed"):
+            params["peaks_bed"] = running_inputs["peaks_bed"]
+
+    elif stage_id == "chip_seq.step5":
+        if _get("peaks_bed"):
+            params["peaks_bed"] = running_inputs["peaks_bed"]
+
+    # ── ATAC-seq ─────────────────────────────────────────────────────────────
+    elif stage_id == "atac_seq.step2":
+        if _get("r1") and "atac_seq.step1" in completed_stage_ids:
+            params["r1"] = running_inputs["r1"]
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
+
+    elif stage_id == "atac_seq.step3":
+        if _get("alignment_bam"):
+            params["alignment_bam"] = running_inputs["alignment_bam"]
+
+    elif stage_id == "atac_seq.step4":
+        if _get("alignment_bam"):
+            params["alignment_bam"] = running_inputs["alignment_bam"]
+        if _get("peaks_bed"):
+            params["peaks_bed"] = running_inputs["peaks_bed"]
+
+    elif stage_id == "atac_seq.step5":
+        if _get("alignment_bam"):
+            params["alignment_bam"] = running_inputs["alignment_bam"]
+        if _get("peaks_bed"):
+            params["peaks_bed"] = running_inputs["peaks_bed"]
+
+    # ── Bisulfite Methylation ─────────────────────────────────────────────────
+    elif stage_id == "methylation.step2":
+        if _get("r1") and "methylation.step1" in completed_stage_ids:
+            params["r1"] = running_inputs["r1"]
+            if _get("r2"):
+                params["r2"] = running_inputs["r2"]
+
+    elif stage_id == "methylation.step3":
+        if _get("bismark_bam"):
+            params["bismark_bam"] = running_inputs["bismark_bam"]
+
+    elif stage_id == "methylation.step4":
+        if _get("methylation_coverage"):
+            params["methylation_coverage"] = running_inputs["methylation_coverage"]
+        if _get("methylation_files"):
+            params["methylation_files"] = running_inputs["methylation_files"]
+
+    # ── Proteomics ────────────────────────────────────────────────────────────
+    elif stage_id == "proteomics.step2":
+        if _get("mzml_dir"):
+            params["mzml_dir"] = running_inputs["mzml_dir"]
+
+    elif stage_id == "proteomics.step3":
+        if _get("psm_tsv"):
+            params["psm_tsv"] = running_inputs["psm_tsv"]
+
+    elif stage_id == "proteomics.step4":
+        if _get("filtered_psm"):
+            params["filtered_psm"] = running_inputs["filtered_psm"]
+        if _get("mzml_dir"):
+            params["mzml_dir"] = running_inputs["mzml_dir"]
+
+    elif stage_id == "proteomics.step5":
+        if _get("quant_matrix"):
+            params["quant_matrix"] = running_inputs["quant_matrix"]
+
     return params
 
 
@@ -392,6 +595,47 @@ _PIPELINE_STAGES: dict[str, list[tuple[str, str, bool]]] = {
         ("rnaseq_deg.step2", "Alignment / Quantification",  False),
         ("rnaseq_deg.step3", "DEG Analysis",                False),
         ("rnaseq_deg.step4", "Enrichment Analysis",         False),
+    ],
+    "metagenomics": [
+        ("metagenomics.step1", "Read QC",                   False),
+        ("metagenomics.step2", "Host Removal",              True),   # optional for non-host samples
+        ("metagenomics.step3", "Taxonomic Profiling",       False),
+        ("metagenomics.step4", "Functional Profiling",      True),   # optional
+        ("metagenomics.step5", "Differential Abundance",    True),   # optional
+    ],
+    "scrna_seq": [
+        ("scrna_seq.step1", "Demux / Alignment",            False),
+        ("scrna_seq.step2", "QC & Filtering",               False),
+        ("scrna_seq.step3", "Clustering & Dim. Reduction",  False),
+        ("scrna_seq.step4", "Marker Gene / DEG",            False),
+        ("scrna_seq.step5", "Trajectory / Pseudotime",      True),   # optional
+    ],
+    "chip_seq": [
+        ("chip_seq.step1",  "Read QC & Trimming",           False),
+        ("chip_seq.step2",  "Alignment",                    False),
+        ("chip_seq.step3",  "Peak Calling",                 False),
+        ("chip_seq.step4",  "Peak Annotation / Coverage",   False),
+        ("chip_seq.step5",  "Motif Analysis",               True),   # optional
+    ],
+    "atac_seq": [
+        ("atac_seq.step1",  "Read QC & Trimming",           False),
+        ("atac_seq.step2",  "Alignment",                    False),
+        ("atac_seq.step3",  "Peak Calling",                 False),
+        ("atac_seq.step4",  "Coverage & Differential",      False),
+        ("atac_seq.step5",  "Footprinting & Motif",         True),   # optional
+    ],
+    "methylation": [
+        ("methylation.step1", "Read QC & Trimming",         False),
+        ("methylation.step2", "Bisulfite Alignment",        False),
+        ("methylation.step3", "Methylation Extraction",     False),
+        ("methylation.step4", "DMR Analysis",               True),   # optional
+    ],
+    "proteomics": [
+        ("proteomics.step1", "Format Conversion",           False),
+        ("proteomics.step2", "Database Search",             False),
+        ("proteomics.step3", "FDR Control",                 False),
+        ("proteomics.step4", "Quantification",              False),
+        ("proteomics.step5", "Statistical Analysis",        True),   # optional
     ],
 }
 
@@ -425,6 +669,68 @@ _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
         ("sample_sheet",     "Sample sheet CSV path"),
         ("reference_genome", "Reference genome FASTA path"),
         ("annotation_gtf",   "Annotation GTF path"),
+    ],
+    # Metagenomics
+    ("metagenomics", "short"): [
+        ("sample_id",       "Sample identifier"),
+        ("sample_sheet",    "Sample sheet CSV path (sample_id, fastq_r1, fastq_r2, group)"),
+        ("host_db",         "Host genome Bowtie2 index for KneadData (leave blank to skip host removal)"),
+        ("kraken2_db",      "Kraken2 database directory"),
+        ("metaphlan_db",    "MetaPhlAn4 database directory (optional, leave blank if using Kraken2)"),
+        ("chocophlan_db",   "HUMAnN3 ChocoPhlAn DB directory (optional)"),
+        ("uniref_db",       "HUMAnN3 UniRef DB directory (optional)"),
+    ],
+    # Single-cell RNA-seq (10x Chromium)
+    ("scrna_seq", "short"): [
+        ("sample_id",       "Sample identifier"),
+        ("fastq_dir",       "Directory containing FASTQ files"),
+        ("cellranger_ref",  "Cell Ranger reference transcriptome directory"),
+        ("star_index",      "STAR genome index directory (alternative to Cell Ranger)"),
+        ("whitelist",       "Cell barcode whitelist (10x v3: 3M-february-2018.txt.gz)"),
+        ("expected_cells",  "Expected number of cells (e.g. 5000)"),
+    ],
+    # ChIP-seq
+    ("chip_seq", "short"): [
+        ("sample_id",       "Sample identifier"),
+        ("sample_sheet",    "Sample sheet CSV (sample_id, fastq_r1, fastq_r2, control_id, mark)"),
+        ("reference_genome","Reference genome FASTA path"),
+        ("bowtie2_index",   "Bowtie2 genome index prefix"),
+        ("genome_size",     "Effective genome size (hs/mm/ce/dm or integer)"),
+        ("annotation_gtf",  "Gene annotation GTF path"),
+    ],
+    # ATAC-seq
+    ("atac_seq", "short"): [
+        ("sample_id",       "Sample identifier"),
+        ("sample_sheet",    "Sample sheet CSV (sample_id, fastq_r1, fastq_r2, group)"),
+        ("reference_genome","Reference genome FASTA path"),
+        ("bowtie2_index",   "Bowtie2 genome index prefix"),
+        ("genome_size",     "Effective genome size (hs/mm/ce/dm or integer)"),
+    ],
+    # Bisulfite-seq / WGBS
+    ("methylation", "short"): [
+        ("sample_id",       "Sample identifier"),
+        ("sample_sheet",    "Sample sheet CSV (sample_id, fastq_r1, fastq_r2, condition)"),
+        ("bismark_genome",  "Bismark-prepared genome directory"),
+        ("genome_build",    "Genome assembly name (e.g. hg38, mm10)"),
+        ("sample_ids",      "Comma-separated sample IDs matching sample_sheet"),
+        ("methylation_files", "Comma-separated methylation coverage files (after Bismark)"),
+    ],
+    # Proteomics (DDA)
+    ("proteomics", "ms_dda"): [
+        ("sample_id",       "Experiment identifier"),
+        ("raw_file_dir",    "Directory containing raw mass-spec files (.raw/.d/.wiff)"),
+        ("protein_db",      "FASTA protein database for database search"),
+        ("msfragger_params","MSFragger parameter file (.params)"),
+        ("fragpipe_workflow","FragPipe workflow file (.workflow)"),
+        ("manifest_file",   "FragPipe manifest file listing mzML paths"),
+    ],
+    # Proteomics (DIA)
+    ("proteomics", "ms_dia"): [
+        ("sample_id",       "Experiment identifier"),
+        ("raw_file_dir",    "Directory containing raw DIA files"),
+        ("protein_db",      "FASTA protein database"),
+        ("fragpipe_workflow","FragPipe DIA workflow file"),
+        ("manifest_file",   "FragPipe manifest file"),
     ],
 }
 
@@ -468,23 +774,51 @@ def interactive_build(pipeline: str, out: Path, *, registry_dir: Path = Path("re
     console.print(f"\n[bold cyan]bioflow custom — {pipeline}[/]\n")
 
     # ── 1. Gather pipeline metadata ──────────────────────────────────────────
-    species = questionary.select(
-        "Species type:",
-        choices=["prokaryote", "eukaryote", "eukaryote_small"],
-    ).ask()
+    # Species choices depend on the pipeline type
+    _OMICS_PIPELINES = {"metagenomics", "scrna_seq", "chip_seq", "atac_seq", "methylation", "proteomics"}
+    if pipeline in _OMICS_PIPELINES:
+        species = questionary.select(
+            "Species type:",
+            choices=["any", "eukaryote", "prokaryote", "eukaryote_small"],
+        ).ask()
+    else:
+        species = questionary.select(
+            "Species type:",
+            choices=["prokaryote", "eukaryote", "eukaryote_small"],
+        ).ask()
     if species is None:
         raise KeyboardInterrupt
 
+    _READ_TYPE_CHOICES: dict[str, list[str]] = {
+        "genome_assembly": ["short", "long_hifi", "long_ont", "hybrid"],
+        "rnaseq_deg":      ["short"],
+        "metagenomics":    ["short"],
+        "scrna_seq":       ["short"],
+        "chip_seq":        ["short"],
+        "atac_seq":        ["short"],
+        "methylation":     ["short"],
+        "proteomics":      ["ms_dda", "ms_dia"],
+    }
     read_type = questionary.select(
-        "Read type:",
-        choices=["short", "long_hifi", "long_ont", "hybrid"],
+        "Read type / data type:",
+        choices=_READ_TYPE_CHOICES.get(pipeline, ["short"]),
     ).ask()
     if read_type is None:
         raise KeyboardInterrupt
 
+    _MODE_CHOICES: dict[str, list[str]] = {
+        "genome_assembly": ["de_novo", "resequencing"],
+        "rnaseq_deg":      ["de_novo"],
+        "metagenomics":    ["profiling"],
+        "scrna_seq":       ["de_novo"],
+        "chip_seq":        ["peak_calling"],
+        "atac_seq":        ["peak_calling", "differential"],
+        "methylation":     ["wgbs", "rrbs"],
+        "proteomics":      ["dda", "dia"],
+    }
     mode = questionary.select(
         "Analysis mode:",
-        choices=["de_novo", "resequencing"],
+        choices=_MODE_CHOICES.get(pipeline, ["de_novo"]),
     ).ask()
     if mode is None:
         raise KeyboardInterrupt

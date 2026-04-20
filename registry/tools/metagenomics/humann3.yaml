@@ -1,0 +1,27 @@
+id: humann3
+name: humann3
+version: "3.9"
+category: metagenomics
+stage: [metagenomics.step4]
+input_types: [clean_fastq]
+output_types: [humann_pathways]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+container:
+  image: quay.io/biocontainers/humann:3.9--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 300}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  humann --input {r1_clean} --output {out_dir} --threads {cpu}
+  --nucleotide-database {chocophlan_db} --protein-database {uniref_db}
+  --taxonomic-profile {taxonomy_report}
+references: []
+citation: "Beghini et al. 2021, PMID 33944776"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

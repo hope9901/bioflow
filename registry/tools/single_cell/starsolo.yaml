@@ -1,0 +1,29 @@
+id: starsolo
+name: starsolo
+version: "2.7.11b"
+category: single_cell
+stage: [scrna_seq.step1]
+input_types: [short_paired]
+output_types: [count_matrix]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/star:2.7.11b--h43eeafb_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  STAR --soloType CB_UMI_Simple --soloCBwhitelist {whitelist}
+  --genomeDir {star_index} --readFilesIn {r2} {r1}
+  --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate
+  --runThreadN {cpu} --outFileNamePrefix {out_dir}/
+  --soloOutDir {out_dir}/Solo.out
+references: []
+citation: "Dobin et al. 2013, PMID 23104886"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

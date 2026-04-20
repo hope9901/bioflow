@@ -1,0 +1,18 @@
+# bioflow ChIP-seq example config
+# Usage: bioflow recommend --preset chip_seq_standard --config config_chip_seq.yaml
+
+pipeline: chip_seq
+species: eukaryote
+read_type: short
+mode: peak_calling
+workdir: ./output/chip_seq_run
+registry_dir: registry
+
+inputs:
+  sample_id: h3k27ac_experiment
+  sample_sheet: /data/chip/sample_sheet.csv   # columns: sample_id, fastq_r1, fastq_r2, control_id, mark
+  reference_genome: /refs/genomes/hg38/hg38.fa
+  bowtie2_index: /refs/bowtie2/hg38/hg38
+  # Effective genome size: hs=2.7e9, mm=1.87e9, ce=9e7, dm=1.2e8
+  genome_size: hs
+  annotation_gtf: /refs/genomes/hg38/gencode.v44.annotation.gtf

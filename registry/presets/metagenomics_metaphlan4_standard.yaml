@@ -1,0 +1,21 @@
+id: metagenomics_metaphlan4_standard
+pipeline: metagenomics
+description: |
+  Marker-gene based metagenomics workflow using MetaPhlAn4 for high-resolution
+  taxonomic profiling and HUMAnN3 for functional analysis. More accurate for
+  known species; recommended for clinical and human microbiome studies.
+applies_to:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+stages:
+  - stage_id: metagenomics.step1
+    tool_id: fastp
+  - stage_id: metagenomics.step2
+    tool_id: kneaddata
+  - stage_id: metagenomics.step3
+    tool_id: metaphlan4
+  - stage_id: metagenomics.step4
+    tool_id: humann3
+  - stage_id: metagenomics.step5
+    tool_id: lefse

@@ -1,0 +1,25 @@
+id: msconvert
+name: msconvert
+version: "3.0.24238"
+category: proteomics
+stage: [proteomics.step1]
+input_types: [ms_raw]
+output_types: [mzml]
+applicable:
+  species: [any]
+  read_type: [ms_dda, ms_dia]
+  mode: [dda, dia]
+container:
+  image: chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 50}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  msconvert {raw_file} --mzML --filter "peakPicking vendor msLevel=1-" --outdir {out_dir}
+references: []
+citation: "Chambers et al. 2012, PMID 22796944"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

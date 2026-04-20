@@ -1,0 +1,27 @@
+id: metaphlan4
+name: metaphlan4
+version: "4.1.0"
+category: metagenomics
+stage: [metagenomics.step3]
+input_types: [clean_fastq]
+output_types: [metaphlan_profile]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+container:
+  image: quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  metaphlan {r1_clean},{r2_clean} --input_type fastq --nproc {cpu}
+  --bowtie2db {metaphlan_db} -o {out_dir}/metaphlan_profile.tsv
+  --bowtie2out {out_dir}/metaphlan.bowtie2.bz2
+references: []
+citation: "Blanco-Miguez et al. 2023, PMID 36823356"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

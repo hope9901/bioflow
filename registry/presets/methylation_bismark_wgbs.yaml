@@ -1,0 +1,19 @@
+id: methylation_bismark_wgbs
+pipeline: methylation
+description: |
+  Whole-genome bisulfite sequencing (WGBS) workflow: TrimGalore quality and
+  adapter trimming → Bismark alignment and methylation extraction → MethylKit
+  differential methylation region (DMR) analysis. Standard WGBS pipeline.
+applies_to:
+  species: [any]
+  read_type: [short]
+  mode: [wgbs]
+stages:
+  - stage_id: methylation.step1
+    tool_id: trimgalore
+  - stage_id: methylation.step2
+    tool_id: bismark
+  - stage_id: methylation.step3
+    tool_id: bismark
+  - stage_id: methylation.step4
+    tool_id: methylkit

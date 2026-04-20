@@ -1,0 +1,27 @@
+id: percolator
+name: percolator
+version: "3.06.1"
+category: proteomics
+stage: [proteomics.step3]
+input_types: [psm_tsv]
+output_types: [percolator_psms]
+applicable:
+  species: [any]
+  read_type: [ms_dda, ms_dia]
+  mode: [dda, dia]
+container:
+  image: quay.io/biocontainers/percolator:3.06.1--hf1761c0_2
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 10}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  percolator --protein-report-fragments --protein-report-duplicates
+  -X {out_dir}/percolator.psms.xml
+  --decoy-results-psms {out_dir}/percolator.decoy.psms.tsv {psm_tsv}
+references: []
+citation: "Kall et al. 2007, PMID 17944918"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

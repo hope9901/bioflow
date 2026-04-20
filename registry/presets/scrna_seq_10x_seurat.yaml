@@ -1,0 +1,21 @@
+id: scrna_seq_10x_seurat
+pipeline: scrna_seq
+description: |
+  10x Chromium scRNA-seq workflow using Cell Ranger for alignment and Seurat
+  (R) for downstream analysis including QC, clustering, and marker gene
+  identification. Standard for most 10x scRNA-seq experiments.
+applies_to:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [de_novo]
+stages:
+  - stage_id: scrna_seq.step1
+    tool_id: cellranger
+  - stage_id: scrna_seq.step2
+    tool_id: seurat
+  - stage_id: scrna_seq.step3
+    tool_id: seurat
+  - stage_id: scrna_seq.step4
+    tool_id: seurat
+  - stage_id: scrna_seq.step5
+    tool_id: monocle3

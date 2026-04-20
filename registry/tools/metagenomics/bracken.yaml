@@ -1,0 +1,26 @@
+id: bracken
+name: bracken
+version: "2.9"
+category: metagenomics
+stage: [metagenomics.step3]
+input_types: [kraken2_report]
+output_types: [bracken_report]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [profiling]
+container:
+  image: quay.io/biocontainers/bracken:2.9--py39h7cff6ad_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 2, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 4, ram_gb: 16, disk_gb: 20}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  bracken -d {kraken2_db} -i {out_dir}/kraken2_report.txt
+  -o {out_dir}/bracken_output.txt -r {read_length} -l S -t {bracken_threshold}
+references: []
+citation: "Lu et al. 2017, PMID 28655956"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

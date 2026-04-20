@@ -1,0 +1,19 @@
+# bioflow ATAC-seq example config
+# Usage: bioflow recommend --preset atac_seq_standard --config config_atac_seq.yaml
+
+pipeline: atac_seq
+species: eukaryote
+read_type: short
+mode: peak_calling
+workdir: ./output/atac_seq_run
+registry_dir: registry
+
+inputs:
+  sample_id: atac_naive_vs_stimulated
+  sample_sheet: /data/atac/sample_sheet.csv   # columns: sample_id, fastq_r1, fastq_r2, group
+  reference_genome: /refs/genomes/hg38/hg38.fa
+  bowtie2_index: /refs/bowtie2/hg38/hg38
+  # Effective genome size: hs=2.7e9, mm=1.87e9
+  genome_size: hs
+  # Control BAM for MACS3 (optional — leave blank for ATAC without matched input)
+  control_bam: ""

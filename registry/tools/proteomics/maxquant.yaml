@@ -1,0 +1,25 @@
+id: maxquant
+name: maxquant
+version: "2.4.14.0"
+category: proteomics
+stage: [proteomics.step4]
+input_types: [ms_raw]
+output_types: [maxquant_results]
+applicable:
+  species: [any]
+  read_type: [ms_dda]
+  mode: [dda]
+container:
+  image: quay.io/biocontainers/maxquant:2.4.14.0--hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 8, ram_gb: 32, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 200}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  maxquant {maxquant_params_xml}
+references: []
+citation: "Cox & Mann 2008, PMID 19029910"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"

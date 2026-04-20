@@ -1,0 +1,27 @@
+id: homer
+name: homer
+version: "4.11.1"
+category: epigenomics
+stage: [chip_seq.step5, atac_seq.step5]
+input_types: [peaks_bed]
+output_types: [motif_results, annotated_peaks]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, differential]
+container:
+  image: quay.io/biocontainers/homer:4.11.1--pl5321h9f5acd7_7
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  findMotifsGenome.pl {peaks_bed} {reference_genome} {out_dir}/motifs -size 200 -p {cpu}
+  && annotatePeaks.pl {peaks_bed} {reference_genome}
+  -gtf {annotation_gtf} > {out_dir}/annotated_peaks.txt
+references: []
+citation: "Heinz et al. 2010, PMID 20513432"
+added: "2026-04-20"
+last_reviewed: "2026-04-20"
