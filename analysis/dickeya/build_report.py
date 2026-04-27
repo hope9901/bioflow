@@ -1,18 +1,59 @@
-<!doctype html><html><head><meta charset="utf-8">
+"""Build the final consolidated HTML report for the Dickeya analysis."""
+from __future__ import annotations
+import sys
+from pathlib import Path
+from datetime import datetime
+
+for _s in (sys.stdout, sys.stderr):
+    try: _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception: pass
+
+ROOT = Path(__file__).resolve().parent
+ROARY_STATS = (ROOT / "roary" / "out" / "summary_statistics.txt").read_text(encoding="utf-8")
+buckets = {}
+for line in ROARY_STATS.strip().splitlines():
+    parts = line.split("\t")
+    if len(parts) >= 3 and parts[0].lower() != "total genes":
+        buckets[parts[0]] = int(parts[-1])
+total = sum(buckets.values())
+
+# Per-genome AMR/VF counts
+ABR = ROOT / "abricate"
+samples = sorted(p.stem.rsplit(".vfdb", 1)[0]
+                 for p in ABR.glob("*.vfdb.tsv"))
+DBS = ["vfdb", "card", "plasmidfinder"]
+amr_rows = []
+for s in samples:
+    short = "_".join(s.split("_")[:2])
+    counts = []
+    for db in DBS:
+        f = ABR / f"{s}.{db}.tsv"
+        n = max(sum(1 for _ in f.open()) - 1, 0) if f.exists() else 0
+        counts.append(n)
+    amr_rows.append((short, counts))
+
+amr_table = "<table><tr><th>genome</th>" + \
+    "".join(f"<th>{db}</th>" for db in DBS) + "</tr>" + \
+    "".join(
+        f"<tr><td>{n}</td>" + "".join(f"<td>{c}</td>" for c in cs) + "</tr>"
+        for n, cs in amr_rows
+    ) + "</table>"
+
+html = f"""<!doctype html><html><head><meta charset="utf-8">
 <title>Dickeya genus comparative genomics</title>
 <style>
- body { font-family: -apple-system, Segoe UI, sans-serif; max-width: 1150px;
-        margin: 2em auto; color:#222; padding: 0 20px }
- h1 { border-bottom: 2px solid #1f3a93; padding-bottom: 4px; color: #1f3a93 }
- h2 { color: #1f3a93; margin-top: 1.5em }
- .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px }
- .card { border:1px solid #ddd; border-radius:8px; padding:16px; background:#fafafa }
- img  { max-width: 100%; height: auto; display:block; margin:10px auto }
- table { border-collapse: collapse; margin: 8px 0; font-size: 0.9em }
- th, td { padding: 4px 10px; border-bottom: 1px solid #ddd; text-align: left }
- th { background: #eee }
- .muted { color: #666; font-size: 0.85em }
- .key { background:#f0f6ff; border-left:4px solid #1f3a93; padding:8px 14px; margin:12px 0 }
+ body {{ font-family: -apple-system, Segoe UI, sans-serif; max-width: 1150px;
+        margin: 2em auto; color:#222; padding: 0 20px }}
+ h1 {{ border-bottom: 2px solid #1f3a93; padding-bottom: 4px; color: #1f3a93 }}
+ h2 {{ color: #1f3a93; margin-top: 1.5em }}
+ .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 24px }}
+ .card {{ border:1px solid #ddd; border-radius:8px; padding:16px; background:#fafafa }}
+ img  {{ max-width: 100%; height: auto; display:block; margin:10px auto }}
+ table {{ border-collapse: collapse; margin: 8px 0; font-size: 0.9em }}
+ th, td {{ padding: 4px 10px; border-bottom: 1px solid #ddd; text-align: left }}
+ th {{ background: #eee }}
+ .muted {{ color: #666; font-size: 0.85em }}
+ .key {{ background:#f0f6ff; border-left:4px solid #1f3a93; padding:8px 14px; margin:12px 0 }}
 </style></head><body>
 <h1>Dickeya — comparative genomics</h1>
 <p class="muted">13 NCBI RefSeq reference genomes (one per recognised species).
@@ -24,8 +65,8 @@
 ANI separates the genus into water-associated <i>D. aquatica</i> / <i>D. lacustris</i>
 basal pair, a "vascular wilt" clade (<i>solani / dadantii / fangzhongdai / dianthicola / undicola / chrysanthemi</i>),
 and a "soft rot" clade (<i>zeae / parazeae / oryzae / ananatis</i>).
-The pangenome is wide-open: only 608 genes are core
-across all 13 species, but the pan-genome reaches 23,776 clusters and is still rising.
+The pangenome is wide-open: only {buckets.get('Core genes',0)} genes are core
+across all 13 species, but the pan-genome reaches {total:,} clusters and is still rising.
 Acquired antibiotic resistance is essentially absent (CARD finds the
 universally-present regulator CRP only); virulence repertoire (T6SS, flagella,
 iron uptake) is concentrated in the clinically aggressive clades.
@@ -60,8 +101,8 @@ clearly separates the four soft-rot members (94-96% within-clade ANI) from every
   <div class="card">
     <img src="figures/pangenome_pie.png" alt="pangenome composition">
     <table>
-      <tr><td>Core genes</td><td>608</td></tr><tr><td>Soft core genes</td><td>0</td></tr><tr><td>Shell genes</td><td>6,921</td></tr><tr><td>Cloud genes</td><td>16,247</td></tr>
-      <tr><td><b>Total</b></td><td><b>23,776</b></td></tr>
+      {''.join(f'<tr><td>{k}</td><td>{v:,}</td></tr>' for k,v in buckets.items())}
+      <tr><td><b>Total</b></td><td><b>{total:,}</b></td></tr>
     </table>
   </div>
   <div class="card">
@@ -92,7 +133,7 @@ phenotypes.</p>
   </div>
   <div class="card">
     <h3>Per-genome counts</h3>
-    <table><tr><th>genome</th><th>vfdb</th><th>card</th><th>plasmidfinder</th></tr><tr><td>D_ananatis</td><td>8</td><td>1</td><td>0</td></tr><tr><td>D_aquatica</td><td>3</td><td>1</td><td>0</td></tr><tr><td>D_chrysanthemi</td><td>12</td><td>1</td><td>0</td></tr><tr><td>D_dadantii</td><td>10</td><td>1</td><td>0</td></tr><tr><td>D_dianthicola</td><td>9</td><td>1</td><td>0</td></tr><tr><td>D_fangzhongdai</td><td>9</td><td>1</td><td>1</td></tr><tr><td>D_lacustris</td><td>1</td><td>1</td><td>0</td></tr><tr><td>D_oryzae</td><td>9</td><td>1</td><td>2</td></tr><tr><td>D_parazeae</td><td>7</td><td>1</td><td>0</td></tr><tr><td>D_poaceiphila</td><td>1</td><td>1</td><td>0</td></tr><tr><td>D_solani</td><td>11</td><td>1</td><td>0</td></tr><tr><td>D_undicola</td><td>10</td><td>1</td><td>3</td></tr><tr><td>D_zeae</td><td>7</td><td>1</td><td>0</td></tr></table>
+    {amr_table}
   </div>
 </div>
 
@@ -113,6 +154,9 @@ phenotypes.</p>
 </ol>
 
 <p class="muted">Generated by bioflow comparative_genomics workflow on
- 2026-04-27 17:31. All Docker images pulled from
+ {datetime.now().strftime('%Y-%m-%d %H:%M')}. All Docker images pulled from
  staphb/* BioContainers.</p>
-</body></html>
+</body></html>"""
+
+(ROOT / "summary.html").write_text(html, encoding="utf-8")
+print(f"Report -> {ROOT/'summary.html'}")

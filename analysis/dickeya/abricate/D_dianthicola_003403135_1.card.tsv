@@ -1,0 +1,2 @@
+#FILE	SEQUENCE	START	END	STRAND	GENE	COVERAGE	COVERAGE_MAP	GAPS	%COVERAGE	%IDENTITY	DATABASE	ACCESSION	PRODUCT	RESISTANCE
+/work/inputs/D_dianthicola_003403135_1.fna	NZ_CP031560.1	4453861	4454489	+	CRP	1-629/633	===============	0/0	99.37	86.01	card	AP009048.1:4154296-4153663	CRP is a global regulator that represses MdtEF multidrug efflux pump expression.	fluoroquinolone;macrolide;penicillin_beta-lactam

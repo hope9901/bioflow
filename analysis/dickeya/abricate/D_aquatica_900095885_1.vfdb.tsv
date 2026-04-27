@@ -1,0 +1,4 @@
+#FILE	SEQUENCE	START	END	STRAND	GENE	COVERAGE	COVERAGE_MAP	GAPS	%COVERAGE	%IDENTITY	DATABASE	ACCESSION	PRODUCT	RESISTANCE
+/work/inputs/D_aquatica_900095885_1.fna	NZ_LT615367.1	1447736	1448125	+	cheY	1-390/390	===============	0/0	100.00	80.00	vfdb	WP_005164479	(cheY) chemotaxis regulatory protein CheY [Flagella (VF0394) - Motility (VFC0204)] [Yersinia enterocolitica subsp. enterocolitica 8081]	
+/work/inputs/D_aquatica_900095885_1.fna	NZ_LT615367.1	3108875	3109513	+	rcsB	13-651/651	========/======	2/4	97.85	80.81	vfdb	WP_002913007	(rcsB) transcriptional regulator RcsB [RcsAB (VF0571) - Regulation (VFC0301)] [Klebsiella pneumoniae subsp. pneumoniae NTUH-K2044]	
+/work/inputs/D_aquatica_900095885_1.fna	NZ_LT615367.1	3533843	3534834	-	rpoS	2-993/993	===============	0/0	99.90	80.85	vfdb	NP_461845	(rpoS) RNA polymerase sigma factor RpoS [RpoS (VF0112) - Regulation (VFC0301)] [Salmonella enterica subsp. enterica serovar Typhimurium str. LT2]	

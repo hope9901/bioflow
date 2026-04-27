@@ -1,0 +1,2 @@
+#FILE	SEQUENCE	START	END	STRAND	GENE	COVERAGE	COVERAGE_MAP	GAPS	%COVERAGE	%IDENTITY	DATABASE	ACCESSION	PRODUCT	RESISTANCE
+/work/inputs/D_poaceiphila_007858975_2.fna	NZ_CP042220.2	1574860	1575249	+	cheY	1-390/390	===============	0/0	100.00	81.03	vfdb	WP_005164479	(cheY) chemotaxis regulatory protein CheY [Flagella (VF0394) - Motility (VFC0204)] [Yersinia enterocolitica subsp. enterocolitica 8081]	

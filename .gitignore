@@ -27,3 +27,13 @@ analysis/*/prokka/
 analysis/*/roary/
 analysis/*/fastani/
 analysis/*/run.log
+# IQ-TREE intermediate files (keep only the *.treefile)
+analysis/*/phylogeny/*.bionj
+analysis/*/phylogeny/*.iqtree
+analysis/*/phylogeny/*.log
+analysis/*/phylogeny/*.mldist
+analysis/*/phylogeny/*.splits.nex
+analysis/*/phylogeny/*.uniqueseq.phy
+analysis/*/phylogeny/*.contree
+analysis/*/phylogeny/*.ckp.gz
+analysis/*/phylogeny/*.model.gz

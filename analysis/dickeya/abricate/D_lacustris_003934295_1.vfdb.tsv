@@ -1,0 +1,2 @@
+#FILE	SEQUENCE	START	END	STRAND	GENE	COVERAGE	COVERAGE_MAP	GAPS	%COVERAGE	%IDENTITY	DATABASE	ACCESSION	PRODUCT	RESISTANCE
+/work/inputs/D_lacustris_003934295_1.fna	NZ_QNUT01000020.1	134318	134929	-	rcsB	13-624/651	===============	0/0	94.01	80.23	vfdb	WP_002913007	(rcsB) transcriptional regulator RcsB [RcsAB (VF0571) - Regulation (VFC0301)] [Klebsiella pneumoniae subsp. pneumoniae NTUH-K2044]	
