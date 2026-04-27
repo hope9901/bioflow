@@ -38,6 +38,7 @@ properties:
       - epigenomics      # ChIP-seq, ATAC-seq, methylation
       - proteomics       # LC-MS/MS proteomics
       - metabolomics     # future
+      - comparative_genomics   # ANI, pangenome, phylogenetics
   stage:
     type: array
     items: { type: string }
@@ -85,6 +86,8 @@ properties:
             # Proteomics
             - dda
             - dia
+            # Comparative genomics
+            - comparative
   container:
     type: object
     required: [image]

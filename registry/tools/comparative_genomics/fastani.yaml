@@ -1,0 +1,25 @@
+id: fastani
+name: FastANI
+version: "1.34"
+category: comparative_genomics
+stage: [comparative_genomics.step2]
+input_types: [assembly_fasta]
+output_types: [ani_matrix]
+applicable:
+  species: [prokaryote]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: staphb/fastani:1.34
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 2}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  fastANI --ql {genome_list} --rl {genome_list} -o {out_dir}/ani_matrix.tsv -t {cpu}
+references: []
+citation: "Jain et al. 2018, PMID 30504855"
+added: "2026-04-27"
+last_reviewed: "2026-04-27"

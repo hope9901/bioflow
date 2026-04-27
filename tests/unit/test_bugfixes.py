@@ -765,6 +765,29 @@ class TestApproveChangelogIsolation:
         assert "isolated_tool_xyz" in iso_changelog.read_text(encoding="utf-8")
 
 
+class TestNcbiIncludeAliasing:
+    """BUG: real NCBI v2 Datasets API returns HTTP 400 on PROTEIN_FASTA.
+    The valid name is PROT_FASTA.  bioflow's CLI advertised the wrong one
+    and a user trying to download a Dickeya genome with --include
+    PROTEIN_FASTA aborted mid-pipeline.  Validation is now done up front
+    and the friendly alias is translated."""
+
+    def test_unknown_include_raises_clean_error(self, tmp_path):
+        from bioflow.core.ncbi import download_genomes, NcbiError
+        with pytest.raises(NcbiError, match="Unknown --include"):
+            download_genomes(
+                "dickeya", tmp_path,
+                include=("BOGUS_TYPE",),
+                _opener=lambda *a, **k: None,
+            )
+
+    def test_protein_fasta_alias_normalised(self):
+        from bioflow.core.ncbi import _INCLUDE_ALIASES, GENOME_INCLUDE_TYPES
+        assert _INCLUDE_ALIASES["PROTEIN_FASTA"] == "PROT_FASTA"
+        assert "PROT_FASTA" in GENOME_INCLUDE_TYPES
+        assert "PROTEIN_FASTA" not in GENOME_INCLUDE_TYPES
+
+
 class TestNcbiDownloadTruncationDetected:
     """BUG: _stream_to_file silently accepted a truncated download.  A
     Content-Length-mismatched ZIP would later fail with a confusing

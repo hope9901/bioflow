@@ -357,7 +357,9 @@ def ncbi_cmd(
         help="Maximum number of assemblies (genome) or sequences (protein) to retrieve."),
     include: str = typer.Option("GENOME_FASTA", "--include",
         help="[genome download] Comma-separated data types: "
-             "GENOME_FASTA, GENOME_GFF, PROTEIN_FASTA, RNA_FASTA, GENOME_GBFF."),
+             "GENOME_FASTA, GENOME_GFF, PROT_FASTA, CDS_FASTA, RNA_FASTA, "
+             "GENOME_GBFF, SEQUENCE_REPORT.  PROTEIN_FASTA is accepted as an "
+             "alias of PROT_FASTA."),
     filter_term: str = typer.Option("refseq[filter]", "--filter",
         help="[protein] Entrez filter.  Use '' for all records."),
 ) -> None:

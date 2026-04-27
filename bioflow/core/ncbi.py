@@ -74,11 +74,18 @@ _LEVEL_API: dict[str, str] = {
 GENOME_INCLUDE_TYPES = (
     "GENOME_FASTA",   # genomic sequences (.fna)
     "GENOME_GFF",     # gene annotation (.gff)
-    "PROTEIN_FASTA",  # translated proteins (.faa) — useful for annotation
+    "PROT_FASTA",     # translated proteins (.faa) — annotation evidence
+    "CDS_FASTA",      # coding sequences (.fna)
     "RNA_FASTA",      # transcripts (.fna)
     "GENOME_GBFF",    # GenBank flat file (.gbff)
     "SEQUENCE_REPORT",
 )
+# Friendly aliases — accept the natural name but translate to NCBI's API value
+_INCLUDE_ALIASES = {
+    "PROTEIN_FASTA": "PROT_FASTA",
+    "PROTEIN":       "PROT_FASTA",
+    "CDS":           "CDS_FASTA",
+}
 
 # FASTA/GFF suffixes to extract from the downloaded ZIP
 _EXTRACT_SUFFIXES = (
@@ -481,6 +488,21 @@ def download_genomes(
     """
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Validate include types up front so a typo like 'PROTEIN_FASTA' fails
+    # cleanly instead of hitting the API and getting an opaque HTTP 400.
+    norm_include: list[str] = []
+    for i in include:
+        key = i.upper().strip()
+        norm = _INCLUDE_ALIASES.get(key, key)
+        if norm not in GENOME_INCLUDE_TYPES:
+            raise NcbiError(
+                f"Unknown --include type {i!r}.  Valid: "
+                + ", ".join(GENOME_INCLUDE_TYPES)
+                + (f"  (aliases: {', '.join(_INCLUDE_ALIASES)})"
+                   if _INCLUDE_ALIASES else "")
+            )
+        norm_include.append(norm)
+
     log.info(f"Querying NCBI Datasets: taxon={taxon!r}  level={assembly_level}  max={max_assemblies}")
     assemblies = list_genomes(
         taxon,
@@ -503,7 +525,7 @@ def download_genomes(
     # Build download URL  (accessions comma-separated in path)
     acc_str = ",".join(urllib.parse.quote(a) for a in accessions)
     include_qs = "&".join(
-        f"include_annotation_type={urllib.parse.quote(i)}" for i in include
+        f"include_annotation_type={urllib.parse.quote(i)}" for i in norm_include
     )
     key_qs = (f"&api_key={_api_key()}" if _api_key() else "")
     dl_url = (

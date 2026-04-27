@@ -19,3 +19,11 @@ data/references/genomes/**
 # OS
 .DS_Store
 Thumbs.db
+
+# Comparative genomics analysis outputs (regeneratable)
+analysis/*/genomes/
+analysis/*/inputs/
+analysis/*/prokka/
+analysis/*/roary/
+analysis/*/fastani/
+analysis/*/run.log

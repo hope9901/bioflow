@@ -1,0 +1,25 @@
+id: roary
+name: Roary
+version: "3.13.0"
+category: comparative_genomics
+stage: [comparative_genomics.step3]
+input_types: [annotation_gff]
+output_types: [pangenome_table, core_alignment]
+applicable:
+  species: [prokaryote]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: staphb/roary:3.13.0
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  roary -p {cpu} -f {out_dir} -e -n -v {gff_dir}/*.gff
+references: []
+citation: "Page et al. 2015, PMID 26198102"
+added: "2026-04-27"
+last_reviewed: "2026-04-27"
