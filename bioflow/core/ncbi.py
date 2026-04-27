@@ -38,6 +38,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import shutil
 import time
 import urllib.error
 import urllib.parse
@@ -206,6 +207,16 @@ def _stream_to_file(
     except Exception as exc:
         dest.unlink(missing_ok=True)
         raise NcbiError(f"Download failed: {exc}") from exc
+
+    # Catch silent truncations: when the server advertised a Content-Length
+    # but the connection dropped early, the write loop exits cleanly.  A
+    # truncated ZIP would later fail with BadZipFile far from the root cause.
+    if total is not None and written != total:
+        dest.unlink(missing_ok=True)
+        raise NcbiError(
+            f"Download truncated: expected {total} bytes, got {written}. "
+            "Re-run the command to retry."
+        )
     return dest
 
 
@@ -541,8 +552,9 @@ def download_genomes(
                     )
                     continue
 
-                with zf.open(member) as src:
-                    dest_path.write_bytes(src.read())
+                # Stream-copy so multi-GB genomes don't spike memory
+                with zf.open(member) as src, dest_path.open("wb") as dst:
+                    shutil.copyfileobj(src, dst, length=1024 * 1024)
                 extracted.append(dest_path)
                 log.info(f"Extracted: {dest_path.name}")
     except zipfile.BadZipFile as exc:

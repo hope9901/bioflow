@@ -82,8 +82,15 @@ def _docker_available() -> bool:
         return False
 
 
-def detect(data_dir: Path = Path.cwd()) -> HardwareProfile:
-    """Detect the current host's hardware profile."""
+def detect(data_dir: Optional[Path] = None) -> HardwareProfile:
+    """Detect the current host's hardware profile.
+
+    *data_dir* is resolved at call time (defaulting to the current working
+    directory) so a long-lived process that has changed directory still
+    reports disk space for the *active* cwd, not the one captured at import.
+    """
+    if data_dir is None:
+        data_dir = Path.cwd()
     cpu = psutil.cpu_count(logical=True) or 1
     ram_gb = psutil.virtual_memory().total / (1024**3)
     disk_free_gb = shutil.disk_usage(data_dir).free / (1024**3)

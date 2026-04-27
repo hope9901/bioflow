@@ -31,7 +31,24 @@ from bioflow.core.logger import get_logger
 
 log = get_logger()
 
-CHANGELOG_PATH = Path(__file__).resolve().parents[2] / "update" / "CHANGELOG.md"
+_DEFAULT_CHANGELOG_PATH = Path(__file__).resolve().parents[2] / "update" / "CHANGELOG.md"
+
+
+def _changelog_path_for(registry_dir: Path) -> Path:
+    """Resolve the CHANGELOG.md location relative to the given registry root.
+
+    Tests pass a tmp registry dir — we route the CHANGELOG to a sibling
+    ``update/`` so test runs never touch the project's real CHANGELOG.
+    Production callers using the project's real registry get the original
+    ``<repo>/update/CHANGELOG.md`` path.
+    """
+    candidate = registry_dir.resolve().parent / "update" / "CHANGELOG.md"
+    # If the registry sits at the project root, the candidate IS the default.
+    return candidate if candidate.parent.parent.exists() else _DEFAULT_CHANGELOG_PATH
+
+
+# Backwards-compatibility alias for callers/tests that import it directly.
+CHANGELOG_PATH = _DEFAULT_CHANGELOG_PATH
 
 
 class ApprovalError(Exception):
@@ -123,8 +140,12 @@ def approve_candidate(
         yaml.dump(raw, fh, allow_unicode=True, sort_keys=False)
     log.info(f"Approved: {tool_id} → {dest}")
 
-    # 5. Append CHANGELOG
-    _append_changelog(tool_id, category, update_meta, candidate_path)
+    # 5. Append CHANGELOG (sibling of the registry — test registries get
+    # an isolated CHANGELOG so they cannot pollute the project's real one)
+    _append_changelog(
+        tool_id, category, update_meta, candidate_path,
+        changelog_path=_changelog_path_for(registry_dir),
+    )
 
     # 6. Optionally delete candidate
     if delete_candidate:
@@ -183,6 +204,8 @@ def _append_changelog(
     category: str,
     update_meta: dict,
     source: Path,
+    *,
+    changelog_path: Optional[Path] = None,
 ) -> None:
     month = update_meta.get("month") or datetime.date.today().strftime("%Y-%m")
     replaces = update_meta.get("replaces") or []
@@ -204,7 +227,8 @@ def _append_changelog(
 
     entry = "\n".join(lines) + "\n"
 
-    changelog = CHANGELOG_PATH
+    changelog = changelog_path or CHANGELOG_PATH
+    changelog.parent.mkdir(parents=True, exist_ok=True)
     if not changelog.exists():
         changelog.write_text("# Registry changelog\n", encoding="utf-8")
 

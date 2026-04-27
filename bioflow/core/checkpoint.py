@@ -25,8 +25,6 @@ log = get_logger()
 
 STATE_FILE = ".bioflow_state.json"
 
-_EMPTY_STATE: dict = {"completed_stages": [], "artifacts": {}}
-
 
 def _empty() -> dict:
     return {"completed_stages": [], "artifacts": {}}

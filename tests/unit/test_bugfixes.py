@@ -694,6 +694,108 @@ class TestSpadesExtraArgsDefault:
         assert params.get("extra_args") == ""
 
 
+class TestHardwareDetectCwdResolvedAtCallTime:
+    """BUG: detect(data_dir=Path.cwd()) captured the cwd at module import.
+    A long-lived process that changed directory still reported disk space for
+    the original cwd."""
+
+    def test_data_dir_default_resolves_at_call_time(self, tmp_path, monkeypatch):
+        from bioflow.core import hardware
+        monkeypatch.chdir(tmp_path)
+        # Should not raise even though Path.cwd() now != original
+        profile = hardware.detect()
+        assert profile.disk_free_gb >= 0
+
+
+class TestApproveChangelogIsolation:
+    """BUG: _append_changelog wrote to the project's update/CHANGELOG.md
+    regardless of registry_dir.  Test runs polluted the real file."""
+
+    def test_test_registry_does_not_touch_project_changelog(self, tmp_path):
+        import shutil
+        import yaml as _y
+        from bioflow.core.approve import approve_candidate, _DEFAULT_CHANGELOG_PATH
+
+        project_changelog_before = (
+            _DEFAULT_CHANGELOG_PATH.read_text(encoding="utf-8")
+            if _DEFAULT_CHANGELOG_PATH.exists() else ""
+        )
+
+        # Build an isolated registry under tmp_path
+        src = Path(__file__).resolve().parents[2] / "registry"
+        reg = tmp_path / "registry"
+        shutil.copytree(src, reg)
+
+        cand = tmp_path / "candidate.yaml"
+        cand.write_text(_y.safe_dump({
+            "id": "isolated_tool_xyz",
+            "name": "iso",
+            "version": "1.0",
+            "category": "qc",
+            "stage": ["genome_assembly.step1"],
+            "input_types": ["fastq_short_paired"],
+            "output_types": ["qc_html"],
+            "applicable": {"species": ["any"], "read_type": ["short"], "mode": ["any"]},
+            "container": {"image": "x:1", "pull_policy": "if_not_present"},
+            "resources": {
+                "min": {"cpu": 1, "ram_gb": 1, "disk_gb": 1},
+                "recommended": {"cpu": 1, "ram_gb": 1, "disk_gb": 1},
+                "gpu": False, "arch": ["x86_64"],
+            },
+            "command_template": "echo hi",
+            "citation": "x",
+            "added": "2026-04-27",
+            "last_reviewed": "2026-04-27",
+            "update_meta": {"month": "2026-04"},
+        }), encoding="utf-8")
+
+        approve_candidate(cand, registry_dir=reg)
+
+        # Project CHANGELOG must be untouched
+        project_changelog_after = (
+            _DEFAULT_CHANGELOG_PATH.read_text(encoding="utf-8")
+            if _DEFAULT_CHANGELOG_PATH.exists() else ""
+        )
+        assert project_changelog_before == project_changelog_after, \
+            "approve_candidate(test_registry) must not touch the project CHANGELOG"
+
+        # The isolated registry's sibling CHANGELOG should have the entry
+        iso_changelog = tmp_path / "update" / "CHANGELOG.md"
+        assert iso_changelog.exists()
+        assert "isolated_tool_xyz" in iso_changelog.read_text(encoding="utf-8")
+
+
+class TestNcbiDownloadTruncationDetected:
+    """BUG: _stream_to_file silently accepted a truncated download.  A
+    Content-Length-mismatched ZIP would later fail with a confusing
+    BadZipFile far from the network error."""
+
+    def test_truncated_download_raises_ncbi_error(self, tmp_path):
+        from bioflow.core.ncbi import _stream_to_file, NcbiError
+
+        class FakeResp:
+            headers = {"Content-Length": "1000"}
+            def __init__(self):
+                self._chunks = [b"x" * 100, b""]   # only 100 of 1000 bytes
+                self._i = 0
+            def read(self, n):
+                if self._i >= len(self._chunks):
+                    return b""
+                c = self._chunks[self._i]; self._i += 1
+                return c
+            def __enter__(self): return self
+            def __exit__(self, *a): pass
+
+        def fake_opener(req, timeout=None): return FakeResp()
+
+        with pytest.raises(NcbiError, match="truncated"):
+            _stream_to_file(
+                "http://x", tmp_path / "out.zip", _opener=fake_opener
+            )
+        # Partial file must be cleaned up
+        assert not (tmp_path / "out.zip").exists()
+
+
 class TestMacs3ControlArg:
     """BUG: MACS3 YAML previously required {control_bam} and planner had no
     chaining for it; the default was literal '{control_bam}' or invalid
