@@ -12,6 +12,7 @@ Subcommands (MVP scope):
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -19,12 +20,24 @@ import typer
 from rich import print as rprint
 from rich.console import Console
 
+# ── Windows-safe console encoding ───────────────────────────────────────────
+# On non-UTF-8 Windows shells (e.g. Korean cp949) Rich's ✓/✗/⚠ glyphs raise
+# UnicodeEncodeError mid-print and abort the command.  Force stdout/stderr to
+# UTF-8 when the interpreter supports it (Python ≥ 3.7) — this is a no-op on
+# already-UTF-8 terminals and keeps non-Windows behaviour unchanged.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    except (AttributeError, ValueError, OSError):
+        pass
+
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
     help="bioflow: genome assembly/annotation & RNA-seq DEG pipeline platform.",
 )
-console = Console()
+# Rich Console: keep colour but degrade glyphs gracefully on legacy code pages
+console = Console(emoji=False, legacy_windows=False)
 
 
 @app.command("hw")
