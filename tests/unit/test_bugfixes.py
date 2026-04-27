@@ -618,6 +618,82 @@ class TestMsconvertRawFileGlob:
         assert "{raw_file_dir}" in cmd
 
 
+class TestBowtie2IndexChaining:
+    """BUG: bowtie2.yaml uses {index} but planner provided bowtie2_index/host_db.
+    The literal '{index}' was being passed to the container."""
+
+    def test_chip_seq_step2_maps_bowtie2_index_to_index(self, tmp_path):
+        import yaml as _y
+        from bioflow.core.planner import plan_from_preset
+
+        cfg = tmp_path / "cfg.yaml"
+        cfg.write_text(_y.safe_dump({
+            "pipeline": "chip_seq",
+            "species": "any",
+            "read_type": "short",
+            "mode": "peak_calling",
+            "workdir": str(tmp_path),
+            "registry_dir": str(Path(__file__).resolve().parents[2] / "registry"),
+            "inputs": {
+                "sample_id": "s1",
+                "sample_sheet": "/x/sheet.csv",
+                "reference_genome": "/x/g.fa",
+                "bowtie2_index": "/x/bt2idx",
+                "genome_size": "hs",
+                "annotation_gtf": "/x/g.gtf",
+                "control_bam": "",
+            },
+        }), encoding="utf-8")
+        plan = plan_from_preset("chip_seq_standard", cfg)
+        step2 = next(s for s in plan.stages if s.stage_id == "chip_seq.step2")
+        assert step2.params.get("index") == "/x/bt2idx"
+
+
+class TestFastqcInputsChaining:
+    """BUG: fastqc.yaml uses {inputs} but planner never set it, leaving the
+    literal '{inputs}' on the command line."""
+
+    def test_fastqc_inputs_assembled_from_r1_r2(self, tmp_path):
+        from bioflow.core.planner import _chain_artifact_params
+
+        params = _chain_artifact_params(
+            stage_id="genome_assembly.step1",
+            tool_id="fastqc",
+            completed_stage_ids=[],
+            workdir=tmp_path,
+            running_inputs={"r1": "/d/R1.fq.gz", "r2": "/d/R2.fq.gz"},
+        )
+        assert params.get("inputs") == "/d/R1.fq.gz /d/R2.fq.gz"
+
+    def test_fastqc_inputs_single_end(self, tmp_path):
+        from bioflow.core.planner import _chain_artifact_params
+
+        params = _chain_artifact_params(
+            stage_id="rnaseq_deg.step1",
+            tool_id="fastqc",
+            completed_stage_ids=[],
+            workdir=tmp_path,
+            running_inputs={"r1": "/d/R1.fq.gz"},
+        )
+        assert params.get("inputs") == "/d/R1.fq.gz"
+
+
+class TestSpadesExtraArgsDefault:
+    """BUG: SPAdes template has {extra_args} which leaked when the user did not
+    set it.  Now defaults to empty string."""
+
+    def test_extra_args_defaults_empty(self, tmp_path):
+        from bioflow.core.planner import _chain_artifact_params
+        params = _chain_artifact_params(
+            stage_id="genome_assembly.step2",
+            tool_id="spades",
+            completed_stage_ids=[],
+            workdir=tmp_path,
+            running_inputs={},
+        )
+        assert params.get("extra_args") == ""
+
+
 class TestMacs3ControlArg:
     """BUG: MACS3 YAML previously required {control_bam} and planner had no
     chaining for it; the default was literal '{control_bam}' or invalid

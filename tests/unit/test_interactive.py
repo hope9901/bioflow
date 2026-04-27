@@ -73,6 +73,7 @@ def test_interactive_build_prokaryote_short_writes_yaml(tmp_path):
         "eggnog_mapper",               # step6
         # required inputs
         "ecoli_test",                  # sample_id
+        "",                            # reference_genome (resequencing-only, optional)
         "/data/R1.fastq.gz",           # r1
         "/data/R2.fastq.gz",           # r2
         "",                            # bakta_db_dir (optional)
@@ -134,6 +135,7 @@ def test_interactive_build_artifact_chaining(tmp_path):
         "eggnog_mapper",  # step6
         # inputs
         "test_sample",
+        "",                   # reference_genome (resequencing-only)
         "/in/R1.fastq.gz",
         "/in/R2.fastq.gz",
         "",                   # bakta_db_dir (optional)

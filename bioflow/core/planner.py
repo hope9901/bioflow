@@ -404,6 +404,26 @@ def _chain_artifact_params(
     def _get(key: str) -> Optional[str]:
         return running_inputs.get(key)
 
+    # Default empty for optional tool-specific placeholders so they don't leak
+    # into the rendered command as literal {key} text when the user has not
+    # supplied them.  Each tool's command line treats an empty value as "off".
+    if tool_id == "spades":
+        params.setdefault("extra_args", "")
+    if tool_id == "clusterprofiler":
+        params.setdefault("kegg_organism", "")
+
+    # FastQC (step1 of multiple pipelines) takes a list of input FASTQ files.
+    # Its template uses {inputs} — assemble it from the user's r1/r2 inputs.
+    if tool_id == "fastqc":
+        r1 = _get("r1")
+        r2 = _get("r2")
+        if r1:
+            params["inputs"] = f"{r1} {r2}" if r2 else r1
+        else:
+            # No raw inputs registered yet — fall back to empty string so the
+            # placeholder doesn't leak into the rendered command.
+            params["inputs"] = ""
+
     # Genome assembly
     if stage_id == "genome_assembly.step2":
         # Short-read assemblers (spades, unicycler, bwa_mem2)
@@ -466,6 +486,9 @@ def _chain_artifact_params(
             params["r1"] = running_inputs["r1"]
             if _get("r2"):
                 params["r2"] = running_inputs["r2"]
+        # bowtie2 template uses {index}; for host removal that's host_db
+        if _get("host_db"):
+            params["index"] = running_inputs["host_db"]
 
     elif stage_id == "metagenomics.step3":
         # Taxonomic profiling uses host-removed reads (or raw clean if no host removal)
@@ -521,6 +544,9 @@ def _chain_artifact_params(
             params["r1"] = running_inputs["r1"]
             if _get("r2"):
                 params["r2"] = running_inputs["r2"]
+        # bowtie2 template uses {index} — wire from user's bowtie2_index input
+        if _get("bowtie2_index"):
+            params["index"] = running_inputs["bowtie2_index"]
 
     elif stage_id == "chip_seq.step3":
         if _get("alignment_bam"):
@@ -546,6 +572,8 @@ def _chain_artifact_params(
             params["r1"] = running_inputs["r1"]
             if _get("r2"):
                 params["r2"] = running_inputs["r2"]
+        if _get("bowtie2_index"):
+            params["index"] = running_inputs["bowtie2_index"]
 
     elif stage_id == "atac_seq.step3":
         if _get("alignment_bam"):
@@ -680,6 +708,7 @@ _PIPELINE_STAGES: dict[str, list[tuple[str, str, bool]]] = {
 _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
     ("genome_assembly", "short"): [
         ("sample_id",     "Sample identifier (e.g. ecoli_test)"),
+        ("reference_genome","Reference FASTA (only required for resequencing/bwa_mem2 mode)"),
         ("r1",            "Read 1 FASTQ path"),
         ("r2",            "Read 2 FASTQ path"),
         # step4/5 optional keys — required only when the chosen tool needs them
@@ -756,6 +785,7 @@ _REQUIRED_INPUTS: dict[tuple[str, str], list[tuple[str, str]]] = {
         ("reference_genome","Reference genome FASTA path"),
         ("bowtie2_index",   "Bowtie2 genome index prefix"),
         ("genome_size",     "Effective genome size (hs/mm/ce/dm or integer)"),
+        ("annotation_gtf",  "Gene annotation GTF (only required when running HOMER step5)"),
     ],
     # Bisulfite-seq / WGBS
     ("methylation", "short"): [
