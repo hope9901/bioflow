@@ -46,3 +46,4 @@ analysis/*/phylogeny/*.model.gz
 analysis/*/prokka_full/
 analysis/*/roary_full/
 analysis/*/full_pangenome.log
+analysis/*/scoary_full/results/

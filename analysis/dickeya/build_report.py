@@ -61,6 +61,46 @@ def _scoary_top(phenotype: str, n: int = 10) -> str:
 scoary_vw = _scoary_top("vascular_wilt")
 scoary_sr = _scoary_top("soft_rot")
 
+
+def _scoary_full_top(phenotype: str, n: int = 12) -> str:
+    p = ROOT / "scoary_full" / f"top30_{phenotype}.tsv"
+    if not p.exists(): return ""
+    import pandas as pd
+    df = pd.read_csv(p, sep="\t").head(n)
+    return ("<table><tr><th>gene</th><th>annotation</th>"
+            "<th>Bonf p</th><th>sens%</th><th>spec%</th></tr>" + "".join(
+        f"<tr><td><code>{r.Gene}</code></td>"
+        f"<td>{(r.Annotation or '')[:55]}</td>"
+        f"<td>{r.Bonferroni_p:.1e}</td>"
+        f"<td>{int(r.Sensitivity)}</td><td>{int(r.Specificity)}</td></tr>"
+        for r in df.itertuples()
+    ) + "</table>")
+
+
+# 262-genome Scoary hit counts
+scoary_full_counts = {}
+for trait in ("vascular_wilt", "soft_rot", "is_solani", "is_dianthicola"):
+    f = ROOT / "scoary_full" / "results" / f"{trait}.results.csv"
+    if f.exists():
+        import pandas as pd
+        df = pd.read_csv(f)
+        scoary_full_counts[trait] = (
+            len(df), int((df["Bonferroni_p"] < 0.05).sum()),
+        )
+# Per-trait positive counts (read from the full scoary traits.csv)
+n_pos: dict[str, int] = {}
+traits_full = ROOT / "scoary_full" / "traits.csv"
+if traits_full.exists():
+    import pandas as pd
+    tdf = pd.read_csv(traits_full)
+    for col in tdf.columns[1:]:
+        n_pos[col] = int(tdf[col].sum())
+
+scoary_full_vw = _scoary_full_top("vascular_wilt")
+scoary_full_sr = _scoary_full_top("soft_rot")
+scoary_full_so = _scoary_full_top("is_solani")
+scoary_full_di = _scoary_full_top("is_dianthicola")
+
 # 262-genome full Roary results (if present)
 FULL_PG = ROOT / "roary_full" / "out" / "summary_statistics.txt"
 buckets_full = {}
@@ -214,6 +254,67 @@ phenotypes.</p>
     <code>fixA/B/X</code> (nitrogen fixation, anaerobic adaptation),
     <code>fadK</code> (fatty-acid metabolism) — competition and
     environmental-tolerance traits rather than direct virulence.</p>
+  </div>
+</div>
+
+<h2>6b · Genus-scale Scoary GWAS (n=262, Bonferroni-significant)</h2>
+<div class="key">
+With 262 genomes the GWAS escapes the small-sample plateau seen at n=13:
+significance now reaches Bonferroni p ≈ 10<sup>-47</sup> to 10<sup>-67</sup>,
+and we recover textbook plant-pathogen virulence machinery in coordinated
+operons rather than as one-off hits.
+</div>
+
+<table>
+  <tr><th>Phenotype</th><th>positives</th><th>candidate genes</th><th>Bonferroni-sig (p&lt;0.05)</th></tr>
+  {''.join(
+      f'<tr><td>{t}</td><td>{n_pos[t]}</td><td>{c[0]:,}</td><td>{c[1]:,}</td></tr>'
+      for t, c in scoary_full_counts.items()
+  ) if scoary_full_counts else '<tr><td colspan=4>no results</td></tr>'}
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>vascular_wilt (n=202)</h3>
+    <img src="figures/scoary_full_vascular_wilt.png" alt="vw scoary 262">
+    {scoary_full_vw}
+    <p class="muted"><b>Coordinated virulence module:</b> Type II Secretion
+    System (<code>xcpW</code>, <code>outS</code>) + minor endoglucanase
+    <code>celY</code> + the full SUF Fe-S cluster assembly operon
+    (<code>sufA/B/D/E</code>) + iron-acquisition (<code>fepB</code>,
+    <code>sbnE</code>) + outer-membrane integrity
+    (<code>eptB</code>, <code>dsbD</code>).  This is the canonical
+    plant-cell-wall-degrading + secretion machinery of soft-rot
+    Pectobacteriaceae.</p>
+  </div>
+  <div class="card">
+    <h3>soft_rot (n=46)</h3>
+    <img src="figures/scoary_full_soft_rot.png" alt="sr scoary 262">
+    {scoary_full_sr}
+    <p class="muted"><b>Negative signal of note:</b> <code>hflK</code>
+    (FtsH protease modulator) sensitivity = 0% — i.e. the gene is
+    <i>missing</i> in soft-rot strains while present elsewhere.  Other top
+    hits are clade-specific accessory clusters not yet annotated.</p>
+  </div>
+  <div class="card">
+    <h3>is_solani (n=51)</h3>
+    <img src="figures/scoary_full_is_solani.png" alt="solani scoary 262">
+    {scoary_full_so}
+    <p class="muted">Tightly-linked block of <code>group_22000-22080</code>
+    clusters at identical p-values (= a co-inherited genomic island).
+    Notable: <code>dosP</code> (c-di-GMP phosphodiesterase, biofilm
+    regulation) and <code>AbaF</code> (fosfomycin-resistance efflux pump)
+    — the only meaningful AMR signal in the entire genus.</p>
+  </div>
+  <div class="card">
+    <h3>is_dianthicola (n=87)</h3>
+    {scoary_full_di}
+    <p class="muted">Strongest signal in the dataset (Bonferroni
+    p ≈ 10<sup>-67</sup>).  Highlights: <code>cusR</code> (copper sensing
+    regulator → host metal-stress adaptation), bifunctional cytochrome
+    P450/NADPH reductase, <code>aaeA</code> efflux pump,
+    <code>glnQ</code> (glutamine transport).  Profile consistent with
+    the hardened metabolic envelope of an aggressive carnation pathogen.</p>
   </div>
 </div>
 

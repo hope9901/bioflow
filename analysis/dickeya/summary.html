@@ -122,6 +122,64 @@ phenotypes.</p>
   </div>
 </div>
 
+<h2>6b · Genus-scale Scoary GWAS (n=262, Bonferroni-significant)</h2>
+<div class="key">
+With 262 genomes the GWAS escapes the small-sample plateau seen at n=13:
+significance now reaches Bonferroni p ≈ 10<sup>-47</sup> to 10<sup>-67</sup>,
+and we recover textbook plant-pathogen virulence machinery in coordinated
+operons rather than as one-off hits.
+</div>
+
+<table>
+  <tr><th>Phenotype</th><th>positives</th><th>candidate genes</th><th>Bonferroni-sig (p&lt;0.05)</th></tr>
+  <tr><td>vascular_wilt</td><td>202</td><td>13,098</td><td>4,648</td></tr><tr><td>soft_rot</td><td>46</td><td>9,925</td><td>4,197</td></tr><tr><td>is_solani</td><td>51</td><td>7,777</td><td>3,373</td></tr><tr><td>is_dianthicola</td><td>87</td><td>9,661</td><td>4,857</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>vascular_wilt (n=202)</h3>
+    <img src="figures/scoary_full_vascular_wilt.png" alt="vw scoary 262">
+    <table><tr><th>gene</th><th>annotation</th><th>Bonf p</th><th>sens%</th><th>spec%</th></tr><tr><td><code>pgl_2</code></td><td>6-phosphogluconolactonase</td><td>4.9e-50</td><td>100</td><td>95</td></tr><tr><td><code>eptB</code></td><td>Kdo(2)-lipid A phosphoethanolamine 7''-transferase</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>argO</code></td><td>Arginine exporter protein ArgO</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>xcpW</code></td><td>Type II secretion system protein J</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>yccU</code></td><td>putative protein YccU</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>group_9456</code></td><td>hypothetical protein</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>yigZ</code></td><td>IMPACT family member YigZ</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>yqjE</code></td><td>Inner membrane protein YqjE</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>celY</code></td><td>Minor endoglucanase Y</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>group_8334</code></td><td>hypothetical protein</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>group_7610</code></td><td>hypothetical protein</td><td>2.5e-48</td><td>100</td><td>93</td></tr><tr><td><code>bioD1_1</code></td><td>ATP-dependent dethiobiotin synthetase BioD 1</td><td>2.5e-48</td><td>100</td><td>93</td></tr></table>
+    <p class="muted"><b>Coordinated virulence module:</b> Type II Secretion
+    System (<code>xcpW</code>, <code>outS</code>) + minor endoglucanase
+    <code>celY</code> + the full SUF Fe-S cluster assembly operon
+    (<code>sufA/B/D/E</code>) + iron-acquisition (<code>fepB</code>,
+    <code>sbnE</code>) + outer-membrane integrity
+    (<code>eptB</code>, <code>dsbD</code>).  This is the canonical
+    plant-cell-wall-degrading + secretion machinery of soft-rot
+    Pectobacteriaceae.</p>
+  </div>
+  <div class="card">
+    <h3>soft_rot (n=46)</h3>
+    <img src="figures/scoary_full_soft_rot.png" alt="sr scoary 262">
+    <table><tr><th>gene</th><th>annotation</th><th>Bonf p</th><th>sens%</th><th>spec%</th></tr><tr><td><code>hflK</code></td><td>Modulator of FtsH protease HflK</td><td>7.2e-48</td><td>0</td><td>0</td></tr><tr><td><code>group_16554</code></td><td>putative Nudix hydrolase NudL</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16560</code></td><td>Glutaredoxin 2</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16564</code></td><td>Protein YeeZ</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16565</code></td><td>hypothetical protein</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16566</code></td><td>hypothetical protein</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16590</code></td><td>hypothetical protein</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_16592</code></td><td>Secretion monitor</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_18211</code></td><td>HTH-type transcriptional regulator AcrR</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>menE_1</code></td><td>2-succinylbenzoate--CoA ligase</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>group_18264</code></td><td>Biofilm growth-associated repressor</td><td>7.2e-48</td><td>100</td><td>100</td></tr><tr><td><code>ufaA1</code></td><td>Tuberculostearic acid methyltransferase UfaA1</td><td>7.2e-48</td><td>100</td><td>100</td></tr></table>
+    <p class="muted"><b>Negative signal of note:</b> <code>hflK</code>
+    (FtsH protease modulator) sensitivity = 0% — i.e. the gene is
+    <i>missing</i> in soft-rot strains while present elsewhere.  Other top
+    hits are clade-specific accessory clusters not yet annotated.</p>
+  </div>
+  <div class="card">
+    <h3>is_solani (n=51)</h3>
+    <img src="figures/scoary_full_is_solani.png" alt="solani scoary 262">
+    <table><tr><th>gene</th><th>annotation</th><th>Bonf p</th><th>sens%</th><th>spec%</th></tr><tr><td><code>group_10132</code></td><td>Acyl carrier protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22044</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22040</code></td><td>Mannosyl-3-phosphoglycerate phosphatase</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22039</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22035</code></td><td>Protein YobA</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22031</code></td><td>HTH-type transcriptional repressor RspR</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22030</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22045</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22029</code></td><td>2-amino-5-chloromuconic acid deaminase</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22027</code></td><td>Fosfomycin resistance protein AbaF</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22009</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22008</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr></table>
+    <p class="muted">Tightly-linked block of <code>group_22000-22080</code>
+    clusters at identical p-values (= a co-inherited genomic island).
+    Notable: <code>dosP</code> (c-di-GMP phosphodiesterase, biofilm
+    regulation) and <code>AbaF</code> (fosfomycin-resistance efflux pump)
+    — the only meaningful AMR signal in the entire genus.</p>
+  </div>
+  <div class="card">
+    <h3>is_dianthicola (n=87)</h3>
+    <table><tr><th>gene</th><th>annotation</th><th>Bonf p</th><th>sens%</th><th>spec%</th></tr><tr><td><code>group_11717</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>cusR</code></td><td>Transcriptional regulatory protein CusR</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_22089</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>yihI</code></td><td>Der GTPase-activating protein YihI</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_20137</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_18664</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_18662</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>yknZ</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>aaeA_1</code></td><td>p-hydroxybenzoic acid efflux pump subunit AaeA</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_18654</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>group_18650</code></td><td>hypothetical protein</td><td>3.1e-67</td><td>100</td><td>100</td></tr><tr><td><code>pxpA_3</code></td><td>5-oxoprolinase subunit A</td><td>3.1e-67</td><td>100</td><td>100</td></tr></table>
+    <p class="muted">Strongest signal in the dataset (Bonferroni
+    p ≈ 10<sup>-67</sup>).  Highlights: <code>cusR</code> (copper sensing
+    regulator → host metal-stress adaptation), bifunctional cytochrome
+    P450/NADPH reductase, <code>aaeA</code> efflux pump,
+    <code>glnQ</code> (glutamine transport).  Profile consistent with
+    the hardened metabolic envelope of an aggressive carnation pathogen.</p>
+  </div>
+</div>
+
 <h2>7a · 262-genome genus-wide pangenome (Roary)</h2>
 <div class="grid">
   <div class="card">
@@ -191,6 +249,6 @@ phenotypes.</p>
 </ol>
 
 <p class="muted">Generated by bioflow comparative_genomics workflow on
- 2026-04-28 16:40. All Docker images pulled from
+ 2026-04-28 16:48. All Docker images pulled from
  staphb/* BioContainers.</p>
 </body></html>
