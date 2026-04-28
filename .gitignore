@@ -43,3 +43,6 @@ analysis/*/phylogeny/*.uniqueseq.phy
 analysis/*/phylogeny/*.contree
 analysis/*/phylogeny/*.ckp.gz
 analysis/*/phylogeny/*.model.gz
+analysis/*/prokka_full/
+analysis/*/roary_full/
+analysis/*/full_pangenome.log
