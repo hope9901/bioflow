@@ -522,63 +522,78 @@ def download_genomes(
     accessions = [a.accession for a in assemblies]
     log.info(f"{len(accessions)} assembly(ies) selected: {accessions}")
 
-    # Build download URL  (accessions comma-separated in path)
-    acc_str = ",".join(urllib.parse.quote(a) for a in accessions)
+    # Batch accessions to keep each request URL under ~4 KB.  NCBI's
+    # /datasets/v2/genome/accession/{acc1,acc2,...}/download endpoint returns
+    # HTTP 414 (URI Too Long) once the comma-separated accession list grows
+    # past roughly 30-40 GCA-style accessions.  Splitting into chunks of 25
+    # keeps us comfortably below that limit.
+    BATCH = 25
     include_qs = "&".join(
         f"include_annotation_type={urllib.parse.quote(i)}" for i in norm_include
     )
     key_qs = (f"&api_key={_api_key()}" if _api_key() else "")
-    dl_url = (
-        f"{DATASETS_BASE}/genome/accession/{acc_str}/download"
-        f"?hydrated=FULLY_HYDRATED&{include_qs}{key_qs}"
-    )
 
-    zip_path = out_dir / f"_ncbi_{urllib.parse.quote(taxon, safe='')}.zip"
-
-    # Download
+    zip_paths: list[Path] = []
     bar = _bytes_bar(f"Genomes — {taxon}", progress)
     with bar:
-        _stream_to_file(
-            dl_url, zip_path,
-            progress_callback=bar.update_bytes,
-            _opener=_opener,
-        )
+        for batch_idx, start in enumerate(range(0, len(accessions), BATCH)):
+            batch = accessions[start:start + BATCH]
+            acc_str = ",".join(urllib.parse.quote(a) for a in batch)
+            dl_url = (
+                f"{DATASETS_BASE}/genome/accession/{acc_str}/download"
+                f"?hydrated=FULLY_HYDRATED&{include_qs}{key_qs}"
+            )
+            zip_path = out_dir / (
+                f"_ncbi_{urllib.parse.quote(taxon, safe='')}_b{batch_idx:03d}.zip"
+            )
+            zip_paths.append(zip_path)
+            log.info(
+                f"Batch {batch_idx + 1}/{(len(accessions) + BATCH - 1)//BATCH}: "
+                f"downloading {len(batch)} genomes"
+            )
+            _stream_to_file(
+                dl_url, zip_path,
+                progress_callback=bar.update_bytes,
+                _opener=_opener,
+            )
 
-    # Extract
+    # Extract from every batch ZIP
     extracted: list[Path] = []
     try:
-        with zipfile.ZipFile(zip_path) as zf:
-            for member in zf.namelist():
-                name_lower = member.lower()
-                if not any(name_lower.endswith(s) for s in _EXTRACT_SUFFIXES):
-                    continue
+        for zip_path in zip_paths:
+            with zipfile.ZipFile(zip_path) as zf:
+                for member in zf.namelist():
+                    name_lower = member.lower()
+                    if not any(name_lower.endswith(s) for s in _EXTRACT_SUFFIXES):
+                        continue
 
-                # Flatten: ncbi_dataset/data/{accession}/filename → {accession}_filename
-                parts = Path(member).parts
-                fname = Path(member).name
-                if len(parts) >= 3 and parts[0] == "ncbi_dataset" and parts[1] == "data":
-                    dest_name = f"{parts[2]}_{fname}"
-                else:
-                    dest_name = fname
+                    # Flatten: ncbi_dataset/data/{accession}/filename
+                    #          → {accession}_filename
+                    parts = Path(member).parts
+                    fname = Path(member).name
+                    if (len(parts) >= 3 and parts[0] == "ncbi_dataset"
+                            and parts[1] == "data"):
+                        dest_name = f"{parts[2]}_{fname}"
+                    else:
+                        dest_name = fname
 
-                # ── Path-traversal guard ─────────────────────────────────────
-                # Resolve the destination inside out_dir and confirm it stays there.
-                dest_path = (out_dir / dest_name).resolve()
-                try:
-                    dest_path.relative_to(out_dir.resolve())
-                except ValueError:
-                    log.warning(
-                        f"Skipping ZIP member '{member}': resolved path "
-                        f"'{dest_path}' is outside output directory '{out_dir}'. "
-                        "This may indicate a malicious ZIP."
-                    )
-                    continue
+                    # Path-traversal guard
+                    dest_path = (out_dir / dest_name).resolve()
+                    try:
+                        dest_path.relative_to(out_dir.resolve())
+                    except ValueError:
+                        log.warning(
+                            f"Skipping ZIP member '{member}': resolved path "
+                            f"'{dest_path}' is outside output directory "
+                            f"'{out_dir}'. May indicate a malicious ZIP."
+                        )
+                        continue
 
-                # Stream-copy so multi-GB genomes don't spike memory
-                with zf.open(member) as src, dest_path.open("wb") as dst:
-                    shutil.copyfileobj(src, dst, length=1024 * 1024)
-                extracted.append(dest_path)
-                log.info(f"Extracted: {dest_path.name}")
+                    # Stream-copy so multi-GB genomes don't spike memory
+                    with zf.open(member) as src, dest_path.open("wb") as dst:
+                        shutil.copyfileobj(src, dst, length=1024 * 1024)
+                    extracted.append(dest_path)
+                    log.info(f"Extracted: {dest_path.name}")
     except zipfile.BadZipFile as exc:
         raise NcbiError(
             f"Downloaded file is not a valid ZIP archive: {exc}. "
@@ -589,7 +604,8 @@ def download_genomes(
         # zipfile raises RuntimeError for encrypted ZIPs
         raise NcbiError(f"ZIP extraction failed: {exc}") from exc
     finally:
-        zip_path.unlink(missing_ok=True)
+        for zp in zip_paths:
+            zp.unlink(missing_ok=True)
 
     if not extracted:
         raise NcbiError(

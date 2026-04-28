@@ -765,6 +765,52 @@ class TestApproveChangelogIsolation:
         assert "isolated_tool_xyz" in iso_changelog.read_text(encoding="utf-8")
 
 
+class TestNcbiBatchedDownload:
+    """BUG: download_genomes built one URL containing every accession.
+    NCBI returned HTTP 414 (URI Too Long) once the list grew past ~30
+    accessions, breaking taxon-wide downloads.  Now batched in chunks
+    of 25."""
+
+    def test_many_accessions_split_into_batches(self, tmp_path, monkeypatch):
+        from bioflow.core import ncbi
+
+        captured_urls: list[str] = []
+
+        # Stub list_genomes — return 60 fake assemblies
+        def fake_list(taxon, **kw):
+            return [
+                ncbi.AssemblyInfo(
+                    accession=f"GCF_{i:09d}.1", organism="x",
+                    strain="", assembly_level="Complete",
+                    total_sequence_length=5_000_000,
+                    scaffold_count=1,
+                ) for i in range(60)
+            ]
+        monkeypatch.setattr(ncbi, "list_genomes", fake_list)
+
+        # Stub _stream_to_file — capture URL, write a tiny valid ZIP
+        import io, zipfile
+        def fake_stream(url, dest, **kw):
+            captured_urls.append(url)
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zf:
+                zf.writestr("ncbi_dataset/data/x/x.fna", ">x\nACGT\n")
+            dest.write_bytes(buf.getvalue())
+            return dest
+        monkeypatch.setattr(ncbi, "_stream_to_file", fake_stream)
+
+        ncbi.download_genomes(
+            "fakeus", tmp_path,
+            include=("GENOME_FASTA",),
+            max_assemblies=60,
+        )
+
+        # 60 / 25 = 3 batches expected
+        assert len(captured_urls) == 3, captured_urls
+        # No single URL should be too long (cap < 4 KB is plenty of margin)
+        assert all(len(u) < 4096 for u in captured_urls)
+
+
 class TestNcbiIncludeAliasing:
     """BUG: real NCBI v2 Datasets API returns HTTP 400 on PROTEIN_FASTA.
     The valid name is PROT_FASTA.  bioflow's CLI advertised the wrong one

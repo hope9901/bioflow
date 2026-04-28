@@ -1,0 +1,26 @@
+Gene	Annotation	Naive_p	Bonferroni_p	Sensitivity	Specificity
+group_2883	hypothetical protein	0.0005827505827505	1.0	0.0	0.0
+pgl_2	6-phosphogluconolactonase	0.0005827505827505	1.0	100.0	100.0
+menH_2	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+group_3567	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+group_3568	Phosphoglycolate phosphatase	0.0005827505827505	1.0	100.0	100.0
+group_3569	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+yicJ	Inner membrane symporter YicJ	0.0005827505827505	1.0	100.0	100.0
+group_3574	Beta-xylosidase	0.0005827505827505	1.0	100.0	100.0
+hiuH	5-hydroxyisourate hydrolase	0.0005827505827505	1.0	100.0	100.0
+group_3579	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+ugpB_3	sn-glycerol-3-phosphate-binding periplasmic protein UgpB	0.0005827505827505	1.0	100.0	100.0
+lacG_2	Lactose transport system permease protein LacG	0.0005827505827505	1.0	100.0	100.0
+bglH_3	Aryl-phospho-beta-D-glucosidase BglH	0.0005827505827505	1.0	100.0	100.0
+nrdF	Ribonucleoside-diphosphate reductase 2 subunit beta	0.0005827505827505	1.0	100.0	100.0
+macB_2	Macrolide export ATP-binding/permease protein MacB	0.0005827505827505	1.0	100.0	100.0
+rsd	Regulator of sigma D	0.0005827505827505	1.0	100.0	100.0
+lolD_2	Lipoprotein-releasing system ATP-binding protein LolD	0.0005827505827505	1.0	100.0	100.0
+group_3561	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+ngcF	Diacetylchitobiose uptake system permease protein NgcF	0.0005827505827505	1.0	100.0	100.0
+pemB	Pectinesterase B	0.0005827505827505	1.0	100.0	100.0
+group_3560	hypothetical protein	0.0005827505827505	1.0	100.0	100.0
+prtC	Serralysin C	0.0005827505827505	1.0	100.0	100.0
+sufC	putative ATP-dependent transporter SufC	0.0005827505827505	1.0	100.0	100.0
+group_3532	Bifunctional cytochrome P450/NADPH--P450 reductase	0.0005827505827505	1.0	100.0	100.0
+licT_2	Transcription antiterminator LicT	0.0005827505827505	1.0	100.0	100.0

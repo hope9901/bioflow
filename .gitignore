@@ -22,11 +22,17 @@ Thumbs.db
 
 # Comparative genomics analysis outputs (regeneratable)
 analysis/*/genomes/
+analysis/*/genomes_full/
 analysis/*/inputs/
 analysis/*/prokka/
 analysis/*/roary/
 analysis/*/fastani/
+analysis/*/fastani_full/ani_full.tsv
+analysis/*/scoary/results/
 analysis/*/run.log
+analysis/*/full_ani.log
+analysis/*/download_full.log
+analysis/*/fastani_full/genomes.txt
 # IQ-TREE intermediate files (keep only the *.treefile)
 analysis/*/phylogeny/*.bionj
 analysis/*/phylogeny/*.iqtree

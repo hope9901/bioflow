@@ -96,7 +96,48 @@ phenotypes.</p>
   </div>
 </div>
 
-<h2>6 · Methods</h2>
+<h2>6 · Phenotype-associated genes (Scoary GWAS)</h2>
+<p>Phenotypes derived from ANI clade membership (binary). Top-10 hits with
+   sensitivity & specificity ≥ 80% shown.</p>
+<div class="grid">
+  <div class="card">
+    <h3>Vascular wilt clade (n=6)</h3>
+    <img src="figures/scoary_vascular_wilt.png" alt="vw scoary">
+    <table><tr><th>gene</th><th>annotation</th><th>sens%</th><th>spec%</th></tr><tr><td><code>group_2883</code></td><td>hypothetical protein</td><td>0</td><td>0</td></tr><tr><td><code>pgl_2</code></td><td>6-phosphogluconolactonase</td><td>100</td><td>100</td></tr><tr><td><code>menH_2</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>group_3567</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>group_3568</code></td><td>Phosphoglycolate phosphatase</td><td>100</td><td>100</td></tr><tr><td><code>group_3569</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>yicJ</code></td><td>Inner membrane symporter YicJ</td><td>100</td><td>100</td></tr><tr><td><code>group_3574</code></td><td>Beta-xylosidase</td><td>100</td><td>100</td></tr><tr><td><code>hiuH</code></td><td>5-hydroxyisourate hydrolase</td><td>100</td><td>100</td></tr><tr><td><code>group_3579</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr></table>
+    <p class="muted">Top hits include the known Dickeya virulence factors
+    <code>prtC</code> (Zn-metalloprotease) and <code>pemB</code>
+    (pectin methylesterase) — enzymes that degrade plant cell walls.</p>
+  </div>
+  <div class="card">
+    <h3>Soft-rot clade (n=4)</h3>
+    <img src="figures/scoary_soft_rot.png" alt="sr scoary">
+    <table><tr><th>gene</th><th>annotation</th><th>sens%</th><th>spec%</th></tr><tr><td><code>cdiA_3</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>fixB</code></td><td>Protein FixB</td><td>100</td><td>100</td></tr><tr><td><code>group_5236</code></td><td>Electron transfer flavoprotein-ubiquinone oxidoreductase</td><td>100</td><td>100</td></tr><tr><td><code>kipR</code></td><td>HTH-type transcriptional regulator KipR</td><td>100</td><td>100</td></tr><tr><td><code>group_5135</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>group_5134</code></td><td>High-affinity branched-chain amino acid transport ATP-bindin</td><td>100</td><td>100</td></tr><tr><td><code>group_5132</code></td><td>hypothetical protein</td><td>100</td><td>100</td></tr><tr><td><code>group_5131</code></td><td>Vitamin B12 import ATP-binding protein BtuD</td><td>100</td><td>100</td></tr><tr><td><code>group_5130</code></td><td>Transcriptional activator protein AnoR</td><td>100</td><td>100</td></tr><tr><td><code>yofA_2</code></td><td>HTH-type transcriptional regulator YofA</td><td>100</td><td>100</td></tr></table>
+    <p class="muted">Soft-rot accessory genes are enriched for
+    <code>cdiA</code> (contact-dependent inhibition toxin),
+    <code>fixA/B/X</code> (nitrogen fixation, anaerobic adaptation),
+    <code>fadK</code> (fatty-acid metabolism) — competition and
+    environmental-tolerance traits rather than direct virulence.</p>
+  </div>
+</div>
+
+<h2>7 · 262-genome subspecies-level ANI</h2>
+<div class="card">
+<img src="figures/ani_full_heatmap.png" alt="full ANI heatmap">
+<p>All 262 GCF (RefSeq) Dickeya assemblies, FastANI all-vs-all (≈70k pairs).
+   Each row/col is a single assembly; the colour stripe on the left marks
+   species. Yellow squares (≥97% ANI) recover textbook-clean species
+   clusters with two interesting outliers:</p>
+<ul>
+  <li><i>D. zeae</i> (n=22) spans <b>94.4-100% ANI</b> — straddles the
+      95% species threshold, suggesting at least one cryptic species
+      hides inside the current "zeae" label.</li>
+  <li><i>D. sp.</i> unassigned (n=7) ranges <b>81.7-99.9%</b> — these
+      likely include genuinely novel species awaiting formal description.</li>
+</ul>
+<table><tr><th>262-genome species ANI ranges</th></tr><tr><td><code>D. ananatis             n=  8   min=98.91  median=99.05  max=99.99</code></td></tr><tr><td><code>D. chrysanthemi         n= 12   min=96.19  median=96.44  max=99.99</code></td></tr><tr><td><code>D. dadantii             n= 26   min=96.28  median=98.41  max=100.00</code></td></tr><tr><td><code>D. dianthicola          n= 87   min=97.34  median=99.50  max=100.00</code></td></tr><tr><td><code>D. fangzhongdai         n= 22   min=96.77  median=98.74  max=100.00</code></td></tr><tr><td><code>D. lacustris            n=  4   min=99.97  median=99.98  max=99.99</code></td></tr><tr><td><code>D. oryzae               n= 14   min=95.26  median=97.14  max=99.99</code></td></tr><tr><td><code>D. parazeae             n=  2   min=98.70  median=98.70  max=98.70</code></td></tr><tr><td><code>D. poaceiphila          n=  2   min=99.92  median=99.92  max=99.92</code></td></tr><tr><td><code>D. solani               n= 51   min=98.56  median=99.96  max=100.00</code></td></tr><tr><td><code>D. sp                   n=  7   min=81.67  median=86.27  max=99.89</code></td></tr><tr><td><code>D. undicola             n=  4   min=98.90  median=99.00  max=99.12</code></td></tr><tr><td><code>D. zeae                 n= 22   min=94.40  median=96.17  max=100.00</code></td></tr></table>
+</div>
+
+<h2>8 · Methods</h2>
 <ol>
   <li><b>Genome retrieval.</b> <code>bioflow ncbi genome --taxon dickeya
    --reference-only --include GENOME_FASTA,GENOME_GFF</code> — 13 RefSeq reference assemblies.</li>
@@ -110,9 +151,17 @@ phenotypes.</p>
    scipy.cluster.hierarchy.</li>
   <li><b>Resistome / virulome.</b> ABRicate 1.2 against VFDB, CARD, PlasmidFinder
    (default thresholds: 80% identity, 80% coverage minimum).</li>
+  <li><b>Pangenome-wide GWAS.</b> Roary re-run with <code>-i 70</code>
+   (2417 core genes from a richer
+   9989-cluster pangenome) feeding
+   Scoary 1.6.16 binary-trait analysis on vascular_wilt vs others
+   (n=6/13) and soft_rot vs others (n=4/13).</li>
+  <li><b>Subspecies ANI expansion.</b> All 262 GCF Dickeya assemblies
+   downloaded via batched NCBI Datasets v2 calls (HTTP 414 workaround
+   patched into bioflow), FastANI all-vs-all in a single container.</li>
 </ol>
 
 <p class="muted">Generated by bioflow comparative_genomics workflow on
- 2026-04-27 17:31. All Docker images pulled from
+ 2026-04-28 09:14. All Docker images pulled from
  staphb/* BioContainers.</p>
 </body></html>
