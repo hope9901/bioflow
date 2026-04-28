@@ -162,11 +162,15 @@ operons rather than as one-off hits.
     <h3>is_solani (n=51)</h3>
     <img src="figures/scoary_full_is_solani.png" alt="solani scoary 262">
     <table><tr><th>gene</th><th>annotation</th><th>Bonf p</th><th>sens%</th><th>spec%</th></tr><tr><td><code>group_10132</code></td><td>Acyl carrier protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22044</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22040</code></td><td>Mannosyl-3-phosphoglycerate phosphatase</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22039</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22035</code></td><td>Protein YobA</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22031</code></td><td>HTH-type transcriptional repressor RspR</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22030</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22045</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22029</code></td><td>2-amino-5-chloromuconic acid deaminase</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22027</code></td><td>Fosfomycin resistance protein AbaF</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22009</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr><tr><td><code>group_22008</code></td><td>hypothetical protein</td><td>4.5e-51</td><td>100</td><td>100</td></tr></table>
-    <p class="muted">Tightly-linked block of <code>group_22000-22080</code>
-    clusters at identical p-values (= a co-inherited genomic island).
-    Notable: <code>dosP</code> (c-di-GMP phosphodiesterase, biofilm
-    regulation) and <code>AbaF</code> (fosfomycin-resistance efflux pump)
-    — the only meaningful AMR signal in the entire genus.</p>
+    <p class="muted">Top hits include <code>dosP</code> (c-di-GMP
+    phosphodiesterase, biofilm regulation), <code>AbaF</code>
+    (fosfomycin-resistance efflux pump — the genus's only meaningful AMR
+    signal), <code>XynC</code> (glucuronoxylanase, plant cell wall
+    degradation) and <code>TatB</code> (Sec-independent secretion).
+    Identical-p<sub>Bonf</sub> tied genes share the same presence/absence
+    vector but, as section 8 shows, are scattered across the chromosome
+    rather than co-located — except for one genuine 5-gene operon
+    around <code>AbaF</code>.</p>
   </div>
   <div class="card">
     <h3>is_dianthicola (n=87)</h3>
@@ -219,7 +223,63 @@ operons rather than as one-off hits.
 <table><tr><th>262-genome species ANI ranges</th></tr><tr><td><code>D. ananatis             n=  8   min=98.91  median=99.05  max=99.99</code></td></tr><tr><td><code>D. chrysanthemi         n= 12   min=96.19  median=96.44  max=99.99</code></td></tr><tr><td><code>D. dadantii             n= 26   min=96.28  median=98.41  max=100.00</code></td></tr><tr><td><code>D. dianthicola          n= 87   min=97.34  median=99.50  max=100.00</code></td></tr><tr><td><code>D. fangzhongdai         n= 22   min=96.77  median=98.74  max=100.00</code></td></tr><tr><td><code>D. lacustris            n=  4   min=99.97  median=99.98  max=99.99</code></td></tr><tr><td><code>D. oryzae               n= 14   min=95.26  median=97.14  max=99.99</code></td></tr><tr><td><code>D. parazeae             n=  2   min=98.70  median=98.70  max=98.70</code></td></tr><tr><td><code>D. poaceiphila          n=  2   min=99.92  median=99.92  max=99.92</code></td></tr><tr><td><code>D. solani               n= 51   min=98.56  median=99.96  max=100.00</code></td></tr><tr><td><code>D. sp                   n=  7   min=81.67  median=86.27  max=99.89</code></td></tr><tr><td><code>D. undicola             n=  4   min=98.90  median=99.00  max=99.12</code></td></tr><tr><td><code>D. zeae                 n= 22   min=94.40  median=96.17  max=100.00</code></td></tr></table>
 </div>
 
-<h2>8 · Methods</h2>
+<h2>8 · D. solani AbaF mini-cluster — closer look at one Scoary hit</h2>
+<div class="card">
+<p>The 30 top is_solani Scoary hits all share the same presence/absence
+vector (every solani strain has them, every other species lacks them) and
+therefore tie at p<sub>Bonf</sub> ≈ 4.5 × 10<sup>-51</sup>.  When we map
+those locus tags back to the type-strain GFF (<code>GCF_001644705.1</code>,
+<i>D. solani</i> IPO 2222), the 30 genes turn out to be <b>scattered across
+4.17 Mb of the chromosome</b> — not a single inherited island.</p>
+<p>Five of them, however, are co-located in a tight ~5 kb operon-style
+block at <b>4.195-4.200 Mb</b>:</p>
+<table>
+<tr><th>locus</th><th>strand</th><th>position</th><th>annotation</th></tr>
+<tr><td><code>abaF_2</code></td><td>-</td><td>4,195,388-4,196,701</td><td>Fosfomycin-resistance MFS efflux pump</td></tr>
+<tr><td><code>DNMKAHCA_03629</code></td><td>-</td><td>4,196,694-4,197,329</td><td>hypothetical</td></tr>
+<tr><td><code>cnbH</code></td><td>-</td><td>4,197,332-4,198,675</td><td>2-amino-5-chloromuconic acid deaminase</td></tr>
+<tr><td><code>DNMKAHCA_03631</code></td><td>-</td><td>4,198,686-4,199,366</td><td>hypothetical</td></tr>
+<tr><td><code>rspR_2</code></td><td>+</td><td>4,199,480-4,200,154</td><td>HTH-type transcriptional repressor RspR</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>Synteny — 5 representative D. solani strains</h3>
+    <img src="figures/solani_island_synteny.png" alt="synteny">
+    <p class="muted">Gene order, spacing and relative orientation
+    are perfectly preserved; only the chromosomal coordinate origin
+    differs (artefact of how each assembly was rotated when circularised).</p>
+  </div>
+  <div class="card">
+    <h3>GC content track</h3>
+    <img src="figures/solani_island_gc.png" alt="GC track">
+    <p class="muted">Cluster GC% = <b>52.82%</b>, vs whole-chromosome
+    mean 56.24% — a 3.42-point dip at the <b>18th percentile</b> of all
+    5 kb windows.  Lower-than-host GC is a classical fingerprint of
+    horizontal acquisition.</p>
+  </div>
+</div>
+
+<h3>Mobile-element evidence summary</h3>
+<table>
+<tr><th>signal</th><th>finding</th><th>verdict</th></tr>
+<tr><td>operon-style gene order</td><td>5/5 strains preserved</td><td>✓ inherited as a unit</td></tr>
+<tr><td>GC% deviation</td><td>-3.4% from genome mean (18th %ile)</td><td>✓ HGT-suggestive</td></tr>
+<tr><td>tRNA flanking</td><td><code>tRNA-Pro(ggg)</code> at 4,204,505 — 4.4 kb downstream</td><td>✓ classic integration target</td></tr>
+<tr><td>transposase / integrase / IS / phage in ±10 kb</td><td>none detected</td><td>✗ direct mobility marker missing</td></tr>
+<tr><td>flanking direct repeats</td><td>not assessed</td><td>?</td></tr>
+</table>
+<p class="muted">Best-fit model: an <b>ancient horizontal acquisition</b>
+that integrated near the tRNA-Pro and was subsequently fixed in the
+<i>D. solani</i> lineage; the mobilising element itself has eroded over
+time, leaving the tRNA-Pro hotspot and atypical GC% as the only
+remaining footprints.  The cargo — a fosfomycin-resistance efflux pump
+flanked by an aromatic-amine deaminase and an HTH regulator — looks
+like a <b>xenobiotic-detoxification cassette</b>, plausibly an
+adaptation to soil/rhizosphere antimicrobial pressure.</p>
+</div>
+
+<h2>9 · Methods</h2>
 <ol>
   <li><b>Genome retrieval.</b> <code>bioflow ncbi genome --taxon dickeya
    --reference-only --include GENOME_FASTA,GENOME_GFF</code> — 13 RefSeq reference assemblies.</li>
@@ -249,6 +309,6 @@ operons rather than as one-off hits.
 </ol>
 
 <p class="muted">Generated by bioflow comparative_genomics workflow on
- 2026-04-28 16:48. All Docker images pulled from
+ 2026-04-28 17:14. All Docker images pulled from
  staphb/* BioContainers.</p>
 </body></html>
