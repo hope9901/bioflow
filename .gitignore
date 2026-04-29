@@ -53,3 +53,17 @@ analysis/*/eggnog/db/
 analysis/*/eggnog/run.log
 analysis/*/eggnog/pangenome_reps.faa
 analysis/*/eggnog/pangenome_reps.tsv
+analysis/*/abricate_full/
+analysis/*/abricate_full.log
+analysis/*/phylogeny_full/_genes_unaligned/
+analysis/*/phylogeny_full/_genes_aligned/
+analysis/*/phylogeny_full/core_supermatrix.fna
+analysis/*/phylogeny_full/iqtree.log
+analysis/*/phylogeny_full/iqtree_full.iqtree
+analysis/*/phylogeny_full/iqtree_full.log
+analysis/*/phylogeny_full/iqtree_full.mldist
+analysis/*/phylogeny_full/iqtree_full.splits.nex
+analysis/*/phylogeny_full/iqtree_full.uniqueseq.phy
+analysis/*/phylogeny_full/iqtree_full.bionj
+analysis/*/phylogeny_full/iqtree_full.contree
+analysis/*/phylogeny_full/iqtree_full.ckp.gz

@@ -417,6 +417,60 @@ like a <b>xenobiotic-detoxification cassette</b>, plausibly an
 adaptation to soil/rhizosphere antimicrobial pressure.</p>
 </div>
 
+<h2>8b · 262-strain ML phylogeny + virulome heatmap</h2>
+<div class="card">
+<img src="figures/tree_full_with_vfdb.png" alt="262-strain ML tree with VFDB" style="max-height:1200px">
+<p class="muted"><b>Custom 50-gene supermatrix.</b>  Roary's full
+pan-genome run was performed without <code>-e -n</code>, so we built our
+own concatenated alignment: 50 single-copy core genes (≥99% strain
+prevalence, exactly one copy per strain), each MAFFT-aligned in parallel
+inside a container, then concatenated to a <b>91,756 bp × 262 strain</b>
+supermatrix.  IQ-TREE 2 GTR+G with 1000 ultrafast bootstrap completed in
+<b>17 minutes</b> on 4 CPU.  Best ML log-likelihood = -668,525.</p>
+<p class="muted"><b>Tree-VFDB alignment.</b>  Each leaf's species is
+shown by the color strip; the heatmap on the right encodes presence of
+the 15 most prevalent VFDB genes across all 262 genomes.  Two
+biological observations:</p>
+<ol>
+<li>Each named species forms a tight monophyletic clade — nominal
+    species labels survive a real ML test on the genus.</li>
+<li>The basal water-associated clade (<i>D. aquatica / lacustris /
+    poaceiphila</i> at the bottom) carries almost none of the T6SS
+    machinery (<code>hcp1, vipB, hcp, tssJ/F/M/clpV</code>),
+    confirming that virulence build-up post-dates the
+    environmental-to-pathogen transition in the genus.</li>
+</ol>
+</div>
+
+<h2>8c · Genus-wide AMR + virulome + plasmid catalogue (262 genomes)</h2>
+<table>
+<tr><th>database</th><th>unique genes</th><th>total hits</th><th>per-genome mean ± sd</th></tr>
+<tr><td>VFDB</td><td>20</td><td>2,252</td><td>8.6 ± 2.2</td></tr>
+<tr><td>CARD</td><td>6</td><td>267</td><td>1.0 ± 0.2 (= CRP only)</td></tr>
+<tr><td>PlasmidFinder</td><td>7</td><td>21</td><td>0.1 ± 0.4</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>VFDB prevalence by species</h3>
+    <img src="figures/abricate_full_vfdb.png" alt="VFDB heatmap full">
+    <p class="muted">T6SS core (<code>cheY, rcsB, rpoS, vipB, hcp1</code>),
+    flagella (<code>fliG, atsL</code>), iron uptake (<code>fur</code>) are
+    100% conserved across the agriculturally-aggressive species; in the
+    water-associated clade (<i>aquatica, lacustris, poaceiphila</i>) they
+    are essentially absent.</p>
+  </div>
+  <div class="card">
+    <h3>Per-genome hits by species</h3>
+    <img src="figures/abricate_full_boxplot.png" alt="boxplot">
+    <p class="muted">Median VFDB hits cluster at 8-11 in the pathogenic
+    clades versus 1-3 in the water-associated lineage — a 5-10× gap that
+    is itself a hallmark of the host-tropism transition.  CARD remains
+    flat at 1 (CRP), PlasmidFinder is sporadic with <i>D. undicola</i>
+    as the only consistent plasmid carrier.</p>
+  </div>
+</div>
+
 <h2>9 · Pangenome functional categories (COG-2024)</h2>
 <p>Pangenome representatives (one protein per Roary cluster, 34,629 total)
 were searched against COG-2024 with DIAMOND blastp (≥1e-5, very-sensitive).
@@ -507,6 +561,13 @@ across the entire genus.</p>
   <li><b>Subspecies ANI expansion.</b> All 262 GCF Dickeya assemblies
    downloaded via batched NCBI Datasets v2 calls (HTTP 414 workaround
    patched into bioflow), FastANI all-vs-all in a single container.</li>
+  <li><b>262-strain ML phylogeny.</b> 50 single-copy core genes from
+   the Roary cluster table, MAFFT-aligned independently inside a
+   <code>staphb/mafft:7.520</code> container (8 parallel × 1 cpu),
+   concatenated to a 91,756 bp supermatrix; IQ-TREE 2 (<code>-m GTR+G
+   -bb 1000 -nt 4</code>) on the supermatrix, 17 min wall.</li>
+  <li><b>Genus-wide ABRicate.</b> 786 runs (262 × 3 DBs: VFDB, CARD,
+   PlasmidFinder), 12 parallel × 1 cpu, 16 min wall, 0 failures.</li>
   <li><b>Functional categories.</b> 34,629 pangenome representatives
    (one Prokka-translated protein per Roary cluster) searched against
    COG-2024 reps with DIAMOND blastp (very-sensitive, e-value ≤ 1e-5);
