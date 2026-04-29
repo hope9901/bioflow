@@ -417,7 +417,75 @@ like a <b>xenobiotic-detoxification cassette</b>, plausibly an
 adaptation to soil/rhizosphere antimicrobial pressure.</p>
 </div>
 
-<h2>9 · Methods</h2>
+<h2>9 · Pangenome functional categories (COG-2024)</h2>
+<p>Pangenome representatives (one protein per Roary cluster, 34,629 total)
+were searched against COG-2024 with DIAMOND blastp (≥1e-5, very-sensitive).
+Each best-hit COG was mapped to its functional-category letter via
+<code>cog-24.def.tab</code>; multi-letter assignments were exploded.</p>
+
+<table>
+  <tr><th>bucket</th><th>n clusters</th><th>% mapped to COG</th></tr>
+  <tr><td>core</td><td>687</td><td>79.8%</td></tr>
+  <tr><td>soft_core</td><td>676</td><td>61.4%</td></tr>
+  <tr><td>shell</td><td>5,247</td><td>45.6%</td></tr>
+  <tr><td>cloud</td><td>28,019</td><td><b>27.9%</b> (the rest = unclassifiable accessory dark matter)</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>Functional composition</h3>
+    <img src="figures/cog_stacked.png" alt="cog stacked">
+    <p class="muted">Translation/ribosome (J) dominates the core (16.6%)
+    and shrinks to 3.9% in the cloud — the canonical signature of essential
+    machinery being conserved.</p>
+  </div>
+  <div class="card">
+    <h3>Cloud-vs-core enrichment</h3>
+    <img src="figures/cog_delta.png" alt="cog delta">
+    <p class="muted">Categories that dominate one bucket but not the other,
+    in percentage points.  Red = enriched in cloud, blue = enriched in core.</p>
+  </div>
+</div>
+
+<div class="key">
+<b>Headline finding.</b>  The single biggest cloud-enrichment is COG
+category <b>X (Mobilome — phage / IS / transposons)</b>: 0% of core
+proteins, but <b>8.6% of cloud proteins</b>.  This explains
+mechanistically why the pan-genome stays open at n=262 — most accessory
+content is either currently mobile DNA or recently arrived through it.
+Other cloud-enriched categories (L replication/repair, V defense,
+Q secondary metabolites) are exactly what one expects to ride mobile
+genetic elements.  The mirror-image core-enrichment in J translation
+and E amino-acid metabolism shows that the conserved 687 genes are
+overwhelmingly housekeeping.
+</div>
+
+<h3>Top cloud-enriched COG categories</h3>
+<table>
+<tr><th>cat</th><th>core %</th><th>cloud %</th><th>Δpp</th><th>description</th></tr>
+<tr><td>X</td><td>0.00</td><td>8.64</td><td>+8.64</td><td><b>Mobilome (phage/IS)</b></td></tr>
+<tr><td>R</td><td>1.80</td><td>6.71</td><td>+4.90</td><td>General prediction only</td></tr>
+<tr><td>L</td><td>2.95</td><td>6.85</td><td>+3.90</td><td>Replication/repair</td></tr>
+<tr><td>Q</td><td>1.15</td><td>4.55</td><td>+3.41</td><td>Secondary metabolites</td></tr>
+<tr><td>V</td><td>1.64</td><td>4.15</td><td>+2.51</td><td>Defense mechanisms</td></tr>
+</table>
+<h3>Top core-enriched (= cloud-depleted)</h3>
+<table>
+<tr><th>cat</th><th>core %</th><th>cloud %</th><th>Δpp</th><th>description</th></tr>
+<tr><td>J</td><td>16.56</td><td>3.93</td><td>-12.63</td><td><b>Translation/ribosome</b></td></tr>
+<tr><td>E</td><td>11.97</td><td>7.45</td><td>-4.52</td><td>Amino acid metabolism</td></tr>
+<tr><td>K</td><td>7.38</td><td>4.51</td><td>-2.87</td><td>Transcription</td></tr>
+<tr><td>F</td><td>4.43</td><td>1.88</td><td>-2.54</td><td>Nucleotide metabolism</td></tr>
+</table>
+
+<p class="muted">This corroborates the AbaF mini-cluster finding from
+section 8: when we zoom into one specific Scoary hit we find
+xenobiotic-detoxification cargo near a tRNA integration hotspot with
+atypical GC%; when we zoom out to the whole pangenome we find the same
+mechanism (mobile DNA) is the dominant driver of accessory diversity
+across the entire genus.</p>
+
+<h2>10 · Methods</h2>
 <ol>
   <li><b>Genome retrieval.</b> <code>bioflow ncbi genome --taxon dickeya
    --reference-only --include GENOME_FASTA,GENOME_GFF</code> — 13 RefSeq reference assemblies.</li>
@@ -439,6 +507,11 @@ adaptation to soil/rhizosphere antimicrobial pressure.</p>
   <li><b>Subspecies ANI expansion.</b> All 262 GCF Dickeya assemblies
    downloaded via batched NCBI Datasets v2 calls (HTTP 414 workaround
    patched into bioflow), FastANI all-vs-all in a single container.</li>
+  <li><b>Functional categories.</b> 34,629 pangenome representatives
+   (one Prokka-translated protein per Roary cluster) searched against
+   COG-2024 reps with DIAMOND blastp (very-sensitive, e-value ≤ 1e-5);
+   best-hit COG mapped to functional-category letter via
+   cog-24.def.tab.</li>
   <li><b>Genus-wide pangenome.</b> All 262 assemblies re-annotated with
    Prokka (6 parallel × 2 cpu, ~4.6 hours) and clustered with Roary
    <code>-i 90</code> (~2.2 hours, 8 cpu / 28 GB RAM).

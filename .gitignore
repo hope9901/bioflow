@@ -47,3 +47,9 @@ analysis/*/prokka_full/
 analysis/*/roary_full/
 analysis/*/full_pangenome.log
 analysis/*/scoary_full/results/
+analysis/*/eggnog/cog_db/
+analysis/*/eggnog/results/pangenome_vs_cog.tsv
+analysis/*/eggnog/db/
+analysis/*/eggnog/run.log
+analysis/*/eggnog/pangenome_reps.faa
+analysis/*/eggnog/pangenome_reps.tsv
