@@ -46,6 +46,7 @@ Design notes
 from __future__ import annotations
 
 import functools
+import hashlib
 import inspect
 import os
 import threading
@@ -70,6 +71,9 @@ __all__ = [
     "StageResult",
     "set_workspace",
     "set_backend",
+    "set_cache_enabled",
+    "is_cache_enabled",
+    "clear_cache",
     "MockBackend",          # for unit tests
 ]
 
@@ -82,6 +86,11 @@ _workspace_lock = threading.Lock()
 _active_workspace: Optional[Path] = None
 _active_backend: Optional[ContainerBackend] = None
 _run_counter = 0
+_cache_enabled: bool = True   # default ON; opt-out via env or set_cache_enabled
+
+# Honour BIOFLOW_NO_CACHE=1 at import time (operator-level kill switch)
+if os.environ.get("BIOFLOW_NO_CACHE", "").lower() in ("1", "true", "yes"):
+    _cache_enabled = False
 
 
 def set_workspace(path: Path) -> None:
@@ -130,6 +139,129 @@ def _next_run_id() -> int:
 
 
 # ---------------------------------------------------------------------------
+# Cache controls
+# ---------------------------------------------------------------------------
+
+CACHE_SENTINEL = ".bioflow_cache_ok"
+"""Marker file written into a stage's out_dir on success.  Subsequent calls
+with identical cache keys treat the directory as a cache hit iff this file
+exists.  Failed runs leave it absent, so retries are automatic."""
+
+
+def set_cache_enabled(flag: bool) -> None:
+    """Globally toggle the input-hash cache.  Default ON."""
+    global _cache_enabled
+    _cache_enabled = bool(flag)
+    log.info(f"bioflow cache: {'enabled' if _cache_enabled else 'disabled'}")
+
+
+def is_cache_enabled() -> bool:
+    return _cache_enabled
+
+
+def clear_cache(workspace: Optional[Path] = None) -> int:
+    """Delete every `<workspace>/.cache/*` directory.  Returns count removed.
+
+    Use sparingly — every cached stage must re-run after this.
+    """
+    import shutil
+    ws = Path(workspace) if workspace else _get_workspace()
+    cache_root = ws / ".cache"
+    if not cache_root.exists():
+        return 0
+    n = 0
+    for child in cache_root.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child, ignore_errors=True)
+            n += 1
+    log.info(f"clear_cache: removed {n} entries under {cache_root}")
+    return n
+
+
+# ---------------------------------------------------------------------------
+# Cache key computation
+# ---------------------------------------------------------------------------
+
+def _hash_input_value(v: Any, _depth: int = 0) -> str:
+    """Stable hash for a single Python value used as a stage input.
+
+    Path objects: hashes (mtime_ns + size + first 64 KB content). This lets
+    cheap mtime/size checks avoid full-content reads for unchanged files,
+    while still detecting in-place edits.
+
+    list / tuple / dict are hashed recursively.  Everything else falls back
+    to repr() — good enough for ints, strings, simple dataclasses.
+    """
+    if _depth > 20:
+        return "deep"   # guard against pathological nesting
+
+    if isinstance(v, Path):
+        try:
+            st = v.stat()
+        except (OSError, FileNotFoundError):
+            return f"pathmissing:{hashlib.sha256(str(v).encode()).hexdigest()[:16]}"
+        h = hashlib.sha256()
+        h.update(str(st.st_mtime_ns).encode())
+        h.update(b"|")
+        h.update(str(st.st_size).encode())
+        h.update(b"|")
+        # Sample first 64 KB only — full file SHA is wasteful for multi-GB
+        # genomes when mtime+size already discriminates.
+        try:
+            with v.open("rb") as fh:
+                h.update(fh.read(65536))
+        except (OSError, PermissionError):
+            pass
+        return f"file:{h.hexdigest()[:16]}"
+
+    if isinstance(v, (list, tuple)):
+        joined = ",".join(_hash_input_value(x, _depth + 1) for x in v)
+        return f"seq:{hashlib.sha256(joined.encode()).hexdigest()[:16]}"
+
+    if isinstance(v, dict):
+        items = sorted(
+            (str(k), _hash_input_value(val, _depth + 1)) for k, val in v.items()
+        )
+        joined = ";".join(f"{k}={h}" for k, h in items)
+        return f"map:{hashlib.sha256(joined.encode()).hexdigest()[:16]}"
+
+    # Fall through: repr() based — covers int, str, float, None, bool, dataclass
+    return f"val:{hashlib.sha256(repr(v).encode()).hexdigest()[:16]}"
+
+
+def _compute_cache_key(stage_obj: "Stage", args: tuple, kwargs: dict) -> str:
+    """Deterministic 24-hex-char key from stage definition + inputs.
+
+    A change in any of the following invalidates the cache:
+      * container image
+      * cpu / ram_gb (different resources may produce different output for
+        non-deterministic tools)
+      * source code of the command-builder function
+      * any positional argument's hash (Path content / mtime / size, or repr)
+      * any keyword argument's hash (out_dir is excluded — it's SDK-injected)
+    """
+    parts: list[str] = [
+        f"image={stage_obj.image}",
+        f"cpu={stage_obj.cpu}",
+        f"ram_gb={stage_obj.ram_gb}",
+    ]
+    try:
+        src = inspect.getsource(stage_obj.func)
+    except (OSError, TypeError):
+        src = stage_obj.func.__qualname__   # fallback for lambdas / built-ins
+    parts.append(f"src={hashlib.sha256(src.encode()).hexdigest()[:16]}")
+
+    parts.extend(_hash_input_value(a) for a in args)
+    for k in sorted(kwargs):
+        if k == "out_dir":
+            continue   # SDK-injected, varies per call by design
+        parts.append(f"{k}={_hash_input_value(kwargs[k])}")
+
+    full = "|".join(parts)
+    return hashlib.sha256(full.encode()).hexdigest()[:24]
+
+
+# ---------------------------------------------------------------------------
 # StageResult and Stage
 # ---------------------------------------------------------------------------
 
@@ -144,6 +276,8 @@ class StageResult:
     exit_code: int
     stdout: str = ""
     stderr: str = ""
+    cached: bool = False
+    cache_key: str = ""
 
     @property
     def ok(self) -> bool:
@@ -208,6 +342,15 @@ class Stage:
     """A wrapped function that, when called, runs a container.
 
     Use :func:`stage` as a decorator rather than instantiating directly.
+
+    Caching
+    -------
+    When ``cache=True`` (default), the SDK computes a deterministic key from
+    (image, cpu, ram_gb, builder source, every input argument's content
+    hash) and reuses the previous out_dir if a sentinel file is present.
+    Set ``cache=False`` per stage, or call ``set_cache_enabled(False)`` to
+    disable globally, or set the env var ``BIOFLOW_NO_CACHE=1`` at process
+    start.
     """
     name: str
     func: Callable[..., str]
@@ -215,6 +358,7 @@ class Stage:
     cpu: int = 2
     ram_gb: float = 4.0
     description: str = ""
+    cache: bool = True
 
     # ------------------------------------------------------------------
     # Single-call execution
@@ -224,8 +368,33 @@ class Stage:
 
     def _run_once(self, args: tuple, kwargs: dict) -> StageResult:
         workspace = _get_workspace()
-        run_id = _next_run_id()
-        out_dir = workspace / f"{self.name}_{run_id:04d}"
+
+        # ------------------------- cache lookup -------------------------
+        cache_key = ""
+        cache_dir: Optional[Path] = None
+        cache_active = self.cache and is_cache_enabled()
+        if cache_active:
+            cache_key = _compute_cache_key(self, args, kwargs)
+            cache_dir = workspace / ".cache" / f"{self.name}__{cache_key}"
+            sentinel = cache_dir / CACHE_SENTINEL
+            if sentinel.exists():
+                log.info(
+                    f"CACHE HIT  stage={self.name}  key={cache_key[:8]}"
+                )
+                return StageResult(
+                    stage=self.name,
+                    out_dir=cache_dir,
+                    command="(cached)",
+                    exit_code=0,
+                    cached=True,
+                    cache_key=cache_key,
+                )
+            # Cache miss → use the cache_dir as out_dir so a successful run
+            # populates it in-place; subsequent identical calls hit.
+            out_dir = cache_dir
+        else:
+            run_id = _next_run_id()
+            out_dir = workspace / f"{self.name}_{run_id:04d}"
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # Inject out_dir as a keyword if the function accepts it
@@ -241,7 +410,11 @@ class Stage:
             )
 
         translated = _translate_command(command, workspace)
-        log.info(f"RUN  stage={self.name}  image={self.image}  out_dir={out_dir.name}")
+        log.info(
+            f"RUN  stage={self.name}  image={self.image}  "
+            f"out_dir={out_dir.name}"
+            + (f"  key={cache_key[:8]}" if cache_active else "")
+        )
 
         backend = _get_backend()
         run_kwargs = dict(
@@ -261,9 +434,17 @@ class Stage:
             exit_code=result.exit_code,
             stdout=result.stdout,
             stderr=result.stderr,
+            cached=False,
+            cache_key=cache_key,
         )
         if sr.ok:
             log.info(f"DONE stage={self.name}  out_dir={out_dir.name}")
+            # Mark cache complete only on success — failures must retry
+            if cache_active and cache_dir is not None:
+                try:
+                    (cache_dir / CACHE_SENTINEL).touch()
+                except OSError as exc:
+                    log.warning(f"Could not write cache sentinel: {exc}")
         else:
             log.error(
                 f"FAIL stage={self.name} exit={result.exit_code}  "
@@ -339,6 +520,7 @@ def stage(
     cpu: int = 2,
     ram_gb: float = 4.0,
     description: str = "",
+    cache: bool = True,
 ) -> Callable[[Callable[..., str]], Stage]:
     """Decorator: wrap a command-builder function into a :class:`Stage`.
 
@@ -346,6 +528,17 @@ def stage(
     will be executed inside *image*.  It receives the user's call
     arguments plus an injected keyword ``out_dir`` (a host ``Path`` to
     a fresh per-call directory inside the active workspace).
+
+    Parameters
+    ----------
+    image, cpu, ram_gb, description :
+        Container metadata.
+    cache :
+        When ``True`` (default), identical calls reuse a prior successful
+        out_dir.  Cache key = image + cpu + ram_gb + builder source +
+        every argument's content hash.  Set ``cache=False`` per stage to
+        force re-execution every time (e.g. for stages with side effects
+        such as network downloads with rate limits).
 
     Example
     -------
@@ -362,6 +555,7 @@ def stage(
             cpu=cpu,
             ram_gb=ram_gb,
             description=description or (func.__doc__ or "").strip().split("\n")[0],
+            cache=cache,
         )
         # Make the Stage object look reasonably like the original function
         functools.update_wrapper(s, func, updated=())

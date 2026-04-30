@@ -9,5 +9,8 @@ from bioflow.sdk import (  # noqa: E402,F401
     StageResult,
     set_workspace,
     set_backend,
+    set_cache_enabled,
+    is_cache_enabled,
+    clear_cache,
     MockBackend,
 )
