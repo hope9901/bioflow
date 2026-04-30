@@ -67,3 +67,9 @@ analysis/*/phylogeny_full/iqtree_full.uniqueseq.phy
 analysis/*/phylogeny_full/iqtree_full.bionj
 analysis/*/phylogeny_full/iqtree_full.contree
 analysis/*/phylogeny_full/iqtree_full.ckp.gz
+analysis/*/cafe/results/Base_asr.tre
+analysis/*/cafe/results/Base_branch_probabilities.tab
+analysis/*/cafe/results/Base_change.tab
+analysis/*/cafe/results/Base_count.tab
+analysis/*/cafe/results/Base_report.cafe
+analysis/*/cafe/tree_ultrametric.nwk

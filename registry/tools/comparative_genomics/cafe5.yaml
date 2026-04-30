@@ -1,0 +1,26 @@
+id: cafe5
+name: CAFE5
+version: "5.1.0"
+category: comparative_genomics
+stage: [comparative_genomics.step6]
+input_types: [gene_count_matrix, ultrametric_tree]
+output_types: [gain_loss_table, ancestral_states]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small, any]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: quay.io/biocontainers/cafe:5.1.0--h5ca1c30_1
+  pull_policy: if_not_present
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 2}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  cafe5 -i {gene_count_matrix} -t {ultrametric_tree} -p
+  -o {out_dir} -c {cpu}
+references: []
+citation: "Mendes et al. 2021, PMID 33325497"
+added: "2026-04-30"
+last_reviewed: "2026-04-30"

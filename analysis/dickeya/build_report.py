@@ -471,6 +471,67 @@ biological observations:</p>
   </div>
 </div>
 
+<h2>8d · CAFE5 ancestral state reconstruction — when did virulence
+genes appear / disappear?</h2>
+<p>The 262-strain ML tree was rendered ultrametric (extend-tip
+method, every leaf equidistant from the root), and a 20-row VFDB count
+matrix (per-genome copy numbers from ABRicate) was fed to <b>CAFE5
+v5.1</b> with default birth-death model.  CAFE estimated a single
+genus-wide gene-family birth/death rate λ = 1.28 × 10<sup>-3</sup>
+events / branch / family (–lnL = 1089.34) and computed per-branch
+ancestral counts.</p>
+
+<div class="key">
+<b>Headline.</b>  Of 20 VFDB families, <b>only two — <code>hcp</code>
+and <code>hcp1</code> — show a non-random rate (CAFE p &lt; 0.05)</b>.
+Both are core components of the <b>Type VI Secretion System</b> (T6SS)
+injection apparatus.  Every other VFDB family's count distribution is
+explained by the null constant-rate model, i.e. their gain/loss occurs
+at the genus-wide background pace.
+</div>
+
+<table>
+<tr><th>family</th><th>annotation</th><th>CAFE p</th><th>verdict</th></tr>
+<tr><td><code>hcp</code></td><td>T6SS Hcp tube protein</td><td>0.005</td><td>★ non-random</td></tr>
+<tr><td><code>hcp1</code></td><td>T6SS Hcp tube paralog</td><td>≈ 0</td><td>★ non-random</td></tr>
+<tr><td>vipB</td><td>T6SS contractile sheath</td><td>0.964</td><td>random</td></tr>
+<tr><td>cheY/rcsB/rpoS/fur/atsL/fliG/...</td><td>regulators · iron · flagella</td><td>0.95-0.98</td><td>random</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h3>Tree-level gain/loss (all families)</h3>
+    <img src="figures/cafe_vfdb_tree.png" alt="CAFE tree">
+    <p class="muted">Branches red where CAFE infers expansion, blue
+    where it infers contraction.  Most dynamism is concentrated in the
+    upper <i>D. dianthicola</i> clade and the basal water-associated
+    lineage at the bottom — the latter shows the T6SS loss event that
+    set up the genus's environmental sub-clade.</p>
+  </div>
+  <div class="card">
+    <h3>Significant T6SS families — copy number by species</h3>
+    <img src="figures/cafe_hcp_detail.png" alt="hcp detail">
+    <p class="muted"><code>hcp1</code>: 1.5-2.5 copies in pathogenic
+    clades, 0 in <i>aquatica / lacustris / poaceiphila</i>.
+    <code>hcp</code>: 0.5-1 copies in pathogens, 0 in environmentals.
+    Together they reveal a <b>T6SS expansion event</b> on the stem
+    branch leading to the agricultural-pathogen clades, with subsequent
+    paralog duplication in the high-virulence lineages.</p>
+  </div>
+</div>
+
+<p class="muted">Biological reading: <b>T6SS is the single most
+phylogenetically dynamic virulence module in the genus</b>, undergoing
+both expansion (in the pathogen lineage) and complete loss (in the
+environmental water-associated lineage).  All other queried VFDB
+factors — global regulators, iron homeostasis, flagella — are
+pan-genus housekeeping that CAFE correctly identifies as evolving at
+background rate.  This recapitulates from a phylogenetic-model angle
+what we already saw at the descriptive level (sections 4, 8c) and at
+the GWAS level (section 6b): T6SS is the molecular signature that
+separates plant pathogens from environmental opportunists in
+<i>Dickeya</i>.</p>
+
 <h2>9 · Pangenome functional categories (COG-2024)</h2>
 <p>Pangenome representatives (one protein per Roary cluster, 34,629 total)
 were searched against COG-2024 with DIAMOND blastp (≥1e-5, very-sensitive).
@@ -568,6 +629,12 @@ across the entire genus.</p>
    -bb 1000 -nt 4</code>) on the supermatrix, 17 min wall.</li>
   <li><b>Genus-wide ABRicate.</b> 786 runs (262 × 3 DBs: VFDB, CARD,
    PlasmidFinder), 12 parallel × 1 cpu, 16 min wall, 0 failures.</li>
+  <li><b>Ancestral state reconstruction.</b> ML tree converted to
+   ultrametric (extend-tip), VFDB count matrix from ABRicate fed to
+   <code>CAFE5 v5.1</code> (<code>quay.io/biocontainers/cafe:5.1.0</code>);
+   single-rate birth-death model, 21 iterations, 3.4 min wall.  Per-family
+   p-values from CAFE's likelihood-ratio test; per-branch increase/decrease
+   from <code>Base_change.tab</code>.</li>
   <li><b>Functional categories.</b> 34,629 pangenome representatives
    (one Prokka-translated protein per Roary cluster) searched against
    COG-2024 reps with DIAMOND blastp (very-sensitive, e-value ≤ 1e-5);

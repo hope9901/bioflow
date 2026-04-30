@@ -1,0 +1,10 @@
+#FamilyID	pvalue	Significant at 0.05
+atsH	0.959	n
+atsL	0.959	n
+cheY	0.962	n
+fur	0.952	n
+hcp	0.005	y
+hcp1	0	y
+rcsB	0.971	n
+rpoS	0.965	n
+vipB	0.964	n

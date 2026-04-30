@@ -1,0 +1,10 @@
+#FamilyID	Likelihood of Family
+atsH	-50.3297
+atsL	-49.7837
+cheY	-47.1081
+fur	-70.6172
+hcp	-335.679
+hcp1	-410.119
+rcsB	-39.0123
+rpoS	-42.634
+vipB	-44.0524
