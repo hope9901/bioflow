@@ -76,3 +76,4 @@ analysis/*/cafe/tree_ultrametric.nwk
 examples/_stage_demo_ws/
 examples/_cache_demo_ws/
 examples/_parallel_demo_ws/
+examples/_pipeline_demo_ws/

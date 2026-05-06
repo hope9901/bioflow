@@ -261,24 +261,61 @@ class TestDisableAndClear:
         go("v")              # miss again
         assert len(_isolated_runtime.calls) == 2
 
-    def test_env_var_disables_cache(self, monkeypatch, tmp_path):
-        # The env var is consulted at module import time, so we re-import.
-        import importlib
-        import bioflow.sdk as sdk_mod
+    def test_env_var_disables_cache(self, monkeypatch, _isolated_runtime):
+        # BIOFLOW_NO_CACHE is consulted on every is_cache_enabled() call,
+        # so flipping the env var takes effect immediately — no reload
+        # needed (which would otherwise rebind class identity and break
+        # other tests that imported these symbols).
+        @stage(image="busybox:latest")
+        def go(x): return f"echo {x}"
+
         monkeypatch.setenv("BIOFLOW_NO_CACHE", "1")
-        importlib.reload(sdk_mod)
-        assert sdk_mod._cache_enabled is False
-        # Restore default for downstream tests
+        assert is_cache_enabled() is False
+        go("v"); go("v"); go("v")
+        # Cache is disabled → 3 backend calls
+        assert len(_isolated_runtime.calls) == 3
+
         monkeypatch.delenv("BIOFLOW_NO_CACHE", raising=False)
-        importlib.reload(sdk_mod)
-        # Re-bind the package-level export so other tests see the fresh symbols
-        import bioflow
-        importlib.reload(bioflow)
+        assert is_cache_enabled() is True
 
 
 # ---------------------------------------------------------------------------
 # Map + cache interaction
 # ---------------------------------------------------------------------------
+
+class TestCrossStageCache:
+    """Phase 1D regression — a downstream stage's cache key must not depend
+    on whether its upstream was a fresh run or a cache hit.  Without the
+    StageResult-by-out_dir hashing, the second pipeline run would re-run
+    every downstream stage because their cache keys would shift."""
+
+    def test_downstream_hits_cache_when_upstream_is_cached(
+        self, _isolated_runtime,
+    ):
+        from bioflow import pipeline as _pipeline
+
+        @stage(image="busybox:latest")
+        def upstream(item):
+            return f"echo up {item}"
+
+        @stage(image="busybox:latest", depends_on=upstream)
+        def downstream(prev):
+            return f"echo down {prev.cache_key[:8]}"
+
+        @_pipeline(stages=[upstream, downstream])
+        def pipe(items):
+            up_result = upstream.map(items)
+            return downstream(up_result[0])
+
+        # First run — both stages execute
+        pipe(["a", "b"])
+        first_calls = len(_isolated_runtime.calls)
+        assert first_calls == 3   # 2 upstream + 1 downstream
+
+        # Second run — every backend call should be skipped
+        pipe(["a", "b"])
+        assert len(_isolated_runtime.calls) == first_calls
+
 
 class TestMapWithCache:
 
