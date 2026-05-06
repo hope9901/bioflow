@@ -49,11 +49,13 @@ import functools
 import hashlib
 import inspect
 import os
+import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, Iterator, Optional, Union
 
 from bioflow.core.logger import get_logger
 from bioflow.core.runner import (
@@ -176,6 +178,84 @@ def clear_cache(workspace: Optional[Path] = None) -> int:
             n += 1
     log.info(f"clear_cache: removed {n} entries under {cache_root}")
     return n
+
+
+# ---------------------------------------------------------------------------
+# Auto-parallelism + progress reporting
+# ---------------------------------------------------------------------------
+
+def _resolve_parallel(parallel: Union[int, str], cpu_per_stage: int) -> int:
+    """Translate ``parallel="auto"`` into a concrete worker count.
+
+    ``parallel=N`` (int) is honoured as-is, clamped to ≥ 1.
+    ``parallel="auto"`` returns ``max(1, host_cpu // cpu_per_stage)`` so
+    the host's logical CPU count is filled without oversubscription.
+    """
+    if isinstance(parallel, str):
+        if parallel.lower() != "auto":
+            raise ValueError(
+                f"parallel must be int or 'auto', got {parallel!r}"
+            )
+        host_cpu = os.cpu_count() or 1
+        return max(1, host_cpu // max(1, cpu_per_stage))
+    return max(1, int(parallel))
+
+
+_ProgressCallback = Callable[[int, int, "StageResult"], None]
+
+
+class _AnsiProgress:
+    """Minimal in-place progress bar — no tqdm dependency.
+
+    ``update(i, n, sr)`` paints
+        [###----- ]  4/12  cached=1  fail=0  stage_name
+    on a single TTY line.  Falls back to per-completion log lines on
+    non-TTY (CI logs, redirected stdout).
+    """
+
+    BAR_WIDTH = 28
+
+    def __init__(self, label: str, total: int) -> None:
+        self.label = label
+        self.total = total
+        self.cached = 0
+        self.failed = 0
+        self.tty = sys.stderr.isatty()
+        self.last = -1
+        self._lock = threading.Lock()
+        self._t0 = time.time()
+
+    def __call__(self, done: int, total: int, sr: "StageResult") -> None:
+        with self._lock:
+            if sr.cached:
+                self.cached += 1
+            if not sr.ok:
+                self.failed += 1
+            elapsed = time.time() - self._t0
+            rate = done / max(elapsed, 0.01)
+            eta = (total - done) / max(rate, 1e-3)
+            if self.tty:
+                filled = int(self.BAR_WIDTH * done / max(total, 1))
+                bar = "#" * filled + "-" * (self.BAR_WIDTH - filled)
+                msg = (
+                    f"\r  [{bar}] {done:>4d}/{total}  "
+                    f"cached={self.cached}  fail={self.failed}  "
+                    f"eta={eta:>4.0f}s  {self.label}"
+                )
+                sys.stderr.write(msg)
+                sys.stderr.flush()
+                if done == total:
+                    sys.stderr.write("\n")
+                    sys.stderr.flush()
+            else:
+                # Non-TTY: emit once every ~5% so logs aren't flooded
+                pct = int(100 * done / max(total, 1))
+                if pct // 5 != self.last // 5 or done == total:
+                    self.last = pct
+                    log.info(
+                        f"{self.label}: {done}/{total} "
+                        f"({pct}%)  cached={self.cached}  fail={self.failed}"
+                    )
 
 
 # ---------------------------------------------------------------------------
@@ -459,55 +539,224 @@ class Stage:
         self,
         inputs: Iterable[Any],
         *,
-        parallel: int = 1,
+        parallel: Union[int, str] = 1,
         stop_on_error: bool = False,
+        progress: Union[bool, _ProgressCallback] = False,
     ) -> list[StageResult]:
         """Run the stage once per element of *inputs*.
 
         Each element is passed as the **first positional argument** to the
-        wrapped function.  Use ``parallel`` > 1 to run N containers
-        concurrently via :class:`ThreadPoolExecutor`.
+        wrapped function.
 
-        Returns a list of :class:`StageResult` in the same order as
-        *inputs*.  Failed runs are included (with ``exit_code != 0``) unless
-        ``stop_on_error=True``, in which case the first failure raises
-        ``RuntimeError`` and outstanding work is cancelled.
+        Parameters
+        ----------
+        inputs :
+            Iterable of values; each becomes the sole positional arg per call.
+        parallel :
+            ``int`` — run N containers concurrently (1 = serial).
+            ``"auto"`` — choose ``host_cpu // stage.cpu`` so the host is
+            filled without oversubscription.
+        stop_on_error :
+            If True, the first failed run raises ``RuntimeError`` and
+            outstanding work is cancelled.  Default keeps the batch going
+            and returns the full result list (failures included).
+        progress :
+            ``True`` — show a single-line ANSI progress bar on stderr.
+            ``False`` (default) — silent.
+            *callable* — a custom hook ``cb(done, total, last_result)``.
+        """
+        return self._fanout(
+            ((item,), {}) for item in inputs
+        ).run(
+            parallel=parallel,
+            stop_on_error=stop_on_error,
+            progress=progress,
+            label=f"map[{self.name}]",
+            return_iterator=False,
+        )
+
+    def starmap(
+        self,
+        inputs: Iterable[tuple],
+        *,
+        parallel: Union[int, str] = 1,
+        stop_on_error: bool = False,
+        progress: Union[bool, _ProgressCallback] = False,
+    ) -> list[StageResult]:
+        """Like :meth:`map` but each element of *inputs* is unpacked as
+        positional args (or a ``(args, kwargs)`` 2-tuple for full control).
+
+        Examples
+        --------
+        Two positional args::
+
+            stage.starmap([(genome, ref), (g2, ref), (g3, ref)], parallel="auto")
+
+        Mixed positional + keyword::
+
+            stage.starmap([
+                ((g1,), {"reference": ref, "min_qual": 30}),
+                ((g2,), {"reference": ref, "min_qual": 30}),
+            ], parallel=4)
         """
         items = list(inputs)
-        results: list[Optional[StageResult]] = [None] * len(items)
+        normalised = []
+        for it in items:
+            if (
+                isinstance(it, tuple) and len(it) == 2
+                and isinstance(it[0], tuple) and isinstance(it[1], dict)
+            ):
+                normalised.append((it[0], it[1]))
+            else:
+                normalised.append((tuple(it), {}))
+        return self._fanout(iter(normalised)).run(
+            parallel=parallel,
+            stop_on_error=stop_on_error,
+            progress=progress,
+            label=f"starmap[{self.name}]",
+            return_iterator=False,
+        )
 
-        def _one(i: int, item: Any) -> tuple[int, StageResult]:
-            return i, self._run_once((item,), {})
+    def imap_unordered(
+        self,
+        inputs: Iterable[Any],
+        *,
+        parallel: Union[int, str] = 1,
+        progress: Union[bool, _ProgressCallback] = False,
+    ) -> Iterator[StageResult]:
+        """Yield :class:`StageResult` as each call completes (any order).
 
-        if parallel <= 1:
-            for i, item in enumerate(items):
-                _, results[i] = _one(i, item)
-                if stop_on_error and results[i] and not results[i].ok:
+        Useful for streaming long batches where you want to start consuming
+        outputs before all containers finish.  Caller cannot rely on input
+        order — pair the result with ``sr.cache_key`` or your own key if
+        ordering matters.
+        """
+        return self._fanout(
+            ((item,), {}) for item in inputs
+        ).run(
+            parallel=parallel,
+            stop_on_error=False,
+            progress=progress,
+            label=f"imap[{self.name}]",
+            return_iterator=True,
+        )
+
+    # ------------------------------------------------------------------
+    # Internal helper — shared engine for map / starmap / imap_unordered
+    # ------------------------------------------------------------------
+    def _fanout(self, plan_iter):
+        return _FanoutPlan(self, list(plan_iter))
+
+
+# ---------------------------------------------------------------------------
+# Fan-out execution engine
+# ---------------------------------------------------------------------------
+
+class _FanoutPlan:
+    """Internal — runs a list of (args, kwargs) tuples through one Stage.
+
+    Centralises parallel-resolution, progress reporting, error semantics,
+    and the serial-vs-parallel branch so map / starmap / imap_unordered
+    don't duplicate logic.
+    """
+
+    def __init__(self, stage_obj: "Stage", plan: list[tuple[tuple, dict]]):
+        self.stage = stage_obj
+        self.plan = plan
+
+    def run(
+        self,
+        *,
+        parallel: Union[int, str],
+        stop_on_error: bool,
+        progress: Union[bool, _ProgressCallback],
+        label: str,
+        return_iterator: bool,
+    ):
+        n = len(self.plan)
+        if n == 0:
+            return iter([]) if return_iterator else []
+
+        workers = _resolve_parallel(parallel, self.stage.cpu)
+        log.info(
+            f"FAN-OUT  stage={self.stage.name}  n={n}  parallel={workers}"
+            + (" (auto)" if isinstance(parallel, str) else "")
+        )
+
+        # Resolve progress reporter
+        if progress is True:
+            progress_cb: Optional[_ProgressCallback] = _AnsiProgress(label, n)
+        elif callable(progress):
+            progress_cb = progress
+        else:
+            progress_cb = None
+
+        def _one(i: int) -> tuple[int, StageResult]:
+            args, kwargs = self.plan[i]
+            return i, self.stage._run_once(args, kwargs)
+
+        if return_iterator:
+            return self._iter(workers, _one, progress_cb)
+
+        results: list[Optional[StageResult]] = [None] * n
+        done = 0
+
+        if workers == 1:
+            for i in range(n):
+                _, sr = _one(i)
+                results[i] = sr
+                done += 1
+                if progress_cb:
+                    progress_cb(done, n, sr)
+                if stop_on_error and not sr.ok:
                     raise RuntimeError(
-                        f"Stage {self.name!r} failed on input {item!r}; "
-                        f"see {results[i].out_dir}"
+                        f"Stage {self.stage.name!r} failed on input "
+                        f"#{i} ({self.plan[i][0]!r}); see {sr.out_dir}"
                     )
         else:
-            log.info(
-                f"MAP  stage={self.name}  n={len(items)}  parallel={parallel}"
-            )
-            with ThreadPoolExecutor(max_workers=parallel) as ex:
-                futs = {
-                    ex.submit(_one, i, item): i
-                    for i, item in enumerate(items)
-                }
-                for fut in as_completed(futs):
-                    i, sr = fut.result()
-                    results[i] = sr
-                    if stop_on_error and not sr.ok:
-                        for f in futs:
-                            f.cancel()
-                        raise RuntimeError(
-                            f"Stage {self.name!r} failed on input "
-                            f"{items[i]!r}; see {sr.out_dir}"
-                        )
-        # All slots populated by now
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                futs = {ex.submit(_one, i): i for i in range(n)}
+                try:
+                    for fut in as_completed(futs):
+                        i, sr = fut.result()
+                        results[i] = sr
+                        done += 1
+                        if progress_cb:
+                            progress_cb(done, n, sr)
+                        if stop_on_error and not sr.ok:
+                            for f in futs:
+                                f.cancel()
+                            raise RuntimeError(
+                                f"Stage {self.stage.name!r} failed on item "
+                                f"{i}; see {sr.out_dir}"
+                            )
+                except KeyboardInterrupt:
+                    log.warning("KeyboardInterrupt: cancelling pending tasks")
+                    for f in futs:
+                        f.cancel()
+                    raise
+
         return [r for r in results if r is not None]
+
+    def _iter(self, workers, _one, progress_cb):
+        n = len(self.plan)
+        done = 0
+        if workers == 1:
+            for i in range(n):
+                _, sr = _one(i)
+                done += 1
+                if progress_cb:
+                    progress_cb(done, n, sr)
+                yield sr
+        else:
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                futs = [ex.submit(_one, i) for i in range(n)]
+                for fut in as_completed(futs):
+                    _, sr = fut.result()
+                    done += 1
+                    if progress_cb:
+                        progress_cb(done, n, sr)
+                    yield sr
 
 
 # ---------------------------------------------------------------------------
