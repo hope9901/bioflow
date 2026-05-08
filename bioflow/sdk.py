@@ -264,6 +264,48 @@ class _AnsiProgress:
 
 
 # ---------------------------------------------------------------------------
+# Resource bumping for retries
+# ---------------------------------------------------------------------------
+
+def _bump_resources(
+    cpu: int, ram_gb: float, recipe: dict,
+) -> tuple[int, float]:
+    """Apply ``retry_with`` directives to one (cpu, ram_gb) pair.
+
+    Each value can be:
+      * a string ending in 'x' / 'X'  → multiplier (e.g. ``"2x"``)
+      * a numeric int / float         → absolute override
+      * anything else                 → ignored with a warning
+    """
+    new_cpu = cpu
+    new_ram = ram_gb
+    for key, val in (recipe or {}).items():
+        if key not in ("cpu", "ram_gb"):
+            log.warning(f"retry_with: ignoring unknown key {key!r}")
+            continue
+        try:
+            if isinstance(val, str) and val.lower().endswith("x"):
+                mult = float(val[:-1])
+                if key == "cpu":
+                    new_cpu = max(1, int(cpu * mult))
+                else:
+                    new_ram = ram_gb * mult
+            elif isinstance(val, (int, float)):
+                if key == "cpu":
+                    new_cpu = max(1, int(val))
+                else:
+                    new_ram = float(val)
+            else:
+                log.warning(
+                    f"retry_with[{key}]: invalid value {val!r}; "
+                    "expected int / float or 'Nx' string"
+                )
+        except (TypeError, ValueError) as exc:
+            log.warning(f"retry_with[{key}]: {exc}; leaving unchanged")
+    return new_cpu, new_ram
+
+
+# ---------------------------------------------------------------------------
 # Cache key computation
 # ---------------------------------------------------------------------------
 
@@ -458,6 +500,18 @@ class Stage:
     automatically wire output→input.  Used by ``@pipeline`` decorators
     to build a DAG diagram for ``show_graph()`` and ``dry_run()``."""
 
+    retry: int = 0
+    """Number of additional attempts after a non-zero exit code.
+    ``retry=0`` (default) means no retries — fail-fast.  ``retry=3``
+    runs the stage up to 4 times total."""
+
+    retry_with: dict = field(default_factory=dict)
+    """Per-attempt resource bumps.  Supports the syntax ``"2x"`` for a
+    multiplier or a numeric absolute.  Currently understood keys:
+    ``cpu``, ``ram_gb``.  Example: ``retry_with={"ram_gb": "2x"}`` makes
+    every retry double the RAM allocated to the container — useful when
+    the failure mode is OOM.  Untouched if ``retry == 0``."""
+
     # ------------------------------------------------------------------
     # Single-call execution
     # ------------------------------------------------------------------
@@ -508,23 +562,44 @@ class Stage:
             )
 
         translated = _translate_command(command, workspace)
-        log.info(
-            f"RUN  stage={self.name}  image={self.image}  "
-            f"out_dir={out_dir.name}"
-            + (f"  key={cache_key[:8]}" if cache_active else "")
-        )
 
         backend = _get_backend()
-        run_kwargs = dict(
-            image=self.image,
-            command=translated,
-            mounts={str(workspace): str(_CONTAINER_WORKSPACE)},
-            cpu=self.cpu,
-            ram_gb=self.ram_gb,
-            workdir=str(_CONTAINER_WORKSPACE),
-        )
-        result: CommandResult = backend.run(**run_kwargs)
+        max_attempts = 1 + max(0, int(self.retry))
 
+        # Resource bumping per attempt — each retry can multiply or
+        # override cpu / ram_gb according to retry_with.
+        cur_cpu = self.cpu
+        cur_ram = self.ram_gb
+        result: Optional[CommandResult] = None
+
+        for attempt in range(1, max_attempts + 1):
+            if attempt > 1:
+                cur_cpu, cur_ram = _bump_resources(
+                    cur_cpu, cur_ram, self.retry_with,
+                )
+                log.warning(
+                    f"RETRY stage={self.name}  attempt={attempt}/{max_attempts}"
+                    f"  cpu={cur_cpu}  ram_gb={cur_ram}"
+                )
+
+            log.info(
+                f"RUN  stage={self.name}  image={self.image}  "
+                f"out_dir={out_dir.name}"
+                + (f"  key={cache_key[:8]}" if cache_active else "")
+                + (f"  attempt={attempt}/{max_attempts}" if max_attempts > 1 else "")
+            )
+            result = backend.run(
+                image=self.image,
+                command=translated,
+                mounts={str(workspace): str(_CONTAINER_WORKSPACE)},
+                cpu=cur_cpu,
+                ram_gb=cur_ram,
+                workdir=str(_CONTAINER_WORKSPACE),
+            )
+            if result.exit_code == 0:
+                break
+
+        assert result is not None
         sr = StageResult(
             stage=self.name,
             out_dir=out_dir,
@@ -546,7 +621,9 @@ class Stage:
         else:
             log.error(
                 f"FAIL stage={self.name} exit={result.exit_code}  "
-                f"out_dir={out_dir.name}\n{(result.stderr or result.stdout)[-1000:]}"
+                f"out_dir={out_dir.name}"
+                + (f"  exhausted {max_attempts} attempts" if max_attempts > 1 else "")
+                + f"\n{(result.stderr or result.stdout)[-1000:]}"
             )
         return sr
 
@@ -789,6 +866,8 @@ def stage(
     description: str = "",
     cache: bool = True,
     depends_on: Optional[Union["Stage", Iterable["Stage"]]] = None,
+    retry: int = 0,
+    retry_with: Optional[dict] = None,
 ) -> Callable[[Callable[..., str]], Stage]:
     """Decorator: wrap a command-builder function into a :class:`Stage`.
 
@@ -845,6 +924,8 @@ def stage(
             description=description or (func.__doc__ or "").strip().split("\n")[0],
             cache=cache,
             depends_on=deps,
+            retry=int(retry),
+            retry_with=dict(retry_with or {}),
         )
         # Make the Stage object look reasonably like the original function
         functools.update_wrapper(s, func, updated=())

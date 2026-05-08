@@ -602,5 +602,59 @@ def recipe_cmd(
     raise typer.Exit(code=1)
 
 
+@app.command("llm")
+def llm_cmd(
+    action: str = typer.Argument(..., help="explain"),
+    term: Optional[str] = typer.Argument(None, help="Term to explain."),
+    context: str = typer.Option(
+        "comparative_genomics", "--context", "-c",
+        help="Short disambiguation hint (no data, just a category word).",
+    ),
+    backend: Optional[str] = typer.Option(
+        None, "--backend",
+        help="Override BIOFLOW_LLM_BACKEND env var "
+             "(anthropic | openai | ollama | disabled).",
+    ),
+    max_tokens: int = typer.Option(350, "--max-tokens",
+        help="Cap on response length."),
+) -> None:
+    """LLM companion (opt-in, privacy-first).
+
+    \b
+    Examples:
+      BIOFLOW_LLM_BACKEND=anthropic ANTHROPIC_API_KEY=... \\
+          bioflow llm explain "Bonferroni correction"
+
+      BIOFLOW_LLM_BACKEND=ollama bioflow llm explain "core gene alignment"
+
+    Phase 1 ships ONLY ``explain`` — pure terminology, zero data exposure.
+    Default backend is ``disabled`` so a fresh install never makes
+    network calls without explicit opt-in.
+    """
+    from bioflow.llm import explain, LlmDisabled, LlmError  # noqa: PLC0415
+
+    if action != "explain":
+        rprint(f"[red]Unknown action {action!r}.[/]  Phase-1 supports: explain")
+        raise typer.Exit(code=1)
+
+    if not term:
+        rprint("[red]A term to explain is required.[/]  e.g. "
+               "[dim]bioflow llm explain \"Bonferroni correction\"[/]")
+        raise typer.Exit(code=1)
+
+    try:
+        text = explain(term, context=context, max_tokens=max_tokens, backend=backend)
+    except LlmDisabled as exc:
+        rprint(f"[yellow]LLM disabled:[/] {exc}")
+        raise typer.Exit(code=2)
+    except LlmError as exc:
+        rprint(f"[red]LLM error:[/] {exc}")
+        raise typer.Exit(code=1)
+
+    rprint(f"\n[bold cyan]{term}[/]")
+    rprint(f"[dim]({context})[/]\n")
+    rprint(text)
+
+
 if __name__ == "__main__":
     app()
