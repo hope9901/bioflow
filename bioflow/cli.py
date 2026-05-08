@@ -491,5 +491,116 @@ def ncbi_cmd(
         raise typer.Exit(code=1)
 
 
+@app.command("recipe")
+def recipe_cmd(
+    action: str = typer.Argument(
+        ..., help="list | show <name> | run <name>"
+    ),
+    name: Optional[str] = typer.Argument(None, help="Recipe name."),
+    out: Path = typer.Option(
+        Path("bioflow_recipe_out"),
+        "--out", "-o",
+        help="Output workspace (created if missing).",
+    ),
+    taxon: Optional[str] = typer.Option(None, "--taxon", "-t",
+        help="NCBI taxon (for taxon-driven recipes)."),
+    max_genomes: int = typer.Option(30, "--max", "-n",
+        help="Cap on assemblies to fetch."),
+    reference_only: bool = typer.Option(True, "--reference-only/--all",
+        help="Use only RefSeq reference assemblies."),
+    identity: int = typer.Option(90, "--identity",
+        help="Identity threshold (recipe-specific; e.g. Roary -i)."),
+    dry_run: bool = typer.Option(False, "--dry-run",
+        help="Print the DAG without running."),
+) -> None:
+    """Curated end-to-end pipelines (the Tier-B entry point).
+
+    \b
+    Examples:
+      bioflow recipe list
+      bioflow recipe show pangenome
+      bioflow recipe run pangenome --taxon Dickeya --max 13
+      bioflow recipe run pangenome --taxon Pectobacterium --dry-run
+    """
+    from bioflow import recipes  # noqa: PLC0415  — lazy import
+    from bioflow.sdk import set_workspace  # noqa: PLC0415
+
+    if action == "list":
+        if not recipes.names():
+            rprint("[yellow]No recipes registered.[/]")
+            raise typer.Exit(code=0)
+        console.print("\n[bold]Available recipes:[/]\n")
+        for n in recipes.names():
+            p = recipes.get(n)
+            console.print(
+                f"  [cyan]{n:<20s}[/] [dim]({len(p.stages)} stages)[/]  "
+                f"{p.description}"
+            )
+        return
+
+    if not name:
+        rprint(f"[red]'{action}' requires a recipe name.[/]")
+        raise typer.Exit(code=1)
+
+    try:
+        pipe = recipes.get(name)
+    except KeyError as exc:
+        rprint(f"[red]{exc}[/]")
+        raise typer.Exit(code=1)
+
+    if action == "show":
+        pipe.show_graph()
+        return
+
+    if action == "run":
+        if dry_run:
+            rprint(f"\n[bold]Dry-run for recipe[/] [cyan]{name}[/]:\n")
+            pipe.show_graph()
+            return
+
+        out = out.resolve()
+        out.mkdir(parents=True, exist_ok=True)
+        set_workspace(out)
+        rprint(f"\n[bold]Running recipe[/] [cyan]{name}[/]  workspace=[dim]{out}[/]")
+
+        # Build kwargs intelligently — pass only what the pipeline accepts
+        import inspect  # noqa: PLC0415
+        sig = inspect.signature(pipe.func)
+        candidate = {
+            "taxon": taxon,
+            "out_dir": out,
+            "max_genomes": max_genomes,
+            "reference_only": reference_only,
+            "identity": identity,
+        }
+        kwargs = {
+            k: v for k, v in candidate.items()
+            if k in sig.parameters and v is not None
+        }
+        # Validate required parameters that have no default
+        missing = [
+            n for n, p in sig.parameters.items()
+            if p.default is inspect.Parameter.empty and n not in kwargs
+        ]
+        if missing:
+            rprint(
+                f"[red]Recipe {name!r} requires: {', '.join(missing)}.[/] "
+                f"Use --taxon, etc."
+            )
+            raise typer.Exit(code=1)
+
+        try:
+            result = pipe(**kwargs)
+        except Exception as exc:
+            rprint(f"[red]Recipe failed:[/] {exc}")
+            raise typer.Exit(code=1)
+
+        rprint(f"\n[green]✓ Recipe done.[/]  result.out_dir = {getattr(result, 'out_dir', '?')}")
+        return
+
+    rprint(f"[red]Unknown action {action!r}.[/]  Use: list | show | run")
+    raise typer.Exit(code=1)
+
+
 if __name__ == "__main__":
     app()

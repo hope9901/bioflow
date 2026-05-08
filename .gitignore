@@ -77,3 +77,7 @@ examples/_stage_demo_ws/
 examples/_cache_demo_ws/
 examples/_parallel_demo_ws/
 examples/_pipeline_demo_ws/
+analysis/*/pangenome_via_sdk/
+analysis/*/pangenome_sdk_13/
+analysis/*/sdk_13_run.log
+analysis/*/.cache/

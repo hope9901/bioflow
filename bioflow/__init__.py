@@ -16,3 +16,4 @@ from bioflow.sdk import (  # noqa: E402,F401
     clear_cache,
     MockBackend,
 )
+from bioflow.report import Report  # noqa: E402,F401
