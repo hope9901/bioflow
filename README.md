@@ -1,6 +1,6 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-391%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-412%20passed-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -381,6 +381,7 @@ critical execution path — it only proposes text the user reviews.
 | `bioflow llm new-tool --tool prokka --help-file h.txt` | tool name + its public `--help` output | opt-in |
 | `bioflow llm suggest --tool prokka --intent "..."` | tool name + user-typed intent string | opt-in |
 | `bioflow llm redact` (stdin → stdout) | nothing — local-only utility | always works |
+| `bioflow llm audit` | nothing — reads local log | always works |
 
 **Backends**: `disabled` (default) · `ollama` (local) · `anthropic` (cloud) · `openai` (cloud).
 
@@ -392,6 +393,12 @@ critical execution path — it only proposes text the user reviews.
 
 **Resolution order** for `BIOFLOW_LLM_*` knobs:
 explicit function argument → env var → `~/.bioflow/config.yaml` → `disabled`.
+
+**Daily cost cap** (cloud backends only): set `daily_cost_cap_usd` in
+`~/.bioflow/config.yaml` (or `BIOFLOW_LLM_DAILY_CAP_USD` env var).  Any
+call whose pre-estimate would push the day's cumulative spend above the
+cap is refused with a clear message — no token is sent to the provider.
+Inspect today's usage with `bioflow llm audit`.
 
 ## License
 

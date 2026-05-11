@@ -632,7 +632,7 @@ def recipe_cmd(
 @app.command("llm")
 def llm_cmd(
     action: str = typer.Argument(...,
-        help="explain | diagnose | redact | new-tool | suggest"),
+        help="explain | diagnose | redact | new-tool | suggest | audit"),
     term: Optional[str] = typer.Argument(None,
         help="For 'explain': the term.  For others: ignored."),
     context: str = typer.Option(
@@ -689,7 +689,8 @@ def llm_cmd(
     network calls without explicit opt-in.
     """
     from bioflow.llm import (  # noqa: PLC0415
-        explain, diagnose_failure, redact, LlmDisabled, LlmError,
+        explain, diagnose_failure, redact,
+        LlmDisabled, LlmError, CapExceeded,
     )
 
     if action == "explain":
@@ -701,6 +702,9 @@ def llm_cmd(
         except LlmDisabled as exc:
             rprint(f"[yellow]LLM disabled:[/] {exc}")
             raise typer.Exit(code=2)
+        except CapExceeded as exc:
+            rprint(f"[yellow]Cost cap reached:[/] {exc}")
+            raise typer.Exit(code=3)
         except LlmError as exc:
             rprint(f"[red]LLM error:[/] {exc}")
             raise typer.Exit(code=1)
@@ -785,6 +789,30 @@ def llm_cmd(
         print(yaml)
         return
 
+    if action == "audit":
+        from bioflow.llm import audit as _audit  # noqa: PLC0415
+        entries = _audit.read_entries(limit=20)
+        if not entries:
+            rprint("[yellow]No LLM calls recorded yet.[/]")
+            return
+        today = _audit.today_total_usd()
+        cap = _audit._load_cap()
+        rprint(f"\n[bold]LLM audit log[/]  ({_audit.AUDIT_PATH})\n")
+        for e in entries:
+            cost = e.get("cost_usd")
+            cost_str = f"${cost:.5f}" if isinstance(cost, (int, float)) else "—"
+            rprint(
+                f"  [dim]{e.get('ts','?'):<25s}[/]  "
+                f"{e.get('action','?'):<20s}  "
+                f"{e.get('backend','?'):<10s}  "
+                f"in={e.get('input_tokens',0):>5d}  "
+                f"out={e.get('output_tokens',0):>5d}  "
+                f"cost={cost_str}"
+            )
+        rprint(f"\n[bold]Today (UTC):[/] ${today:.4f}"
+               + (f"  [dim]/ cap ${cap:.2f}[/]" if cap is not None else ""))
+        return
+
     if action == "suggest":
         from bioflow.llm import suggest_command  # noqa: PLC0415
         if not tool_name or not intent:
@@ -807,7 +835,7 @@ def llm_cmd(
         return
 
     rprint(f"[red]Unknown action {action!r}.[/]  "
-           "Use: explain | diagnose | redact | new-tool | suggest")
+           "Use: explain | diagnose | redact | new-tool | suggest | audit")
     raise typer.Exit(code=1)
 
 
@@ -899,6 +927,19 @@ def setup_cmd(
         cfg["model"] = model
     if backend == "ollama":
         cfg["endpoint"] = "http://localhost:11434"
+
+    # Optional daily cost cap — only relevant for cloud backends
+    if backend in ("anthropic", "openai") and not yes:
+        cap_str = typer.prompt(
+            "Daily cost cap (USD, 0 = no cap)",
+            default="5.00",
+        )
+        try:
+            cap_val = float(cap_str)
+        except ValueError:
+            cap_val = 0.0
+        if cap_val > 0:
+            cfg["daily_cost_cap_usd"] = cap_val
 
     path = save_config(cfg)
     rprint(f"\n[green]✓ Saved[/] → [dim]{path}[/]")

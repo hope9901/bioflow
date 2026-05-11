@@ -30,6 +30,23 @@ from bioflow.core.logger import get_logger
 
 log = get_logger()
 
+# Re-export L6 cap exception so callers don't have to know about the
+# audit submodule directly.
+from bioflow.llm.audit import CapExceeded  # noqa: E402
+
+
+def _coerce_int(v, *, default: int) -> int:
+    """Best-effort int conversion that falls back to *default* on failure.
+
+    Used to recover when an SDK response's ``usage`` block is a test
+    MagicMock (not a real int) — we still need to write valid JSON to
+    the audit log.
+    """
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return int(default)
+
 __all__ = [
     "explain",
     "diagnose_failure",
@@ -41,6 +58,7 @@ __all__ = [
     "save_config",
     "LlmError",
     "LlmDisabled",
+    "CapExceeded",
 ]
 
 
@@ -467,8 +485,13 @@ def _call_anthropic(prompt: dict, *, max_tokens: int) -> str:
         raise LlmError(
             "Install the `anthropic` package: pip install anthropic"
         ) from exc
+    from bioflow.llm import audit as _audit   # noqa: PLC0415
     client = anthropic.Anthropic(api_key=api_key)
     model = _model_for_backend("anthropic")
+    # Pre-call cap check using a rough input-token estimate
+    est_input = _audit.estimate_input_tokens(prompt["system"] + prompt["user"])
+    est_cost = _audit.estimate_cost("anthropic", model, est_input, max_tokens) or 0.0
+    _audit.check_cap(est_cost)
     try:
         msg = client.messages.create(
             model=model,
@@ -478,7 +501,25 @@ def _call_anthropic(prompt: dict, *, max_tokens: int) -> str:
         )
     except Exception as exc:
         raise LlmError(f"anthropic call failed: {exc}") from exc
-    return msg.content[0].text.strip()
+    text = msg.content[0].text.strip()
+    # Actual token counts from the API (when available); fall back to
+    # the cheap estimator if the SDK didn't surface usage (or it's a
+    # MagicMock in a unit test).
+    usage = getattr(msg, "usage", None)
+    in_tok = _coerce_int(
+        getattr(usage, "input_tokens", None), default=est_input,
+    )
+    out_tok = _coerce_int(
+        getattr(usage, "output_tokens", None),
+        default=_audit.estimate_input_tokens(text),
+    )
+    _audit.record(
+        action="anthropic_call", backend="anthropic", model=model,
+        input_tokens=in_tok, output_tokens=out_tok,
+        cost_usd=_audit.estimate_cost("anthropic", model, in_tok, out_tok),
+        redacted_prompt=prompt["user"],
+    )
+    return text
 
 
 def _call_openai(prompt: dict, *, max_tokens: int) -> str:
@@ -493,8 +534,11 @@ def _call_openai(prompt: dict, *, max_tokens: int) -> str:
         raise LlmError(
             "Install the `openai` package: pip install openai"
         ) from exc
+    from bioflow.llm import audit as _audit   # noqa: PLC0415
     client = OpenAI(api_key=api_key)
     model = _model_for_backend("openai")
+    est_input = _audit.estimate_input_tokens(prompt["system"] + prompt["user"])
+    _audit.check_cap(_audit.estimate_cost("openai", model, est_input, max_tokens) or 0.0)
     try:
         resp = client.chat.completions.create(
             model=model,
@@ -506,7 +550,22 @@ def _call_openai(prompt: dict, *, max_tokens: int) -> str:
         )
     except Exception as exc:
         raise LlmError(f"openai call failed: {exc}") from exc
-    return resp.choices[0].message.content.strip()
+    text = resp.choices[0].message.content.strip()
+    usage = getattr(resp, "usage", None)
+    in_tok = _coerce_int(
+        getattr(usage, "prompt_tokens", None), default=est_input,
+    )
+    out_tok = _coerce_int(
+        getattr(usage, "completion_tokens", None),
+        default=_audit.estimate_input_tokens(text),
+    )
+    _audit.record(
+        action="openai_call", backend="openai", model=model,
+        input_tokens=in_tok, output_tokens=out_tok,
+        cost_usd=_audit.estimate_cost("openai", model, in_tok, out_tok),
+        redacted_prompt=prompt["user"],
+    )
+    return text
 
 
 def _call_ollama(prompt: dict, *, max_tokens: int) -> str:
@@ -543,7 +602,17 @@ def _call_ollama(prompt: dict, *, max_tokens: int) -> str:
         ) from exc
     except Exception as exc:
         raise LlmError(f"ollama call failed: {exc}") from exc
-    return data.get("response", "").strip() or "(empty response)"
+    text = data.get("response", "").strip() or "(empty response)"
+    # Local model — free, but still audited for completeness
+    from bioflow.llm import audit as _audit   # noqa: PLC0415
+    _audit.record(
+        action="ollama_call", backend="ollama", model=model,
+        input_tokens=_audit.estimate_input_tokens(prompt["system"] + prompt["user"]),
+        output_tokens=_audit.estimate_input_tokens(text),
+        cost_usd=0.0,
+        redacted_prompt=prompt["user"],
+    )
+    return text
 
 
 # ---------------------------------------------------------------------------
