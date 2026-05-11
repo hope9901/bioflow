@@ -61,3 +61,5 @@ from bioflow.recipes.comparative_genomics import download_taxon as _dl    # noqa
 from bioflow.recipes.comparative_genomics import ani_matrix as _ani       # noqa
 from bioflow.recipes.comparative_genomics import gwas as _gwas            # noqa
 from bioflow.recipes.comparative_genomics import amr_vf_catalogue as _amr  # noqa
+from bioflow.recipes.comparative_genomics import cafe_evolution as _cafe  # noqa
+from bioflow.recipes.comparative_genomics import cog_enrichment as _cog   # noqa

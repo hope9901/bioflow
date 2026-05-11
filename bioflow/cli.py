@@ -517,7 +517,17 @@ def recipe_cmd(
     traits_csv: Optional[Path] = typer.Option(None, "--traits-csv",
         help="Scoary-format binary traits CSV (gwas)."),
     gpa_csv: Optional[Path] = typer.Option(None, "--gpa-csv",
-        help="Roary gene_presence_absence.csv (gwas, phylogeny fallback)."),
+        help="Roary gene_presence_absence.csv (gwas, phylogeny fallback, cog_enrichment)."),
+    tree: Optional[Path] = typer.Option(None, "--tree",
+        help="Ultrametric Newick tree (cafe_evolution)."),
+    count_table: Optional[Path] = typer.Option(None, "--count-table",
+        help="CAFE-format family count matrix (cafe_evolution)."),
+    pangenome_faa: Optional[Path] = typer.Option(None, "--pangenome-faa",
+        help="One protein per Roary cluster (cog_enrichment)."),
+    cog_faa: Optional[Path] = typer.Option(None, "--cog-faa",
+        help="COG-2024 reference FASTA (cog_enrichment)."),
+    cog_def: Optional[Path] = typer.Option(None, "--cog-def",
+        help="NCBI cog-24.def.tab (cog_enrichment)."),
     dry_run: bool = typer.Option(False, "--dry-run",
         help="Print the DAG without running."),
 ) -> None:
@@ -584,6 +594,11 @@ def recipe_cmd(
             "gff_dir": gff_dir,
             "traits_csv": traits_csv,
             "gpa_csv": gpa_csv,
+            "tree": tree,
+            "count_table": count_table,
+            "pangenome_faa": pangenome_faa,
+            "cog_faa": cog_faa,
+            "cog_def": cog_def,
         }
         kwargs = {
             k: v for k, v in candidate.items()

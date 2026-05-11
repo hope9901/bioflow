@@ -1,6 +1,6 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-382%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-391%20passed-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
