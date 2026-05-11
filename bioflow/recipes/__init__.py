@@ -57,3 +57,7 @@ def names() -> list:
 # noqa: E402,F401 — these imports trigger registration as a side effect
 from bioflow.recipes.comparative_genomics import pangenome as _pangenome   # noqa
 from bioflow.recipes.comparative_genomics import phylogeny as _phylogeny   # noqa
+from bioflow.recipes.comparative_genomics import download_taxon as _dl    # noqa
+from bioflow.recipes.comparative_genomics import ani_matrix as _ani       # noqa
+from bioflow.recipes.comparative_genomics import gwas as _gwas            # noqa
+from bioflow.recipes.comparative_genomics import amr_vf_catalogue as _amr  # noqa

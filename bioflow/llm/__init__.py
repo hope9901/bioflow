@@ -22,13 +22,20 @@ Usage::
 from __future__ import annotations
 
 import os
-from typing import Optional
+from pathlib import Path
+from typing import Iterable, Optional
 
 from bioflow.core.logger import get_logger
 
 log = get_logger()
 
-__all__ = ["explain", "LlmError", "LlmDisabled"]
+__all__ = [
+    "explain",
+    "diagnose_failure",
+    "redact",
+    "LlmError",
+    "LlmDisabled",
+]
 
 
 class LlmError(RuntimeError):
@@ -136,6 +143,149 @@ def _build_prompt(term: str, context: str) -> dict:
         "Explain in 2-4 sentences."
     )
     return {"system": _SYSTEM_PROMPT, "user": user}
+
+
+# ---------------------------------------------------------------------------
+# Redaction — for L2 (error diagnosis)
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+_DEFAULT_REDACT_PATTERNS: tuple = (
+    # Windows user paths: C:\Users\someone\... → C:\Users\<USER>\...
+    (_re.compile(r"([A-Z]:\\Users\\)[^\\\s]+", _re.IGNORECASE), r"\1<USER>"),
+    # Unix user paths: /Users/foo/... or /home/foo/...
+    (_re.compile(r"(/Users/|/home/)[^/\s]+"), r"\1<USER>"),
+    # Email addresses
+    (_re.compile(
+        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    ), "<EMAIL>"),
+    # IPv4 addresses
+    (_re.compile(
+        r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
+    ), "<IP>"),
+    # API keys / long tokens (hex or base64-ish, 24+ chars)
+    (_re.compile(r"\b[A-Za-z0-9_\-]{40,}\b"), "<TOKEN>"),
+)
+
+
+def redact(
+    text: str,
+    *,
+    workspace: Optional[str] = None,
+    extra_patterns: Optional[Iterable[tuple]] = None,
+) -> str:
+    """Redact paths, emails, IPs, and long tokens from *text*.
+
+    Sanitiser used before any LLM error-diagnosis call.  Always call
+    this; never feed raw stderr to a remote model.
+
+    Parameters
+    ----------
+    text :
+        The string to sanitise.
+    workspace :
+        Absolute path of the bioflow workspace.  Replaced with
+        ``<WORKSPACE>`` before per-pattern rules.
+    extra_patterns :
+        Iterable of ``(compiled_regex, replacement)`` pairs applied in
+        addition to the defaults.  For project-specific tokens, e.g.
+        ``patient_\\d+``.
+    """
+    if not text:
+        return ""
+    out = text
+    if workspace:
+        out = out.replace(str(workspace), "<WORKSPACE>")
+    for pat, repl in _DEFAULT_REDACT_PATTERNS:
+        out = pat.sub(repl, out)
+    for pat, repl in (extra_patterns or ()):
+        out = pat.sub(repl, out)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# L2 — Error diagnosis
+# ---------------------------------------------------------------------------
+
+_DIAGNOSE_SYSTEM_PROMPT = (
+    "You are a bioinformatics CLI debugging assistant.  The user gives "
+    "you a redacted shell command and the redacted last lines of its "
+    "stderr.  Diagnose the most likely cause in ONE short paragraph, "
+    "then propose a fixed command if one is obvious.  Keep responses "
+    "under 8 lines.  Never ask for more data; work with what you have. "
+    "Never claim certainty when the failure is ambiguous."
+)
+
+
+def diagnose_failure(
+    *,
+    stage_name: str,
+    command: str,
+    stderr: str,
+    exit_code: int,
+    workspace: Optional[str] = None,
+    extra_patterns: Optional[Iterable[tuple]] = None,
+    max_tokens: int = 400,
+    backend: Optional[str] = None,
+    audit_log: Optional["Path"] = None,
+) -> str:
+    """Ask the configured LLM to diagnose a failed stage.
+
+    All inputs are redacted first.  The LLM never auto-runs the
+    suggestion; the caller / CLI is responsible for prompting the user
+    before re-execution.  When *audit_log* is set, the redacted prompt
+    and response are appended for sanity checks.
+
+    Raises :class:`LlmDisabled` if no backend is configured (default).
+    """
+    chosen = (backend or _backend()).lower().strip()
+    if chosen in ("disabled", "off", ""):
+        raise LlmDisabled(
+            "LLM is disabled.  Enable with BIOFLOW_LLM_BACKEND=…"
+        )
+
+    # Sanitise inputs BEFORE building the prompt
+    safe_cmd = redact(command, workspace=workspace, extra_patterns=extra_patterns)
+    safe_err = redact(stderr or "", workspace=workspace, extra_patterns=extra_patterns)
+    # Truncate stderr to the last 2 KB — the bottom is usually where
+    # the real failure lives, and shorter prompts cost less.
+    if len(safe_err) > 2000:
+        safe_err = "…<truncated>…\n" + safe_err[-2000:]
+
+    user = (
+        f"Stage: {stage_name}\n"
+        f"Exit code: {exit_code}\n"
+        f"Command (redacted):\n{safe_cmd}\n\n"
+        f"Last stderr (redacted):\n{safe_err}\n\n"
+        "Diagnose."
+    )
+    prompt = {"system": _DIAGNOSE_SYSTEM_PROMPT, "user": user}
+    log.info(
+        f"llm.diagnose_failure: backend={chosen}  stage={stage_name}  "
+        f"command_chars={len(safe_cmd)}  stderr_chars={len(safe_err)}"
+    )
+
+    if chosen == "anthropic":
+        text = _call_anthropic(prompt, max_tokens=max_tokens)
+    elif chosen == "openai":
+        text = _call_openai(prompt, max_tokens=max_tokens)
+    elif chosen == "ollama":
+        text = _call_ollama(prompt, max_tokens=max_tokens)
+    else:
+        raise LlmError(f"Unknown LLM backend {chosen!r}")
+
+    if audit_log is not None:
+        from pathlib import Path as _P
+        from bioflow.io import write_text as _wt, read_text as _rt
+        ap = _P(audit_log)
+        old = _rt(ap) if ap.exists() else ""
+        _wt(ap, old + (
+            f"\n=== {stage_name} | exit={exit_code} | backend={chosen} ===\n"
+            f"--- redacted prompt ---\n{user}\n"
+            f"--- response ---\n{text}\n"
+        ))
+    return text
 
 
 # ---------------------------------------------------------------------------

@@ -510,6 +510,14 @@ def recipe_cmd(
         help="Use only RefSeq reference assemblies."),
     identity: int = typer.Option(90, "--identity",
         help="Identity threshold (recipe-specific; e.g. Roary -i)."),
+    genome_dir: Optional[Path] = typer.Option(None, "--genome-dir",
+        help="Directory of *.fna inputs (ani_matrix, amr_vf_catalogue)."),
+    gff_dir: Optional[Path] = typer.Option(None, "--gff-dir",
+        help="Directory of Prokka GFF inputs (phylogeny)."),
+    traits_csv: Optional[Path] = typer.Option(None, "--traits-csv",
+        help="Scoary-format binary traits CSV (gwas)."),
+    gpa_csv: Optional[Path] = typer.Option(None, "--gpa-csv",
+        help="Roary gene_presence_absence.csv (gwas, phylogeny fallback)."),
     dry_run: bool = typer.Option(False, "--dry-run",
         help="Print the DAG without running."),
 ) -> None:
@@ -572,6 +580,10 @@ def recipe_cmd(
             "max_genomes": max_genomes,
             "reference_only": reference_only,
             "identity": identity,
+            "genome_dir": genome_dir,
+            "gff_dir": gff_dir,
+            "traits_csv": traits_csv,
+            "gpa_csv": gpa_csv,
         }
         kwargs = {
             k: v for k, v in candidate.items()
@@ -604,8 +616,9 @@ def recipe_cmd(
 
 @app.command("llm")
 def llm_cmd(
-    action: str = typer.Argument(..., help="explain"),
-    term: Optional[str] = typer.Argument(None, help="Term to explain."),
+    action: str = typer.Argument(..., help="explain | diagnose | redact"),
+    term: Optional[str] = typer.Argument(None,
+        help="For 'explain': the term.  For others: ignored."),
     context: str = typer.Option(
         "comparative_genomics", "--context", "-c",
         help="Short disambiguation hint (no data, just a category word).",
@@ -617,43 +630,104 @@ def llm_cmd(
     ),
     max_tokens: int = typer.Option(350, "--max-tokens",
         help="Cap on response length."),
+    # diagnose-specific
+    stage: Optional[str] = typer.Option(None, "--stage",
+        help="[diagnose] failed stage name."),
+    command: Optional[str] = typer.Option(None, "--command",
+        help="[diagnose] the failed shell command (will be redacted)."),
+    stderr_path: Optional[Path] = typer.Option(None, "--stderr",
+        help="[diagnose] path to a file holding the failed command's stderr."),
+    exit_code: int = typer.Option(1, "--exit-code",
+        help="[diagnose] exit code returned by the failed run."),
+    workspace: Optional[Path] = typer.Option(None, "--workspace",
+        help="[diagnose] workspace path to redact in the prompt."),
+    audit_log: Optional[Path] = typer.Option(None, "--audit",
+        help="[diagnose] append redacted prompt + response to this file."),
 ) -> None:
     """LLM companion (opt-in, privacy-first).
 
     \b
-    Examples:
-      BIOFLOW_LLM_BACKEND=anthropic ANTHROPIC_API_KEY=... \\
-          bioflow llm explain "Bonferroni correction"
+    Phase 1 — terminology Q&A (zero data exposure):
+      bioflow llm explain "Bonferroni correction"
 
-      BIOFLOW_LLM_BACKEND=ollama bioflow llm explain "core gene alignment"
+    \b
+    Phase 2 — error diagnosis (opt-in, all inputs redacted):
+      bioflow llm diagnose --stage prokka --exit-code 1 \\
+          --command "$(cat last_command.sh)" \\
+          --stderr last.stderr.log
 
-    Phase 1 ships ONLY ``explain`` — pure terminology, zero data exposure.
+    \b
+    Helper:
+      bioflow llm redact   # paste text on stdin, get redacted text on stdout
+
     Default backend is ``disabled`` so a fresh install never makes
     network calls without explicit opt-in.
     """
-    from bioflow.llm import explain, LlmDisabled, LlmError  # noqa: PLC0415
+    from bioflow.llm import (  # noqa: PLC0415
+        explain, diagnose_failure, redact, LlmDisabled, LlmError,
+    )
 
-    if action != "explain":
-        rprint(f"[red]Unknown action {action!r}.[/]  Phase-1 supports: explain")
-        raise typer.Exit(code=1)
+    if action == "explain":
+        if not term:
+            rprint("[red]A term to explain is required.[/]")
+            raise typer.Exit(code=1)
+        try:
+            text = explain(term, context=context, max_tokens=max_tokens, backend=backend)
+        except LlmDisabled as exc:
+            rprint(f"[yellow]LLM disabled:[/] {exc}")
+            raise typer.Exit(code=2)
+        except LlmError as exc:
+            rprint(f"[red]LLM error:[/] {exc}")
+            raise typer.Exit(code=1)
+        rprint(f"\n[bold cyan]{term}[/]")
+        rprint(f"[dim]({context})[/]\n")
+        rprint(text)
+        return
 
-    if not term:
-        rprint("[red]A term to explain is required.[/]  e.g. "
-               "[dim]bioflow llm explain \"Bonferroni correction\"[/]")
-        raise typer.Exit(code=1)
+    if action == "diagnose":
+        if not stage or not command:
+            rprint("[red]--stage and --command are required for diagnose.[/]")
+            raise typer.Exit(code=1)
+        stderr_text = ""
+        if stderr_path:
+            try:
+                from bioflow.io import read_text  # noqa: PLC0415
+                stderr_text = read_text(stderr_path)
+            except OSError as exc:
+                rprint(f"[red]Could not read stderr file:[/] {exc}")
+                raise typer.Exit(code=1)
+        try:
+            text = diagnose_failure(
+                stage_name=stage,
+                command=command,
+                stderr=stderr_text,
+                exit_code=exit_code,
+                workspace=str(workspace) if workspace else None,
+                max_tokens=max_tokens,
+                backend=backend,
+                audit_log=audit_log,
+            )
+        except LlmDisabled as exc:
+            rprint(f"[yellow]LLM disabled:[/] {exc}")
+            raise typer.Exit(code=2)
+        except LlmError as exc:
+            rprint(f"[red]LLM error:[/] {exc}")
+            raise typer.Exit(code=1)
+        rprint(f"\n[bold]Diagnosis for stage[/] [cyan]{stage}[/] (exit={exit_code}):\n")
+        rprint(text)
+        rprint("\n[dim](LLM proposes — review before re-running)[/]")
+        return
 
-    try:
-        text = explain(term, context=context, max_tokens=max_tokens, backend=backend)
-    except LlmDisabled as exc:
-        rprint(f"[yellow]LLM disabled:[/] {exc}")
-        raise typer.Exit(code=2)
-    except LlmError as exc:
-        rprint(f"[red]LLM error:[/] {exc}")
-        raise typer.Exit(code=1)
+    if action == "redact":
+        # Read from stdin, emit redacted output (also a Tier-B safety
+        # check: paste a stderr log to see what would have been sent)
+        import sys as _sys  # noqa: PLC0415
+        raw = _sys.stdin.read()
+        rprint(redact(raw, workspace=str(workspace) if workspace else None))
+        return
 
-    rprint(f"\n[bold cyan]{term}[/]")
-    rprint(f"[dim]({context})[/]\n")
-    rprint(text)
+    rprint(f"[red]Unknown action {action!r}.[/]  Use: explain | diagnose | redact")
+    raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

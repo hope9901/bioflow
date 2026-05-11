@@ -78,6 +78,8 @@ __all__ = [
     "set_cache_enabled",
     "is_cache_enabled",
     "clear_cache",
+    "set_log_streaming",
+    "is_log_streaming_enabled",
     "MockBackend",          # for unit tests
 ]
 
@@ -91,6 +93,7 @@ _active_workspace: Optional[Path] = None
 _active_backend: Optional[ContainerBackend] = None
 _run_counter = 0
 _cache_enabled: bool = True   # default ON; opt-out via env or set_cache_enabled
+_log_streaming_enabled: bool = False   # default OFF; very chatty
 
 
 def _env_disables_cache() -> bool:
@@ -164,6 +167,27 @@ def set_cache_enabled(flag: bool) -> None:
 
 def is_cache_enabled() -> bool:
     return _cache_enabled and not _env_disables_cache()
+
+
+def set_log_streaming(flag: bool) -> None:
+    """Toggle real-time container stdout/stderr streaming.
+
+    When True, each running container's output is forwarded to the
+    bioflow logger at INFO level, prefixed by ``[stage_name]``.  Useful
+    for long-running stages where ``tail -f`` would otherwise be needed.
+
+    Also enabled by setting env var ``BIOFLOW_STREAM_LOGS=1``.  Default
+    is OFF because some tools (e.g. Roary, IQ-TREE) emit several MB of
+    chatty output that drowns the log.
+    """
+    global _log_streaming_enabled
+    _log_streaming_enabled = bool(flag)
+
+
+def is_log_streaming_enabled() -> bool:
+    if os.environ.get("BIOFLOW_STREAM_LOGS", "").lower() in ("1", "true", "yes"):
+        return True
+    return _log_streaming_enabled
 
 
 def clear_cache(workspace: Optional[Path] = None) -> int:
@@ -588,7 +612,7 @@ class Stage:
                 + (f"  key={cache_key[:8]}" if cache_active else "")
                 + (f"  attempt={attempt}/{max_attempts}" if max_attempts > 1 else "")
             )
-            result = backend.run(
+            run_kw = dict(
                 image=self.image,
                 command=translated,
                 mounts={str(workspace): str(_CONTAINER_WORKSPACE)},
@@ -596,6 +620,19 @@ class Stage:
                 ram_gb=cur_ram,
                 workdir=str(_CONTAINER_WORKSPACE),
             )
+            # Only pass log_callback when (a) the backend supports
+            # streaming (DockerBackend sets _STREAMING_SUPPORTED=True;
+            # MockBackend doesn't accept kwargs it doesn't know about)
+            # AND (b) the user opted in.
+            if (
+                is_log_streaming_enabled()
+                and getattr(backend, "_STREAMING_SUPPORTED", False)
+            ):
+                _stage_name = self.name
+                run_kw["log_callback"] = lambda line, _s=_stage_name: log.info(
+                    f"  [{_s}] {line}"
+                )
+            result = backend.run(**run_kw)
             if result.exit_code == 0:
                 break
 
