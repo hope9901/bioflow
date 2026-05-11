@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.3] — 2026-05-11
+
+### Added
+- **`bioflow update auto --git-commit / --git-push`** — maintainer-only
+  flags that, after auto-approval, stage the updated registry +
+  CHANGELOG + last_run.json, commit with a deterministic message, and
+  push to the configured remote/branch.  Skips the commit cleanly when
+  nothing was staged.  Auth (token / SSH key) is the user's
+  responsibility — bioflow never stores credentials.
+- `--git-remote` / `--git-branch` overrides (defaults: `origin` and the
+  current HEAD).
+- `install-schedule-windows.ps1` learns `-GitPush -GitRemote -GitBranch`.
+- `install-schedule-cron.sh` learns `--git-push --git-remote=...`.
+
+### Changed
+- README "Registry updates" section split into **Role A (maintainer)**
+  and **Role B (every other clone)**.  Researchers just `git pull` —
+  they should never install the scheduled task with `--git-push`.
+
+### Tests
+- 422 → 426 unit (+4: git flags off by default, commit on staged
+  changes, push implies commit, commit skipped when nothing staged —
+  all with mocked `subprocess.run`).
+
+---
+
 ## [0.1.2] — 2026-05-11
 
 ### Added

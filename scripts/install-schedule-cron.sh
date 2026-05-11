@@ -19,12 +19,16 @@ PYTHON_BIN="$(command -v python || command -v python3)"
 MARKER="# bioflow-monthly-update"
 AUTO_APPROVE=""
 REAL=""
+GIT_PUSH=""
+GIT_REMOTE="origin"
 UNINSTALL=""
 
 for arg in "$@"; do
     case "$arg" in
         --auto-approve) AUTO_APPROVE="--auto-approve" ;;
         --real)         REAL="--real" ;;
+        --git-push)     GIT_PUSH="--git-push" ;;
+        --git-remote=*) GIT_REMOTE="${arg#*=}" ;;
         --uninstall)    UNINSTALL=1 ;;
         *) echo "Unknown flag: $arg"; exit 1 ;;
     esac
@@ -43,7 +47,11 @@ if [[ ! -f "$REPO_PATH/bioflow/__init__.py" ]]; then
 fi
 
 LOG_DIR="$REPO_PATH/update/cron.log"
-ARGS="update auto $AUTO_APPROVE $REAL --report $REPO_PATH/update/last_run.json"
+GIT_FLAGS=""
+if [[ -n "$GIT_PUSH" ]]; then
+    GIT_FLAGS="$GIT_PUSH --git-remote $GIT_REMOTE"
+fi
+ARGS="update auto $AUTO_APPROVE $REAL $GIT_FLAGS --report $REPO_PATH/update/last_run.json"
 
 # At 02:30 on the 1st of every month
 CRON_LINE="30 2 1 * * cd $REPO_PATH && $PYTHON_BIN -m bioflow.cli $ARGS >> $LOG_DIR 2>&1  $MARKER"

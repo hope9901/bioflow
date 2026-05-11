@@ -112,6 +112,103 @@ class TestAutoApproveFlag:
         assert data["auto_approve"] is False
 
 
+class TestGitPushMaintainerMode:
+    """`--git-commit` / `--git-push` are off by default and only the
+    maintainer should turn them on.  They're plumbed through subprocess
+    so we mock the git binary; tests must NOT touch the real .git."""
+
+    def test_git_flags_off_by_default(self, tmp_path, monkeypatch):
+        """No --git-commit ⇒ subprocess.run is never invoked."""
+        from unittest.mock import patch
+        cand_dir = tmp_path / "candidates"
+        cand_dir.mkdir()
+        (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+        with patch("subprocess.run") as fake_run:
+            _run([
+                "update", "auto",
+                "--candidates-dir", str(cand_dir),
+                "--report", str(tmp_path / "r.json"),
+            ])
+        fake_run.assert_not_called()
+
+    def test_git_commit_invokes_git_add_and_commit(
+        self, tmp_path, monkeypatch,
+    ):
+        from unittest.mock import patch, MagicMock
+        cand_dir = tmp_path / "candidates"
+        cand_dir.mkdir()
+        (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+
+        # Stub git: `git diff --cached --quiet` returns 1 (changes present)
+        def fake_git(argv, **kwargs):
+            ret = MagicMock(returncode=0, stdout="", stderr="")
+            if "diff" in argv:
+                ret.returncode = 1     # 1 = there ARE staged changes
+            return ret
+        with patch("subprocess.run", side_effect=fake_git) as fake_run:
+            _run([
+                "update", "auto",
+                "--candidates-dir", str(cand_dir),
+                "--report", str(tmp_path / "r.json"),
+                "--git-commit",
+            ])
+        # We expect at minimum: git add, git diff --cached --quiet, git commit
+        called_with = [c.args[0] for c in fake_run.call_args_list]
+        assert any("add" in a for a in called_with), called_with
+        assert any("commit" in a for a in called_with), called_with
+        # NEVER called push because --git-push wasn't set
+        assert not any("push" in a for a in called_with), called_with
+
+    def test_git_push_implies_push(self, tmp_path, monkeypatch):
+        from unittest.mock import patch, MagicMock
+        cand_dir = tmp_path / "candidates"
+        cand_dir.mkdir()
+        (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+
+        def fake_git(argv, **kwargs):
+            ret = MagicMock(returncode=0, stdout="main\n", stderr="")
+            if "diff" in argv:
+                ret.returncode = 1
+            return ret
+        with patch("subprocess.run", side_effect=fake_git) as fake_run:
+            _run([
+                "update", "auto",
+                "--candidates-dir", str(cand_dir),
+                "--report", str(tmp_path / "r.json"),
+                "--git-push",
+            ])
+        called_with = [c.args[0] for c in fake_run.call_args_list]
+        assert any("push" in a for a in called_with), called_with
+
+    def test_git_commit_skipped_when_nothing_staged(
+        self, tmp_path, monkeypatch,
+    ):
+        from unittest.mock import patch, MagicMock
+        cand_dir = tmp_path / "candidates"
+        cand_dir.mkdir()
+        (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+
+        # Stub git: diff --cached --quiet returns 0 (no changes)
+        def fake_git(argv, **kwargs):
+            return MagicMock(returncode=0, stdout="", stderr="")
+        with patch("subprocess.run", side_effect=fake_git) as fake_run:
+            _run([
+                "update", "auto",
+                "--candidates-dir", str(cand_dir),
+                "--report", str(tmp_path / "r.json"),
+                "--git-commit",
+            ])
+        called_with = [c.args[0] for c in fake_run.call_args_list]
+        # add + diff should be called, but commit should NOT (nothing staged)
+        assert any("add" in a for a in called_with), called_with
+        assert any("diff" in a for a in called_with), called_with
+        assert not any("commit" in a for a in called_with), called_with
+
+
 class TestUnknownAction:
 
     def test_unknown_action_rejected(self):

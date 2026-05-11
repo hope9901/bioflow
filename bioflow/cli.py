@@ -277,6 +277,26 @@ def update_cmd(
         help="[auto] Run smoke tests with the real DockerBackend (slow, "
              "but the only way to catch image-pull / runtime failures).",
     ),
+    git_commit: bool = typer.Option(
+        False, "--git-commit",
+        help="[auto, maintainer-only] After approval, `git add` the "
+             "registry / CHANGELOG / report and `git commit` if anything "
+             "changed.  Off by default.",
+    ),
+    git_push: bool = typer.Option(
+        False, "--git-push",
+        help="[auto, maintainer-only] `git push origin <branch>` after the "
+             "commit.  Implies --git-commit.  Off by default — only the "
+             "repository maintainer should set this on their scheduled task.",
+    ),
+    git_remote: str = typer.Option(
+        "origin", "--git-remote",
+        help="[auto] Remote name for --git-push.",
+    ),
+    git_branch: Optional[str] = typer.Option(
+        None, "--git-branch",
+        help="[auto] Branch to push.  Defaults to the current HEAD.",
+    ),
 ) -> None:
     """Registry update utilities.
 
@@ -437,6 +457,7 @@ def update_cmd(
         rprint(f"[dim]Report → {target}[/]")
 
         # Optionally auto-approve passing candidates
+        n_approved = 0
         if auto_approve and n_pass > 0:
             rprint(f"\n[bold]Auto-approving {n_pass} passing candidate(s) "
                    "→ registry[/]")
@@ -456,9 +477,67 @@ def update_cmd(
                     )
                     rprint(f"  [green]✓ approved[/]  "
                            f"{Path(r['candidate']).name} → {dest}")
+                    n_approved += 1
                 except ApprovalError as exc:
                     rprint(f"  [yellow]⚠ skipped[/]  "
                            f"{Path(r['candidate']).name}: {exc}")
+
+        # ── Maintainer-only: commit + push to GitHub ────────────────────
+        if (git_commit or git_push) and not dry_run:
+            from datetime import date as _date  # noqa: PLC0415
+            import subprocess as _sub  # noqa: PLC0415
+
+            def _git(*args, check=True):
+                """Run git in the repo root.  Returns CompletedProcess."""
+                return _sub.run(
+                    ["git", *args],
+                    capture_output=True, text=True, check=check,
+                )
+
+            # Stage everything relevant
+            try:
+                _git("add",
+                     str(registry_dir),
+                     "update/CHANGELOG.md",
+                     str(report_path or Path("update") / "last_run.json"))
+            except (FileNotFoundError, _sub.CalledProcessError) as exc:
+                rprint(f"[red]git add failed:[/] {exc}")
+                raise typer.Exit(code=1)
+
+            # Skip commit if there's nothing staged
+            staged = _git("diff", "--cached", "--quiet", check=False)
+            if staged.returncode == 0:
+                rprint("[dim]No staged changes — skipping git commit.[/]")
+            else:
+                today = _date.today().isoformat()
+                msg = (
+                    f"chore(registry): monthly auto-update {today} — "
+                    f"{n_approved} new tool(s)"
+                )
+                try:
+                    _git("commit", "-m", msg)
+                    rprint(f"[green]✓ git commit:[/] {msg}")
+                except _sub.CalledProcessError as exc:
+                    rprint(f"[red]git commit failed:[/]\n{exc.stderr}")
+                    raise typer.Exit(code=1)
+
+                if git_push:
+                    branch = git_branch
+                    if branch is None:
+                        # Resolve current HEAD branch
+                        head = _git("rev-parse", "--abbrev-ref", "HEAD",
+                                    check=False)
+                        branch = head.stdout.strip() or "main"
+                    try:
+                        push = _git("push", git_remote, branch)
+                        rprint(
+                            f"[green]✓ git push:[/] {git_remote}/{branch}"
+                        )
+                        if push.stderr.strip():
+                            rprint(f"[dim]{push.stderr.strip()}[/]")
+                    except _sub.CalledProcessError as exc:
+                        rprint(f"[red]git push failed:[/]\n{exc.stderr}")
+                        raise typer.Exit(code=1)
 
         if n_fail:
             raise typer.Exit(code=1)

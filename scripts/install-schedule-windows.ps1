@@ -23,6 +23,9 @@ param(
     [string]$RunTime = "02:30",     # 2:30 AM
     [switch]$AutoApprove,           # also approve passing candidates
     [switch]$Real,                  # use real DockerBackend (slow)
+    [switch]$GitPush,               # MAINTAINER ONLY: commit + push to origin
+    [string]$GitRemote = "origin",
+    [string]$GitBranch = "",
     [switch]$Uninstall
 )
 
@@ -45,6 +48,11 @@ if (-not (Test-Path "$RepoPath\bioflow\__init__.py")) {
 $cmdArgs = @("-m", "bioflow.cli", "update", "auto")
 if ($AutoApprove) { $cmdArgs += "--auto-approve" }
 if ($Real)        { $cmdArgs += "--real" }
+if ($GitPush) {
+    $cmdArgs += "--git-push"
+    $cmdArgs += @("--git-remote", $GitRemote)
+    if ($GitBranch) { $cmdArgs += @("--git-branch", $GitBranch) }
+}
 $cmdArgs += @("--report", "$RepoPath\update\last_run.json")
 
 # Wrap as a single command line for schtasks
@@ -88,6 +96,7 @@ Write-Host "  Runs every 4 weeks at $RunTime"
 Write-Host "  Command: $PythonExe $($cmdArgs -join ' ')"
 Write-Host "  Auto-approve: $($AutoApprove.IsPresent)"
 Write-Host "  Real Docker:  $($Real.IsPresent)"
+Write-Host "  Git push:     $($GitPush.IsPresent) (maintainer-only)"
 Write-Host ""
 Write-Host "Manual trigger:" -ForegroundColor Cyan
 Write-Host "  Start-ScheduledTask -TaskName $TaskName"

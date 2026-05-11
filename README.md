@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-422%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.2-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-426%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.3-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -397,63 +397,69 @@ python -m pytest tests/integration/ -v    # requires Docker daemon
 
 ---
 
-## Monthly Deep-Research update (scheduled)
+## Registry updates — two roles, two flows
 
-The `update/` workflow takes YAML drafts of new tools and benchmarks
-them in containers before promoting them into `registry/`.  You can
-wire this into your OS's scheduler so it runs once a month without
-touching it:
+The registry of tool YAMLs evolves over time as new bioinformatics
+software ships.  We deliberately split the update work into TWO roles:
 
-```bash
-# Manual one-shot — benchmarks every YAML in update/candidates/, writes
-# a JSON report.  Safe by default (does NOT promote anything).
-bioflow update auto
+### Role A — the repository maintainer (only one person)
 
-# Also auto-approve any candidate whose smoke test passes:
-bioflow update auto --auto-approve
-
-# Use the real DockerBackend (slow, but catches image-pull failures):
-bioflow update auto --real
-```
-
-### Windows Task Scheduler
+The maintainer runs **Deep Research** monthly to find new tools, drops
+the resulting YAML drafts under `update/candidates/<YYYY-MM>/`, then
+lets a scheduled task benchmark them and push the approved subset to
+GitHub:
 
 ```powershell
-# elevated PowerShell:
-.\scripts\install-schedule-windows.ps1
-# or with auto-approve:
-.\scripts\install-schedule-windows.ps1 -AutoApprove
-# remove:
-.\scripts\install-schedule-windows.ps1 -Uninstall
+# Maintainer machine, ONE-TIME setup (elevated PowerShell on Windows):
+.\scripts\install-schedule-windows.ps1 -AutoApprove -GitPush
 ```
-
-### Linux / macOS cron
 
 ```bash
-./scripts/install-schedule-cron.sh                 # safe default
-./scripts/install-schedule-cron.sh --auto-approve  # promote on pass
-./scripts/install-schedule-cron.sh --uninstall
+# Or on Linux/macOS:
+./scripts/install-schedule-cron.sh --auto-approve --git-push
 ```
 
-Both helpers schedule the run for **02:30 on the 1st of every month**.
-A JSON report lands at `update/last_run.json` so you can inspect what
-happened on the next morning.
+What the scheduled job does every month at 02:30:
 
-### Workflow
+1. Walk every YAML in `update/candidates/`.
+2. Smoke-test each against `data/test/` fixtures.
+3. Write `update/last_run.json` with per-candidate pass/fail.
+4. **`--auto-approve`** → promote passing YAMLs into `registry/`.
+5. **`--git-push`** → `git add` registry / CHANGELOG / report,
+   `git commit` with a deterministic message, then
+   `git push origin <branch>`.
 
-1. Deep Research (manual or LLM) drops new YAML drafts under
-   `update/candidates/<YYYY-MM>/`.
-2. The scheduled job runs `bioflow update auto`:
-   - validates every YAML against `registry/schema.yaml`
-   - pulls the container image (when `--real`)
-   - executes a smoke test against the bundled test datasets
-   - writes a structured report
-3. With `--auto-approve`, passing candidates are promoted to the
-   registry automatically; without it, you review the report and run
-   `bioflow update approve` manually.
+The maintainer's `git push` is the single point at which the public
+registry changes.  Auth (token / SSH key) must be configured on the
+maintainer's machine the normal git way; bioflow never stores
+credentials.
 
-bioflow itself never becomes a daemon — only the OS scheduler is
-long-running (Part 5 of the design doc).
+Manual one-shot equivalent:
+```bash
+bioflow update auto --auto-approve --git-push
+bioflow update auto --real            # extra: actually pull each image
+```
+
+### Role B — every other clone (researchers)
+
+Researchers do **nothing**.  When they want a fresh registry they just:
+
+```bash
+cd /path/to/bioflow
+git pull
+```
+
+That's it.  No scheduled task, no Docker images pre-pulled, no
+benchmark runs — the maintainer already did the work, and the result
+is just a git history with new YAML files under `registry/tools/`.
+
+The installer scripts above default to safe mode (`--auto-approve`,
+`--git-push` OFF) precisely so an end user who *accidentally* runs
+them never rewrites their own copy of the registry — they'd only
+benchmark and write a local JSON report.
+
+bioflow itself never becomes a daemon — only the OS scheduler on the
+maintainer's machine is long-running (Part 5 of the design doc).
 
 ## LLM companion (opt-in, privacy-first)
 
