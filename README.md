@@ -318,12 +318,12 @@ examples/
   config_prokaryote_short.yaml
   config_eukaryote_hifi.yaml
   config_rnaseq.yaml
-  config_metagenomics.yaml    ← NEW
-  config_scrna_seq.yaml       ← NEW
-  config_chip_seq.yaml        ← NEW
-  config_atac_seq.yaml        ← NEW
-  config_methylation.yaml     ← NEW
-  config_proteomics.yaml      ← NEW
+  config_metagenomics.yaml
+  config_scrna_seq.yaml
+  config_chip_seq.yaml
+  config_atac_seq.yaml
+  config_methylation.yaml
+  config_proteomics.yaml
 
 data/
   test/ecoli_small/      Synthetic prokaryote test fixtures
