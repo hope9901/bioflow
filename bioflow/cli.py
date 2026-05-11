@@ -616,7 +616,8 @@ def recipe_cmd(
 
 @app.command("llm")
 def llm_cmd(
-    action: str = typer.Argument(..., help="explain | diagnose | redact"),
+    action: str = typer.Argument(...,
+        help="explain | diagnose | redact | new-tool | suggest"),
     term: Optional[str] = typer.Argument(None,
         help="For 'explain': the term.  For others: ignored."),
     context: str = typer.Option(
@@ -643,6 +644,15 @@ def llm_cmd(
         help="[diagnose] workspace path to redact in the prompt."),
     audit_log: Optional[Path] = typer.Option(None, "--audit",
         help="[diagnose] append redacted prompt + response to this file."),
+    # new-tool / suggest specific
+    tool_name: Optional[str] = typer.Option(None, "--tool",
+        help="[new-tool, suggest] tool name (e.g. prokka)."),
+    help_path: Optional[Path] = typer.Option(None, "--help-file",
+        help="[new-tool] path to a file holding `<tool> --help` output."),
+    image_hint: Optional[str] = typer.Option(None, "--image",
+        help="[new-tool] suggested container image tag."),
+    intent: Optional[str] = typer.Option(None, "--intent",
+        help="[suggest] short text describing what you want the command to do."),
 ) -> None:
     """LLM companion (opt-in, privacy-first).
 
@@ -726,8 +736,175 @@ def llm_cmd(
         rprint(redact(raw, workspace=str(workspace) if workspace else None))
         return
 
-    rprint(f"[red]Unknown action {action!r}.[/]  Use: explain | diagnose | redact")
+    if action == "new-tool":
+        from bioflow.llm import new_tool  # noqa: PLC0415
+        if not tool_name:
+            rprint("[red]--tool is required.[/]")
+            raise typer.Exit(code=1)
+        if help_path is None:
+            rprint("[red]--help-file <path> is required "
+                   "(capture `<tool> --help` into a file first).[/]")
+            raise typer.Exit(code=1)
+        try:
+            from bioflow.io import read_text  # noqa: PLC0415
+            help_txt = read_text(help_path)
+        except OSError as exc:
+            rprint(f"[red]Could not read --help-file: {exc}[/]")
+            raise typer.Exit(code=1)
+        try:
+            yaml = new_tool(
+                name=tool_name,
+                help_text=help_txt,
+                image_hint=image_hint or "",
+                max_tokens=max_tokens,
+                backend=backend,
+            )
+        except LlmDisabled as exc:
+            rprint(f"[yellow]LLM disabled:[/] {exc}")
+            raise typer.Exit(code=2)
+        except LlmError as exc:
+            rprint(f"[red]LLM error:[/] {exc}")
+            raise typer.Exit(code=1)
+        rprint(f"\n[bold]Draft tool YAML for[/] [cyan]{tool_name}[/]"
+               "  [dim](review before committing)[/]\n")
+        print(yaml)
+        return
+
+    if action == "suggest":
+        from bioflow.llm import suggest_command  # noqa: PLC0415
+        if not tool_name or not intent:
+            rprint("[red]--tool and --intent are required.[/]")
+            raise typer.Exit(code=1)
+        try:
+            cmd = suggest_command(
+                tool=tool_name, intent=intent,
+                backend=backend, max_tokens=max_tokens,
+            )
+        except LlmDisabled as exc:
+            rprint(f"[yellow]LLM disabled:[/] {exc}")
+            raise typer.Exit(code=2)
+        except LlmError as exc:
+            rprint(f"[red]LLM error:[/] {exc}")
+            raise typer.Exit(code=1)
+        rprint(f"\n[bold]Suggested command for[/] [cyan]{tool_name}[/]"
+               "  [dim](review — uses {placeholder} for inputs)[/]\n")
+        print(cmd)
+        return
+
+    rprint(f"[red]Unknown action {action!r}.[/]  "
+           "Use: explain | diagnose | redact | new-tool | suggest")
     raise typer.Exit(code=1)
+
+
+@app.command("setup")
+def setup_cmd(
+    backend: Optional[str] = typer.Option(
+        None, "--backend",
+        help="Skip the interactive prompt and configure this backend "
+             "directly (disabled | ollama | anthropic | openai).",
+    ),
+    model: Optional[str] = typer.Option(None, "--model",
+        help="Override the recommended model name."),
+    yes: bool = typer.Option(False, "--yes", "-y",
+        help="Accept the auto-recommendation without prompting."),
+) -> None:
+    """First-time setup — picks an LLM backend that fits this machine.
+
+    \b
+    What it does:
+      1. Detects CPU / RAM / GPU.
+      2. Recommends a local Ollama model that fits, or suggests cloud APIs.
+      3. Saves the choice to ~/.bioflow/config.yaml so future runs honour it.
+
+    \b
+    Examples:
+      bioflow setup                          # interactive
+      bioflow setup --yes                    # accept recommendation as-is
+      bioflow setup --backend disabled       # explicit no-LLM mode
+      bioflow setup --backend anthropic      # use cloud Anthropic
+    """
+    from bioflow.core.hardware import detect  # noqa: PLC0415
+    from bioflow.llm import (  # noqa: PLC0415
+        recommend_local_model, save_config, CONFIG_PATH,
+    )
+
+    hw = detect()
+    rec = recommend_local_model(
+        ram_gb=hw.ram_gb, gpu_present=hw.gpu_present, cpu_count=hw.cpu_count,
+    )
+
+    console.print(
+        f"\n[bold]Detected hardware[/]\n"
+        f"  CPU:        {hw.cpu_count}\n"
+        f"  RAM:        {hw.ram_gb:.1f} GB\n"
+        f"  GPU:        {'present' if hw.gpu_present else 'none'}\n"
+        f"  Disk free:  {hw.disk_free_gb:.1f} GB\n"
+        f"  OS / arch:  {hw.os} / {hw.arch}\n"
+    )
+    console.print(f"[bold]Recommendation[/]: [cyan]{rec.backend}[/]"
+                  + (f" ({rec.model})" if rec.model else ""))
+    console.print(f"[dim]  {rec.reason}[/]\n")
+
+    # Resolve choice
+    if backend is None:
+        if yes:
+            backend = rec.backend
+            model = model or rec.model
+        else:
+            console.print("Choose backend:")
+            console.print("  1) disabled    (no LLM — safest default)")
+            console.print(
+                f"  2) ollama      (local, recommended model: {rec.model or 'n/a'})"
+            )
+            console.print("  3) anthropic   (cloud, requires ANTHROPIC_API_KEY env var)")
+            console.print("  4) openai      (cloud, requires OPENAI_API_KEY env var)")
+            choice = typer.prompt("Selection [1-4]", default="2")
+            backend = {
+                "1": "disabled", "2": "ollama",
+                "3": "anthropic", "4": "openai",
+            }.get(choice.strip(), rec.backend)
+            if backend == "ollama" and not model:
+                model = typer.prompt(
+                    "Ollama model", default=rec.model or "qwen2.5-coder:7b",
+                )
+            elif backend in ("anthropic", "openai") and not model:
+                default_model = (
+                    "claude-3-5-haiku-latest" if backend == "anthropic"
+                    else "gpt-4o-mini"
+                )
+                model = typer.prompt("Model name", default=default_model)
+
+    backend = (backend or "disabled").lower().strip()
+    if backend not in ("disabled", "ollama", "anthropic", "openai"):
+        rprint(f"[red]Unknown backend {backend!r}.[/]")
+        raise typer.Exit(code=1)
+
+    cfg: dict = {"backend": backend}
+    if backend != "disabled" and model:
+        cfg["model"] = model
+    if backend == "ollama":
+        cfg["endpoint"] = "http://localhost:11434"
+
+    path = save_config(cfg)
+    rprint(f"\n[green]✓ Saved[/] → [dim]{path}[/]")
+
+    # Helpful next-step hints
+    if backend == "ollama":
+        rprint(
+            f"\nNext: install Ollama from [cyan]https://ollama.com[/], then pull the model:"
+        )
+        rprint(f"  [dim]ollama pull {model}[/]")
+        rprint(f"  [dim]ollama serve[/]   # leaves a local daemon running")
+    elif backend == "anthropic":
+        rprint("\nNext: export your API key:")
+        rprint("  [dim]export ANTHROPIC_API_KEY=sk-ant-...[/]")
+    elif backend == "openai":
+        rprint("\nNext: export your API key:")
+        rprint("  [dim]export OPENAI_API_KEY=sk-...[/]")
+    else:
+        rprint(
+            "\n[dim]LLM is off.  Re-run `bioflow setup` any time to change.[/]"
+        )
 
 
 if __name__ == "__main__":

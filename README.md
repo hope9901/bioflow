@@ -1,6 +1,6 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-153%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-382%20passed-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -45,6 +45,22 @@ and LC-MS/MS proteomics — orchestrated from Python over per-tool Docker contai
 docker info            # verify Docker is running
 pip install -e .       # installs bioflow + all deps
 ```
+
+### 1b. First-time setup (optional — for the LLM companion)
+
+```bash
+bioflow setup                       # detects CPU / RAM / GPU,
+                                    # recommends a local Ollama model
+                                    # or cloud API based on hardware
+bioflow setup --yes                 # non-interactive, accept the recommendation
+bioflow setup --backend disabled    # explicit no-LLM mode (default if you skip setup)
+bioflow setup --backend anthropic   # use cloud Anthropic (needs ANTHROPIC_API_KEY)
+```
+
+The wizard writes `~/.bioflow/config.yaml`.  LLM is OFF by default —
+nothing is sent anywhere until you opt in.  See the
+[LLM companion](#llm-companion-opt-in-privacy-first) section below for
+the safety model.
 
 ### 2. Inspect this machine
 
@@ -352,6 +368,30 @@ python -m pytest tests/integration/ -v    # requires Docker daemon
 ```
 
 ---
+
+## LLM companion (opt-in, privacy-first)
+
+bioflow ships a thin LLM helper that **never** runs as part of the
+critical execution path — it only proposes text the user reviews.
+
+| Capability | Data sent to model | Default |
+|---|---|---|
+| `bioflow llm explain "<term>"` | the term + 1 category word | safe; runs once you've configured a backend |
+| `bioflow llm diagnose --stage ... --command ... --stderr ...` | command + last 2 KB of stderr, **redacted** | opt-in |
+| `bioflow llm new-tool --tool prokka --help-file h.txt` | tool name + its public `--help` output | opt-in |
+| `bioflow llm suggest --tool prokka --intent "..."` | tool name + user-typed intent string | opt-in |
+| `bioflow llm redact` (stdin → stdout) | nothing — local-only utility | always works |
+
+**Backends**: `disabled` (default) · `ollama` (local) · `anthropic` (cloud) · `openai` (cloud).
+
+**Auto-redaction** before every diagnose call replaces:
+- `C:\Users\*`, `/Users/*`, `/home/*` → `<USER>`
+- the bioflow workspace path → `<WORKSPACE>`
+- emails → `<EMAIL>`, IPv4 → `<IP>`, 40+ char tokens → `<TOKEN>`
+- any custom regex you provide for project-specific PHI
+
+**Resolution order** for `BIOFLOW_LLM_*` knobs:
+explicit function argument → env var → `~/.bioflow/config.yaml` → `disabled`.
 
 ## License
 
