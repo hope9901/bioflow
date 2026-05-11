@@ -1,7 +1,10 @@
 id: trimgalore
 name: trimgalore
 version: "0.6.10"
-category: alignment
+# Read trimmer (Cutadapt wrapper).  Used at the QC step of several
+# pipelines; not itself an aligner.  (Misclassified as `alignment`
+# until v0.1.1.)
+category: qc
 stage: [chip_seq.step1, atac_seq.step1, methylation.step1]
 input_types: [short_paired]
 output_types: [clean_fastq]

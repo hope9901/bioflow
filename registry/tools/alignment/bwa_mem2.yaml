@@ -1,10 +1,15 @@
 id: bwa_mem2
 name: BWA-MEM2
 version: "2.2.1"
-category: assembly
+category: alignment
 stage: [genome_assembly.step2]
+# BWA-MEM2 is a short-read → reference aligner, not an assembler.
+# The stage list keeps it in genome_assembly.step2 because the
+# resequencing-mode "step 2" is align-then-consensus (see
+# command_template below) — but the *category* reflects the tool
+# itself.  (Misclassified as `assembly` until v0.1.1.)
 input_types: [fastq_short_paired_clean, reference_genome]
-output_types: [assembly_fasta]
+output_types: [alignment_bam, consensus_fasta]
 applicable:
   species: [prokaryote, eukaryote, eukaryote_small]
   read_type: [short]

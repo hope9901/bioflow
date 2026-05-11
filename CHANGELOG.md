@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.1.1] — 2026-05-11
+
+Bug-fix release — registry tool taxonomy corrections caught by a user
+review.
+
+### Fixed
+- **BWA-MEM2** was filed under `category: assembly`.  It is a short-read
+  aligner — recategorised to `alignment`.  The tool stays in
+  `genome_assembly.step2` (resequencing-mode "step 2" is
+  align-then-`samtools consensus`), but the category now reflects what
+  the tool is, not which pipeline slot it fills.  Its `output_types`
+  also corrected: `[alignment_bam, consensus_fasta]` instead of the
+  misleading `[assembly_fasta]`.
+- **Trim Galore** was filed under `category: alignment`.  It's a read
+  trimmer (Cutadapt wrapper) — recategorised to `qc`, matching its
+  stage entries (`*.step1`).
+- **`prokka_comparative`** registry entry removed.  It was a redundant
+  copy of `prokka` with `--genus Dickeya` hard-coded — a session-1
+  artefact that would have produced wrong results on any other taxon.
+  The cookbook recipes already call Prokka through their own `@stage`
+  definitions, so this entry was unused and dangerous.
+
+### Added
+- `tests/unit/test_registry_sanity.py` — 4 new regression tests that
+  encode the taxonomy rules so future PRs can't reintroduce these
+  three classes of bug:
+    * naming substring → must-be-in-category mapping (catches
+      BWA / Bowtie / FastQC / etc. under the wrong category)
+    * aligners must not advertise `assembly_fasta` outputs
+    * no two registry files share an id
+    * no `command_template` hard-codes a genus / species
+
+### Tests
+- 412 → 416 unit (+4 sanity), all still pass.
+
+---
+
 ## [0.1.0] — 2026-05-11
 
 First public release.  Closes the 14-box roadmap in
