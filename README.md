@@ -5,111 +5,65 @@
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-Multi-omics bioinformatics pipeline platform — covering genome assembly/annotation,
-RNA-seq, metagenomics, single-cell RNA-seq, ChIP-seq, ATAC-seq, bisulfite methylation,
-and LC-MS/MS proteomics — orchestrated from Python over per-tool Docker containers
-(sibling-container pattern).
+A bioinformatics SDK + cookbook for one-line comparative-genomics
+analyses on a single workstation with local Docker.  Each tool runs in
+its own container (no native installs), each recipe is one CLI call,
+and a privacy-first LLM companion is available when you want it.
 
 ---
 
-## Features
+## What you get
 
-| | |
-|---|---|
-| **8 pipelines** | Genome Assembly · RNA-seq DEG · Metagenomics · scRNA-seq · ChIP-seq · ATAC-seq · Methylation · Proteomics |
-| **Two modes** | `recommend` (fixed curated preset) · `custom` (interactive, hardware-filtered) |
-| **Read / data types** | Illumina short · PacBio HiFi · ONT long · hybrid · LC-MS/MS DDA/DIA |
-| **Species** | Prokaryote · Eukaryote · Eukaryote (small) · Any |
-| **53 tools registered** | QC, assembly, annotation, DEG, taxonomic profiling, scRNA, peak calling, methylation, proteomics |
-| **Hardware checks** | CPU / RAM / GPU / disk / arch → installable / runnable_slow / incompatible |
-| **arm64 aware** | Apple Silicon & Linux ARM: x86_64 tools auto-classified as `runnable_slow` (emulation) |
-| **Preset recommendation** | `bioflow tools --recommend` scores all presets against your hardware |
-| **Artifact chaining** | Planner auto-fills inter-stage file paths at plan time |
-| **Checkpoint / resume** | `.bioflow_state.json` — completed stages skipped on re-run |
-| **Progress bar** | Rich per-stage spinner + elapsed time during `bioflow run` |
-| **Live log streaming** | DockerBackend streams container stdout/stderr in real time |
-| **Failure report** | Failed stages shown in red with error detail in HTML summary |
-| **Reports** | MultiQC aggregation + HTML pipeline summary |
-| **NCBI downloader** | `bioflow ncbi genome/protein` — direct NCBI Datasets & Entrez download |
-| **Reference DB management** | `bioflow db fetch/list/verify` — 7 catalog entries with progress bar |
-| **Registry approval** | `bioflow update approve` — validate + promote candidate tool YAMLs |
-| **Monthly updates** | Deep Research → smoke-test → manual approval → registry PR |
+- **8 cookbook recipes** invokable as one-liners — pangenome, ANI,
+  phylogeny, GWAS, gene-family evolution, AMR/VF catalogue,
+  COG enrichment, NCBI download.
+- **8 multi-step pipelines** for genome assembly + annotation, RNA-seq
+  DEG, metagenomics, scRNA-seq, ChIP-seq, ATAC-seq, bisulfite
+  methylation, LC-MS/MS proteomics.
+- **58 tools** registered, all pulled as BioContainer images at run
+  time — nothing to install on the host beyond Docker + Python.
+- **Hardware-aware**: every tool is classified `installable` /
+  `runnable_slow` / `incompatible` against your CPU / RAM / GPU / arch.
+- **Input-hash caching**: re-running a recipe with unchanged inputs
+  returns in seconds.
+- **Privacy-first LLM companion** (optional): terminology Q&A, sanitized
+  error diagnosis, tool-registration assist.  Disabled by default.
 
 ---
 
-## Quick start
-
-### 1. Prerequisites
+## Install
 
 ```bash
-# Docker ≥ 20.10 and Python ≥ 3.9
-docker info            # verify Docker is running
-pip install -e .       # installs bioflow + all deps
+git clone https://github.com/<you>/bioflow
+cd bioflow
+pip install -e .
+
+# Verify Docker is running
+docker info
 ```
 
-### 1b. First-time setup (optional — for the LLM companion)
+### Optional one-time setup for the LLM companion
 
 ```bash
-bioflow setup                       # detects CPU / RAM / GPU,
-                                    # recommends a local Ollama model
-                                    # or cloud API based on hardware
-bioflow setup --yes                 # non-interactive, accept the recommendation
-bioflow setup --backend disabled    # explicit no-LLM mode (default if you skip setup)
-bioflow setup --backend anthropic   # use cloud Anthropic (needs ANTHROPIC_API_KEY)
+bioflow setup                       # detects CPU/RAM/GPU, recommends a backend
+bioflow setup --backend disabled    # explicit no-LLM mode (default)
+bioflow setup --backend anthropic   # cloud (needs ANTHROPIC_API_KEY env)
+bioflow setup --backend ollama      # local Ollama instance
 ```
 
-The wizard writes `~/.bioflow/config.yaml`.  LLM is OFF by default —
-nothing is sent anywhere until you opt in.  See the
-[LLM companion](#llm-companion-opt-in-privacy-first) section below for
-the safety model.
+Writes `~/.bioflow/config.yaml`.  Nothing is sent to any model until you
+opt in.  See [LLM companion](#llm-companion) for the safety model.
 
-### 2. Inspect this machine
+---
 
-```bash
-bioflow hw                                  # CPU / RAM / GPU / disk profile
-bioflow tools                               # all tools, grouped by hw-compatibility
-bioflow tools --category assembly           # filter by category
-bioflow tools --recommend genome_assembly   # ranked preset suggestions for this hw
-```
+## Quick start — Cookbook recipes
 
-### 3. Fetch reference databases
+Eight curated end-to-end pipelines.  Run from the CLI; no Python
+required.
 
 ```bash
-bioflow db list                             # show all available DBs
-bioflow db fetch busco_bacteria --dest /refs
-bioflow db fetch eggnog          --dest /refs
-bioflow db verify busco_bacteria --dest /refs
-```
-
-### 4. Run a preset pipeline
-
-```bash
-# Copy and edit an example config
-cp examples/config_prokaryote_short.yaml my_config.yaml
-# edit my_config.yaml → set r1/r2 paths and workdir
-
-bioflow recommend --preset prokaryote_denovo_short --config my_config.yaml
-
-# Preview the plan without executing
-bioflow recommend --preset prokaryote_denovo_short --config my_config.yaml --dry-run
-```
-
-Example configs are in `examples/`:
-
-| File | Preset |
-|---|---|
-| `config_prokaryote_short.yaml` | prokaryote_denovo_short |
-| `config_eukaryote_hifi.yaml`   | eukaryote_denovo_hifi |
-| `config_rnaseq.yaml`           | rnaseq_deseq2_standard |
-
-### 5. Cookbook recipes (comparative genomics, one-line invocations)
-
-Eight curated end-to-end pipelines ship with bioflow.  They are the
-Tier-B entry point — no Python required.
-
-```bash
-bioflow recipe list                                 # show all available recipes
-bioflow recipe show pangenome                       # render the DAG without running
+bioflow recipe list                          # show every recipe + its DAG
+bioflow recipe show pangenome                # render the DAG without running
 bioflow recipe run pangenome --taxon Dickeya --max 13 --out ./out
 bioflow recipe run pangenome --taxon Pectobacterium --dry-run
 ```
@@ -125,117 +79,67 @@ bioflow recipe run pangenome --taxon Pectobacterium --dry-run
 | `amr_vf_catalogue`   | ABRicate × N genomes × M DBs |
 | `cog_enrichment`     | DIAMOND vs COG-2024 → per-bucket categories |
 
-All recipes use the SDK so they get **input-hash caching automatically**
-— a second run with the same inputs returns in seconds.  Failed stages
-retry with bumped resources where configured (e.g. CAFE5 → 2× RAM).
+Recipes use input-hash caching automatically — a second run with the
+same inputs returns in seconds.  Failed stages retry with bumped
+resources where configured (e.g. CAFE5 → 2× RAM).
 
-### 6. Custom interactive pipeline (legacy YAML-driven path)
+---
+
+## Verify your machine
+
+```bash
+bioflow hw                                  # CPU / RAM / GPU / disk profile
+bioflow tools                               # all tools, grouped by compatibility
+bioflow tools --category assembly           # filter by category
+bioflow tools --recommend genome_assembly   # ranked preset picks for this host
+```
+
+---
+
+## Reference databases
+
+Some pipelines need external databases (Pfam, eggNOG, BUSCO, etc.).
+`bioflow` ships a small catalog with a progress-bar downloader.
+
+```bash
+bioflow db list                                  # show available DBs
+bioflow db fetch busco_bacteria --dest /refs
+bioflow db verify busco_bacteria --dest /refs
+```
+
+| Key | Size | Used by |
+|---|---:|---|
+| `busco_bacteria`   | 0.07 GB | busco |
+| `busco_insecta`    | 0.08 GB | busco |
+| `busco_vertebrata` | 0.30 GB | busco |
+| `pfam`             | 0.50 GB | interproscan |
+| `dfam_curated`     | 2.00 GB | repeatmasker, earlgrey |
+| `uniprot_sprot`    | 0.25 GB | braker3 |
+| `eggnog`           | 8.50 GB | eggnog_mapper |
+
+---
+
+## Preset pipelines (multi-stage YAML path)
+
+For workloads that don't fit the cookbook recipes (single-sample read
+QC → assembly → annotation), use the preset pipelines:
+
+```bash
+cp examples/config_prokaryote_short.yaml my_config.yaml
+# edit my_config.yaml → set r1/r2 paths and workdir
+
+bioflow recommend --preset prokaryote_denovo_short --config my_config.yaml
+bioflow recommend --preset prokaryote_denovo_short --config my_config.yaml --dry-run
+```
+
+Or build a custom plan interactively:
 
 ```bash
 bioflow custom --pipeline genome_assembly --out my_plan.yaml
-# → questionary prompts for species, read type, mode, then per-stage tool selection
-# → only hardware-compatible tools are shown; incompatible/slow ones are labelled
-
-bioflow run my_plan.yaml      # execute the saved plan
+bioflow run my_plan.yaml
 ```
 
-### 7. Docker (production)
-
-```bash
-docker compose -f docker/docker-compose.yml build
-
-# Run with your data mounted
-docker compose run --rm -v /path/to/data:/workspace bioflow recommend \
-    --preset prokaryote_denovo_short \
-    --config /workspace/config.yaml
-```
-
----
-
-## Pipelines
-
-### Genome Assembly & Annotation (6 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | Read QC | fastp · filtlong · nanoplot |
-| step2 | Assembly | SPAdes · hifiasm · Flye · Unicycler · BWA-MEM2 |
-| step3 | Assembly QC | QUAST · BUSCO · CheckM2 · Merqury |
-| step4 | Repeat masking *(eukaryote only)* | Earl Grey · RepeatModeler · RepeatMasker |
-| step5 | Structural annotation | BRAKER3 · Prokka · Bakta |
-| step6 | Functional annotation | eggNOG-mapper · InterProScan |
-
-### RNA-seq DEG (4 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | QC | fastp |
-| step2 | Alignment / quant | HISAT2 · STAR · Salmon · Kallisto |
-| step3 | DEG | DESeq2 · edgeR · limma-voom |
-| step4 | Enrichment | clusterProfiler · topGO · GSEA |
-
-### Metagenomics (5 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | Read QC | fastp |
-| step2 | Host removal | KneadData |
-| step3 | Taxonomic profiling | Kraken2+Bracken · MetaPhlAn4 |
-| step4 | Functional profiling | HUMAnN3 |
-| step5 | Differential abundance | LEfSe |
-
-### Single-cell RNA-seq (5 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | Demux / Alignment | Cell Ranger (10x) · STARsolo |
-| step2 | QC & Filtering | Seurat · Scanpy |
-| step3 | Clustering & Dim. Reduction | Seurat · Scanpy |
-| step4 | Marker gene / DEG | Seurat · Scanpy |
-| step5 | Trajectory / Pseudotime *(optional)* | Monocle3 |
-
-### ChIP-seq (5 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | QC & Trimming | TrimGalore |
-| step2 | Alignment | Bowtie2 |
-| step3 | Peak calling | MACS3 |
-| step4 | Peak annotation / Coverage | HOMER · deepTools |
-| step5 | Motif analysis *(optional)* | HOMER |
-
-### ATAC-seq (5 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | QC & Trimming | TrimGalore |
-| step2 | Alignment | Bowtie2 |
-| step3 | Peak calling | MACS3 |
-| step4 | Coverage & Differential | deepTools |
-| step5 | Footprinting & Motif *(optional)* | TOBIAS · HOMER |
-
-### Bisulfite Methylation / WGBS (4 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | QC & Trimming | TrimGalore |
-| step2 | Bisulfite Alignment | Bismark |
-| step3 | Methylation Extraction | Bismark |
-| step4 | DMR Analysis *(optional)* | MethylKit |
-
-### Proteomics LC-MS/MS (5 stages)
-
-| Stage | Content | Example tools |
-|---|---|---|
-| step1 | Format Conversion | msconvert (ProteoWizard) |
-| step2 | Database Search | MSFragger |
-| step3 | FDR Control | Percolator |
-| step4 | Quantification | FragPipe · MaxQuant |
-| step5 | Statistical Analysis *(optional)* | FragPipe built-in |
-
----
-
-## Available presets
+Available presets:
 
 | Preset | Pipeline | Species | Data type | Mode |
 |---|---|---|---|---|
@@ -254,117 +158,50 @@ docker compose run --rm -v /path/to/data:/workspace bioflow recommend \
 | `methylation_bismark_wgbs`       | methylation     | any             | short     | wgbs |
 | `proteomics_msfragger_dda`       | proteomics      | any             | ms_dda    | dda |
 
----
+### Pipeline stages (overview)
 
-## Reference databases
-
-`bioflow db list` shows all catalog entries.
-
-| Key | Description | Size | Used by |
-|---|---|---|---|
-| `busco_bacteria` | BUSCO bacteria_odb10 | 0.07 GB | busco |
-| `busco_insecta` | BUSCO insecta_odb10 | 0.08 GB | busco |
-| `busco_vertebrata` | BUSCO vertebrata_odb10 | 0.3 GB | busco |
-| `pfam` | Pfam-A 36.0 HMMs | 0.5 GB | interproscan |
-| `dfam_curated` | Dfam 3.8 curated repeats | 2.0 GB | repeatmasker, earlgrey |
-| `uniprot_sprot` | UniProt Swiss-Prot | 0.25 GB | braker3 |
-| `eggnog` | eggNOG v5.0 | 8.5 GB | eggnog_mapper |
+| Pipeline | Stages | Example tools |
+|---|---|---|
+| **Genome Assembly & Annotation** (6) | Read QC · Assembly · Assembly QC · Repeat masking (eukaryote) · Structural annotation · Functional annotation | fastp · SPAdes/hifiasm/Flye · QUAST/BUSCO · RepeatModeler · Prokka/BRAKER · eggNOG-mapper |
+| **RNA-seq DEG** (4)            | QC · Alignment/Quant · DEG · Enrichment           | fastp · STAR/Salmon · DESeq2 · clusterProfiler |
+| **Metagenomics** (5)           | QC · Host removal · Taxonomic · Functional · Diff-abundance | fastp · KneadData · Kraken2/MetaPhlAn4 · HUMAnN3 · LEfSe |
+| **scRNA-seq** (5)              | Demux/Align · QC · Cluster · Marker · Trajectory  | Cell Ranger · Scanpy/Seurat · Monocle3 |
+| **ChIP-seq / ATAC-seq** (5)    | QC · Align · Peak call · Annotation/Coverage · Motif | TrimGalore · Bowtie2 · MACS3 · HOMER/deepTools · TOBIAS |
+| **Bisulfite Methylation** (4)  | QC · Bisulfite align · Extract · DMR              | TrimGalore · Bismark · MethylKit |
+| **LC-MS/MS Proteomics** (5)    | Convert · Search · FDR · Quant · Stats            | msconvert · MSFragger · Percolator · FragPipe/MaxQuant |
 
 ---
 
-## Project layout
+## LLM companion
 
-```
-bioflow/                 Python orchestrator package
-  cli.py                 Typer CLI: hw / tools / recommend / custom / run / db / update / ncbi
-  core/
-    hardware.py          CPU/RAM/GPU/disk/arch detection (psutil + pynvml); arch normalisation
-    registry.py          Tool YAML loader + Pydantic models
-    compatibility.py     hw ↔ tool matching + arm64 emulation + recommend_presets()
-    planner.py           Preset loading, artifact chaining, interactive_build() — 8 pipelines
-    runner.py            Docker sibling-container executor + Rich progress bar
-    dag.py               Topological stage sort (Kahn's algorithm)
-    checkpoint.py        .bioflow_state.json — resume + failure tracking
-    logger.py            Structured JSON logging
-    report.py            MultiQC + HTML pipeline summary with failure highlights
-    db.py                Reference DB catalog, fetch (with progress), verify
-    ncbi.py              NCBI Datasets API + Entrez genome/protein download
-    approve.py           Registry candidate validation & promotion
+bioflow ships a thin LLM helper that **never** runs as part of the
+critical execution path — it only proposes text the user reviews.
 
-registry/
-  schema.yaml            JSON Schema (Draft 2020-12) for tool validation
-  tools/
-    qc/                  fastp · fastqc · filtlong · nanoplot · trimgalore
-    assembly/            spades · hifiasm · flye · unicycler · bwa_mem2
-    assembly_qc/         quast · busco · checkm2 · merqury
-    repeat/              earlgrey · repeatmodeler · repeatmasker
-    struct_annot/        braker3 · prokka · bakta
-    func_annot/          eggnog_mapper · interproscan · diamond_uniprot
-    rnaseq_align/        hisat2 · star · salmon · kallisto
-    deg/                 deseq2 · edger · limma_voom
-    enrichment/          clusterprofiler · topgo · gsea
-    alignment/           bowtie2 · trimgalore          ← NEW
-    metagenomics/        kraken2 · bracken · metaphlan4 · humann3 · kneaddata · lefse  ← NEW
-    single_cell/         cellranger · starsolo · seurat · scanpy · monocle3  ← NEW
-    epigenomics/         macs3 · deeptools · homer · bismark · methylkit · tobias  ← NEW
-    proteomics/          msconvert · msfragger · percolator · fragpipe · maxquant  ← NEW
-  presets/               14 curated preset YAML files
+| Capability | Data sent to model | Default |
+|---|---|---|
+| `bioflow llm explain "<term>"`                        | the term + 1 category word | safe; runs once a backend is configured |
+| `bioflow llm diagnose --stage … --command … --stderr …` | command + last 2 KB of stderr, **redacted** | opt-in |
+| `bioflow llm new-tool --tool prokka --help-file h.txt`  | tool name + its public `--help` output | opt-in |
+| `bioflow llm suggest --tool prokka --intent "..."`      | tool name + user-typed intent | opt-in |
+| `bioflow llm redact` (stdin → stdout)                   | nothing — local-only utility | always works |
+| `bioflow llm audit`                                     | nothing — reads local log    | always works |
 
-docker/
-  core/Dockerfile        python:3.12-slim + Docker CLI + bioflow
-  docker-compose.yml     mounts host Docker socket (Linux/macOS/Windows WSL2)
+**Backends**: `disabled` (default) · `ollama` (local) · `anthropic`
+(cloud) · `openai` (cloud).
 
-examples/
-  config_prokaryote_short.yaml
-  config_eukaryote_hifi.yaml
-  config_rnaseq.yaml
-  config_metagenomics.yaml
-  config_scrna_seq.yaml
-  config_chip_seq.yaml
-  config_atac_seq.yaml
-  config_methylation.yaml
-  config_proteomics.yaml
+**Auto-redaction** before every diagnose call replaces:
+`C:\Users\*` / `/Users/*` / `/home/*` → `<USER>`, workspace path →
+`<WORKSPACE>`, emails → `<EMAIL>`, IPv4 → `<IP>`, 40+ char tokens →
+`<TOKEN>`, plus any custom regex you supply.
 
-data/
-  test/ecoli_small/      Synthetic prokaryote test fixtures
-  test/rnaseq_toy/       Synthetic RNA-seq test fixtures
-  references/            Mount point for external DBs (not bundled)
+**Daily cost cap** (cloud backends only): set `daily_cost_cap_usd` in
+`~/.bioflow/config.yaml` (or `BIOFLOW_LLM_DAILY_CAP_USD` env var).  Any
+call whose pre-estimate would push the day's cumulative spend above the
+cap is refused — no token is sent.  Inspect today's usage with
+`bioflow llm audit`.
 
-update/
-  research_prompt.md     Standard monthly Deep Research prompt
-  benchmark.py           Candidate smoke-test CLI (--real for live Docker)
-  candidates/YYYY-MM/    Draft tool YAMLs from Deep Research run
-  CHANGELOG.md           Registry version history
-
-tests/
-  unit/                  unit tests (153 passed total)
-  e2e/                   end-to-end tests (MockBackend, no Docker)
-  integration/           integration tests (require Docker, --real flag)
-```
-
----
-
-## Monthly registry update workflow
-
-1. Run the Deep Research prompt in `update/research_prompt.md` — targets the last 60 days of literature.
-2. Save candidate tool YAMLs to `update/candidates/YYYY-MM/`.
-3. Run smoke tests:
-   ```bash
-   python update/benchmark.py --all-candidates update/candidates/2026-05/
-   python update/benchmark.py --all-candidates update/candidates/2026-05/ --real  # with Docker
-   ```
-4. **Manually review** passing candidates, then move to `registry/tools/`.
-5. `update/CHANGELOG.md` is auto-appended with `--append-changelog`.
-
----
-
-## Development
-
-```bash
-pip install -e ".[dev]"                    # installs test + lint deps
-python -m pytest tests/unit tests/e2e -v  # 86 passed
-python -m pytest tests/integration/ -v    # requires Docker daemon
-```
+**Resolution order** for every LLM knob:
+explicit argument → env var → `~/.bioflow/config.yaml` → `disabled`.
 
 ---
 
@@ -372,125 +209,59 @@ python -m pytest tests/integration/ -v    # requires Docker daemon
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  CLI  (bioflow recommend / custom / run / db / …)       │
+│  CLI  recipe / recommend / custom / run / db / setup / llm  │
 └──────────────────────┬──────────────────────────────────┘
                        │
        ┌───────────────▼──────────────────────┐
-       │   Python Orchestrator (core)         │
-       │  Planner → DAG → Runner              │
-       │  Checkpoint · Logger · Report · DB   │
+       │   Python SDK + Orchestrator          │
+       │  @stage · @pipeline · cache · retry  │
+       │  Hardware filter · Report builder    │
        └──────┬──────────────────┬────────────┘
               │                  │
    ┌──────────▼──────┐  ┌────────▼────────────────┐
-   │  Tool Registry  │  │  Docker Engine           │
-   │  (YAML files)   │  │  per-tool container      │
-   │  29 tools       │  │  sibling-container ptn   │
-   └─────────────────┘  │  live log streaming      │
-                        └─────────────────────────-┘
-              ▲
-              │ monthly PR (semi-automated)
-   ┌──────────┴───────────────────────┐
-   │  Deep Research → benchmark.py   │
-   │  → manual review → registry PR  │
-   └──────────────────────────────────┘
+   │  Tool Registry  │  │  Docker Engine          │
+   │  58 YAML tools  │  │  Sibling-container ptn  │
+   │  in 15 categories│  │  Live log streaming    │
+   └─────────────────┘  └─────────────────────────┘
 ```
+
+`bioflow` is never a daemon.  Every command spins up briefly, does its
+work, and exits.
 
 ---
 
-## Registry updates — two roles, two flows
-
-The registry of tool YAMLs evolves over time as new bioinformatics
-software ships.  We deliberately split the update work into TWO roles:
-
-### Role A — the repository maintainer (only one person)
-
-The maintainer runs **Deep Research** monthly to find new tools, drops
-the resulting YAML drafts under `update/candidates/<YYYY-MM>/`, then
-lets a scheduled task benchmark them and push the approved subset to
-GitHub:
-
-```powershell
-# Maintainer machine, ONE-TIME setup (elevated PowerShell on Windows):
-.\scripts\install-schedule-windows.ps1 -AutoApprove -GitPush
-```
+## Development
 
 ```bash
-# Or on Linux/macOS:
-./scripts/install-schedule-cron.sh --auto-approve --git-push
+pip install -e ".[dev]"
+python -m pytest tests/unit -q       # 426 unit tests
+python -m pytest tests/integration/  # requires Docker daemon
 ```
 
-What the scheduled job does every month at 02:30:
+### Project layout
 
-1. Walk every YAML in `update/candidates/`.
-2. Smoke-test each against `data/test/` fixtures.
-3. Write `update/last_run.json` with per-candidate pass/fail.
-4. **`--auto-approve`** → promote passing YAMLs into `registry/`.
-5. **`--git-push`** → `git add` registry / CHANGELOG / report,
-   `git commit` with a deterministic message, then
-   `git push origin <branch>`.
+```
+bioflow/
+  cli.py              CLI: hw · tools · recommend · custom · run · db · ncbi · update · recipe · setup · llm
+  sdk.py              @stage / @pipeline / parallel='auto' / cache / retry
+  report.py           HTML report accumulator (Report.add_section / add_figure / …)
+  io.py               CRLF-safe text, atomic write, HTTP download with retry
+  recipes/            8 cookbook pipelines (auto-registered)
+  llm/                Opt-in LLM companion (explain / diagnose / new-tool / suggest / audit)
+  core/               Hardware profiler · registry loader · runner · planner · checkpoint · NCBI
 
-The maintainer's `git push` is the single point at which the public
-registry changes.  Auth (token / SSH key) must be configured on the
-maintainer's machine the normal git way; bioflow never stores
-credentials.
+registry/
+  schema.yaml         JSON Schema for tool YAMLs
+  tools/              58 tools in 15 categories (qc, assembly, alignment, comparative_genomics, …)
+  presets/            14 curated preset YAMLs
 
-Manual one-shot equivalent:
-```bash
-bioflow update auto --auto-approve --git-push
-bioflow update auto --real            # extra: actually pull each image
+examples/             config_*.yaml for each pipeline + *_demo.py for the SDK
+data/test/            Synthetic fixtures (ecoli_small, rnaseq_toy)
+docker/               core/Dockerfile + docker-compose.yml (sibling-container)
+docs/MAINTAINER.md    Scheduled-update workflow (read this only if you own the GitHub repo)
 ```
 
-### Role B — every other clone (researchers)
-
-Researchers do **nothing**.  When they want a fresh registry they just:
-
-```bash
-cd /path/to/bioflow
-git pull
-```
-
-That's it.  No scheduled task, no Docker images pre-pulled, no
-benchmark runs — the maintainer already did the work, and the result
-is just a git history with new YAML files under `registry/tools/`.
-
-The installer scripts above default to safe mode (`--auto-approve`,
-`--git-push` OFF) precisely so an end user who *accidentally* runs
-them never rewrites their own copy of the registry — they'd only
-benchmark and write a local JSON report.
-
-bioflow itself never becomes a daemon — only the OS scheduler on the
-maintainer's machine is long-running (Part 5 of the design doc).
-
-## LLM companion (opt-in, privacy-first)
-
-bioflow ships a thin LLM helper that **never** runs as part of the
-critical execution path — it only proposes text the user reviews.
-
-| Capability | Data sent to model | Default |
-|---|---|---|
-| `bioflow llm explain "<term>"` | the term + 1 category word | safe; runs once you've configured a backend |
-| `bioflow llm diagnose --stage ... --command ... --stderr ...` | command + last 2 KB of stderr, **redacted** | opt-in |
-| `bioflow llm new-tool --tool prokka --help-file h.txt` | tool name + its public `--help` output | opt-in |
-| `bioflow llm suggest --tool prokka --intent "..."` | tool name + user-typed intent string | opt-in |
-| `bioflow llm redact` (stdin → stdout) | nothing — local-only utility | always works |
-| `bioflow llm audit` | nothing — reads local log | always works |
-
-**Backends**: `disabled` (default) · `ollama` (local) · `anthropic` (cloud) · `openai` (cloud).
-
-**Auto-redaction** before every diagnose call replaces:
-- `C:\Users\*`, `/Users/*`, `/home/*` → `<USER>`
-- the bioflow workspace path → `<WORKSPACE>`
-- emails → `<EMAIL>`, IPv4 → `<IP>`, 40+ char tokens → `<TOKEN>`
-- any custom regex you provide for project-specific PHI
-
-**Resolution order** for `BIOFLOW_LLM_*` knobs:
-explicit function argument → env var → `~/.bioflow/config.yaml` → `disabled`.
-
-**Daily cost cap** (cloud backends only): set `daily_cost_cap_usd` in
-`~/.bioflow/config.yaml` (or `BIOFLOW_LLM_DAILY_CAP_USD` env var).  Any
-call whose pre-estimate would push the day's cumulative spend above the
-cap is refused with a clear message — no token is sent to the provider.
-Inspect today's usage with `bioflow llm audit`.
+---
 
 ## License
 
