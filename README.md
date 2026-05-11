@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-416%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.1-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-422%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.2-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -396,6 +396,64 @@ python -m pytest tests/integration/ -v    # requires Docker daemon
 ```
 
 ---
+
+## Monthly Deep-Research update (scheduled)
+
+The `update/` workflow takes YAML drafts of new tools and benchmarks
+them in containers before promoting them into `registry/`.  You can
+wire this into your OS's scheduler so it runs once a month without
+touching it:
+
+```bash
+# Manual one-shot — benchmarks every YAML in update/candidates/, writes
+# a JSON report.  Safe by default (does NOT promote anything).
+bioflow update auto
+
+# Also auto-approve any candidate whose smoke test passes:
+bioflow update auto --auto-approve
+
+# Use the real DockerBackend (slow, but catches image-pull failures):
+bioflow update auto --real
+```
+
+### Windows Task Scheduler
+
+```powershell
+# elevated PowerShell:
+.\scripts\install-schedule-windows.ps1
+# or with auto-approve:
+.\scripts\install-schedule-windows.ps1 -AutoApprove
+# remove:
+.\scripts\install-schedule-windows.ps1 -Uninstall
+```
+
+### Linux / macOS cron
+
+```bash
+./scripts/install-schedule-cron.sh                 # safe default
+./scripts/install-schedule-cron.sh --auto-approve  # promote on pass
+./scripts/install-schedule-cron.sh --uninstall
+```
+
+Both helpers schedule the run for **02:30 on the 1st of every month**.
+A JSON report lands at `update/last_run.json` so you can inspect what
+happened on the next morning.
+
+### Workflow
+
+1. Deep Research (manual or LLM) drops new YAML drafts under
+   `update/candidates/<YYYY-MM>/`.
+2. The scheduled job runs `bioflow update auto`:
+   - validates every YAML against `registry/schema.yaml`
+   - pulls the container image (when `--real`)
+   - executes a smoke test against the bundled test datasets
+   - writes a structured report
+3. With `--auto-approve`, passing candidates are promoted to the
+   registry automatically; without it, you review the report and run
+   `bioflow update approve` manually.
+
+bioflow itself never becomes a daemon — only the OS scheduler is
+long-running (Part 5 of the design doc).
 
 ## LLM companion (opt-in, privacy-first)
 

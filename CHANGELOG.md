@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.2] — 2026-05-11
+
+### Added
+- **`bioflow update auto`** — unattended pipeline that walks
+  `update/candidates/`, smoke-tests every YAML, writes a JSON report
+  to `update/last_run.json`, and (with `--auto-approve`) promotes
+  passing candidates to the registry.  Designed to be wired into an
+  OS-level scheduler.
+- **`scripts/install-schedule-windows.ps1`** — registers a Windows
+  Task Scheduler task firing every 4 weeks at 02:30; `-AutoApprove`
+  and `-Real` flags pass through; `-Uninstall` removes the task.
+- **`scripts/install-schedule-cron.sh`** — appends a single cron line
+  (1st of every month at 02:30) to the invoking user's crontab.
+- README section "Monthly Deep-Research update (scheduled)" documents
+  the install one-liner and the manual workflow.
+
+### Notes
+- bioflow itself stays a *no-daemon* tool (Part 5).  Only the OS
+  scheduler is long-running.
+- `--auto-approve` is OFF by default — the safe scheduled mode just
+  benchmarks and reports; you review the JSON before promoting.
+
+### Tests
+- 416 → 422 unit (+6: empty candidates, report emission, default-safe
+  flag, unknown-action rejection, both installer scripts present).
+
+---
+
 ## [0.1.1] — 2026-05-11
 
 Bug-fix release — registry tool taxonomy corrections caught by a user

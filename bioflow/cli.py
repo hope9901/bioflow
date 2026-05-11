@@ -242,7 +242,7 @@ def db_cmd(
 
 @app.command("update")
 def update_cmd(
-    action: str = typer.Argument(..., help="approve"),
+    action: str = typer.Argument(..., help="approve | auto"),
     candidate: Optional[Path] = typer.Option(
         None, "--candidate", "-c",
         help="Path to a single candidate YAML to approve.",
@@ -261,11 +261,32 @@ def update_cmd(
         help="Delete candidate file(s) after successful approval.",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show what would happen without writing."),
+    # `auto` action specific
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve",
+        help="[auto] Approve any candidate whose smoke test passes (off by default — "
+             "the safe scheduled mode only benchmarks + reports).",
+    ),
+    report_path: Optional[Path] = typer.Option(
+        None, "--report",
+        help="[auto] Write a JSON summary to this path (default: "
+             "update/last_run.json).",
+    ),
+    use_real_docker: bool = typer.Option(
+        False, "--real",
+        help="[auto] Run smoke tests with the real DockerBackend (slow, "
+             "but the only way to catch image-pull / runtime failures).",
+    ),
 ) -> None:
     """Registry update utilities.
 
     \b
     approve   Promote a candidate YAML (or a whole directory) to the registry.
+    auto      Scheduled pipeline: benchmark every YAML in update/candidates/,
+              write a JSON report, and (with --auto-approve) promote passes.
+              Designed to be wired into Windows Task Scheduler / cron — see
+              scripts/install-schedule-windows.ps1 and
+              scripts/install-schedule-cron.sh.
     """
     from bioflow.core.approve import (  # noqa: PLC0415
         ApprovalError,
@@ -335,8 +356,115 @@ def update_cmd(
             rprint("[red]--candidate or --candidates-dir is required for 'approve'.[/]")
             raise typer.Exit(code=1)
 
+    elif action == "auto":
+        # Unattended pipeline for OS-level schedulers (Task Scheduler / cron)
+        import datetime as _dt  # noqa: PLC0415
+        import json  # noqa: PLC0415
+        import sys as _sys  # noqa: PLC0415
+        from update import benchmark as _b  # noqa: PLC0415
+
+        # Walk every */ subdir under update/candidates/ — Deep Research
+        # drops monthly batches under update/candidates/<YYYY-MM>/
+        root_dirs = [candidates_dir] if candidates_dir else [
+            Path("update/candidates"),
+        ]
+        all_paths: list = []
+        for r in root_dirs:
+            if not r.exists():
+                continue
+            all_paths.extend(sorted(r.rglob("*.yaml")))
+
+        if not all_paths:
+            rprint("[yellow]No candidate YAML files found under "
+                   f"{root_dirs[0]}.[/]")
+            raise typer.Exit(code=0)
+
+        rprint(f"[bold]Found {len(all_paths)} candidate(s):[/]")
+        results = []
+        for p in all_paths:
+            rprint(f"  • {p}")
+        rprint()
+
+        for p in all_paths:
+            try:
+                br = _b.smoke_test(p, use_real_docker=use_real_docker)
+            except Exception as exc:
+                rprint(f"[red]✗ {p.name}:[/] {exc}")
+                results.append({
+                    "candidate": str(p), "passed": False, "skipped": False,
+                    "error": str(exc), "elapsed_s": 0.0,
+                })
+                continue
+            if br.skipped:
+                mark = "[yellow]⊘[/]"
+                note = br.skip_reason
+            elif br.passed:
+                mark = "[green]✓[/]"
+                note = ""
+            else:
+                mark = "[red]✗[/]"
+                note = br.error or ""
+            rprint(f"  {mark} {p.name:<40s}  {br.elapsed:>5.1f}s  {note}")
+            results.append({
+                "candidate":  str(p),
+                "passed":     br.passed,
+                "skipped":    br.skipped,
+                "skip_reason": br.skip_reason,
+                "error":      br.error,
+                "elapsed_s":  br.elapsed,
+            })
+
+        n_pass = sum(1 for r in results if r["passed"])
+        n_fail = len(results) - n_pass
+        rprint(f"\n[bold]Total:[/] {len(results)}  "
+               f"[green]passed={n_pass}[/]  [red]failed={n_fail}[/]")
+
+        # Write JSON report
+        target = report_path or Path("update") / "last_run.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            json.dumps({
+                "ran_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+                "candidates_scanned": len(results),
+                "passed": n_pass,
+                "failed": n_fail,
+                "real_docker": use_real_docker,
+                "auto_approve": auto_approve,
+                "results": results,
+            }, indent=2),
+            encoding="utf-8",
+        )
+        rprint(f"[dim]Report → {target}[/]")
+
+        # Optionally auto-approve passing candidates
+        if auto_approve and n_pass > 0:
+            rprint(f"\n[bold]Auto-approving {n_pass} passing candidate(s) "
+                   "→ registry[/]")
+            from bioflow.core.approve import (  # noqa: PLC0415
+                approve_candidate, ApprovalError,
+            )
+            for r in results:
+                if not r["passed"]:
+                    continue
+                try:
+                    dest = approve_candidate(
+                        Path(r["candidate"]),
+                        registry_dir=registry_dir,
+                        overwrite=False,
+                        delete_candidate=delete_candidate,
+                        dry_run=dry_run,
+                    )
+                    rprint(f"  [green]✓ approved[/]  "
+                           f"{Path(r['candidate']).name} → {dest}")
+                except ApprovalError as exc:
+                    rprint(f"  [yellow]⚠ skipped[/]  "
+                           f"{Path(r['candidate']).name}: {exc}")
+
+        if n_fail:
+            raise typer.Exit(code=1)
+
     else:
-        rprint(f"[red]Unknown action '{action}'.[/] Available: approve")
+        rprint(f"[red]Unknown action '{action}'.[/] Available: approve | auto")
         raise typer.Exit(code=1)
 
 
