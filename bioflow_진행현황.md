@@ -332,3 +332,73 @@ $ bioflow recipe pangenome --taxon Pectobacterium --max-genomes 50
 - **bioflow llm explain prototype** (LLM L1) — 가장 안전하고 즉시 가치, Tier B에게 직접 도움
 - **Cookbook 첫 recipe `pangenome.py`** (Phase 3) — Tier B가 처음 만지는 CLI 표면
 - **로드맵 자체를 ROADMAP.md로 commit** — 비전을 코드베이스에 박아두기
+
+---
+
+## Part 9 · 종료 상태 (2026-05-11)
+
+**모든 box가 닫혔습니다.** 로드맵이 완료됐고, 추가로 Part 2/3 명세에 없던
+`bioflow setup` 위저드까지 보너스로 들어왔습니다.
+
+### 최종 진척 (16/14 + 보너스 = 100%+)
+
+| Phase / Box | 상태 | 핵심 산출물 |
+|---|---|---|
+| Phase 1A `@stage` 데코레이터 | ✅ | `bioflow.sdk.Stage` |
+| Phase 1B 자동 병렬화 | ✅ | `parallel="auto"`, `starmap`, `imap_unordered`, progress |
+| Phase 1C 입력 해시 캐싱 | ✅ | `~/.bioflow/cache/` mtime+SHA, 8 tasks 0.0s 재실행 |
+| Phase 1D Stage chaining 분리 | ✅ | `@pipeline` + `depends_on`, `planner.py` 수정 0 |
+| Phase 2E Auto-report | ✅ | `bioflow.Report` 누적 builder |
+| Phase 2F 운영 함정 흡수 | ✅ | `bioflow.io` (CRLF/UTF-8/HTTP-414/retry) |
+| Phase 2G 재시도 / fault tolerance | ✅ | `@stage(retry=N, retry_with={"ram_gb":"2x"})` |
+| Phase 2H 실시간 모니터링 | ✅ | `BIOFLOW_STREAM_LOGS=1` 컨테이너 로그 stream |
+| Phase 3 Cookbook (8 recipe) | ✅ **8/8** | download_taxon · pangenome · phylogeny · ani_matrix · gwas · cafe_evolution · amr_vf_catalogue · cog_enrichment |
+| LLM L1 용어 Q&A | ✅ | `bioflow llm explain` (데이터 노출 0) |
+| LLM L2 에러 진단 | ✅ | `bioflow llm diagnose` + 자동 redaction |
+| LLM L3 도구 등록 보조 | ✅ | `bioflow llm new-tool` |
+| LLM L4 명령어 제안 | ✅ | `bioflow llm suggest` |
+| LLM L5 Ollama 백엔드 | ✅ | setup 위저드 + Ollama HTTP 클라이언트 |
+| LLM L6 감사 + 비용 cap | ✅ | JSONL 로그 + `daily_cost_cap_usd` 사전 차단 + `bioflow llm audit` |
+| 🎁 셋업 위저드 (로드맵 외 보너스) | ✅ | `bioflow setup` 하드웨어→모델 자동 추천 |
+
+### Phase 1 검증 마일스톤 — 달성 측정값
+
+- **session-1 `run_full_pangenome.py`**: 175 줄 / 22 executable
+- **SDK 위에서 동일 작업**: 38 줄 / **3 executable** (-86%)
+- **같은 입력 재실행**: 35.3 분 → **0.0 초** (캐시)
+- 13 게놈 실측: 1,324 core / 15,359 cluster — 옛 strict(608/23,776) vs loose(2,417/9,989) 사이 정확한 위치 (i=90)
+
+### 누적 메트릭 (최종)
+
+| | |
+|---|---|
+| 단위 테스트 | **412 passed** |
+| 통합 테스트 | 5 passed (with Docker) |
+| Recipe | 8 |
+| CLI 서브커맨드 | hw · tools · recommend · custom · run · db · ncbi · update · recipe · setup · llm |
+| 등록 도구 (YAML) | 59 |
+| LLM 백엔드 | disabled / anthropic / openai / ollama |
+| 예제 데모 | stage / cache / parallel / pipeline / pectobacterium (5) |
+
+### Part 5 영원히-안-할-것 약속 — 모두 지킴
+
+- HPC / SLURM / k8s 백엔드 → **추가 안 함**
+- 멀티유저 / 인증 / quota → **추가 안 함**
+- WDL / CWL / Nextflow 호환 → **추가 안 함**
+- 웹 UI / Tower 대시보드 → **추가 안 함**
+- nf-core 규모 표준 파이프라인 → **추가 안 함**
+- GUI 빌더 → **추가 안 함**
+- 데이터 / 결과 LLM 전송 → **차단 (redaction 강제)**
+- LLM 자동 실행 → **차단 (proposes only)**
+
+### Part 6 한 줄 비전 — 실현 확인
+
+> "1대 워크스테이션에서 비교유전체 ad-hoc 분석을 위한 Deterministic Python SDK
+> + 옵셔널 프라이버시-우선 LLM 컴패니언"
+
+- Deterministic SDK: ✅ 412 단위 테스트 + Dickeya 실 데이터 검증
+- 옵셔널 LLM: ✅ default disabled, 데이터 노출 0
+- 1대 워크스테이션: ✅ Docker만 있으면 작동, HPC 의존 0
+- 1년 후 재현성: ✅ Docker tag pin + 입력 해시 캐시 + 감사 로그
+
+**프로젝트가 처음 정의한 목적을 정확히 그대로 닿았습니다.**

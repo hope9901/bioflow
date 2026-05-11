@@ -101,7 +101,34 @@ Example configs are in `examples/`:
 | `config_eukaryote_hifi.yaml`   | eukaryote_denovo_hifi |
 | `config_rnaseq.yaml`           | rnaseq_deseq2_standard |
 
-### 5. Custom interactive pipeline
+### 5. Cookbook recipes (comparative genomics, one-line invocations)
+
+Eight curated end-to-end pipelines ship with bioflow.  They are the
+Tier-B entry point — no Python required.
+
+```bash
+bioflow recipe list                                 # show all available recipes
+bioflow recipe show pangenome                       # render the DAG without running
+bioflow recipe run pangenome --taxon Dickeya --max 13 --out ./out
+bioflow recipe run pangenome --taxon Pectobacterium --dry-run
+```
+
+| Recipe | One-line description |
+|---|---|
+| `download_taxon`     | Every RefSeq assembly of a taxon (no Docker) |
+| `pangenome`          | NCBI fetch → parallel Prokka → Roary |
+| `phylogeny`          | Single-copy core → MAFFT × N → IQ-TREE ML |
+| `ani_matrix`         | All-vs-all FastANI |
+| `gwas`               | Scoary over a Roary GPA |
+| `cafe_evolution`     | CAFE5 gene-family expansion / contraction |
+| `amr_vf_catalogue`   | ABRicate × N genomes × M DBs |
+| `cog_enrichment`     | DIAMOND vs COG-2024 → per-bucket categories |
+
+All recipes use the SDK so they get **input-hash caching automatically**
+— a second run with the same inputs returns in seconds.  Failed stages
+retry with bumped resources where configured (e.g. CAFE5 → 2× RAM).
+
+### 6. Custom interactive pipeline (legacy YAML-driven path)
 
 ```bash
 bioflow custom --pipeline genome_assembly --out my_plan.yaml
@@ -111,7 +138,7 @@ bioflow custom --pipeline genome_assembly --out my_plan.yaml
 bioflow run my_plan.yaml      # execute the saved plan
 ```
 
-### 6. Docker (production)
+### 7. Docker (production)
 
 ```bash
 docker compose -f docker/docker-compose.yml build

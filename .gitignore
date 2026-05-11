@@ -82,3 +82,4 @@ analysis/*/pangenome_sdk_13/
 analysis/*/sdk_13_run.log
 analysis/*/.cache/
 examples/_pectobacterium_ws/
+examples/_pectobacterium_run.log
