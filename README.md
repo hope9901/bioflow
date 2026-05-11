@@ -34,7 +34,7 @@ and a privacy-first LLM companion is available when you want it.
 ## Install
 
 ```bash
-git clone https://github.com/<you>/bioflow
+git clone https://github.com/hope9901/bioflow
 cd bioflow
 pip install -e .
 

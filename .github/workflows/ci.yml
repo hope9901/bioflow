@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: Unit tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run unit tests
+        run: python -m pytest tests/unit -q --tb=short
+
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Run ruff
+        run: ruff check .
+
+  registry-schema:
+    name: Validate registry YAMLs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Validate all tool YAMLs against schema
+        run: |
+          python - <<'EOF'
+          import yaml, jsonschema, pathlib, sys
+
+          schema = yaml.safe_load(
+              pathlib.Path("registry/schema.yaml").read_text(encoding="utf-8")
+          )
+          errors = []
+          for p in pathlib.Path("registry/tools").rglob("*.yaml"):
+              doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+              # strip update_meta before validating
+              doc.pop("update_meta", None)
+              try:
+                  jsonschema.validate(doc, schema)
+              except jsonschema.ValidationError as e:
+                  errors.append(f"{p}: {e.message}")
+          if errors:
+              for err in errors:
+                  print("FAIL:", err, file=sys.stderr)
+              sys.exit(1)
+          print(f"OK — {len(list(pathlib.Path('registry/tools').rglob('*.yaml')))} tool YAMLs validated")
+          EOF

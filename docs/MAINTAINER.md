@@ -146,7 +146,7 @@ Cowork to do the research and emit YAML candidates as a PR.
 The exact prompt to register is at:
 
 ```
-update/cowork_schedule_prompt.md
+docs/maintainer/cowork_schedule_prompt.md
 ```
 
 Copy the fenced code block from that file into Cowork's "scheduled
