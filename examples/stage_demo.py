@@ -1,4 +1,4 @@
-"""Phase-1A demo — `@stage` decorator on real Docker.
+"""Demo — `@stage` decorator basics on real Docker.
 
 Demonstrates:
   * Single-call execution
@@ -37,7 +37,7 @@ def hello(name: str, *, out_dir):
 
 
 print("\n=== Demo 1 — single call, auto out_dir ===")
-result = hello("dickeya")
+result = hello("world")
 print(f"  ok={result.ok}  out_dir={result.out_dir.name}")
 greeting = result.out_dir / "greeting.txt"
 if greeting.exists():

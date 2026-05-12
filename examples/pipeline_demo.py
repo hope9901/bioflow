@@ -1,4 +1,4 @@
-"""Phase 1D demo — @pipeline composition + show_graph + dry_run."""
+"""Demo — @pipeline composition + show_graph + dry_run."""
 from __future__ import annotations
 import sys, time
 from pathlib import Path

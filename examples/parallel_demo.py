@@ -1,4 +1,4 @@
-"""Phase 1B demo — auto parallelism + progress + starmap + imap_unordered."""
+"""Demo — auto parallelism + progress + starmap + imap_unordered."""
 from __future__ import annotations
 import os, sys, time
 from pathlib import Path

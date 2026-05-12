@@ -1,4 +1,4 @@
-"""Phase-1C demo — input-hash caching with the @stage decorator.
+"""Demo — input-hash caching with the @stage decorator.
 
 Run twice; the second run should be near-instant (all cache hits).
 """

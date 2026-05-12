@@ -1,24 +1,23 @@
-"""Phase 3 integration demo — Pectobacterium genus pangenome via the SDK.
+"""End-to-end demo — Pectobacterium genus pangenome via the Python SDK.
 
-This script proves the Phase 3 roadmap goal:
+Runs the same recipes that ``bioflow recipe run pangenome`` calls under the
+hood, but wired together in Python so you can see every step and customise
+the parameters.  The equivalent one-liner is:
 
-    `bioflow recipe pangenome --taxon Pectobacterium` 한 줄로 우리가
-    6.8시간 한 작업을 재현할 수 있어야 합니다.
+    bioflow recipe run pangenome --taxon Pectobacterium --max 12 --out ./out
 
-…except it's now Python rather than CLI, and uses a smaller taxon cap so
-it finishes in tens of minutes rather than hours.  The CLI form
-``bioflow recipe run pangenome --taxon Pectobacterium --max 12`` works
-identically.
+This demo uses a cap of 12 genomes so it completes in tens of minutes on a
+typical workstation.  Remove ``max_genomes=12`` to run on the full taxon.
 
-What it touches end-to-end:
-  * bioflow.recipes.download_taxon   (Phase 3, NCBI ingestion)
-  * bioflow.recipes.pangenome        (Phase 3, parallel Prokka + Roary)
-  * bioflow.recipes.ani_matrix       (Phase 3, FastANI all-vs-all)
-  * bioflow.recipes.amr_vf_catalogue (Phase 3, ABRicate × N × DBs)
-  * bioflow.Report                   (Phase 2E, auto-html)
-  * @stage caching                   (Phase 1C — second run will be ~0 s)
-  * @stage retry                     (Phase 2G — Roary auto-retries OOM)
-  * parallel="auto"                  (Phase 1B — fills host CPUs)
+What it exercises end-to-end:
+  * bioflow.recipes.download_taxon   — NCBI RefSeq ingestion
+  * bioflow.recipes.pangenome        — parallel Prokka + Roary
+  * bioflow.recipes.ani_matrix       — FastANI all-vs-all
+  * bioflow.recipes.amr_vf_catalogue — ABRicate × N genomes × M databases
+  * bioflow.Report                   — auto-accumulating HTML report
+  * @stage caching                   — second run with same inputs: ~0 s
+  * @stage retry                     — Roary auto-retries on OOM
+  * parallel="auto"                  — fills available CPUs automatically
 """
 from __future__ import annotations
 import sys, time

@@ -1,5 +1,11 @@
 # Changelog
 
+> This file tracks **software releases**.
+> For the monthly tool-registry update log see
+> [`update/REGISTRY_CHANGELOG.md`](update/REGISTRY_CHANGELOG.md).
+
+---
+
 ## [0.1.3] — 2026-05-11
 
 ### Added
