@@ -1,0 +1,29 @@
+id: picard
+name: Picard MarkDuplicates
+version: "3.2.0"
+category: epigenomics
+stage:
+  - chip_seq.step2
+  - atac_seq.step2
+  - methylation.step2
+input_types: [bam]
+output_types: [bam, dedup_metrics]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, differential, wgbs, rrbs]
+container:
+  image: quay.io/biocontainers/picard:3.2.0--hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 8,  disk_gb: 10 }
+  recommended: { cpu: 4, ram_gb: 16, disk_gb: 30 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  picard MarkDuplicates I={input_bam} O={out_dir}/dedup.bam
+         M={out_dir}/dup_metrics.txt REMOVE_DUPLICATES=true
+references: []
+citation: "Broad Institute, https://broadinstitute.github.io/picard/"
+added: "2026-05-12"
+last_reviewed: "2026-05-12"

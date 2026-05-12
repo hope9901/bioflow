@@ -6,6 +6,24 @@
 
 ---
 
+## [0.1.4] — 2026-05-12
+
+### Added
+- **8 new per-pipeline recipes** — at least one recipe per pipeline area:
+  `prokaryote_assembly`, `rnaseq_deg`, `metagenomics_profile`, `scrna_seq`,
+  `chip_seq`, `atac_seq`, `methylation_wgbs`, `proteomics_dda`.
+  Total recipe count: 8 → **16**.
+- 2 new tool YAMLs to support the new recipes:
+  - `samtools` (alignment) — standalone BAM sort/index.
+  - `picard` (epigenomics) — MarkDuplicates for ChIP-seq / ATAC-seq dedup.
+  Total registered tools: 58 → **60**.
+
+### Tests
+- 426 → **444** unit tests (+18: per-pipeline recipe registration smoke
+  tests, DAG-shape parametrised tests, registry-total assertion).
+
+---
+
 ## [0.1.3] — 2026-05-11
 
 ### Added

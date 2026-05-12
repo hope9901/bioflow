@@ -1,0 +1,58 @@
+"""Smoke tests for the per-pipeline recipes added in v0.1.4.
+
+These verify each new recipe registers under the expected name and
+exposes a DAG of the expected stage count.  Full end-to-end execution
+requires real Docker + real reference data (genome indices etc.) so it
+lives in tests/e2e/, not here.
+"""
+from __future__ import annotations
+
+import pytest
+
+from bioflow.recipes import get, names
+
+
+EXPECTED_RECIPES = {
+    "prokaryote_assembly":  4,   # fastp → spades → quast → prokka
+    "rnaseq_deg":           4,   # fastp → salmon_index → salmon_quant → deseq2
+    "metagenomics_profile": 3,   # fastp → kraken2 → bracken
+    "scrna_seq":            2,   # starsolo → scanpy
+    "chip_seq":             5,   # trim → align → dedup → peaks → annotate
+    "atac_seq":             5,   # trim → align → dedup → peaks → footprint
+    "methylation_wgbs":     3,   # trim → bismark → methylkit
+    "proteomics_dda":       2,   # msconvert → fragpipe
+}
+
+
+class TestPerPipelineRegistry:
+
+    def test_all_per_pipeline_recipes_registered(self):
+        registered = set(names())
+        missing = set(EXPECTED_RECIPES) - registered
+        assert not missing, f"Missing recipes: {missing}"
+
+    @pytest.mark.parametrize("recipe_name,n_stages", list(EXPECTED_RECIPES.items()))
+    def test_recipe_dag_shape(self, recipe_name, n_stages):
+        pipe = get(recipe_name)
+        plan = pipe.dry_run()
+        assert plan["n_stages"] == n_stages, (
+            f"{recipe_name}: expected {n_stages} stages, "
+            f"got {plan['n_stages']}"
+        )
+
+    @pytest.mark.parametrize("recipe_name", list(EXPECTED_RECIPES))
+    def test_recipe_has_description(self, recipe_name):
+        pipe = get(recipe_name)
+        assert pipe.description, f"{recipe_name}: empty description"
+
+
+class TestRegistryTotal:
+    """The repo should now ship 8 comparative genomics + 8 per-pipeline = 16."""
+
+    def test_total_recipe_count(self):
+        registered = set(names())
+        # 8 comparative + 8 per-pipeline = 16 minimum
+        assert len(registered) >= 16, (
+            f"Expected ≥16 recipes, got {len(registered)}: "
+            f"{sorted(registered)}"
+        )

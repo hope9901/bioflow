@@ -1,0 +1,30 @@
+id: samtools
+name: samtools
+version: "1.20"
+category: alignment
+stage:
+  - chip_seq.step2
+  - atac_seq.step2
+  - rnaseq_deg.step2
+  - methylation.step2
+  - genome_assembly.step2
+input_types: [bam, sam]
+output_types: [bam, bai]
+applicable:
+  species: [any]
+  read_type: [short, long_hifi, long_ont, hybrid, any]
+  mode: [any, de_novo, resequencing, peak_calling, wgbs, rrbs, differential, profiling]
+container:
+  image: quay.io/biocontainers/samtools:1.20--h50ea8bc_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 2,  disk_gb: 5 }
+  recommended: { cpu: 8, ram_gb: 8,  disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  samtools sort -@ {cpu} -o {out_dir}/sorted.bam {input_bam} &&
+  samtools index -@ {cpu} {out_dir}/sorted.bam
+citation: "Danecek 2021, PMID 33590861"
+added: "2026-05-12"
+last_reviewed: "2026-05-12"

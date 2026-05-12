@@ -55,11 +55,23 @@ def names() -> list:
 # ---------------------------------------------------------------------------
 
 # noqa: E402,F401 — these imports trigger registration as a side effect
+
+# Comparative genomics (8 recipes)
 from bioflow.recipes.comparative_genomics import pangenome as _pangenome   # noqa
 from bioflow.recipes.comparative_genomics import phylogeny as _phylogeny   # noqa
-from bioflow.recipes.comparative_genomics import download_taxon as _dl    # noqa
-from bioflow.recipes.comparative_genomics import ani_matrix as _ani       # noqa
-from bioflow.recipes.comparative_genomics import gwas as _gwas            # noqa
+from bioflow.recipes.comparative_genomics import download_taxon as _dl     # noqa
+from bioflow.recipes.comparative_genomics import ani_matrix as _ani        # noqa
+from bioflow.recipes.comparative_genomics import gwas as _gwas             # noqa
 from bioflow.recipes.comparative_genomics import amr_vf_catalogue as _amr  # noqa
-from bioflow.recipes.comparative_genomics import cafe_evolution as _cafe  # noqa
-from bioflow.recipes.comparative_genomics import cog_enrichment as _cog   # noqa
+from bioflow.recipes.comparative_genomics import cafe_evolution as _cafe   # noqa
+from bioflow.recipes.comparative_genomics import cog_enrichment as _cog    # noqa
+
+# Per-pipeline recipes (one per pipeline area)
+from bioflow.recipes.genome_assembly import prokaryote_assembly as _asm    # noqa
+from bioflow.recipes.rnaseq_deg import rnaseq_deg as _rnaseq               # noqa
+from bioflow.recipes.metagenomics import metagenomics_profile as _meta     # noqa
+from bioflow.recipes.single_cell import scrna_seq as _scrna                # noqa
+from bioflow.recipes.epigenomics import chip_seq as _chip                  # noqa
+from bioflow.recipes.epigenomics import atac_seq as _atac                  # noqa
+from bioflow.recipes.methylation import bismark_wgbs as _methyl            # noqa
+from bioflow.recipes.proteomics import proteomics_dda as _prot             # noqa
