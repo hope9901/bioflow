@@ -18,6 +18,8 @@ dependencies = [
     "docker>=7.1",
     "psutil>=5.9",
     "questionary>=2.0",
+    "pandas>=1.5",
+    "matplotlib>=3.6",
     "pynvml>=11.5; platform_system == 'Linux'",
 ]
 
