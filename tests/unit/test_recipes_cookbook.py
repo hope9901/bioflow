@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from bioflow import set_backend, set_workspace, MockBackend
-from bioflow.recipes import RECIPES, get, names
+from bioflow.recipes import get, names
 
 
 @pytest.fixture(autouse=True)

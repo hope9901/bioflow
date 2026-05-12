@@ -4,7 +4,8 @@ Run twice; the second run should be near-instant (all cache hits).
 """
 from __future__ import annotations
 
-import sys, time
+import sys
+import time
 from pathlib import Path
 
 for _s in (sys.stdout, sys.stderr):

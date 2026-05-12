@@ -1,7 +1,6 @@
 """LLM L3/L4 + first-time setup wizard tests."""
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest

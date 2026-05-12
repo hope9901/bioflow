@@ -7,10 +7,8 @@ Covers:
 
 from __future__ import annotations
 
-import platform
 from unittest.mock import patch
 
-import pytest
 
 from bioflow.core.hardware import _ARCH_ALIASES, detect
 from bioflow.core.compatibility import _arch_status, _status

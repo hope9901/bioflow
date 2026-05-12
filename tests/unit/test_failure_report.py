@@ -1,9 +1,7 @@
 """Tests for stage failure tracking and HTML error display (items 4 & 5)."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 import yaml

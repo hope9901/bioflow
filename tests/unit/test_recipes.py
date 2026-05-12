@@ -1,7 +1,6 @@
 """Phase 3 — recipe registry + CLI bridge tests."""
 from __future__ import annotations
 
-from pathlib import Path
 
 import pytest
 

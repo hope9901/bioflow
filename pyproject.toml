@@ -45,6 +45,17 @@ packages = ["bioflow"]
 line-length = 100
 target-version = "py311"
 
+[tool.ruff.lint]
+# E402: standalone scripts do sys.path.insert before bioflow imports (intentional)
+# E701: single-line try/except used in examples for cp949-safe stdout setup
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Examples are standalone scripts — sys.path manipulation before imports is intentional
+"examples/*.py" = ["E402", "E701"]
+# Tests use inline semicolons as a compact setup style
+"tests/**/*.py" = ["E702", "E701", "F841"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"

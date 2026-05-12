@@ -17,7 +17,7 @@ Adding a recipe
 """
 from __future__ import annotations
 
-from typing import Dict, Iterable, Optional
+from typing import Dict
 
 from bioflow.sdk import Pipeline
 

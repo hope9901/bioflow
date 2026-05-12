@@ -5,7 +5,6 @@ makes it into the user message that would be sent to a model.
 """
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,7 +13,6 @@ from bioflow.llm import (
     redact,
     diagnose_failure,
     LlmDisabled,
-    LlmError,
 )
 
 

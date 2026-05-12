@@ -35,7 +35,6 @@ Typical usage
 
 from __future__ import annotations
 
-import io
 import json
 import os
 import shutil
@@ -44,7 +43,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional, Sequence
 

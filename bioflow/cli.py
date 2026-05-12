@@ -380,7 +380,6 @@ def update_cmd(
         # Unattended pipeline for OS-level schedulers (Task Scheduler / cron)
         import datetime as _dt  # noqa: PLC0415
         import json  # noqa: PLC0415
-        import sys as _sys  # noqa: PLC0415
         from update import benchmark as _b  # noqa: PLC0415
 
         # Walk every */ subdir under update/candidates/ — Deep Research
@@ -1075,7 +1074,7 @@ def setup_cmd(
     """
     from bioflow.core.hardware import detect  # noqa: PLC0415
     from bioflow.llm import (  # noqa: PLC0415
-        recommend_local_model, save_config, CONFIG_PATH,
+        recommend_local_model, save_config,
     )
 
     hw = detect()
@@ -1154,10 +1153,10 @@ def setup_cmd(
     # Helpful next-step hints
     if backend == "ollama":
         rprint(
-            f"\nNext: install Ollama from [cyan]https://ollama.com[/], then pull the model:"
+            "\nNext: install Ollama from [cyan]https://ollama.com[/], then pull the model:"
         )
         rprint(f"  [dim]ollama pull {model}[/]")
-        rprint(f"  [dim]ollama serve[/]   # leaves a local daemon running")
+        rprint("  [dim]ollama serve[/]   # leaves a local daemon running")
     elif backend == "anthropic":
         rprint("\nNext: export your API key:")
         rprint("  [dim]export ANTHROPIC_API_KEY=sk-ant-...[/]")

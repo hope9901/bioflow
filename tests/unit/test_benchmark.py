@@ -6,10 +6,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-REPO_ROOT      = Path(__file__).resolve().parents[2]
-REGISTRY_DIR   = REPO_ROOT / "registry"
-CANDIDATES_DIR = REPO_ROOT / "update" / "candidates"
-SAMPLE_CANDIDATE = CANDIDATES_DIR / "2026-05" / "hypo_assembler.yaml"
+REPO_ROOT        = Path(__file__).resolve().parents[2]
+REGISTRY_DIR     = REPO_ROOT / "registry"
+SAMPLE_CANDIDATE = REPO_ROOT / "tests" / "fixtures" / "hypo_assembler.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +42,7 @@ def test_validate_candidate_fails_for_invalid_yaml(tmp_path):
 
 def test_resolve_test_dataset_prokaryote_step2():
     import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
-    from benchmark import _resolve_test_dataset, TEST_DATA
+    from benchmark import _resolve_test_dataset
     # ecoli_small must map to genome_assembly.step2 / prokaryote
     # Dataset may not exist in CI — we just check the return type
     result = _resolve_test_dataset("genome_assembly.step2", ["prokaryote"])

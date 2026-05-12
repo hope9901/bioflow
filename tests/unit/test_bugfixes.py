@@ -325,7 +325,7 @@ class TestNcbiZipPathTraversal:
     def test_download_genomes_skips_traversal_members(self, tmp_path):
         """End-to-end: if a ZIP somehow contains a member whose resolved path
         is outside out_dir, download_genomes() skips it without crashing."""
-        from bioflow.core.ncbi import NcbiError, download_genomes
+        from bioflow.core.ncbi import download_genomes
 
         out_dir = tmp_path / "genomes"
         out_dir.mkdir()
@@ -576,7 +576,6 @@ class TestRunnerRamCeiling:
         assert max(math.ceil(ram_gb), 1) == 8
 
     def test_docker_backend_uses_ceil(self, monkeypatch):
-        import math
         captured = {}
 
         class FakeContainer:
@@ -789,7 +788,7 @@ class TestNcbiBatchedDownload:
         monkeypatch.setattr(ncbi, "list_genomes", fake_list)
 
         # Stub _stream_to_file — capture URL, write a tiny valid ZIP
-        import io, zipfile
+        import io
         def fake_stream(url, dest, **kw):
             captured_urls.append(url)
             buf = io.BytesIO()

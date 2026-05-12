@@ -1,17 +1,12 @@
 """Phase 1D — depends_on metadata + @pipeline composition tests."""
 from __future__ import annotations
 
-import io
-import sys
-from contextlib import redirect_stdout
-from pathlib import Path
 
 import pytest
 
 from bioflow import (
     stage,
     pipeline,
-    Stage,
     Pipeline,
     set_workspace,
     set_backend,

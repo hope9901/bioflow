@@ -65,8 +65,8 @@ def run_multiqc(
             return None
 
     cmd = (
-        f"multiqc /data/workdir --outdir /data/out "
-        f"--filename multiqc_report.html --force --quiet"
+        "multiqc /data/workdir --outdir /data/out "
+        "--filename multiqc_report.html --force --quiet"
     )
 
     log.info(f"MultiQC: scanning {workdir} -> {out_dir}")

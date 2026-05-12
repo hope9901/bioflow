@@ -27,7 +27,7 @@ Programmatic (Tier A) usage
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 from bioflow import stage, pipeline
 from bioflow.io import write_text

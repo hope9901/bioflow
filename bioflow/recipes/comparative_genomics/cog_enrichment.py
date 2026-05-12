@@ -21,7 +21,6 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Optional
 
 from bioflow import stage, pipeline
 from bioflow.io import write_text
@@ -155,9 +154,12 @@ def cog_enrichment(
 
     def bucket_of(n: int) -> str:
         f = n / n_strains
-        if f >= 0.99:  return "core"
-        if f >= 0.95:  return "soft_core"
-        if f >= 0.15:  return "shell"
+        if f >= 0.99:
+            return "core"
+        if f >= 0.95:
+            return "soft_core"
+        if f >= 0.15:
+            return "shell"
         return "cloud"
 
     # Counts: bucket × category

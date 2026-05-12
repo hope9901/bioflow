@@ -17,7 +17,6 @@ end-to-end glue.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from bioflow import stage, pipeline
 from bioflow.recipes import register

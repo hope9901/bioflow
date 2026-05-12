@@ -21,7 +21,6 @@ manually (or the CLI caller can do it with ``--delete-candidate``).
 from __future__ import annotations
 
 import datetime
-import shutil
 from pathlib import Path
 from typing import Optional
 

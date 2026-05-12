@@ -1,10 +1,7 @@
 """Unit tests for bioflow.core.db (item 1 — db fetch)."""
 from __future__ import annotations
 
-import io
-import gzip
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 

@@ -185,9 +185,12 @@ def recommend_local_model(
         try:
             from bioflow.core.hardware import detect   # noqa: PLC0415
             hw = detect()
-            if ram_gb is None:        ram_gb = hw.ram_gb
-            if gpu_present is None:   gpu_present = hw.gpu_present
-            if cpu_count is None:     cpu_count = hw.cpu_count
+            if ram_gb is None:
+                ram_gb = hw.ram_gb
+            if gpu_present is None:
+                gpu_present = hw.gpu_present
+            if cpu_count is None:
+                cpu_count = hw.cpu_count
         except Exception:
             ram_gb = ram_gb or 0
             gpu_present = bool(gpu_present)
@@ -330,7 +333,7 @@ def _build_prompt(term: str, context: str) -> dict:
 # Redaction — for L2 (error diagnosis)
 # ---------------------------------------------------------------------------
 
-import re as _re
+import re as _re  # noqa: E402
 
 _DEFAULT_REDACT_PATTERNS: tuple = (
     # Windows user paths: C:\Users\someone\... → C:\Users\<USER>\...

@@ -17,8 +17,6 @@ What is verified:
 """
 from __future__ import annotations
 
-import os
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -140,7 +138,6 @@ def test_docker_backend_log_streaming(docker_backend, tmp_path):
 @docker_required
 def test_run_plan_with_docker_backend_single_stage(tmp_path):
     """Full pipeline run with real Docker: 1 stage that echoes and exits 0."""
-    import yaml  # noqa: PLC0415
     from bioflow.core.planner import ExecutionPlan, StagePlan  # noqa: PLC0415
     from bioflow.core.registry import load_registry  # noqa: PLC0415
     from bioflow.core.runner import DockerBackend, run_plan  # noqa: PLC0415

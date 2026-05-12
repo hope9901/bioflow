@@ -271,7 +271,8 @@ def download_url(
                 f"HTTP {exc.code} on attempt {attempt}/{attempts}; "
                 f"sleeping {delay:.1f}s"
             )
-            time.sleep(delay); delay *= 2
+            time.sleep(delay)
+            delay *= 2
         except (urllib.error.URLError, TimeoutError, ConnectionError, DownloadError) as exc:
             target.unlink(missing_ok=True)
             last_exc = exc
@@ -281,7 +282,8 @@ def download_url(
                 f"transient {exc!r} on attempt {attempt}/{attempts}; "
                 f"sleeping {delay:.1f}s"
             )
-            time.sleep(delay); delay *= 2
+            time.sleep(delay)
+            delay *= 2
 
     raise DownloadError(
         f"giving up on {url} after {attempts} attempts: {last_exc!r}"

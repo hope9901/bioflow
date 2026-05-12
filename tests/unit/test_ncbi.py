@@ -5,8 +5,7 @@ from __future__ import annotations
 import io
 import json
 import zipfile
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -15,7 +14,6 @@ from bioflow.core.ncbi import (
     NcbiError,
     _api_key,
     _get_json,
-    _LEVEL_API,
     download_genomes,
     download_proteins,
     list_genomes,

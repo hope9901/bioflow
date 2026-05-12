@@ -114,7 +114,6 @@ class TestOllamaDispatch:
     def test_returns_response_field(self, monkeypatch):
         # Stub urllib.request.urlopen
         import json as _json
-        from io import BytesIO
 
         class FakeResp:
             def read(self):

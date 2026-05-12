@@ -22,7 +22,6 @@ from __future__ import annotations
 import hashlib
 import urllib.request
 from pathlib import Path
-from typing import Optional
 
 from bioflow.core.logger import get_logger
 
@@ -187,7 +186,7 @@ def fetch_db(
     log.info(f"Fetching '{name}' ({size_gb:.2f} GB) from {url}")
 
     try:
-        from rich.progress import (  # noqa: PLC0415
+        from rich.progress import (  # noqa: PLC0415, F401
             BarColumn,
             DownloadColumn,
             Progress,

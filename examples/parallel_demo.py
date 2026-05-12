@@ -1,6 +1,8 @@
 """Demo — auto parallelism + progress + starmap + imap_unordered."""
 from __future__ import annotations
-import os, sys, time
+import os
+import sys
+import time
 from pathlib import Path
 
 for _s in (sys.stdout, sys.stderr):
