@@ -6,6 +6,31 @@
 
 ---
 
+## [0.1.5] — 2026-05-15
+
+### Fixed
+- **BLOCKER: per-pipeline recipes were unrunnable via the CLI.**
+  `bioflow recipe run` had a hardcoded option set + `candidate` dict, so
+  the 8 per-pipeline recipes could not receive `--r1` / `--sample-sheet`
+  / etc.  The recipe command now accepts pass-through `--key value`
+  tokens, maps `--sample-id` → `sample_id`, coerces integer values, warns
+  on unknown options, and prints an actionable hint listing the exact
+  missing parameters.
+- **BLOCKER: input files outside the workspace were invisible to
+  containers.**  The SDK mounted only the workspace and `_translate_command`
+  only rewrote workspace paths, so any external `--r1` / reference / index
+  path pointed at something neither mounted nor translated.  The SDK now
+  scans stage arguments for external `Path` inputs, bind-mounts their
+  parent directory at `/inputs/<n>`, and rewrites the command accordingly
+  (files, directories, and index-prefixes all handled).  This also fixes
+  the same latent bug in the existing `gwas` recipe.
+
+### Tests
+- 444 → **464** unit tests (+20: `test_sdk_external_mounts.py`,
+  `test_recipe_cli_args.py`).
+
+---
+
 ## [0.1.4] — 2026-05-12
 
 ### Added
