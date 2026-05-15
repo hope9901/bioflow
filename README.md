@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-464%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.5-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-474%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.6-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 

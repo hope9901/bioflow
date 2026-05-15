@@ -51,19 +51,23 @@ def msconvert(raw_dir: Path, *, out_dir):
 def fragpipe(mzml, fragpipe_workflow: Path, fasta_db: Path, *, out_dir):
     """FragPipe headless: MSFragger search + Percolator FDR + IonQuant quant.
 
-    A minimal manifest is generated automatically from the mzML files
-    produced by the previous stage (one row per mzML, default
-    experiment / bioreplicate ``1``).
+    The 4-column manifest (mzML path / experiment / bioreplicate /
+    data type) is built inline from the mzML files emitted by the
+    previous stage.  ``--database`` overrides any FASTA referenced by
+    the workflow file so users keep their proteome decoupled from the
+    workflow config.
     """
     return (
-        f"sh -c 'cd {out_dir} && "
-        f"ls {mzml.out_dir}/*.mzML | "
-        f"awk -F/ \\\"{{print \\$0\\\"\\t1\\t1\\tDDA\\\"}}\\\" "
+        f"bash -c 'cd {out_dir} && "
         f"> manifest.tsv && "
+        f"for f in {mzml.out_dir}/*.mzML; do "
+        f"  printf \"%s\\t1\\t1\\tDDA\\n\" \"$f\" >> manifest.tsv; "
+        f"done && "
         f"fragpipe --headless "
         f"--workflow {fragpipe_workflow} "
         f"--manifest manifest.tsv "
         f"--workdir {out_dir} "
+        f"--database-path {fasta_db} "
         f"--ram 32 --threads 8'"
     )
 

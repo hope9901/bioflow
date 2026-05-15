@@ -46,6 +46,8 @@ def starsolo(r1: Path, r2: Path, star_index: Path, whitelist: Path,
         f"--soloCBwhitelist {whitelist} "
         f"--soloCBstart 1 --soloCBlen {cb_len} "
         f"--soloUMIstart {cb_len + 1} --soloUMIlen {umi_len} "
+        f"--soloFeatures Gene "
+        f"--soloCellFilter EmptyDrops_CR "
         f"--outSAMtype BAM SortedByCoordinate "
         f"--outFileNamePrefix {out_dir}/ "
         f"--soloOutFileNames Solo.out/ features.tsv barcodes.tsv matrix.mtx"
@@ -56,24 +58,41 @@ def starsolo(r1: Path, r2: Path, star_index: Path, whitelist: Path,
        cpu=8, ram_gb=32, depends_on=starsolo)
 def scanpy_analyze(solo, *, out_dir,
                    min_genes: int = 200, min_cells: int = 3):
-    """Scanpy QC + normalize + cluster + UMAP from the STARsolo matrix."""
-    mtx_dir = f"{solo.out_dir}/Solo.out/Gene/filtered"
+    """Scanpy QC + normalize + cluster + UMAP from the STARsolo matrix.
+
+    Prefers ``Solo.out/Gene/filtered`` when STARsolo's cell-filtering
+    succeeded, otherwise falls back to ``Solo.out/Gene/raw`` so the
+    pipeline still produces an h5ad on borderline / very-shallow runs.
+
+    The Scanpy logic is materialised to a sibling ``analyze.py`` rather
+    than passed via ``python -c`` — that keeps the quoting sane and
+    makes the script independently re-runnable for debugging.
+    """
+    script_path = Path(out_dir) / "analyze.py"
+    script_path.write_text(
+        "import sys\n"
+        "import scanpy as sc\n"
+        "adata = sc.read_10x_mtx(sys.argv[1], var_names='gene_symbols')\n"
+        f"sc.pp.filter_cells(adata, min_genes={min_genes})\n"
+        f"sc.pp.filter_genes(adata, min_cells={min_cells})\n"
+        "sc.pp.normalize_total(adata, target_sum=1e4)\n"
+        "sc.pp.log1p(adata)\n"
+        "sc.pp.highly_variable_genes(adata, n_top_genes=2000)\n"
+        "sc.pp.scale(adata, max_value=10)\n"
+        "sc.tl.pca(adata)\n"
+        "sc.pp.neighbors(adata)\n"
+        "sc.tl.umap(adata)\n"
+        "sc.tl.leiden(adata)\n"
+        "sc.tl.rank_genes_groups(adata, 'leiden', method='wilcoxon')\n"
+        "adata.write(sys.argv[2])\n",
+        encoding="utf-8",
+    )
+    filt = f"{solo.out_dir}/Solo.out/Gene/filtered"
+    raw  = f"{solo.out_dir}/Solo.out/Gene/raw"
     return (
-        f"python -c \""
-        f"import scanpy as sc; "
-        f"adata = sc.read_10x_mtx('{mtx_dir}', var_names='gene_symbols'); "
-        f"sc.pp.filter_cells(adata, min_genes={min_genes}); "
-        f"sc.pp.filter_genes(adata, min_cells={min_cells}); "
-        f"sc.pp.normalize_total(adata, target_sum=1e4); "
-        f"sc.pp.log1p(adata); "
-        f"sc.pp.highly_variable_genes(adata, n_top_genes=2000); "
-        f"sc.pp.scale(adata, max_value=10); "
-        f"sc.tl.pca(adata); "
-        f"sc.pp.neighbors(adata); "
-        f"sc.tl.umap(adata); "
-        f"sc.tl.leiden(adata); "
-        f"sc.tl.rank_genes_groups(adata, 'leiden', method='wilcoxon'); "
-        f"adata.write('{out_dir}/analyzed.h5ad')\""
+        f"bash -c '"
+        f"if [ -d {filt} ]; then MTX={filt}; else MTX={raw}; fi && "
+        f"python {script_path} \"$MTX\" {out_dir}/analyzed.h5ad'"
     )
 
 

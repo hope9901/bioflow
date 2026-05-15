@@ -53,17 +53,32 @@ def assemble(clean, *, out_dir):
 
 @stage(image="staphb/quast:5.2.0", cpu=2, ram_gb=4, depends_on=assemble)
 def assembly_qc(asm, *, out_dir):
-    """QUAST: assembly contiguity & completeness metrics."""
-    return f"quast.py -o {out_dir} -t 2 {asm.out_dir}/scaffolds.fasta"
+    """QUAST: assembly contiguity & completeness metrics.
+
+    Prefers ``scaffolds.fasta``; for very fragmented assemblies SPAdes
+    can omit it, so we fall back to the always-present
+    ``contigs.fasta``.
+    """
+    return (
+        f"bash -c '"
+        f"ASM={asm.out_dir}/scaffolds.fasta; "
+        f"[ -f \"$ASM\" ] || ASM={asm.out_dir}/contigs.fasta; "
+        f"quast.py -o {out_dir} -t 2 \"$ASM\"'"
+    )
 
 
 @stage(image="staphb/prokka:1.14.6", cpu=4, ram_gb=8, depends_on=assemble)
 def annotate(asm, *, out_dir, sample_id: str = "sample"):
-    """Prokka: structural annotation (CDS, rRNA, tRNA) on the assembly."""
+    """Prokka: structural annotation (CDS, rRNA, tRNA) on the assembly.
+
+    Same scaffolds → contigs fall-back as ``assembly_qc``.
+    """
     return (
+        f"bash -c '"
+        f"ASM={asm.out_dir}/scaffolds.fasta; "
+        f"[ -f \"$ASM\" ] || ASM={asm.out_dir}/contigs.fasta; "
         f"prokka --outdir {out_dir}/prokka --prefix {sample_id} "
-        f"--kingdom Bacteria --cpus 4 --force --fast "
-        f"{asm.out_dir}/scaffolds.fasta"
+        f"--kingdom Bacteria --cpus 4 --force --fast \"$ASM\"'"
     )
 
 
@@ -86,10 +101,8 @@ def prokaryote_assembly(
 
     clean = qc_trim(Path(r1), Path(r2))
     asm = assemble(clean)
-    qc = assembly_qc(asm)
-    ann = annotate(asm, sample_id=sample_id)
-    return {"clean_reads": clean, "assembly": asm,
-            "assembly_qc": qc, "annotation": ann}
+    assembly_qc(asm)                # QUAST report lands in its own out_dir
+    return annotate(asm, sample_id=sample_id)
 
 
 register("prokaryote_assembly", prokaryote_assembly)

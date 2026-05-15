@@ -135,8 +135,9 @@ def rnaseq_deg(
 
     samples = _parse_sample_sheet(Path(sample_sheet))
 
-    # 1. fastp on every sample, in parallel
-    qc_results = qc_one.map(
+    # 1. fastp on every sample, in parallel.  `.starmap` unpacks each
+    # tuple into the stage's positional args (sample_id, r1, r2).
+    qc_results = qc_one.starmap(
         [(s_id, r1, r2) for s_id, r1, r2, _ in samples],
         parallel="auto", progress=True,
     )
@@ -152,7 +153,7 @@ def rnaseq_deg(
             Path(qc.out_dir) / f"{s_id}_R1.clean.fq.gz",
             Path(qc.out_dir) / f"{s_id}_R2.clean.fq.gz",
         ))
-    quant_results = salmon_quant.map(
+    quant_results = salmon_quant.starmap(
         [(idx, s, r1, r2) for s, r1, r2 in clean_inputs],
         parallel="auto", progress=True,
     )

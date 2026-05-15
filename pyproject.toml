@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bioflow"
-version = "0.1.5"
+version = "0.1.6"
 description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
 readme = "README.md"
 requires-python = ">=3.9"

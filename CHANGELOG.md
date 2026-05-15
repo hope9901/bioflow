@@ -6,6 +6,43 @@
 
 ---
 
+## [0.1.6] — 2026-05-15
+
+### Fixed
+- **CRITICAL: `rnaseq_deg` was unrunnable.**  Two multi-arg stages were
+  fanned out with `.map()` (which forwards the whole tuple as the first
+  positional arg) instead of `.starmap()` (which unpacks).  This was
+  invisible to registration-style tests; only the new e2e suite caught
+  it.
+- `proteomics_dda`: now actually uses the `fasta_db` argument
+  (`fragpipe --database-path …`) and writes the FragPipe manifest via a
+  readable `for f in *.mzML; do printf …; done` bash loop instead of a
+  triply-escaped inline `awk`.
+- `chip_seq` / `atac_seq` / `methylation_wgbs`: replaced the bare
+  `*_val_1.fq.gz` glob fed straight to the aligner with `R1=$(ls … |
+  head -1)` so multiple matches no longer break `bowtie2 -1` / `bismark
+  -1`.
+- `scrna_seq`: set explicit `--soloCellFilter EmptyDrops_CR
+  --soloFeatures Gene` so the `filtered/` matrix is reproducibly
+  produced, and added a `filtered → raw` fall-back so shallow runs still
+  yield an h5ad.
+- `scrna_seq`: rewrote the inline `python -c` analysis as a sibling
+  `analyze.py` (quoting hygiene + independently re-runnable for
+  debugging).
+- `prokaryote_assembly`: QUAST + Prokka stages now fall back to
+  `contigs.fasta` when SPAdes does not produce `scaffolds.fasta`
+  (fragmented assemblies).
+- `prokaryote_assembly` returns the final `annotate` `StageResult`
+  instead of a `dict`, so `bioflow recipe run … --out X` no longer
+  prints `result.out_dir = ?`.
+
+### Tests
+- 464 → **474** unit tests (+10: `test_recipes_per_pipeline_e2e.py`
+  exercises every per-pipeline recipe through MockBackend and asserts
+  external inputs are bind-mounted + path-translated).
+
+---
+
 ## [0.1.5] — 2026-05-15
 
 ### Fixed

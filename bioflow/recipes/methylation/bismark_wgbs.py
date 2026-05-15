@@ -46,11 +46,16 @@ def trim(r1: Path, r2: Path, *, out_dir):
        cpu=8, ram_gb=32, depends_on=trim,
        retry=2, retry_with={"ram_gb": "2x"})
 def bismark_align(clean, bismark_genome: Path, sample_id: str, *, out_dir):
-    """Bismark bisulfite alignment + methylation extractor."""
-    r1 = f"{clean.out_dir}/*_val_1.fq.gz"
-    r2 = f"{clean.out_dir}/*_val_2.fq.gz"
+    """Bismark bisulfite alignment + methylation extractor.
+
+    Trimmed-read filenames are resolved at runtime via ``ls | head -1``
+    so the recipe survives variations in TrimGalore's naming.
+    """
     return (
-        f"sh -c 'bismark --genome {bismark_genome} -1 {r1} -2 {r2} "
+        f"bash -c '"
+        f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
+        f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
+        f"bismark --genome {bismark_genome} -1 \"$R1\" -2 \"$R2\" "
         f"-o {out_dir} --multicore 4 && "
         f"bismark_methylation_extractor --paired-end --comprehensive "
         f"--cytosine_report --genome_folder {bismark_genome} "

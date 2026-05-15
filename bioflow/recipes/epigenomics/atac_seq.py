@@ -39,11 +39,16 @@ def trim(r1: Path, r2: Path, *, out_dir):
 @stage(image="quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
-    """Bowtie2 align with -X 2000 (ATAC-seq fragment max), sort + index."""
-    r1 = f"{clean.out_dir}/*_val_1.fq.gz"
-    r2 = f"{clean.out_dir}/*_val_2.fq.gz"
+    """Bowtie2 align with -X 2000 (ATAC-seq fragment max), sort + index.
+
+    Trimmed-read filenames are resolved at runtime via ``ls | head -1``
+    so the recipe is robust to TrimGalore's naming conventions.
+    """
     return (
-        f"sh -c 'bowtie2 -x {bowtie2_index} -1 {r1} -2 {r2} "
+        f"bash -c '"
+        f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
+        f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
+        f"bowtie2 -x {bowtie2_index} -1 \"$R1\" -2 \"$R2\" "
         f"-X 2000 --very-sensitive "
         f"-S {out_dir}/{sample_id}.sam -p 8 2>{out_dir}/bowtie2.log && "
         f"samtools sort -@ 8 -o {out_dir}/{sample_id}.bam "
