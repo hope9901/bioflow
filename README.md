@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-474%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.6-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-476%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.7-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -21,7 +21,7 @@ and a privacy-first LLM companion is available when you want it.
   - *Per-pipeline (8)*: prokaryote_assembly, rnaseq_deg,
     metagenomics_profile, scrna_seq, chip_seq, atac_seq,
     methylation_wgbs, proteomics_dda — one recipe per pipeline area.
-- **60 tools** registered, all pulled as BioContainer images at run
+- **63 tools** registered, all pulled as BioContainer images at run
   time — nothing to install on the host beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /
   `runnable_slow` / `incompatible` against your CPU / RAM / GPU / arch.
@@ -132,6 +132,23 @@ bioflow db verify busco_bacteria --dest /refs
 | `dfam_curated`     | 2.00 GB | repeatmasker, earlgrey |
 | `uniprot_sprot`    | 0.25 GB | braker3 |
 | `eggnog`           | 8.50 GB | eggnog_mapper |
+
+---
+
+## Preset pipelines vs recipes — which do I use?
+
+bioflow ships **two entry points** for the same workflows:
+
+| | Recipe (`bioflow recipe run`) | Preset (`bioflow recommend --preset`) |
+|---|---|---|
+| **Defined in** | Python (`@stage` + `@pipeline`) | YAML (declarative chain of tool IDs) |
+| **Customisation** | Edit Python; full control flow, fan-out, retry | Edit YAML; swap tool IDs |
+| **Hardware filter** | Per-stage `cpu`/`ram_gb` declared in `@stage` | Whole-preset score from registry YAMLs |
+| **Best for** | Active execution, tuning, custom logic | Picking the recommended chain on this host |
+
+Presets that have a matching recipe are linked via a `recipe:` field —
+e.g. `prokaryote_denovo_short.yaml` points to the `prokaryote_assembly`
+recipe.  Pick whichever surface fits your workflow.
 
 ---
 

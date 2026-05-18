@@ -1,0 +1,24 @@
+id: mafft
+name: MAFFT
+version: "7.520"
+category: comparative_genomics
+stage: [comparative_genomics.step4]
+input_types: [protein_faa, nucleotide_fasta]
+output_types: [msa_fasta]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: staphb/mafft:7.520
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2,  ram_gb: 4,  disk_gb: 5 }
+  recommended: { cpu: 16, ram_gb: 16, disk_gb: 20 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  mafft --auto --thread {cpu} {input_fasta} > {out_dir}/aligned.fasta
+citation: "Katoh & Standley 2013, PMID 23329690"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"

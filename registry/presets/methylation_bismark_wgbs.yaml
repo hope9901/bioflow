@@ -1,5 +1,6 @@
 id: methylation_bismark_wgbs
 pipeline: methylation
+recipe: methylation_wgbs         # Python execution path equivalent
 description: |
   Whole-genome bisulfite sequencing (WGBS) workflow: TrimGalore quality and
   adapter trimming → Bismark alignment and methylation extraction → MethylKit

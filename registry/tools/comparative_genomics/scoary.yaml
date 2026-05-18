@@ -1,0 +1,25 @@
+id: scoary
+name: Scoary
+version: "1.6.16"
+category: comparative_genomics
+stage: [comparative_genomics.step7]
+input_types: [gene_presence_absence_csv, traits_csv]
+output_types: [gwas_results_csv]
+applicable:
+  species: [prokaryote]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: quay.io/biocontainers/scoary:1.6.16--py_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4,  disk_gb: 5 }
+  recommended: { cpu: 8, ram_gb: 16, disk_gb: 20 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  scoary -t {traits_csv} -g {gpa_csv} --no_pairwise --no-time
+         -o {out_dir} --threads {cpu}
+citation: "Brynildsrud 2016, PMID 27887642"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"

@@ -1,5 +1,6 @@
 id: atac_seq_standard
 pipeline: atac_seq
+recipe: atac_seq         # Python execution path equivalent
 description: |
   Standard ATAC-seq workflow: TrimGalore QC → Bowtie2 alignment → MACS3 peak
   calling → deepTools coverage tracks → TOBIAS footprinting and motif analysis.

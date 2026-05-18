@@ -1,0 +1,26 @@
+id: diamond
+name: DIAMOND
+version: "2.1.8"
+category: comparative_genomics
+stage: [comparative_genomics.step8]
+input_types: [protein_faa, diamond_db]
+output_types: [diamond_hits_tsv]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: quay.io/biocontainers/diamond:2.1.8--h43eeafb_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
+  recommended: { cpu: 16, ram_gb: 32, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  diamond blastp --query {query_faa} --db {diamond_db}
+                 --out {out_dir}/hits.tsv --threads {cpu}
+                 --outfmt 6 --evalue 1e-5 --max-target-seqs 1
+citation: "Buchfink 2021, PMID 33828273"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"

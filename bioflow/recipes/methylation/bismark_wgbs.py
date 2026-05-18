@@ -63,7 +63,7 @@ def bismark_align(clean, bismark_genome: Path, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="bioconductor/bioconductor_docker:RELEASE_3_18",
+@stage(image="bioconductor/bioconductor_full:RELEASE_3_18",
        cpu=4, ram_gb=16, depends_on=bismark_align)
 def methylkit_dmr(bismark, sample_id: str, *, out_dir,
                   genome_build: str = "hg38",

@@ -6,6 +6,56 @@
 
 ---
 
+## [0.1.7] — 2026-05-15
+
+### Fixed — drift from original design (TIER 1)
+- `methylation_wgbs` recipe now uses the same Bioconductor image
+  (`bioconductor/bioconductor_full:RELEASE_3_18`) registered for the
+  `methylkit` tool YAML — the previous `_docker` tag was unverified
+  on Docker Hub.
+- 3 tools (`scoary`, `diamond`, `mafft`) used by the comparative-
+  genomics recipes had no registry YAML.  Added — they now show up in
+  `bioflow tools`, get hardware-classified, and can be picked up by
+  `bioflow update auto`.
+- `samtools.yaml` and `picard.yaml` stage IDs were aspirational.
+  samtools is now declared under `utility.bam_processing` (it's
+  bundled inline within several aligner BioContainers).  picard dropped
+  its `methylation.step2` claim (Bismark has its own
+  `deduplicate_bismark`).
+
+### Changed — structural alignment (TIER 2)
+- Every preset YAML that has a recipe equivalent now carries a
+  ``recipe:`` field linking the two (8 presets total).  Researchers
+  can still pick either entry point, but the relationship is now
+  declared in the metadata.
+- Added the 6 missing pipeline modules
+  (`bioflow/pipelines/{chip_seq,atac_seq,metagenomics,scrna_seq,
+  methylation,proteomics}.py`) so every preset's `pipeline:` value
+  points to a real canonical-stage-IDs module — not just the 2 that
+  existed before.
+- `bioflow.core.db._DB_CATALOG` gained the 3 reference DBs the new
+  recipes actually need: `kraken2_standard_8gb`,
+  `10x_whitelist_v3`, `bowtie2_grch38_noalt`.  `bioflow db fetch`
+  can now provision them.
+
+### Added — UX (TIER 3)
+- `examples/recipes_quickstart.py` — programmatic call signatures for
+  all 8 per-pipeline recipes (the missing Python counterpart to the
+  CLI `bioflow recipe run` examples in the README).
+- README: new "Preset pipelines vs recipes — which do I use?" section
+  explaining the two entry points and how they map.
+
+### Tests
+- 474 → 476 unit tests (+2 alignment checks):
+  - `test_recipe_registry_alignment.py`: asserts every recipe's
+    `@stage(image=...)` is registered in `registry/tools/`.
+  - `test_pipeline_modules_present`: asserts every preset's
+    `pipeline:` value has a matching `bioflow/pipelines/<id>.py`.
+- Tool count: 60 → 63 (scoary, diamond, mafft).
+- DB catalog: 7 → 10.
+
+---
+
 ## [0.1.6] — 2026-05-15
 
 ### Fixed

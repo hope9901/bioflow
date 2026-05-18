@@ -113,6 +113,51 @@ _DB_CATALOG: dict[str, dict] = {
         "used_by": ["braker3"],
         "notes": "Decompress before use with BRAKER3.",
     },
+    "kraken2_standard_8gb": {
+        "name": "Kraken2 Standard 8GB (capped) — taxonomic classifier DB",
+        "url": (
+            "https://genome-idx.s3.amazonaws.com/kraken/"
+            "k2_standard_08gb_20240605.tar.gz"
+        ),
+        "size_gb": 7.5,
+        "md5": None,
+        "dest_file": "kraken2/k2_standard_08gb.tar.gz",
+        "used_by": ["kraken2", "bracken"],
+        "notes": (
+            "Untar into a directory and point --kraken2-db at it.  "
+            "The 8GB cap fits most workstations; replace with the full "
+            "k2_standard_20240605 (~70GB) for higher sensitivity."
+        ),
+    },
+    "10x_whitelist_v3": {
+        "name": "10x Genomics 3' v3 chemistry barcode whitelist (3M)",
+        "url": (
+            "https://github.com/10XGenomics/cellranger/raw/"
+            "master/lib/python/cellranger/barcodes/3M-february-2018.txt.gz"
+        ),
+        "size_gb": 0.02,
+        "md5": None,
+        "dest_file": "10x/3M-february-2018.txt.gz",
+        "used_by": ["starsolo", "cellranger"],
+        "notes": (
+            "Gunzip to a plain .txt before passing to STARsolo's "
+            "--soloCBwhitelist."
+        ),
+    },
+    "bowtie2_grch38_noalt": {
+        "name": "Bowtie2 prebuilt index — GRCh38 (no alt contigs)",
+        "url": (
+            "https://genome-idx.s3.amazonaws.com/bt/GRCh38_noalt_as.zip"
+        ),
+        "size_gb": 3.5,
+        "md5": None,
+        "dest_file": "bowtie2/GRCh38_noalt_as.zip",
+        "used_by": ["bowtie2"],
+        "notes": (
+            "Unzip to reveal the index prefix files.  Pass the prefix "
+            "(e.g. /refs/bowtie2/GRCh38_noalt_as) to --bowtie2-index."
+        ),
+    },
 }
 
 

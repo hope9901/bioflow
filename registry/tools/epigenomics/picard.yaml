@@ -3,9 +3,11 @@ name: Picard MarkDuplicates
 version: "3.2.0"
 category: epigenomics
 stage:
+  # MarkDuplicates is the post-alignment dedup step in chip_seq and
+  # atac_seq.  Bismark has its own deduplicate_bismark for WGBS, so
+  # picard is NOT used in the methylation pipeline.
   - chip_seq.step2
   - atac_seq.step2
-  - methylation.step2
 input_types: [bam]
 output_types: [bam, dedup_metrics]
 applicable:

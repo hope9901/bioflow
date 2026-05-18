@@ -1,5 +1,6 @@
 id: scrna_seq_10x_scanpy
 pipeline: scrna_seq
+recipe: scrna_seq         # Python execution path equivalent
 description: |
   10x Chromium scRNA-seq workflow using STARsolo for alignment and Scanpy
   (Python) for downstream analysis. Scalable to large datasets and compatible

@@ -1,5 +1,6 @@
 id: metagenomics_kraken2_standard
 pipeline: metagenomics
+recipe: metagenomics_profile         # Python execution path equivalent
 description: |
   Standard shotgun metagenomics workflow using Kraken2+Bracken for taxonomic
   profiling and HUMAnN3 for functional pathway analysis. Suitable for human gut,

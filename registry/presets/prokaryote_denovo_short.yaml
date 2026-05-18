@@ -1,5 +1,6 @@
 id: prokaryote_denovo_short
 pipeline: genome_assembly
+recipe: prokaryote_assembly
 description: >
   Prokaryote de-novo assembly from Illumina short reads.
   Includes QC → SPAdes assembly → QUAST evaluation →

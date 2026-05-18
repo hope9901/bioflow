@@ -1,5 +1,6 @@
 id: chip_seq_standard
 pipeline: chip_seq
+recipe: chip_seq         # Python execution path equivalent
 description: |
   Standard ChIP-seq workflow: adapter trimming (TrimGalore) → Bowtie2 alignment
   → MACS3 peak calling → deepTools coverage tracks + HOMER peak annotation →

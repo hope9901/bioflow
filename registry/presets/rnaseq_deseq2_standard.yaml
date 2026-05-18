@@ -1,5 +1,6 @@
 id: rnaseq_deseq2_standard
 pipeline: rnaseq_deg
+recipe: rnaseq_deg         # Python execution path equivalent
 description: >
   Standard RNA-seq DEG pipeline with Salmon (alignment-free quantification) +
   DESeq2 (differential expression) + clusterProfiler (GO & KEGG enrichment).

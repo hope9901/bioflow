@@ -1,5 +1,6 @@
 id: proteomics_msfragger_dda
 pipeline: proteomics
+recipe: proteomics_dda         # Python execution path equivalent
 description: |
   Data-dependent acquisition (DDA) proteomics workflow: ProteoWizard msconvert
   raw→mzML → MSFragger database search → Percolator FDR → FragPipe label-free
