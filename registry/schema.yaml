@@ -123,3 +123,10 @@ properties:
   citation:        { type: string }
   added:           { type: string, format: date }
   last_reviewed:   { type: string, format: date }
+  # Optional — owner/repo for the weekly release-watch (T2 cadence).
+  # When present, update/release_watch.py polls
+  # https://api.github.com/repos/<source_repo>/releases/latest and files
+  # a candidate YAML draft if the latest tag is newer than `version`.
+  source_repo:
+    type: string
+    pattern: "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"

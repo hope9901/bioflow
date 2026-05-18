@@ -5,7 +5,13 @@
 > anything in this file — they just `git pull`.
 
 The registry of tool YAMLs evolves over time as new bioinformatics
-software ships.  bioflow's design intentionally splits the update work
+software ships.  bioflow runs **5 update cadences** to keep it fresh —
+this file documents the monthly Cowork ↔ local-cron pipeline.  For the
+full multi-cadence model (daily freshness check, weekly release watch,
+quarterly deep audit, event-driven PR smoke test) see
+[`UPDATE_CADENCES.md`](maintainer/UPDATE_CADENCES.md).
+
+bioflow's design intentionally splits the update work
 into **two roles**:
 
 | Role | Who | Does |

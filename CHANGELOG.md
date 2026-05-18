@@ -6,6 +6,65 @@
 
 ---
 
+## [0.1.8] — 2026-05-15
+
+### Added — multi-cadence registry update model
+Five complementary cadences keep `registry/tools/` from silently rotting.
+Previously: one monthly cadence (Cowork Deep Research → local cron).
+Now:
+
+- **T1 daily — `update/freshness_check.py`** + `scripts/install-schedule-daily.{ps1,sh}`
+  - Queries quay.io + Docker Hub REST APIs for every registered image
+  - Surfaces newer tags, yanked images, "tag aged out", and Cowork
+    silence (>35 days since last candidate)
+  - Writes `update/notifications/freshness-<DATE>.md`; exit code
+    0=clean / 1=updates available / 2=yanked
+  - First real run on the current registry: 27 newer-tag candidates,
+    2 yanked images (`fcyu/fragpipe`, `fcyu/msfragger` — never on
+    Docker Hub), 32 tags aged out
+- **T2 weekly — `update/release_watch.py`** + `scripts/install-schedule-weekly.{ps1,sh}`
+  - Polls GitHub releases for every tool that declares
+    `source_repo: <owner>/<repo>` in its YAML
+  - Files a candidate YAML draft under `update/candidates/<YYYY-MM>/`
+    when upstream is newer (state-tracked in
+    `update/release_watch_state.json` so the same release is never
+    re-filed)
+  - Honours `GITHUB_TOKEN` env var for rate-limit (60/hr → 5000/hr)
+  - 8 representative tools seeded with `source_repo` for the watcher
+- **T3 monthly** *(unchanged)* — existing `bioflow update auto` cron
+- **T4 quarterly — `docs/maintainer/quarterly_audit_prompt.md`**
+  - Cowork-side prompt for deprecation review (last commit,
+    citation trend, successor-fork detection)
+- **T5 event-driven — `.github/workflows/candidate-smoke-test.yml`**
+  - On any PR touching `update/candidates/**`, runs
+    `bioflow update auto` on only the changed dirs and comments a
+    per-candidate ✅/❌ summary on the PR
+
+### Added — schema
+- Optional `source_repo:` field (regex `^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$`)
+  enables the T2 release-watch for that tool.
+
+### Added — docs
+- `docs/maintainer/UPDATE_CADENCES.md` — 5-tier model with cron
+  examples, exit-code semantics, and a matrix of which cadence
+  catches which failure mode.
+- `docs/MAINTAINER.md` now links to it from its first paragraph.
+
+### Tests
+- 476 → 508 unit tests (+32):
+  - `test_freshness_check.py` (15 tests): image-string parsing for
+    quay/Docker Hub variants, version comparison with build suffix,
+    HTTPError yanked/check_failed branches, report rendering,
+    Cowork-pulse detection, CLI exit codes.
+  - `test_release_watch.py` (17 tests): `is_newer` ordering,
+    candidate generation, state-file dedup, dry-run, no-releases /
+    missing source_repo paths, image-tag bump helper.
+
+### Bumps
+- Version: 0.1.7 → 0.1.8
+
+---
+
 ## [0.1.7] — 2026-05-15
 
 ### Fixed — drift from original design (TIER 1)
