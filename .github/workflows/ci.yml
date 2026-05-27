@@ -46,6 +46,28 @@ jobs:
       - name: Run ruff
         run: ruff check .
 
+  typecheck:
+    # Advisory only — mypy issues do not block merging.  Provides
+    # visibility while we gradually add type annotations.  Will be
+    # upgraded to a blocking check when the error count reaches 0.
+    name: Type check (mypy, advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install mypy
+        run: pip install -e ".[dev]" && pip install types-PyYAML types-requests
+
+      - name: Run mypy
+        run: mypy bioflow --ignore-missing-imports || true
+
   registry-schema:
     name: Validate registry YAMLs
     runs-on: ubuntu-latest

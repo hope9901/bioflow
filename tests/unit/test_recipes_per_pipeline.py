@@ -20,7 +20,7 @@ EXPECTED_RECIPES = {
     "chip_seq":             5,   # trim → align → dedup → peaks → annotate
     "atac_seq":             5,   # trim → align → dedup → peaks → footprint
     "methylation_wgbs":     3,   # trim → bismark → methylkit
-    "proteomics_dda":       2,   # msconvert → fragpipe
+    "proteomics_dda":       3,   # msconvert → comet → percolator
 }
 
 

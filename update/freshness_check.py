@@ -257,11 +257,27 @@ def days_since_last_candidate(candidates_dir: Path) -> Optional[int]:
     return age.days
 
 
+def days_since_last_t3_run(last_run_path: Path) -> Optional[int]:
+    """How many days since `bioflow update auto` last produced a
+    last_run.json?  None if the file doesn't exist (cron may never have
+    run, or the maintainer hasn't installed the schedule)."""
+    if not last_run_path.exists():
+        return None
+    age = dt.datetime.now() - dt.datetime.fromtimestamp(
+        last_run_path.stat().st_mtime,
+    )
+    return age.days
+
+
 # ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 
-def render_report(records: list[dict], cowork_pulse: Optional[int]) -> str:
+def render_report(
+    records: list[dict],
+    cowork_pulse: Optional[int],
+    t3_pulse: Optional[int] = None,
+) -> str:
     today = dt.date.today().isoformat()
     by_status: dict[str, list[dict]] = {}
     for r in records:
@@ -297,16 +313,26 @@ def render_report(records: list[dict], cowork_pulse: Optional[int]) -> str:
     section("Unparseable image string",       "unparseable")
     section("Up to date",                     "ok")
 
-    lines.append("## Cowork pulse")
+    lines.append("## Scheduler pulses")
     if cowork_pulse is None:
-        lines.append("- ⚠️  no candidate YAMLs found under `update/candidates/` "
-                     "— Cowork pipeline may have stopped firing")
+        lines.append("- ⚠️  Cowork: no candidate YAMLs found under "
+                     "`update/candidates/` — pipeline may have stopped firing")
     elif cowork_pulse > 35:
-        lines.append(f"- ⚠️  last candidate landed **{cowork_pulse} days ago** "
-                     "— expected ≤30 (monthly cadence). Investigate.")
+        lines.append(f"- ⚠️  Cowork: last candidate landed **{cowork_pulse} "
+                     "days ago** — expected ≤30 (monthly cadence). Investigate.")
     else:
-        lines.append(f"- ✓ last candidate landed {cowork_pulse} days ago "
-                     "(within expected monthly cadence)")
+        lines.append(f"- ✓ Cowork: last candidate landed {cowork_pulse} "
+                     "days ago (within expected monthly cadence)")
+
+    if t3_pulse is None:
+        lines.append("- ⚠️  T3 local cron: `update/last_run.json` not found — "
+                     "`bioflow update auto` has never run on this machine "
+                     "(see scripts/install-schedule-windows.ps1 / cron.sh)")
+    elif t3_pulse > 35:
+        lines.append(f"- ⚠️  T3 local cron: last ran **{t3_pulse} days ago** "
+                     "— expected ≤30. Schedule may be unregistered or failing.")
+    else:
+        lines.append(f"- ✓ T3 local cron: last ran {t3_pulse} days ago")
     lines.append("")
 
     lines.append("## Summary")
@@ -345,7 +371,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     tool_files = sorted(args.registry.rglob("*.yaml"))
     records = [check_tool(p) for p in tool_files]
     pulse = days_since_last_candidate(args.candidates_dir)
-    report = render_report(records, pulse)
+    t3_pulse = days_since_last_t3_run(REPO_ROOT / "update" / "last_run.json")
+    report = render_report(records, pulse, t3_pulse=t3_pulse)
 
     out = args.out
     if out is None:

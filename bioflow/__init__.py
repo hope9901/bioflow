@@ -1,8 +1,8 @@
 """bioflow - bioinformatics pipeline platform."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.8"
 
-# Tier-A SDK (Phase 1A: @stage decorator)
+# Tier-A SDK — @stage / @pipeline / runtime config
 from bioflow.sdk import (  # noqa: E402,F401
     stage,
     Stage,
@@ -17,5 +17,6 @@ from bioflow.sdk import (  # noqa: E402,F401
     set_log_streaming,
     is_log_streaming_enabled,
     MockBackend,
+    DockerBackend,
 )
 from bioflow.report import Report  # noqa: E402,F401

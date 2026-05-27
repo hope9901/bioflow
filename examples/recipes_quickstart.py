@@ -99,11 +99,11 @@ def run_methylation(r1: Path, r2: Path, bismark_genome: Path):
 
 
 # ── 8 · LC-MS/MS DDA proteomics ─────────────────────────────────────────────
-def run_proteomics(raw_dir: Path, fragpipe_workflow: Path, fasta_db: Path):
-    """msconvert → FragPipe (MSFragger + Percolator + IonQuant)."""
+def run_proteomics(raw_dir: Path, comet_params: Path, fasta_db: Path):
+    """msconvert → Comet → Percolator (fully open-source stack)."""
     return get("proteomics_dda")(
         raw_dir=raw_dir,
-        fragpipe_workflow=fragpipe_workflow,
+        comet_params=comet_params,
         fasta_db=fasta_db,
         out_dir=WS / "prot",
     )

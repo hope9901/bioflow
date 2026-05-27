@@ -23,4 +23,12 @@ command_template: |
 references: []
 citation: "Yu et al. 2020, PMID 33338430"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-05-15"
+deprecated: true
+deprecation_note: >
+  No public Docker image — `fcyu/fragpipe:22.0` is not on Docker Hub
+  and the FragPipe distribution is a Java JAR via GitHub releases.
+  The `proteomics_dda` recipe now uses an open-source stack
+  (msconvert → Comet → Percolator).  To use FragPipe, the maintainer
+  must build a local Dockerfile after accepting its license.
+replaced_by: comet

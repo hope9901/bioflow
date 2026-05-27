@@ -1,28 +1,38 @@
-"""LC-MS/MS DDA proteomics recipe.
+"""LC-MS/MS DDA proteomics recipe — open-source stack.
 
 End-to-end workflow:
-    msconvert (vendor .RAW / .d / .wiff → open mzML)
-        → FragPipe (MSFragger + Percolator + Philosopher in one workflow)
+    msconvert (vendor → mzML)
+        → Comet (database search, mzML + FASTA → pep.xml)
+        → Percolator (FDR control on pep.xml)
 
-FragPipe is a wrapper around MSFragger (search), Percolator (FDR),
-IonQuant (label-free quant) and Philosopher (assembly + reporting).
-Running it in `--headless` mode against a manifest of mzML files +
-a FragPipe workflow ``.workflow`` config produces a complete proteomic
-report including protein-level FDR and quant matrices.
+The previous version of this recipe used FragPipe/MSFragger, but those
+projects do not publish a public Docker image (`fcyu/fragpipe:22.0`
+and `fcyu/msfragger:4.1` are not on Docker Hub and the licenses
+prohibit BioContainers redistribution).  The current stack uses
+fully open-source, publicly-pullable BioContainers:
 
-Inputs:
-    raw_dir         directory containing vendor-format spectra
-                    (.raw / .d / .wiff)
-    fragpipe_workflow  path to a FragPipe ``.workflow`` config file
-                    (LFQ-MBR-default workflow ships with FragPipe)
-    fasta_db        protein FASTA + decoys for the search
+  * msconvert: ProteoWizard's vendor → mzML converter
+  * Comet:     well-established C++ search engine
+  * Percolator: machine-learned FDR rescoring
+
+Inputs
+------
+* ``raw_dir``       directory containing vendor-format spectra
+                    (.raw / .d / .wiff) — these are converted to mzML
+* ``fasta_db``      protein FASTA database (target + decoys for FDR)
+* ``comet_params``  Comet's ``comet.params`` config file
 
 Researcher (Tier B) usage::
 
     bioflow recipe run proteomics_dda \\
-        --raw-dir /data/raw --fragpipe-workflow LFQ-MBR.workflow \\
+        --raw-dir /data/raw \\
         --fasta-db /refs/human_uniprot_decoy.fa \\
+        --comet-params /refs/comet.params \\
         --out ./out
+
+If you have access to FragPipe / MSFragger locally and want to use
+them instead, see ``docs/maintainer/proteomics_msfragger.md`` for the
+build-your-own-image recipe.
 """
 from __future__ import annotations
 
@@ -37,7 +47,7 @@ from bioflow.recipes import register
 @stage(image="chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest",
        cpu=4, ram_gb=8)
 def msconvert(raw_dir: Path, *, out_dir):
-    """msconvert: vendor → mzML conversion with vendor peak-picking."""
+    """msconvert: vendor (.raw / .d / .wiff) → mzML with vendor peak-picking."""
     return (
         f"sh -c 'for f in {raw_dir}/*.raw {raw_dir}/*.d {raw_dir}/*.wiff; "
         f"do [ -e \\\"$f\\\" ] && msconvert \\\"$f\\\" --mzML "
@@ -46,51 +56,70 @@ def msconvert(raw_dir: Path, *, out_dir):
     )
 
 
-@stage(image="fcyu/fragpipe:22.0", cpu=8, ram_gb=32, depends_on=msconvert,
+@stage(image="quay.io/biocontainers/comet-ms:2024020--h7ec2334_0",
+       cpu=8, ram_gb=16, depends_on=msconvert,
        retry=2, retry_with={"ram_gb": "2x"})
-def fragpipe(mzml, fragpipe_workflow: Path, fasta_db: Path, *, out_dir):
-    """FragPipe headless: MSFragger search + Percolator FDR + IonQuant quant.
+def comet_search(mzml, comet_params: Path, fasta_db: Path, *, out_dir):
+    """Comet: database search, mzML + FASTA → pep.xml.
 
-    The 4-column manifest (mzML path / experiment / bioreplicate /
-    data type) is built inline from the mzML files emitted by the
-    previous stage.  ``--database`` overrides any FASTA referenced by
-    the workflow file so users keep their proteome decoupled from the
-    workflow config.
+    The Comet binary needs ``-P<params>`` and ``-D<fasta>`` joined to
+    their flags (no space).  We loop over every mzML produced by the
+    previous stage.
     """
     return (
-        f"bash -c 'cd {out_dir} && "
-        f"> manifest.tsv && "
+        f"bash -c '"
+        f"cd {out_dir} && "
         f"for f in {mzml.out_dir}/*.mzML; do "
-        f"  printf \"%s\\t1\\t1\\tDDA\\n\" \"$f\" >> manifest.tsv; "
+        f"  comet -P{comet_params} -D{fasta_db} \"$f\"; "
         f"done && "
-        f"fragpipe --headless "
-        f"--workflow {fragpipe_workflow} "
-        f"--manifest manifest.tsv "
-        f"--workdir {out_dir} "
-        f"--database-path {fasta_db} "
-        f"--ram 32 --threads 8'"
+        f"mv {mzml.out_dir}/*.pep.xml {out_dir}/ 2>/dev/null || true'"
+    )
+
+
+@stage(image="quay.io/biocontainers/percolator:3.06.1--hf1761c0_2",
+       cpu=4, ram_gb=16, depends_on=comet_search)
+def percolator_fdr(search, *, out_dir, fdr_threshold: float = 0.01):
+    """Percolator: machine-learned FDR control on Comet pep.xml outputs.
+
+    Outputs a per-PSM table with q-values plus a target-PSM TSV
+    filtered at ``fdr_threshold`` (default 1% FDR).
+    """
+    return (
+        f"bash -c '"
+        f"for f in {search.out_dir}/*.pep.xml; do "
+        f"  base=$(basename \"$f\" .pep.xml); "
+        f"  percolator --xmloutput {out_dir}/$base.pout.xml "
+        f"             --results-psms {out_dir}/$base.psms.tsv "
+        f"             \"$f\"; "
+        f"done && "
+        # 1% FDR cut for downstream
+        f"awk -F\\t -v q={fdr_threshold} "
+        f"      \"NR==1 || \\$3 < q\" "
+        f"      {out_dir}/*.psms.tsv > {out_dir}/passing_psms.tsv'"
     )
 
 
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[msconvert, fragpipe],
-    description="LC-MS/MS DDA proteomics: msconvert → FragPipe",
+    stages=[msconvert, comet_search, percolator_fdr],
+    description="LC-MS/MS DDA proteomics: msconvert → Comet → Percolator",
 )
 def proteomics_dda(
     raw_dir: Path,
-    fragpipe_workflow: Path,
     fasta_db: Path,
+    comet_params: Path,
     *,
     out_dir: Path,
+    fdr_threshold: float = 0.01,
 ):
-    """End-to-end DDA proteomics from vendor spectra to FDR-controlled hits."""
+    """End-to-end DDA proteomics, fully open-source stack."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     mz = msconvert(Path(raw_dir))
-    return fragpipe(mz, Path(fragpipe_workflow), Path(fasta_db))
+    search = comet_search(mz, Path(comet_params), Path(fasta_db))
+    return percolator_fdr(search, fdr_threshold=fdr_threshold)
 
 
 register("proteomics_dda", proteomics_dda)

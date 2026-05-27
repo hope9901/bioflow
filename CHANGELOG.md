@@ -6,6 +6,62 @@
 
 ---
 
+## [0.1.9] — 2026-05-15
+
+### Fixed — critical
+- `proteomics_dda` was unrunnable: `fcyu/fragpipe:22.0` and
+  `fcyu/msfragger:4.1` are not public Docker images.  Recipe
+  rewritten on top of an open-source stack (msconvert → Comet →
+  Percolator), all images pullable from BioContainers / chambm.
+- `bioflow.DockerBackend` was not re-exported from `bioflow.__init__`;
+  added so users can switch from MockBackend to the real backend
+  with `from bioflow import DockerBackend`.
+
+### Added — first real-Docker integration tests
+- `tests/integration/test_sdk_real_docker.py` — 5 tests that pull
+  `alpine:3.19` and exercise the full SDK contract: single-stage
+  exec, two-stage chaining, failure propagation, external-input
+  auto-mount (BLOCKER 2), cache hit on repeat call.
+- Auto-skipped when no Docker daemon — explicitly opt-in via
+  `pytest tests/integration/ -m docker -v`.
+- First time the SDK has been validated against a real Docker
+  daemon (previously: MockBackend only).
+
+### Added — schema fields
+- Optional `pin_reason: string` — explains why a tool is
+  intentionally not bumped to the latest upstream.
+- Optional `deprecated: boolean` + `deprecation_note: string` +
+  `replaced_by: string` — marks a tool YAML as deprecated without
+  deleting the file (preserves reproducibility / rollback).
+- Used by the new `comet.yaml` to replace the deprecated
+  `msfragger.yaml` / `fragpipe.yaml` (no public Docker image).
+
+### Added — T3 cron silence detection in T1
+- `update/freshness_check.py` now reports both:
+  - Days since the last Cowork candidate landed
+    (`update/candidates/<YYYY-MM>/*.yaml` newest mtime)
+  - Days since the last `bioflow update auto` run
+    (`update/last_run.json` mtime)
+- Maintainer is warned within 24 hours if either scheduler stops.
+
+### Added — registry policy
+- `update/REGISTRY_CHANGELOG.md` — first manual review entry
+  documenting the 2 yanked images, 27 newer tags noted but pinned
+  for stability, and the new `pin_reason` field for explicit pins.
+
+### Added — type-checking visibility
+- CI gained a non-blocking `mypy` advisory job; current error count
+  (~36) does not block merging but is visible in PR checks.
+
+### Tests
+- 508 → 510 unit tests (+2 T3-silence detection).
+- New integration suite: 5 tests passing against real Docker.
+
+### Bumps
+- Version: 0.1.8 → 0.1.9.
+
+---
+
 ## [0.1.8] — 2026-05-15
 
 ### Added — multi-cadence registry update model

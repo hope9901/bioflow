@@ -135,13 +135,13 @@ class TestExecution:
     def test_proteomics_dda_runs(self, tmp_path):
         raw = tmp_path / "raw"
         raw.mkdir()
-        wf = tmp_path / "lfq.workflow"
-        wf.write_text("# fragpipe workflow\n", encoding="utf-8")
+        params = tmp_path / "comet.params"
+        params.write_text("# comet params\n", encoding="utf-8")
         fdb = tmp_path / "uniprot.fa"
         fdb.write_text(">x\nMKK\n", encoding="utf-8")
 
         result = get("proteomics_dda")(
-            raw_dir=raw, fragpipe_workflow=wf, fasta_db=fdb,
+            raw_dir=raw, comet_params=params, fasta_db=fdb,
             out_dir=tmp_path / "out",
         )
         assert result.ok

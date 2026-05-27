@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-508%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.8-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-510%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.9-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -93,7 +93,7 @@ bioflow recipe run pangenome --taxon Pectobacterium --dry-run
 | `chip_seq`              | ChIP-seq       | TrimGalore → Bowtie2 → Picard → MACS3 → HOMER |
 | `atac_seq`              | ATAC-seq       | TrimGalore → Bowtie2 → Picard → MACS3 → TOBIAS |
 | `methylation_wgbs`      | Bisulfite      | TrimGalore → Bismark → methylKit |
-| `proteomics_dda`        | LC-MS/MS       | msconvert → FragPipe (MSFragger + Percolator) |
+| `proteomics_dda`        | LC-MS/MS       | msconvert → Comet → Percolator (open-source) |
 
 Recipes use input-hash caching automatically — a second run with the
 same inputs returns in seconds.  Failed stages retry with bumped

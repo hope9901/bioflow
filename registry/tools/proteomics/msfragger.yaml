@@ -23,4 +23,12 @@ command_template: |
 references: []
 citation: "Kong et al. 2017, PMID 28394336"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-05-15"
+deprecated: true
+deprecation_note: >
+  No public Docker image — `fcyu/msfragger:4.1` is not on Docker Hub
+  and MSFragger's license prohibits BioContainers redistribution.
+  Recipes default to `comet` (open-source); to use MSFragger, the
+  maintainer must build a local image after accepting the
+  non-commercial license.
+replaced_by: comet

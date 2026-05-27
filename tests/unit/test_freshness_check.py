@@ -123,6 +123,15 @@ class TestRenderReport:
         assert "60 days ago" in out
         assert "Investigate" in out
 
+    def test_t3_silence_warning(self):
+        out = fc.render_report([], cowork_pulse=5, t3_pulse=None)
+        assert "T3 local cron" in out
+        assert "never run" in out
+
+    def test_t3_overdue_warning(self):
+        out = fc.render_report([], cowork_pulse=5, t3_pulse=50)
+        assert "T3 local cron: last ran **50 days ago**" in out
+
 
 class TestDaysSinceLastCandidate:
 

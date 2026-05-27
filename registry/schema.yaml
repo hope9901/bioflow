@@ -130,3 +130,11 @@ properties:
   source_repo:
     type: string
     pattern: "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+  # Optional — explain why a version is intentionally NOT bumped to the
+  # latest upstream (referenced by `bioflow update` review docs).
+  pin_reason:    { type: string }
+  # Optional — flag a tool as deprecated.  Recipes are expected to stop
+  # using it; YAML stays in-tree for reproducibility / rollback.
+  deprecated:        { type: boolean }
+  deprecation_note:  { type: string }
+  replaced_by:       { type: string }
