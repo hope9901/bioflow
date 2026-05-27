@@ -21,7 +21,7 @@ and a privacy-first LLM companion is available when you want it.
   - *Per-pipeline (8)*: prokaryote_assembly, rnaseq_deg,
     metagenomics_profile, scrna_seq, chip_seq, atac_seq,
     methylation_wgbs, proteomics_dda — one recipe per pipeline area.
-- **63 tools** registered, all pulled as BioContainer images at run
+- **64 tools** registered, all pulled as BioContainer images at run
   time — nothing to install on the host beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /
   `runnable_slow` / `incompatible` against your CPU / RAM / GPU / arch.
