@@ -1,0 +1,28 @@
+id: mash
+name: Mash
+version: "2.3"
+category: comparative_genomics
+stage: [comparative_genomics.step2]
+input_types: [assembly_fasta, fastq]
+output_types: [distance_matrix]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [comparative]
+container:
+  image: quay.io/biocontainers/mash:2.3--he348c14_4
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4,  disk_gb: 10 }
+  recommended: { cpu: 8, ram_gb: 16, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  mash sketch -p {cpu} -o {out_dir}/ref {genome_files} &&
+  mash dist -p {cpu} {out_dir}/ref.msh {out_dir}/ref.msh
+       > {out_dir}/distances.tsv
+references: []
+citation: "Ondov 2016, PMID 27323842"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: marbl/Mash

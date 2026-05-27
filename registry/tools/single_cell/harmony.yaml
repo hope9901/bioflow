@@ -1,0 +1,30 @@
+id: harmony
+name: Harmony
+version: "1.2.1"
+category: single_cell
+stage: [scrna_seq.step3]
+input_types: [embedding_matrix, metadata]
+output_types: [batch_corrected_embedding]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/harmonypy:0.0.10--pyh7cba7a3_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16, disk_gb: 10 }
+  recommended: { cpu: 16, ram_gb: 64, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  python -c "import scanpy as sc; import harmonypy as hm;
+             adata = sc.read_h5ad('{input_h5ad}');
+             ho = hm.run_harmony(adata.obsm['X_pca'], adata.obs, '{batch_key}');
+             adata.obsm['X_pca_harmony'] = ho.Z_corr.T;
+             adata.write('{out_dir}/harmonized.h5ad')"
+references: []
+citation: "Korsunsky 2019, PMID 31740819"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: immunogenomics/harmony

@@ -1,0 +1,27 @@
+id: liftoff
+name: Liftoff
+version: "1.6.3"
+category: struct_annot
+stage: [genome_assembly.step5]
+input_types: [assembly_fasta, reference_annotation_gff]
+output_types: [structural_gff]
+applicable:
+  species: [eukaryote, eukaryote_small, prokaryote]
+  read_type: [any]
+  mode: [de_novo, resequencing]
+container:
+  image: quay.io/biocontainers/liftoff:1.6.3--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 8,  disk_gb: 10 }
+  recommended: { cpu: 8, ram_gb: 32, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  liftoff -g {reference_gff} -o {out_dir}/lifted.gff
+          {target_assembly_fasta} {reference_assembly_fasta} -p {cpu}
+references: []
+citation: "Shumate & Salzberg 2021, PMID 33320174"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: agshumate/Liftoff

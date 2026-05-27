@@ -1,0 +1,29 @@
+id: methylpy
+name: methylpy
+version: "1.4.7"
+category: epigenomics
+stage: [methylation.step2, methylation.step3]
+input_types: [fastq_short_paired_clean]
+output_types: [methylation_report, dmr_results]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [wgbs]
+container:
+  image: quay.io/biocontainers/methylpy:1.4.7--py39h4b81fae_1
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 8,  ram_gb: 16, disk_gb: 50 }
+  recommended: { cpu: 32, ram_gb: 64, disk_gb: 200 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  methylpy single-end-pipeline --read-files {fastq}
+           --sample {sample_id} --forward-ref {forward_ref}
+           --reverse-ref {reverse_ref} --ref-fasta {reference}
+           --num-procs {cpu} --path-to-output {out_dir}
+references: []
+citation: "Schultz 2015, PMID 26039496"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: yupenghe/methylpy

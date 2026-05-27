@@ -1,0 +1,27 @@
+id: subread
+name: Subread / featureCounts
+version: "2.0.6"
+category: rnaseq_align
+stage: [rnaseq_deg.step2]
+input_types: [bam, annotation_gtf]
+output_types: [count_matrix]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/subread:2.0.6--he4a0461_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2,  ram_gb: 4,  disk_gb: 10 }
+  recommended: { cpu: 16, ram_gb: 16, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  featureCounts -T {cpu} -a {annotation_gtf} -o {out_dir}/counts.tsv
+                -p --countReadPairs -t exon -g gene_id {alignment_bams}
+references: []
+citation: "Liao 2014, PMID 24227677"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: ShiLab-Bioinformatics/subread

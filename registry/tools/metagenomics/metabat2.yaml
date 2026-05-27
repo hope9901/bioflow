@@ -1,0 +1,28 @@
+id: metabat2
+name: MetaBAT 2
+version: "2.17"
+category: metagenomics
+stage: [metagenomics.step3]
+input_types: [assembly_fasta, bam]
+output_types: [genome_bins]
+applicable:
+  species: [any]
+  read_type: [short, long_ont]
+  mode: [profiling, de_novo]
+container:
+  image: quay.io/biocontainers/metabat2:2.17--h4da6f23_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 50 }
+  recommended: { cpu: 32, ram_gb: 128, disk_gb: 500 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  jgi_summarize_bam_contig_depths --outputDepth {out_dir}/depth.txt {alignment_bam} &&
+  metabat2 -i {assembly_fasta} -a {out_dir}/depth.txt
+           -o {out_dir}/bin --numThreads {cpu}
+references: []
+citation: "Kang 2019, PMID 31336383"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: bioboxes/metabat

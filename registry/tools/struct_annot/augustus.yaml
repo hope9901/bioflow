@@ -1,0 +1,27 @@
+id: augustus
+name: AUGUSTUS
+version: "3.5.0"
+category: struct_annot
+stage: [genome_assembly.step5]
+input_types: [assembly_fasta]
+output_types: [structural_gff, protein_faa]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/augustus:3.5.0--pl5321hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
+  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  augustus --species={augustus_species} --gff3=on
+           {assembly_fasta} > {out_dir}/augustus.gff
+references: []
+citation: "Stanke 2008, PMID 18218656"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: Gaius-Augustus/Augustus

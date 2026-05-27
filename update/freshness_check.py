@@ -254,7 +254,7 @@ def days_since_last_candidate(candidates_dir: Path) -> Optional[int]:
         return None
     newest = max(p.stat().st_mtime for p in yamls)
     age = dt.datetime.now() - dt.datetime.fromtimestamp(newest)
-    return age.days
+    return max(0, age.days)   # filesystem clock skew can give -1; clamp
 
 
 def days_since_last_t3_run(last_run_path: Path) -> Optional[int]:
@@ -266,7 +266,7 @@ def days_since_last_t3_run(last_run_path: Path) -> Optional[int]:
     age = dt.datetime.now() - dt.datetime.fromtimestamp(
         last_run_path.stat().st_mtime,
     )
-    return age.days
+    return max(0, age.days)
 
 
 # ---------------------------------------------------------------------------

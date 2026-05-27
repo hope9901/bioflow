@@ -1,0 +1,28 @@
+id: cutadapt
+name: Cutadapt
+version: "4.9"
+category: qc
+stage: [genome_assembly.step1, rnaseq_deg.step1, chip_seq.step1, atac_seq.step1]
+input_types: [fastq_short_paired, fastq_short_single]
+output_types: [fastq_short_paired_clean]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/cutadapt:4.9--py310h4b81fae_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4, disk_gb: 5 }
+  recommended: { cpu: 8, ram_gb: 8, disk_gb: 20 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  cutadapt -j {cpu} -a {adapter_r1} -A {adapter_r2}
+           -o {out_dir}/clean_R1.fq.gz -p {out_dir}/clean_R2.fq.gz
+           -q 20 -m 30 {r1} {r2}
+references: []
+citation: "Martin 2011, doi:10.14806/ej.17.1.200"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: marcelm/cutadapt

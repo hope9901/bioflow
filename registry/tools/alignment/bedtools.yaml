@@ -1,0 +1,27 @@
+id: bedtools
+name: bedtools
+version: "2.31.1"
+category: alignment
+stage: [utility.genomic_intervals]
+input_types: [bed, bam, vcf, gff]
+output_types: [bed, bam, coverage_tsv]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/bedtools:2.31.1--h13024bc_3
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 1, ram_gb: 2,  disk_gb: 5 }
+  recommended: { cpu: 4, ram_gb: 16, disk_gb: 50 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  bedtools intersect -a {input_a} -b {input_b}
+           > {out_dir}/intersect.bed
+references: []
+citation: "Quinlan & Hall 2010, PMID 20110278"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: arq5x/bedtools2

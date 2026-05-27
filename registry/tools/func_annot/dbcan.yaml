@@ -1,0 +1,27 @@
+id: dbcan
+name: dbCAN
+version: "4.1.4"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [protein_faa]
+output_types: [cazyme_tsv, substrate_predictions]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/dbcan:4.1.4--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
+  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  run_dbcan {protein_faa} protein --db_dir {dbcan_db}
+            --out_dir {out_dir} --threads {cpu}
+references: ["/refs/dbs/dbcan"]
+citation: "Zhang 2018, PMID 29905870"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: linnabrown/run_dbcan

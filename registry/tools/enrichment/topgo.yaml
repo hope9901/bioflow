@@ -1,0 +1,33 @@
+id: topgo
+name: topGO
+version: "2.56.0"
+category: enrichment
+stage: [rnaseq_deg.step4]
+input_types: [deg_table, gene_universe, go_annotation]
+output_types: [enrichment_report]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/bioconductor-topgo:2.56.0--r43hdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 4,  disk_gb: 10 }
+  recommended: { cpu: 4, ram_gb: 16, disk_gb: 30 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  Rscript -e "library(topGO);
+              data <- read.csv('{deg_table}');
+              gl <- factor(as.integer(data\$padj < 0.05));
+              names(gl) <- data\$gene_id;
+              go <- new('topGOdata', ontology='BP',
+                        allGenes=gl, annot=annFUN.org,
+                        mapping='{org_db}', ID='ensembl');
+              res <- runTest(go, statistic='fisher');
+              write.csv(GenTable(go, p=res), '{out_dir}/topgo.csv')"
+references: []
+citation: "Alexa & Rahnenfuhrer 2010, https://bioconductor.org/packages/topGO/"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"

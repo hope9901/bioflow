@@ -1,0 +1,29 @@
+id: scrublet
+name: Scrublet
+version: "0.2.3"
+category: single_cell
+stage: [scrna_seq.step2]
+input_types: [count_matrix]
+output_types: [doublet_scores, filtered_matrix]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/scrublet:0.2.3--pyhdfd78af_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 2, ram_gb: 8,  disk_gb: 10 }
+  recommended: { cpu: 8, ram_gb: 32, disk_gb: 30 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  python -c "import scrublet as scr; import scipy.io;
+             m = scipy.io.mmread('{matrix_mtx}').T.tocsc();
+             s = scr.Scrublet(m); scores, predicted = s.scrub_doublets();
+             import numpy; numpy.savetxt('{out_dir}/doublet_scores.txt', scores)"
+references: []
+citation: "Wolock 2019, PMID 30954476"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: swolock/scrublet

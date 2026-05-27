@@ -6,6 +6,47 @@
 
 ---
 
+## [0.1.11] — 2026-05-15
+
+### Added — 30 tools across 11 pipeline categories (76 → 106)
+
+Filling the largest gaps so every pipeline can be assembled from the
+registry without inventing inline images.  Headline fix: a recipe
+no longer needs to inline `quay.io/biocontainers/multiqc:…` or
+`bedtools:…` — these are now real registry entries that
+`bioflow tools` lists and `bioflow update auto` tracks.
+
+**QC (3):** multiqc · cutadapt · seqkit
+**Alignment (3):** minimap2 · bwa · bedtools
+**Assembly QC (2):** compleasm · gfastats
+**Struct. annotation (2):** augustus · liftoff
+**Functional annotation (3):** antismash · gtdbtk · dbcan
+**RNA-seq align/quant (3):** subread (featureCounts) · stringtie · rsem
+**Enrichment (3):** gseapy · topgo · enrichr
+**scRNA-seq (3):** bustools · scrublet · harmony
+**Metagenomics (2):** metabat2 · maxbin2
+**Epigenomics (1):** methylpy
+**Comparative genomics (3):** panaroo · mash · skani
+**Proteomics (2):** openms · xtandem
+
+### Verified
+- T1 freshness ran against all 30 → **30/30 image references resolve**
+  (initial `xtandem` had wrong BioContainers package name; corrected
+  to `xtandem` not `tandem`).
+- Every tool with an active GitHub repo declares `source_repo:` so T2
+  weekly release-watch covers them automatically.
+
+### Fixed
+- `days_since_last_candidate` / `days_since_last_t3_run` clamp to 0
+  when filesystem clock skew yields a sub-second-in-the-future mtime
+  on Windows.
+
+### Bumps
+- Tool count: 76 → 106
+- Version: 0.1.10 → 0.1.11
+
+---
+
 ## [0.1.10] — 2026-05-15
 
 ### Added — 12 genome assembly tools (64 → 76 registered)
