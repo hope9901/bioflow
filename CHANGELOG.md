@@ -6,6 +6,41 @@
 
 ---
 
+## [0.1.10] — 2026-05-15
+
+### Added — 12 genome assembly tools (64 → 76 registered)
+
+Filling out the assembly category beyond the original 4 (SPAdes,
+hifiasm, Flye, Unicycler):
+
+**Long-read assemblers (4):**
+- `canu`        — classic long-read assembler with `-pacbio-hifi`
+- `verkko`      — T2T-quality HiFi + ONT hybrid (Rautiainen 2023)
+- `nextdenovo`  — popular ONT/PacBio assembler (Hu 2024)
+- `shasta`      — fast ONT assembler (Shafin 2020)
+
+**Other assemblers (4):**
+- `raven`       — fast ONT alternative to Flye (Vaser & Sikic 2021)
+- `masurca`     — heavy-duty hybrid for large genomes (Zimin 2017)
+- `megahit`     — short-read genome / metagenome (Li 2015)
+- `abyss`       — short-read large-genome assembler (Jackman 2017)
+
+**Polishing (4):**
+- `pilon`       — short-read polish (Walker 2014)
+- `racon`       — long-read polish (Vaser 2017)
+- `medaka`      — ONT-specific polish (Oxford Nanopore)
+- `nextpolish`  — fast polisher (Hu 2020)
+
+All 12 verified pullable via `update/freshness_check.py` against
+quay.io / Docker Hub — no yanked images.  Each declares
+`source_repo:` so T2 weekly release-watch covers them automatically.
+
+### Bumps
+- Tool count: 64 → 76
+- Version: 0.1.9 → 0.1.10
+
+---
+
 ## [0.1.9] — 2026-05-15
 
 ### Fixed — critical

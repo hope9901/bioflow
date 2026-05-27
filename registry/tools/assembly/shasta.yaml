@@ -1,0 +1,27 @@
+id: shasta
+name: Shasta
+version: "0.11.1"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [fastq_long_ont]
+output_types: [assembly_fasta, assembly_graph]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [long_ont]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/shasta:0.11.1--h9948957_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 16, ram_gb: 64,  disk_gb: 200 }
+  recommended: { cpu: 64, ram_gb: 512, disk_gb: 2000 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  shasta --input {long_reads} --assemblyDirectory {out_dir}
+         --threads {cpu} --config Nanopore-May2022
+references: []
+citation: "Shafin 2020, PMID 32514112"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: paoloshasta/shasta

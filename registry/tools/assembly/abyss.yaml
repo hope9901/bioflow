@@ -1,0 +1,27 @@
+id: abyss
+name: ABySS
+version: "2.3.7"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [fastq_short_paired_clean]
+output_types: [assembly_fasta]
+applicable:
+  species: [eukaryote, eukaryote_small, prokaryote]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/abyss:2.3.7--he4a0461_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
+  recommended: { cpu: 64, ram_gb: 256, disk_gb: 1000 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  abyss-pe -C {out_dir} name={sample_id} k=96 B=2G
+           in='{r1} {r2}' np={cpu}
+references: []
+citation: "Jackman 2017, PMID 28298430"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: bcgsc/abyss

@@ -1,0 +1,28 @@
+id: canu
+name: Canu
+version: "2.2"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [fastq_long_pacbio, fastq_long_ont, fastq_long_hifi]
+output_types: [assembly_fasta, assembly_graph]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [long_ont, long_hifi]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/canu:2.2--ha47f30e_0
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
+  recommended: { cpu: 32, ram_gb: 128, disk_gb: 500 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  canu -p {sample_id} -d {out_dir} genomeSize={genome_size}
+       -pacbio-hifi {long_reads}
+       useGrid=false maxThreads={cpu} maxMemory={ram_gb}g
+references: []
+citation: "Koren 2017, PMID 28298431"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: marbl/canu

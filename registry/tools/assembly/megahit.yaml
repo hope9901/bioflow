@@ -1,0 +1,26 @@
+id: megahit
+name: MEGAHIT
+version: "1.2.9"
+category: assembly
+stage: [genome_assembly.step2, metagenomics.step2]
+input_types: [fastq_short_paired_clean]
+output_types: [assembly_fasta]
+applicable:
+  species: [prokaryote, any]
+  read_type: [short]
+  mode: [de_novo, profiling]
+container:
+  image: quay.io/biocontainers/megahit:1.2.9--h2e03b76_1
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
+  recommended: { cpu: 32, ram_gb: 64, disk_gb: 200 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  megahit -1 {r1} -2 {r2} -o {out_dir} -t {cpu} --memory 0.85
+references: []
+citation: "Li 2015, PMID 25609793"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: voutcn/megahit

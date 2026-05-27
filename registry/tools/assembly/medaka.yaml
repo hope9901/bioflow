@@ -1,0 +1,27 @@
+id: medaka
+name: Medaka
+version: "1.11.3"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [assembly_fasta, fastq_long_ont]
+output_types: [polished_assembly_fasta]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [long_ont]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 16, disk_gb: 30 }
+  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  gpu: true
+  arch: [x86_64, amd64]
+command_template: |
+  medaka_consensus -i {long_reads} -d {assembly_fasta}
+                   -o {out_dir} -t {cpu} -m {medaka_model}
+references: []
+citation: "Oxford Nanopore Technologies, https://github.com/nanoporetech/medaka"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: nanoporetech/medaka

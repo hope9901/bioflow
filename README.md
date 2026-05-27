@@ -1,7 +1,7 @@
 # bioflow
 
 [![tests](https://img.shields.io/badge/tests-510%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.9-orange)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.1.10-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -21,7 +21,7 @@ and a privacy-first LLM companion is available when you want it.
   - *Per-pipeline (8)*: prokaryote_assembly, rnaseq_deg,
     metagenomics_profile, scrna_seq, chip_seq, atac_seq,
     methylation_wgbs, proteomics_dda — one recipe per pipeline area.
-- **64 tools** registered, all pulled as BioContainer images at run
+- **76 tools** registered, all pulled as BioContainer images at run
   time — nothing to install on the host beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /
   `runnable_slow` / `incompatible` against your CPU / RAM / GPU / arch.

@@ -1,0 +1,27 @@
+id: racon
+name: Racon
+version: "1.5.0"
+category: assembly
+stage: [genome_assembly.step2]
+input_types: [assembly_fasta, fastq_long_ont, fastq_long_pacbio, paf, sam]
+output_types: [polished_assembly_fasta]
+applicable:
+  species: [prokaryote, eukaryote, eukaryote_small]
+  read_type: [long_ont, long_hifi]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/racon:1.5.0--h21ec9f0_2
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
+  recommended: { cpu: 32, ram_gb: 64, disk_gb: 100 }
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  racon -t {cpu} {long_reads} {overlaps_paf} {assembly_fasta}
+        > {out_dir}/polished.fasta
+references: []
+citation: "Vaser 2017, PMID 28100585"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
+source_repo: lbcb-sci/racon
