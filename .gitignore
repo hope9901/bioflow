@@ -83,3 +83,10 @@ analysis/*/sdk_13_run.log
 analysis/*/.cache/
 examples/_pectobacterium_ws/
 examples/_pectobacterium_run.log
+
+# Update scheduler outputs (per-machine, not for version control)
+update/notifications/
+update/last_run.json
+update/release_watch_state.json
+update/notifications/cron.log
+update/notifications/release_watch.log
