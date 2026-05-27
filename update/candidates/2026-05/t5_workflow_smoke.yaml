@@ -1,0 +1,33 @@
+update_meta:
+  month: "2026-05"
+  source: t5_validation_dummy
+  replaces: []
+  benchmark_note: "dummy candidate to validate the T5 GitHub Actions workflow"
+  risks:
+    - "synthetic — do NOT merge into registry"
+
+id: t5_workflow_smoke
+name: T5WorkflowSmoke
+version: "0.0.1"
+category: qc
+stage:
+  - genome_assembly.step1
+input_types: [fastq_short_paired]
+output_types: [qc_html]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [any]
+container:
+  image: alpine:3.19
+  pull_policy: if_not_present
+resources:
+  min:         { cpu: 1, ram_gb: 1, disk_gb: 1 }
+  recommended: { cpu: 1, ram_gb: 1, disk_gb: 1 }
+  gpu: false
+  arch: [x86_64]
+command_template: |
+  echo "t5 workflow smoke test"
+citation: "n/a"
+added: "2026-05-15"
+last_reviewed: "2026-05-15"
