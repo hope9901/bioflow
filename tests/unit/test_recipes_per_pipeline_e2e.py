@@ -45,6 +45,31 @@ class TestExecution:
         )
         assert result.ok
 
+    def test_eukaryote_assembly_runs(self, tmp_path):
+        lr = tmp_path / "ont.fq.gz"
+        lr.write_text("@r\nACGT\n+\nIIII\n", encoding="utf-8")
+        result = get("eukaryote_assembly")(
+            long_reads=lr, out_dir=tmp_path / "out",
+        )
+        assert result.ok
+
+    def test_metagenome_assembly_runs(self, tmp_path):
+        r1, r2 = _make_fastq_pair(tmp_path)
+        result = get("metagenome_assembly")(
+            r1=r1, r2=r2, out_dir=tmp_path / "out", sample_id="env",
+        )
+        assert result.ok
+
+    def test_germline_variants_runs(self, tmp_path):
+        r1, r2 = _make_fastq_pair(tmp_path)
+        ref = tmp_path / "ref.fa"
+        ref.write_text(">chr1\nACGTACGTACGT\n", encoding="utf-8")
+        result = get("germline_variants")(
+            r1=r1, r2=r2, reference=ref, snpeff_db="test_db",
+            out_dir=tmp_path / "out", sample_id="s",
+        )
+        assert result.ok
+
     def test_rnaseq_deg_runs(self, tmp_path):
         d = tmp_path / "reads"
         d.mkdir()

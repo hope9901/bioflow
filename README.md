@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-510%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.11-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-519%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.12-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -14,14 +14,15 @@ and a privacy-first LLM companion is available when you want it.
 
 ## What you get
 
-- **16 cookbook recipes** invokable as one-liners:
+- **19 cookbook recipes** invokable as one-liners:
   - *Comparative genomics (8)*: pangenome, ANI, phylogeny, GWAS,
     gene-family evolution, AMR/VF catalogue, COG enrichment, NCBI
     download.
-  - *Per-pipeline (8)*: prokaryote_assembly, rnaseq_deg,
-    metagenomics_profile, scrna_seq, chip_seq, atac_seq,
-    methylation_wgbs, proteomics_dda — one recipe per pipeline area.
-- **106 tools** registered across 15 categories, all pulled as
+  - *Per-pipeline (11)*: prokaryote_assembly, eukaryote_assembly,
+    rnaseq_deg, metagenomics_profile, metagenome_assembly, scrna_seq,
+    chip_seq, atac_seq, methylation_wgbs, proteomics_dda,
+    germline_variants.
+- **110 tools** registered across 16 categories, all pulled as
   BioContainer images at run time — nothing to install on the host
   beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /
@@ -88,13 +89,16 @@ bioflow recipe run pangenome --taxon Pectobacterium --dry-run
 | Recipe | Pipeline | One-line description |
 |---|---|---|
 | `prokaryote_assembly`   | Genome assembly | fastp → SPAdes → QUAST → Prokka |
+| `eukaryote_assembly`    | Genome assembly | NanoPlot → Flye → Medaka → compleasm (long-read) |
 | `rnaseq_deg`            | RNA-seq DEG    | fastp → Salmon → DESeq2 (tximport bridge) |
 | `metagenomics_profile`  | Metagenomics   | fastp → Kraken2 → Bracken |
+| `metagenome_assembly`   | Metagenomics   | fastp → MEGAHIT → minimap2 → MetaBAT2 → CheckM2 |
 | `scrna_seq`             | scRNA-seq      | STARsolo → Scanpy (10x, license-free) |
 | `chip_seq`              | ChIP-seq       | TrimGalore → Bowtie2 → Picard → MACS3 → HOMER |
 | `atac_seq`              | ATAC-seq       | TrimGalore → Bowtie2 → Picard → MACS3 → TOBIAS |
 | `methylation_wgbs`      | Bisulfite      | TrimGalore → Bismark → methylKit |
 | `proteomics_dda`        | LC-MS/MS       | msconvert → Comet → Percolator (open-source) |
+| `germline_variants`     | Variant calling | fastp → BWA → GATK → bcftools → SnpEff |
 
 Recipes use input-hash caching automatically — a second run with the
 same inputs returns in seconds.  Failed stages retry with bumped

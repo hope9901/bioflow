@@ -68,10 +68,13 @@ from bioflow.recipes.comparative_genomics import cog_enrichment as _cog    # noq
 
 # Per-pipeline recipes (one per pipeline area)
 from bioflow.recipes.genome_assembly import prokaryote_assembly as _asm    # noqa
+from bioflow.recipes.genome_assembly import eukaryote_assembly as _euk_asm  # noqa
 from bioflow.recipes.rnaseq_deg import rnaseq_deg as _rnaseq               # noqa
 from bioflow.recipes.metagenomics import metagenomics_profile as _meta     # noqa
+from bioflow.recipes.metagenomics import metagenome_assembly as _meta_asm  # noqa
 from bioflow.recipes.single_cell import scrna_seq as _scrna                # noqa
 from bioflow.recipes.epigenomics import chip_seq as _chip                  # noqa
 from bioflow.recipes.epigenomics import atac_seq as _atac                  # noqa
 from bioflow.recipes.methylation import bismark_wgbs as _methyl            # noqa
 from bioflow.recipes.proteomics import proteomics_dda as _prot             # noqa
+from bioflow.recipes.variant_calling import germline_variants as _gvar     # noqa

@@ -6,6 +6,38 @@
 
 ---
 
+## [0.1.12] — 2026-05-15
+
+### Added — variant-calling pipeline (new category)
+- New schema category `variant_calling` + `bioflow/pipelines/variant_calling.py`
+- 4 new tools: `gatk4`, `bcftools`, `snpeff`, `freebayes`
+- New recipe **`germline_variants`**:
+  fastp → BWA-MEM → GATK MarkDuplicates+HaplotypeCaller →
+  bcftools filter → SnpEff annotation.
+  Fills the single largest workflow gap (resequencing / SNP calling).
+
+### Added — recipes that use the 0.1.10/0.1.11 tools
+Previously 30+ assembly / binning / polishing tools were registered but
+unreachable from any one-liner.  Two new recipes wire them in:
+- **`eukaryote_assembly`** — NanoPlot → Flye → Medaka → compleasm
+  (long-read ONT/HiFi eukaryote assembly + polish + BUSCO QC)
+- **`metagenome_assembly`** — fastp → MEGAHIT → minimap2 → MetaBAT2 →
+  CheckM2 (metagenome assembly + genome binning + bin QC)
+
+### Verified
+- All 4 variant-calling images resolve via T1 freshness (no yanked).
+- 3 new recipes execute end-to-end through MockBackend.
+
+### Tests
+- 510 → 519 (+9): 3 new e2e execution tests, 2 new DAG-shape entries,
+  registry-total raised to ≥19.
+
+### Bumps
+- Tool count: 106 → 110 · Recipe count: 16 → 19 · Categories: 15 → 16
+- Version: 0.1.11 → 0.1.12
+
+---
+
 ## [0.1.11] — 2026-05-15
 
 ### Added — 30 tools across 11 pipeline categories (76 → 106)

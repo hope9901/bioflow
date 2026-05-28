@@ -14,13 +14,16 @@ from bioflow.recipes import get, names
 
 EXPECTED_RECIPES = {
     "prokaryote_assembly":  4,   # fastp → spades → quast → prokka
+    "eukaryote_assembly":   4,   # nanoplot → flye → medaka → compleasm
     "rnaseq_deg":           4,   # fastp → salmon_index → salmon_quant → deseq2
     "metagenomics_profile": 3,   # fastp → kraken2 → bracken
+    "metagenome_assembly":  5,   # fastp → megahit → minimap2 → metabat2 → checkm2
     "scrna_seq":            2,   # starsolo → scanpy
     "chip_seq":             5,   # trim → align → dedup → peaks → annotate
     "atac_seq":             5,   # trim → align → dedup → peaks → footprint
     "methylation_wgbs":     3,   # trim → bismark → methylkit
     "proteomics_dda":       3,   # msconvert → comet → percolator
+    "germline_variants":    5,   # fastp → bwa → gatk → bcftools → snpeff
 }
 
 
@@ -47,12 +50,11 @@ class TestPerPipelineRegistry:
 
 
 class TestRegistryTotal:
-    """The repo should now ship 8 comparative genomics + 8 per-pipeline = 16."""
+    """8 comparative genomics + 11 per-pipeline = 19 recipes."""
 
     def test_total_recipe_count(self):
         registered = set(names())
-        # 8 comparative + 8 per-pipeline = 16 minimum
-        assert len(registered) >= 16, (
-            f"Expected ≥16 recipes, got {len(registered)}: "
+        assert len(registered) >= 19, (
+            f"Expected ≥19 recipes, got {len(registered)}: "
             f"{sorted(registered)}"
         )

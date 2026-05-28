@@ -33,6 +33,7 @@ properties:
       - enrichment
       # Multi-omics expansion
       - alignment        # general-purpose aligners (Bowtie2, BWA)
+      - variant_calling  # SNP / indel / SV calling + annotation
       - metagenomics     # taxonomic + functional profiling
       - single_cell      # scRNA-seq, scATAC-seq
       - epigenomics      # ChIP-seq, ATAC-seq, methylation
