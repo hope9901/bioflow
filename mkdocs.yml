@@ -1,0 +1,62 @@
+site_name: bioflow
+site_description: >
+  A bioinformatics SDK + cookbook for one-line comparative-genomics,
+  assembly, RNA-seq, metagenomics, and variant-calling analyses on a
+  single workstation with local Docker.
+site_url: https://hope9901.github.io/bioflow/
+repo_url: https://github.com/hope9901/bioflow
+repo_name: hope9901/bioflow
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - search.suggest
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Quick start: quickstart.md
+  - Reference:
+      - Recipes: reference/recipes.md
+      - Tools: reference/tools.md
+  - Architecture: architecture.md
+  - Maintainer:
+      - Guide: MAINTAINER.md
+      - Update cadences: maintainer/UPDATE_CADENCES.md
+      - Cowork research prompt: maintainer/research_prompt.md
+      - Cowork schedule prompt: maintainer/cowork_schedule_prompt.md
+      - Quarterly audit prompt: maintainer/quarterly_audit_prompt.md
+  - Design notes: DESIGN.md

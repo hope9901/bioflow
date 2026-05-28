@@ -95,3 +95,6 @@ update/notifications/release_watch.log
 dist/
 build/
 *.egg-info/
+
+# MkDocs build output
+site/

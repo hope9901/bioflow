@@ -6,6 +6,30 @@
 
 ---
 
+## [0.1.14] — 2026-05-15
+
+### Added — documentation site (MkDocs → GitHub Pages)
+- `mkdocs.yml` (Material theme) + `docs/` pages: index, install,
+  quickstart, architecture, on top of the existing MAINTAINER /
+  UPDATE_CADENCES / DESIGN docs.
+- `scripts/gen_docs.py` — auto-generates `docs/reference/tools.md`
+  (110 tools by category) and `docs/reference/recipes.md` (19 recipes
+  with their DAGs) from the registry so the published docs never drift.
+- `.github/workflows/docs.yml` — regenerates the reference pages,
+  builds with `mkdocs build --strict`, and deploys to GitHub Pages on
+  push to main (official actions/deploy-pages flow).
+- `[project.optional-dependencies].docs` = mkdocs + mkdocs-material.
+- README links to https://hope9901.github.io/bioflow/.
+
+### Note
+- Enable Pages once in the repo settings (Settings → Pages → Source:
+  GitHub Actions) for the first deploy to publish.
+
+### Bumps
+- Version: 0.1.13 → 0.1.14
+
+---
+
 ## [0.1.13] — 2026-05-15
 
 ### Added — real-data validation + distribution (TIER 1-B & TIER 2)

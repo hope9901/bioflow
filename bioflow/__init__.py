@@ -1,6 +1,6 @@
 """bioflow - bioinformatics pipeline platform."""
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 
 # Tier-A SDK — @stage / @pipeline / runtime config
 from bioflow.sdk import (  # noqa: E402,F401

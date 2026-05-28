@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bioflow"
-version = "0.1.13"
+version = "0.1.14"
 description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -35,6 +35,10 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "mypy>=1.10",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
 ]
 
 [project.scripts]
