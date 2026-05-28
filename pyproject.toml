@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bioflow"
-version = "0.1.12"
+version = "0.1.13"
 description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -42,6 +42,13 @@ bioflow = "bioflow.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["bioflow"]
+
+# Bundle the tool registry + presets into the wheel so `pip install bioflow`
+# (no git checkout) still has a working registry.  At runtime,
+# bioflow.core.registry.default_registry_dir() prefers ./registry in the
+# CWD (dev / git clone) and falls back to this bundled copy.
+[tool.hatch.build.targets.wheel.force-include]
+"registry" = "bioflow/_bundled_registry"
 
 [tool.ruff]
 line-length = 100

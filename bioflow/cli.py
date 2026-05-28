@@ -20,6 +20,8 @@ import typer
 from rich import print as rprint
 from rich.console import Console
 
+from bioflow.core.registry import default_registry_dir as _default_registry_dir
+
 # ── Windows-safe console encoding ───────────────────────────────────────────
 # On non-UTF-8 Windows shells (e.g. Korean cp949) Rich's ✓/✗/⚠ glyphs raise
 # UnicodeEncodeError mid-print and abort the command.  Force stdout/stderr to
@@ -30,6 +32,10 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     except (AttributeError, ValueError, OSError):
         pass
+
+# Registry default: ./registry in CWD (dev) or the wheel-bundled copy
+# (pip install).  Computed once at import so it shows up in --help.
+_REGISTRY_DEFAULT = _default_registry_dir()
 
 app = typer.Typer(
     add_completion=False,
@@ -52,7 +58,7 @@ def hw_cmd() -> None:
 @app.command("tools")
 def tools_cmd(
     registry_dir: Path = typer.Option(
-        Path("registry"),
+        _REGISTRY_DEFAULT,
         "--registry",
         "-r",
         help="Path to tool registry directory.",
@@ -115,7 +121,7 @@ def tools_cmd(
 def recommend_cmd(
     preset: str = typer.Option(..., "--preset", "-p"),
     config: Path = typer.Option(..., "--config", "-c", exists=True),
-    registry: Path = typer.Option(Path("registry"), "--registry", "-r"),
+    registry: Path = typer.Option(_REGISTRY_DEFAULT, "--registry", "-r"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the plan without executing."),
 ) -> None:
     """Run a preset (recommended) pipeline against an input config."""
@@ -164,7 +170,7 @@ def recommend_cmd(
 def custom_cmd(
     pipeline: str = typer.Option(..., "--pipeline", help="genome_assembly | rnaseq_deg"),
     out: Path = typer.Option(Path("custom_config.yaml"), "--out", "-o"),
-    registry: Path = typer.Option(Path("registry"), "--registry", "-r"),
+    registry: Path = typer.Option(_REGISTRY_DEFAULT, "--registry", "-r"),
 ) -> None:
     """Interactively pick tools per stage (only hardware-compatible ones shown)."""
     from bioflow.core.planner import interactive_build  # noqa: PLC0415
@@ -252,7 +258,7 @@ def update_cmd(
         help="Approve every .yaml in this directory.",
     ),
     registry_dir: Path = typer.Option(
-        Path("registry"), "--registry",
+        _REGISTRY_DEFAULT, "--registry",
         help="Root of the tool registry.",
     ),
     overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing entries."),

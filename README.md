@@ -1,7 +1,7 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-519%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.12-orange)](CHANGELOG.md)
+[![tests](https://img.shields.io/badge/tests-522%20passed-brightgreen)](tests/)
+[![version](https://img.shields.io/badge/version-0.1.13-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -36,6 +36,8 @@ and a privacy-first LLM companion is available when you want it.
 
 ## Install
 
+**From a git checkout (for development / editing recipes):**
+
 ```bash
 git clone https://github.com/hope9901/bioflow
 cd bioflow
@@ -44,6 +46,26 @@ pip install -e .
 # Verify Docker is running
 docker info
 ```
+
+**As a package (the tool registry is bundled into the wheel):**
+
+```bash
+pip install bioflow          # once published to PyPI
+bioflow recipe list          # works from any directory
+```
+
+**As a container (no Python setup needed):**
+
+```bash
+docker build -f docker/core/Dockerfile -t bioflow .
+docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v "$PWD":/workspace -v /refs:/refs \
+  bioflow recipe run prokaryote_assembly --r1 ... --r2 ... --out /workspace/out
+```
+
+The orchestrator mounts the host Docker socket and launches each tool as
+a *sibling* container (not Docker-in-Docker).
 
 ### Optional one-time setup for the LLM companion
 

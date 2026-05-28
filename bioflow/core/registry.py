@@ -14,6 +14,30 @@ from jsonschema import Draft202012Validator
 from pydantic import BaseModel, Field
 
 
+# Location of the registry bundled into the installed wheel
+# (see pyproject [tool.hatch.build.targets.wheel.force-include]).
+_BUNDLED_REGISTRY = Path(__file__).resolve().parent.parent / "_bundled_registry"
+
+
+def default_registry_dir() -> Path:
+    """Resolve the registry root.
+
+    Order of preference:
+      1. ``./registry`` in the current working directory (dev / git
+         clone — lets contributors edit YAMLs in place).
+      2. The copy bundled into the installed wheel
+         (``bioflow/_bundled_registry``) — for ``pip install bioflow``.
+      3. ``./registry`` as a last resort (will error clearly downstream
+         if it doesn't exist).
+    """
+    cwd_reg = Path("registry")
+    if (cwd_reg / "tools").is_dir():
+        return cwd_reg
+    if (_BUNDLED_REGISTRY / "tools").is_dir():
+        return _BUNDLED_REGISTRY
+    return cwd_reg
+
+
 class Resources(BaseModel):
     cpu: int
     ram_gb: float

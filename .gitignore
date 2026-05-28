@@ -90,3 +90,8 @@ update/last_run.json
 update/release_watch_state.json
 update/notifications/cron.log
 update/notifications/release_watch.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

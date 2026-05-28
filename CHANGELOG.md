@@ -6,6 +6,44 @@
 
 ---
 
+## [0.1.13] — 2026-05-15
+
+### Added — real-data validation + distribution (TIER 1-B & TIER 2)
+
+**First real-biology validation** (was: MockBackend + alpine only)
+- `data/test/ecoli_small/real_R{1,2}.fastq.gz` — 500 high-quality
+  paired reads (Phred 40), a third carrying adapters.
+- `tests/integration/test_recipe_real_data.py` — pulls the real
+  fastp BioContainer and runs it on the fixture: 1000 reads in,
+  >800 survive, valid JSON report.  Also runs the
+  `prokaryote_assembly` recipe's qc_trim stage against real Docker.
+  **First time an actual bioinformatics tool has been validated
+  end-to-end through the SDK.**
+
+**Distribution**
+- The bioflow self-image builds + runs:
+  `docker build -f docker/core/Dockerfile -t bioflow .` →
+  `docker run bioflow recipe list` shows all 19 recipes (~1 GB).
+- **Fixed `pip install` deployment blocker**: the registry resolved as
+  `./registry` relative to CWD, so a wheel install with no git checkout
+  had no registry.  Now:
+  - `pyproject.toml` force-includes `registry/` into the wheel as
+    `bioflow/_bundled_registry` (110 tool YAMLs + presets + schema).
+  - `bioflow.core.registry.default_registry_dir()` prefers `./registry`
+    (dev) and falls back to the bundled copy.
+  - Verified: clean-venv `pip install`, then `bioflow tools` from `C:\`
+    lists all 110 tools and 19 recipes.
+- `python -m build` + `twine check` PASS for sdist and wheel.
+
+### Tests
+- 519 → 522 (+3 registry-resolver unit tests).
+- Integration: +2 real-fastp tests (Docker-gated).
+
+### Bumps
+- Version: 0.1.12 → 0.1.13 (synced stale `bioflow.__version__`).
+
+---
+
 ## [0.1.12] — 2026-05-15
 
 ### Added — variant-calling pipeline (new category)
