@@ -22,10 +22,14 @@ The tool registry is bundled into the wheel, so this works from any
 directory:
 
 ```bash
-pip install bioflow      # available on PyPI from 0.2.0
-bioflow doctor           # verify host (Docker, RAM, disk, registry, ...)
+pip install bioflowkit    # PyPI distribution name (`bioflow` was taken in 2018)
+bioflow doctor            # CLI + Python import stay `bioflow`
 bioflow recipe list
 ```
+
+Only the `pip install` argument differs from the brand — `from bioflow
+import stage`, the `bioflow` CLI command, and the GitHub URL are
+unchanged.
 
 ## As a container
 

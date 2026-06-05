@@ -1,8 +1,8 @@
 # bioflow
 
-[![PyPI](https://img.shields.io/pypi/v/bioflow.svg)](https://pypi.org/project/bioflow/)
-[![Downloads](https://img.shields.io/pypi/dm/bioflow.svg)](https://pypi.org/project/bioflow/)
-[![python](https://img.shields.io/pypi/pyversions/bioflow.svg)](https://pypi.org/project/bioflow/)
+[![PyPI](https://img.shields.io/pypi/v/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
+[![Downloads](https://img.shields.io/pypi/dm/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
+[![python](https://img.shields.io/pypi/pyversions/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
 [![tests](https://img.shields.io/badge/tests-565%20passed-brightgreen)](tests/)
 [![nightly smoke](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml/badge.svg)](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
@@ -55,10 +55,14 @@ bioflow doctor
 **As a package (the tool registry is bundled into the wheel):**
 
 ```bash
-pip install bioflow          # available on PyPI from 0.2.0
-bioflow doctor               # 12-point host self-check (run this first)
-bioflow recipe list          # works from any directory
+pip install bioflowkit        # PyPI distribution name (from 0.2.0)
+bioflow doctor                # CLI + Python import stay `bioflow`
+bioflow recipe list           # works from any directory
 ```
+
+> Why the two names? The PyPI namespace `bioflow` was taken in 2018.
+> Everything else — `from bioflow import stage`, `bioflow` CLI,
+> `https://github.com/hope9901/bioflow` — is unchanged.
 
 **As a container (no Python setup needed):**
 

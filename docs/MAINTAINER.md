@@ -258,10 +258,16 @@ PyPI → GitHub Releases.  Authentication uses **PyPI Trusted Publishing
 Do this once for **TestPyPI** (https://test.pypi.org) and once for
 **PyPI** (https://pypi.org).  Both sites have the same UI.
 
+> **Distribution name note**: the PyPI namespace `bioflow` was taken
+> in 2018 by an unrelated dormant project, so we publish under
+> `bioflowkit`.  The Python import name (`from bioflow import …`),
+> the CLI command (`bioflow`), and the GitHub repository
+> (`hope9901/bioflow`) are all unchanged.
+
 1. Log in to (Test)PyPI.
 2. Account → **Publishing** → **Add a new pending publisher**.
 3. Fill in:
-   - **PyPI project name**: `bioflow`
+   - **PyPI project name**: `bioflowkit`
    - **Owner**: `hope9901`
    - **Repository**: `bioflow`
    - **Workflow name**: `release.yml`
@@ -302,8 +308,8 @@ git push origin main --tags
 #    Each environment may prompt for approval if you set required reviewers.
 
 # 6. Verify the published artifact
-pip install --upgrade bioflow==X.Y.Z       # in a fresh venv
-bioflow doctor                              # must report all OK
+pip install --upgrade bioflowkit==X.Y.Z    # PyPI distribution name
+bioflow doctor                              # CLI command stays `bioflow`
 ```
 
 ### Hotfix release (0.Y.Z → 0.Y.(Z+1))

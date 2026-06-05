@@ -17,6 +17,14 @@ ship bug fixes only.  Breaking changes to the documented public API
 First PyPI release.  Three months of 0.1.x work consolidated into a
 single installable distribution + SemVer commitment.
 
+> **PyPI distribution name**: ``bioflowkit``.  The namespace ``bioflow``
+> was taken in 2018 by an unrelated dormant project, so we ship under
+> ``bioflowkit`` on PyPI.  Everything else stays the same — Python
+> ``from bioflow import stage`` still works, the ``bioflow`` CLI
+> command is unchanged, and the repository remains
+> ``github.com/hope9901/bioflow``.  Only the ``pip install`` argument
+> reflects the alternate name.
+
 ### Added — `bioflow doctor`
 - New CLI command + `bioflow.core.doctor` module: 12-point host
   self-check covering Python version, architecture, Docker CLI/daemon/

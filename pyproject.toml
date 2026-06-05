@@ -3,9 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "bioflow"
+# PyPI distribution name.  The PyPI namespace `bioflow` is held by an
+# unrelated 2018 project (Andrei Kucharavy's "BioFlow — Information
+# Flow Analysis"), so we ship under `bioflowkit`.  The Python import
+# name and the CLI command remain `bioflow` — only the `pip install`
+# argument changes.
+name = "bioflowkit"
 version = "0.2.0"
-description = "Bioinformatics pipeline platform: genome assembly/annotation and RNA-seq DEG, orchestrated over per-tool Docker containers."
+description = "bioflow: one-line comparative-genomics recipes + Tier-A SDK, orchestrated over per-tool Docker BioContainers."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "bioflow", email = "hope9901@gmail.com" }]
