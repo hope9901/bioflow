@@ -344,14 +344,16 @@ def run_plan(
             command = _render_command(tool, stage, plan, stage_dir)
             mounts = {str(workdir.resolve()): "/workspace"}
 
+            image_ref = tool.container.pinned_image
             log.info(
-                f"RUN  {stage.stage_id}  tool={tool.id}  image={tool.container.image}"
+                f"RUN  {stage.stage_id}  tool={tool.id}  image={image_ref}"
+                + ("" if tool.container.image_digest else "  [unpinned]")
             )
             prog.update_stage(stage.stage_id, tool.id)
 
             # Build kwargs — only pass log_callback if backend supports it
             run_kwargs: dict = dict(
-                image=tool.container.image,
+                image=image_ref,
                 command=command,
                 mounts=mounts,
                 cpu=tool.resources.min.cpu,

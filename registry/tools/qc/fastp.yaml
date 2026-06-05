@@ -14,9 +14,10 @@ applicable:
 container:
   image: quay.io/biocontainers/fastp:0.23.4--h5f740d0_0
   pull_policy: if_not_present
+  image_digest: sha256:b635334b6bb25eba14d0b8c240a45a51234984247d79715f8cd0b7959df850c2
 resources:
-  min:         { cpu: 2, ram_gb: 2,  disk_gb: 1 }
-  recommended: { cpu: 8, ram_gb: 8,  disk_gb: 5 }
+  min: {cpu: 2, ram_gb: 2, disk_gb: 1}
+  recommended: {cpu: 8, ram_gb: 8, disk_gb: 5}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

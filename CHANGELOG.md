@@ -4,6 +4,118 @@
 > For the monthly tool-registry update log see
 > [`update/REGISTRY_CHANGELOG.md`](update/REGISTRY_CHANGELOG.md).
 
+bioflow follows **Semantic Versioning** starting at 0.2.0.  Minor
+releases (0.X.0) may add features and tools; patch releases (0.X.Y)
+ship bug fixes only.  Breaking changes to the documented public API
+(`bioflow.stage / pipeline / set_workspace / set_backend`, the
+`bioflow` CLI surface, and tool YAML schema) wait for a major bump.
+
+---
+
+## [0.2.0] — 2026-06-05
+
+First PyPI release.  Three months of 0.1.x work consolidated into a
+single installable distribution + SemVer commitment.
+
+### Added — `bioflow doctor`
+- New CLI command + `bioflow.core.doctor` module: 12-point host
+  self-check covering Python version, architecture, Docker CLI/daemon/
+  socket, CPU/RAM/disk floors, GPU presence, registry loadability,
+  `~/.bioflow/` writability, and workspace writability.
+- Every check is independent and never raises — failures become
+  `CheckResult(status="fail", fix="…")` so the rest of the report still
+  runs.  Exit code is 1 when any check fails (warnings do not block).
+- `--json` emits a structured `{summary, checks[]}` payload for CI;
+  `--verbose` adds per-check detail blocks.
+- README + `docs/install.md` updated to make `bioflow doctor` the first
+  command a new user runs.
+- Tests: +26 unit tests (`tests/unit/test_doctor.py`) covering each
+  check + the CLI surface.
+
+### Added — Container digest pinning
+- `registry/schema.yaml`: optional `container.image_digest` field
+  (pattern `^sha256:[0-9a-f]{64}$`).
+- `bioflow.core.registry.ContainerSpec.pinned_image` returns
+  `image@digest` when a digest is pinned; runner now passes that ref
+  to the backend so silent upstream retags can't change recipe results.
+- `scripts/pin_digests.py` resolves digests via `docker buildx
+  imagetools inspect` (fallback: `docker manifest inspect`, then
+  `docker pull`) and writes them back into YAML in-place, preserving
+  comments via ruamel.yaml.  `--audit`, `--dry-run`, `--force`
+  supported.
+- CI adds an advisory `digest-audit` job that surfaces the
+  pinned/unpinned count without failing the build (flip when bulk
+  pinning is done).
+- 5 high-traffic tools pinned in-tree (fastp / spades / quast / prokka /
+  bwa) as a demonstration.
+- Tests: +10 unit tests (`tests/unit/test_digest_pinning.py`) covering
+  `pinned_image` semantics, schema validation, runner integration, and
+  a live-registry regression guard.
+
+### Added — Nightly recipe smoke matrix
+- `tests/integration/test_recipe_smoke_matrix.py`: parametrized
+  per-recipe smoke test that drives the lightest reachable stage of
+  each recipe against a real BioContainer (fastp on the ecoli_small
+  fixture, abricate on the bundled reference FASTA, …).  Each entry
+  asserts the container exited 0 and produced expected output files.
+- `.github/workflows/nightly-smoke.yml`: schedule = `0 3 * * *`,
+  Docker-enabled ubuntu runner, uploads JUnit XML.
+- README gains a "nightly smoke" badge.
+
+### Added — `bioflow run --resume` / `--fresh` + `bioflow status`
+- `bioflow run` already auto-skipped checkpointed stages; this exposes
+  the behaviour with explicit `--resume` (alias for default) and
+  `--fresh` (delete `.bioflow_state.json` and re-run from scratch).
+  Mutually exclusive.
+- New `bioflow status <workdir>` command: human report or `--json` for
+  completed_stages / failed_stages / artifacts.
+- Tests: +7 unit tests (`tests/unit/test_run_resume.py`) — fault
+  injection mid-pipeline, resume skips completed stages, `--fresh`
+  re-runs all, and CLI status surface (empty / partial / JSON).
+
+### Changed — Internal layout (no public API changes)
+- `bioflow/sdk.py` (1278 lines, one file) → `bioflow/sdk/` package with
+  9 focused modules: `_runtime` (workspace/backend globals), `_cache`
+  (toggles + sentinel), `_hashing`, `_paths` (host↔container path
+  translation + external bind mounts), `_parallel` (worker count +
+  progress + retry bumps), `_result` (StageResult), `_stage` (Stage +
+  fan-out + `@stage` decorator), `_pipeline` (Pipeline + `@pipeline`),
+  `__init__` re-exports the public surface and the underscore-prefixed
+  helpers the test suite still references.  Largest single file
+  shrinks from 1278 → 522 lines.
+- `bioflow/cli.py` (1417 lines) → `bioflow/cli/` package: `_app`
+  (typer app + console + encoding bootstrap), per-command modules
+  `hw`, `pipelines` (recommend/custom/run/status), `db`, `update`,
+  `ncbi`, `recipe` (also owns `_parse_recipe_extra`), `llm`, `doctor`,
+  `setup`.  `__init__` imports each module to trigger `@app.command`
+  registration and re-exports `app` + `_parse_recipe_extra` for
+  backwards compatibility.  Largest single file now 318 lines
+  (`cli/update.py`).
+- New `bioflow/cli/__main__.py` keeps `python -m bioflow.cli` working
+  alongside the existing `bioflow` console-script entry point.
+- Verified: 565 unit tests still pass, ruff clean, `bioflow doctor`
+  reports 12/12 ok on the dev host.
+
+### Added — PyPI distribution
+- First release published to PyPI as ``bioflow``.  ``pip install
+  bioflow`` now works from any directory, with the 110-tool registry +
+  14 preset YAMLs bundled inside the wheel
+  (`bioflow/_bundled_registry/`).
+- `.github/workflows/release.yml`: tag-driven (`v*.*.*`) release
+  pipeline — build → TestPyPI → PyPI → GitHub Release — using PyPI
+  Trusted Publishing (OIDC) so no long-lived tokens live in the repo.
+  Build step refuses to publish when `pyproject.toml::project.version`
+  and `bioflow.__version__` disagree, and verifies the wheel ships
+  `bioflow/sdk/`, `bioflow/cli/`, and `bioflow/_bundled_registry/`.
+- `docs/MAINTAINER.md`: PyPI Trusted Publisher setup walkthrough +
+  release procedure (tag, monitor, hotfix).
+
+### Bumps
+- Version: 0.1.14 → 0.2.0 (SemVer commitment starts here).
+
+### Tests
+- 522 → 565 (+43): doctor (+26), digest pinning (+10), resume (+7).
+
 ---
 
 ## [0.1.14] — 2026-05-15

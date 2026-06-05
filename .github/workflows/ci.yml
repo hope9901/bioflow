@@ -106,3 +106,25 @@ jobs:
               sys.exit(1)
           print(f"OK — {len(list(pathlib.Path('registry/tools').rglob('*.yaml')))} tool YAMLs validated")
           EOF
+
+  digest-audit:
+    # Advisory until enough tools are pinned — prints the missing-digest
+    # count and lists the first ~30 unpinned tools.  Upgrade to a blocking
+    # check (drop `|| true`) once the bulk of the registry is pinned.
+    name: Container digest pin audit (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Count missing image_digest entries
+        run: python scripts/pin_digests.py --audit || true

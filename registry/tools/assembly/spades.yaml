@@ -12,9 +12,10 @@ applicable:
 container:
   image: staphb/spades:4.0.0
   pull_policy: if_not_present
+  image_digest: sha256:1369ddad4c5f0ffe23742ecac9e811a14b96476d378c3999cc3d71a9be8a86c9
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 16, ram_gb: 64, disk_gb: 200 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

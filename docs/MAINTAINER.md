@@ -246,7 +246,90 @@ Bypasses both schedulers.  Useful for emergency additions.
 
 ---
 
-## Part 5 · What this guide intentionally does NOT cover
+## Part 5 · Cutting a PyPI release
+
+bioflow is published from `main` via a tag-driven GitHub Actions
+workflow (`.github/workflows/release.yml`) that pushes to TestPyPI →
+PyPI → GitHub Releases.  Authentication uses **PyPI Trusted Publishing
+(OIDC)**, so no long-lived tokens live in the repo.
+
+### One-time PyPI setup (per project, per environment)
+
+Do this once for **TestPyPI** (https://test.pypi.org) and once for
+**PyPI** (https://pypi.org).  Both sites have the same UI.
+
+1. Log in to (Test)PyPI.
+2. Account → **Publishing** → **Add a new pending publisher**.
+3. Fill in:
+   - **PyPI project name**: `bioflow`
+   - **Owner**: `hope9901`
+   - **Repository**: `bioflow`
+   - **Workflow name**: `release.yml`
+   - **Environment name**: `pypi` (for prod) or `testpypi` (for test)
+4. Save.
+
+GitHub side: **Settings → Environments → New environment**.  Create
+one named `testpypi` and one named `pypi`.  No secrets needed — the
+OIDC token is minted at runtime.  Optionally add **Required reviewers**
+to the `pypi` environment so a release can't promote without your
+click.
+
+### Release procedure
+
+```bash
+# 1. Make sure main is green
+git fetch origin && git status
+python -m pytest tests/unit -q              # must be all-green
+python -m ruff check .
+
+# 2. Bump version in two places (kept in sync; CI guards against drift)
+#    - pyproject.toml::project.version
+#    - bioflow/__init__.py::__version__
+$EDITOR pyproject.toml bioflow/__init__.py
+
+# 3. Move the CHANGELOG's [Unreleased] section to [X.Y.Z] — YYYY-MM-DD
+$EDITOR CHANGELOG.md
+
+# 4. Commit + tag
+git add pyproject.toml bioflow/__init__.py CHANGELOG.md
+git commit -m "chore: release vX.Y.Z"
+git tag vX.Y.Z
+git push origin main --tags
+
+# 5. Watch the workflow at
+#    https://github.com/hope9901/bioflow/actions/workflows/release.yml
+#    Order: build → testpypi → pypi → github
+#    Each environment may prompt for approval if you set required reviewers.
+
+# 6. Verify the published artifact
+pip install --upgrade bioflow==X.Y.Z       # in a fresh venv
+bioflow doctor                              # must report all OK
+```
+
+### Hotfix release (0.Y.Z → 0.Y.(Z+1))
+
+Patch releases are for bug fixes only.  Same procedure, but branch off
+`main` and *only* include the fix + a CHANGELOG entry — no
+behavioural changes.
+
+### If something goes wrong mid-pipeline
+
+- **TestPyPI succeeded, PyPI failed.**  The tag is already on main.
+  Use **Re-run jobs → only failed** in the workflow UI; the build
+  artifact is still in the cache.  Don't retag — that fails uniqueness
+  checks on TestPyPI.
+- **PyPI succeeded but had a critical bug.**  Yank the release on the
+  PyPI web UI (Releases → version → Options → Yank).  Bump to the next
+  patch (`0.Y.(Z+1)`) and republish; yanked versions are not deleted,
+  so users can still see they existed.
+- **Version-drift sanity check fails.**  The `build` job aborts.
+  Fix `pyproject.toml` ↔ `bioflow/__init__.py` mismatch, force-push
+  the tag (`git tag -f vX.Y.Z && git push -f origin vX.Y.Z`) only if
+  no publish step has run yet.  Otherwise bump to the next patch.
+
+---
+
+## Part 6 · What this guide intentionally does NOT cover
 
 These are out of scope for bioflow itself — use the right OS / cloud
 primitive instead:

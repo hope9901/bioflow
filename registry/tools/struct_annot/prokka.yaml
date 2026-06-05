@@ -12,9 +12,10 @@ applicable:
 container:
   image: staphb/prokka:1.14.6
   pull_policy: if_not_present
+  image_digest: sha256:6bb2522e077ef08a8be7a3856fe80372ede3b832becba0728e1ddbe83d89a042
 resources:
-  min:         { cpu: 2, ram_gb: 4,  disk_gb: 5 }
-  recommended: { cpu: 8, ram_gb: 16, disk_gb: 20 }
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 20}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

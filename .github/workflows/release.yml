@@ -1,0 +1,171 @@
+name: Release to PyPI
+
+# Triggered by pushing a v* tag.  Pipeline:
+#   build      → sdist + wheel + twine check, artifacts uploaded
+#   testpypi   → publish to TestPyPI for one final smoke check
+#   pypi       → publish to PyPI
+#   github     → cut a GitHub Release with the artifacts attached
+#
+# Authentication uses PyPI Trusted Publishing (OIDC) — no long-lived
+# tokens.  Setup steps live in docs/MAINTAINER.md.
+#
+# Manual override: workflow_dispatch lets the maintainer re-run a stage
+# without recreating the tag (e.g. retry pypi after fixing a TestPyPI
+# issue).
+
+on:
+  push:
+    tags:
+      - "v*.*.*"          # v0.2.0, v0.2.1, v1.0.0, …
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # for setuptools_scm-style version lookups (future)
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build + twine
+        run: pip install --upgrade build twine
+
+      - name: Sanity-check version match
+        # Refuse to build if pyproject.toml and bioflow.__version__ have
+        # drifted.  Caught a real bug in 0.1.13.
+        run: |
+          python - <<'PY'
+          import tomllib, pathlib, re, sys
+          pp = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          py_version = pp["project"]["version"]
+          init = pathlib.Path("bioflow/__init__.py").read_text(encoding="utf-8")
+          m = re.search(r'__version__\s*=\s*"([^"]+)"', init)
+          if not m or m.group(1) != py_version:
+              print(f"FAIL: pyproject={py_version} but __version__={m.group(1) if m else 'missing'}", file=sys.stderr)
+              sys.exit(1)
+          print(f"OK — both report {py_version}")
+          PY
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: twine check
+        run: python -m twine check dist/*
+
+      - name: Verify wheel ships sdk/, cli/, _bundled_registry/
+        # Guard against pyproject.toml regressions that would drop the
+        # bundled registry or one of the freshly-split packages.
+        run: |
+          python - <<'PY'
+          import zipfile, glob, sys
+          whl = glob.glob("dist/bioflow-*.whl")[0]
+          names = zipfile.ZipFile(whl).namelist()
+          required_prefixes = (
+              "bioflow/sdk/",
+              "bioflow/cli/",
+              "bioflow/_bundled_registry/tools/",
+          )
+          missing = [p for p in required_prefixes
+                     if not any(n.startswith(p) for n in names)]
+          if missing:
+              print(f"FAIL: wheel missing prefixes {missing}", file=sys.stderr)
+              sys.exit(1)
+          print(f"OK — wheel ships {len(names)} entries with all required prefixes")
+          PY
+
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+          if-no-files-found: error
+
+  testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/bioflow
+    permissions:
+      id-token: write          # OIDC token for trusted publishing
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    name: Publish to PyPI
+    needs: testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/bioflow
+    permissions:
+      id-token: write
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github:
+    name: Cut GitHub Release
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # required to create a release
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: Extract release notes for this tag
+        # Slice the CHANGELOG section whose header matches the tag (v0.2.0
+        # → look for "## [0.2.0]").  Falls back to "(see CHANGELOG.md)".
+        id: notes
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          python - <<PY > release_notes.md
+          import pathlib, re
+          src = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          pat = re.compile(rf"^## \[{re.escape('$VERSION')}\][^\n]*\n(.*?)(?=^## \[|\Z)",
+                           re.MULTILINE | re.DOTALL)
+          m = pat.search(src)
+          print(m.group(1).strip() if m else "(see CHANGELOG.md for details)")
+          PY
+          echo "RELEASE_NOTES_PATH=release_notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: dist/*
+          generate_release_notes: false      # we provided our own
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}   # e.g. v0.2.0-rc1

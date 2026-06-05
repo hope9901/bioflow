@@ -54,6 +54,17 @@ class ResourceSpec(BaseModel):
 class ContainerSpec(BaseModel):
     image: str
     pull_policy: Literal["always", "if_not_present", "never"] = "if_not_present"
+    # Optional sha256 manifest digest used for content-addressed pulls.
+    # Populate via ``scripts/pin_digests.py``; absence is warned in CI.
+    image_digest: Optional[str] = None
+
+    @property
+    def pinned_image(self) -> str:
+        """Return ``image@digest`` when a digest is pinned, else ``image``."""
+        if self.image_digest:
+            base = self.image.split("@", 1)[0].rsplit(":", 1)[0]
+            return f"{base}@{self.image_digest}"
+        return self.image
 
 
 class Applicable(BaseModel):

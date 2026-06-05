@@ -96,6 +96,15 @@ properties:
     properties:
       image:       { type: string }
       pull_policy: { type: string, enum: [always, if_not_present, never] }
+      # Optional but strongly recommended — content-addressed image
+      # digest pinned via `scripts/pin_digests.py`.  When present the
+      # runner uses ``image@image_digest`` instead of ``image:tag`` so a
+      # silently-retagged upstream image cannot change recipe results.
+      # Pin format is the OCI manifest digest, e.g.
+      #   sha256:0d3c7a4f….  CI warns on missing digests.
+      image_digest:
+        type: string
+        pattern: "^sha256:[0-9a-f]{64}$"
   resources:
     type: object
     required: [min, recommended]

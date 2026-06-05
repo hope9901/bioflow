@@ -1,0 +1,58 @@
+name: Nightly recipe smoke
+
+# Real-container smoke tests for the recipe matrix.  Runs once a day at
+# 03:00 UTC and on manual dispatch.  Failures are loud (workflow goes red
+# in the README badge) but never block PR merges — see ci.yml for the
+# unit-test gate.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  smoke-matrix:
+    name: Recipe smoke matrix
+    runs-on: ubuntu-latest
+    # Each recipe pulls 50–600 MB and runs for ~30s; ~10 entries fits well
+    # inside this limit even on a cold runner.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Confirm Docker is up on the runner
+        run: |
+          docker --version
+          docker info | head -20
+
+      - name: Install bioflow with dev extras
+        run: pip install -e ".[dev]"
+
+      - name: Run smoke matrix (real BioContainers)
+        env:
+          # The smoke matrix is Docker-gated; reduce log noise.
+          BIOFLOW_LOG_LEVEL: INFO
+        run: |
+          python -m pytest tests/integration/test_recipe_smoke_matrix.py \
+            -v -m docker \
+            --junitxml=reports/smoke.xml
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-junit
+          path: reports/smoke.xml
+
+      - name: Fail the job on red results
+        if: failure()
+        run: |
+          echo "::error::Nightly recipe smoke matrix failed — inspect the junit"
+          echo "         artifact and the per-recipe stderr in the log above."
+          exit 1

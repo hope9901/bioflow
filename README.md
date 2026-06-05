@@ -1,8 +1,10 @@
 # bioflow
 
-[![tests](https://img.shields.io/badge/tests-522%20passed-brightgreen)](tests/)
-[![version](https://img.shields.io/badge/version-0.1.14-orange)](CHANGELOG.md)
-[![python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/bioflow.svg)](https://pypi.org/project/bioflow/)
+[![Downloads](https://img.shields.io/pypi/dm/bioflow.svg)](https://pypi.org/project/bioflow/)
+[![python](https://img.shields.io/pypi/pyversions/bioflow.svg)](https://pypi.org/project/bioflow/)
+[![tests](https://img.shields.io/badge/tests-565%20passed-brightgreen)](tests/)
+[![nightly smoke](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml/badge.svg)](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://hope9901.github.io/bioflow/)
 
@@ -46,14 +48,15 @@ git clone https://github.com/hope9901/bioflow
 cd bioflow
 pip install -e .
 
-# Verify Docker is running
-docker info
+# Verify host (Docker, RAM, disk, registry, …) in one command
+bioflow doctor
 ```
 
 **As a package (the tool registry is bundled into the wheel):**
 
 ```bash
-pip install bioflow          # once published to PyPI
+pip install bioflow          # available on PyPI from 0.2.0
+bioflow doctor               # 12-point host self-check (run this first)
 bioflow recipe list          # works from any directory
 ```
 
@@ -132,6 +135,20 @@ resources where configured (e.g. CAFE5 → 2× RAM).
 ---
 
 ## Verify your machine
+
+Run this first after install:
+
+```bash
+bioflow doctor                              # 12-point host self-check
+bioflow doctor --json                       # CI-friendly structured output
+```
+
+`doctor` verifies Python, the Docker CLI + daemon, the docker socket
+(sibling-container path), CPU / RAM / disk, the registry, and your
+config + workspace directories — each failure prints a one-line fix hint
+and the command exits non-zero on the first FAIL.
+
+Deeper inspection:
 
 ```bash
 bioflow hw                                  # CPU / RAM / GPU / disk profile

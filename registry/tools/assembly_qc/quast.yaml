@@ -12,9 +12,10 @@ applicable:
 container:
   image: staphb/quast:5.2.0
   pull_policy: if_not_present
+  image_digest: sha256:83ea0fd6c28ca01508fd7a93c0942b19089e6de25c9b8a496a34e138d240e0e8
 resources:
-  min:         { cpu: 1, ram_gb: 2, disk_gb: 2 }
-  recommended: { cpu: 4, ram_gb: 8, disk_gb: 10 }
+  min: {cpu: 1, ram_gb: 2, disk_gb: 2}
+  recommended: {cpu: 4, ram_gb: 8, disk_gb: 10}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |
