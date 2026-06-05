@@ -62,11 +62,19 @@ jobs:
 
       - name: Verify wheel ships sdk/, cli/, _bundled_registry/
         # Guard against pyproject.toml regressions that would drop the
-        # bundled registry or one of the freshly-split packages.
+        # bundled registry or one of the freshly-split packages.  The
+        # glob matches whatever PyPI distribution name we ship under
+        # (`bioflowkit`, `bioflow`, etc.) — there is only ever one
+        # wheel per release in the artifact directory.
         run: |
           python - <<'PY'
           import zipfile, glob, sys
-          whl = glob.glob("dist/bioflow-*.whl")[0]
+          wheels = glob.glob("dist/*.whl")
+          if not wheels:
+              print(f"FAIL: no wheel under dist/ (have: {sorted(glob.glob('dist/*'))})",
+                    file=sys.stderr)
+              sys.exit(1)
+          whl = wheels[0]
           names = zipfile.ZipFile(whl).namelist()
           required_prefixes = (
               "bioflow/sdk/",
@@ -76,9 +84,9 @@ jobs:
           missing = [p for p in required_prefixes
                      if not any(n.startswith(p) for n in names)]
           if missing:
-              print(f"FAIL: wheel missing prefixes {missing}", file=sys.stderr)
+              print(f"FAIL: {whl} missing prefixes {missing}", file=sys.stderr)
               sys.exit(1)
-          print(f"OK — wheel ships {len(names)} entries with all required prefixes")
+          print(f"OK — {whl} ships {len(names)} entries with all required prefixes")
           PY
 
       - name: Upload dist as artifact
