@@ -144,7 +144,10 @@ def _build_matrix() -> list[SmokeCase]:
             recipe="rnaseq_deg",
             stage_attr="qc_one",
             invoke=_run_rnaseq_qc,
-            expect=["clean_R1.fastq.gz"],
+            # qc_one prefixes outputs with sample_id ("smoke_sample" here)
+            # and uses .fq.gz, not .fastq.gz — matching its own file
+            # naming convention rather than prokaryote_assembly's.
+            expect=["smoke_sample_R1.clean.fq.gz", "smoke_sample.fastp.json"],
             fixture_required=[FIXTURE_R1, FIXTURE_R2],
             notes="per-sample fastp wrapper from rnaseq_deg.qc_one",
         ),
