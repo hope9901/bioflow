@@ -236,12 +236,21 @@ def pin_one(
 # ---------------------------------------------------------------------------
 
 def audit() -> int:
-    """Return number of tool YAMLs lacking a digest.  Print a one-line summary."""
+    """Return number of *active* tool YAMLs lacking a digest.
+
+    Deprecated tools are excluded — their upstream images are gone by
+    definition (that is usually why they were deprecated), so requiring
+    a digest for them would make a clean registry impossible.
+    """
     missing: list[str] = []
     pinned: list[str] = []
+    deprecated: list[str] = []
     for p in _iter_yamls(only=None):
         data, _ = _load_yaml(p)
         if not isinstance(data, dict):
+            continue
+        if data.get("deprecated"):
+            deprecated.append(p.stem)
             continue
         container = data.get("container") or {}
         digest = container.get("image_digest")
@@ -251,7 +260,8 @@ def audit() -> int:
             missing.append(p.stem)
     total = len(missing) + len(pinned)
     print(
-        f"digest audit: {len(pinned)}/{total} pinned, {len(missing)} missing"
+        f"digest audit: {len(pinned)}/{total} active pinned, "
+        f"{len(missing)} missing, {len(deprecated)} deprecated (skipped)"
     )
     if missing and len(missing) <= 30:
         print("  missing:", ", ".join(missing))

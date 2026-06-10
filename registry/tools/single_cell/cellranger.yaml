@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: litd/docker-cellranger:7.2.0
+  image: litd/docker-cellranger:v7.2.0
   pull_policy: if_not_present
+  image_digest: sha256:910709794f2b21348ba9f3b001d1fbbe1486dc880e1b03155c285b1311de9f87
 resources:
   min: {cpu: 16, ram_gb: 64, disk_gb: 100}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}

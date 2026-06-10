@@ -86,7 +86,7 @@ def call_peaks(treat, sample_id: str, genome_size: str = "hs",
     )
 
 
-@stage(image="quay.io/biocontainers/homer:4.11.1--pl5321h9f5acd7_7",
+@stage(image="quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1",
        cpu=4, ram_gb=8, depends_on=call_peaks)
 def annotate_peaks(peaks, reference: Path, annotation: Path, sample_id: str,
                    *, out_dir):

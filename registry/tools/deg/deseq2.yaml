@@ -10,11 +10,12 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/bioconductor-deseq2:1.44.0--r43hf17093f_0
+  image: quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0
   pull_policy: if_not_present
+  image_digest: sha256:de4543b77eba3d5b4b774a50bf2539b9adb0ba7451c9d909bf8def4a1b1dd56d
 resources:
-  min:         { cpu: 2, ram_gb: 8,  disk_gb: 5 }
-  recommended: { cpu: 8, ram_gb: 32, disk_gb: 10 }
+  min: {cpu: 2, ram_gb: 8, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 32, disk_gb: 10}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

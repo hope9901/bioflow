@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, differential]
 container:
-  image: quay.io/biocontainers/homer:4.11.1--pl5321h9f5acd7_7
+  image: quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1
   pull_policy: if_not_present
+  image_digest: sha256:d99bf68f31a7d14cdcd4b3016a5741d775b1e779d70d9e36c8e008300bce30a5
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}

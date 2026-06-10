@@ -113,12 +113,12 @@ jobs:
           EOF
 
   digest-audit:
-    # Advisory until enough tools are pinned — prints the missing-digest
-    # count and lists the first ~30 unpinned tools.  Upgrade to a blocking
-    # check (drop `|| true`) once the bulk of the registry is pinned.
-    name: Container digest pin audit (advisory)
+    # Now blocking: every *active* tool must carry an image_digest
+    # (deprecated tools are skipped — their upstream images are gone by
+    # definition).  This keeps the registry fully content-addressed so a
+    # silently-retagged or GC'd upstream image can never change results.
+    name: Container digest pin audit
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -131,5 +131,5 @@ jobs:
       - name: Install dependencies
         run: pip install pyyaml
 
-      - name: Count missing image_digest entries
-        run: python scripts/pin_digests.py --audit || true
+      - name: Require every active tool to be digest-pinned
+        run: python scripts/pin_digests.py --audit

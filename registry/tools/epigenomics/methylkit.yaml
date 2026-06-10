@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [wgbs, rrbs]
 container:
-  image: bioconductor/bioconductor_full:RELEASE_3_18
+  image: quay.io/biocontainers/bioconductor-methylkit:1.36.0--r45ha27e39d_0
   pull_policy: if_not_present
+  image_digest: sha256:3bc5ec3aa01cc26a6437b8477829c19b31c6d906186cabf3fc1f73886131f621
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 10}
   recommended: {cpu: 8, ram_gb: 32, disk_gb: 20}

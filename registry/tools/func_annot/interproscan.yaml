@@ -10,11 +10,12 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/interproscan:5.67.99.0--hec16e2b_1
+  image: quay.io/biocontainers/interproscan:5.59_91.0--hec16e2b_1
   pull_policy: if_not_present
+  image_digest: sha256:f5f1afca06ea17ad0c33e652bfb88ea55d1cbcfeea6f10a52d94db86d87c79d8
 resources:
-  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 20 }
-  recommended: { cpu: 16, ram_gb: 64,  disk_gb: 60 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 60}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

@@ -57,11 +57,29 @@ ship bug fixes only.  Breaking changes to the documented public API
 - Verified: the bumped images pull + run (e.g. `bowtie2 2.5.4`), and
   the nightly smoke matrix is green.
 
-### Added — broader digest pinning
-- Digest coverage raised from 5/110 → **93/110** tools
-  (`scripts/pin_digests.py`).  The remaining 17 are BioConductor R
-  packages and Docker Hub images whose pinned version has left Quay and
-  needs a manual version bump (tracked separately).
+### Added — full digest pinning (registry now 100% content-addressed)
+- Digest coverage raised from 5/110 → **107/107 active tools** in two
+  passes.  The second pass resolved the 17 hold-outs:
+  - **Version bumps** to the newest BioContainer of the same tool where
+    the pinned version had left Quay: DESeq2 1.44→1.50.2, edgeR
+    4.2→4.8.2, limma 3.60→3.66, clusterProfiler 4.12→4.18.4, topGO
+    2.56→2.62, HOMER 4.11.1→5.1, Scanpy 1.10.1→1.7.2 (1.10 was never on
+    Quay biocontainers), Comet 2024020→2026011, Percolator 3.06.1→3.7.1,
+    InterProScan 5.67→5.59.
+  - **Image-source switches**: methylKit and monocle3 moved off the
+    multi-GB `bioconductor/bioconductor_full:RELEASE_3_18` (gone) to the
+    dedicated `bioconductor-methylkit` / `r-monocle3` BioContainers;
+    Cell Ranger tag `7.2.0`→`v7.2.0`; Seurat `5.0.1`→`5.0.0`.
+  - **Deprecations**: MaxQuant joins MSFragger + FragPipe as
+    `deprecated: true` — proprietary tools whose images are gone and
+    which the `proteomics_dda` recipe does not use (it runs the
+    open-source msconvert → Comet → Percolator stack).  The audit now
+    skips deprecated tools.
+- **CI `digest-audit` is now blocking** (was advisory): every active
+  tool must carry an `image_digest`, so the registry can never silently
+  rot again.
+- `scripts/refresh_tags.py` also reports `version_gone` and non-Quay
+  images for these manual cases.
 
 ### Added — Bioconda recipe (prep)
 - `conda-recipe/meta.yaml`: noarch-python Bioconda recipe (only

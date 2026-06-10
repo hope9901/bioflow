@@ -56,7 +56,7 @@ def msconvert(raw_dir: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/comet-ms:2024020--h7ec2334_0",
+@stage(image="quay.io/biocontainers/comet-ms:2026011--h9ee0642_0",
        cpu=8, ram_gb=16, depends_on=msconvert,
        retry=2, retry_with={"ram_gb": "2x"})
 def comet_search(mzml, comet_params: Path, fasta_db: Path, *, out_dir):
@@ -76,7 +76,7 @@ def comet_search(mzml, comet_params: Path, fasta_db: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/percolator:3.06.1--hf1761c0_2",
+@stage(image="quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2",
        cpu=4, ram_gb=16, depends_on=comet_search)
 def percolator_fdr(search, *, out_dir, fdr_threshold: float = 0.01):
     """Percolator: machine-learned FDR control on Comet pep.xml outputs.

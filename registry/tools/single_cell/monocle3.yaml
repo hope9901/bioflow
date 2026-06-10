@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: bioconductor/bioconductor_full:RELEASE_3_18
+  image: quay.io/biocontainers/r-monocle3:1.4.26--r44h9948957_0
   pull_policy: if_not_present
+  image_digest: sha256:513fa87e98bebc2bc81442d779788866acfe9c29d42ec345db65d9818405050a
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 20}

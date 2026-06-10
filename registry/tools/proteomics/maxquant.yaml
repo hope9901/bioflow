@@ -22,4 +22,13 @@ command_template: |
 references: []
 citation: "Cox & Mann 2008, PMID 19029910"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-06-10"
+deprecated: true
+deprecation_note: |
+  The pinned BioContainer (maxquant:2.4.14.0) was garbage-collected from
+  Quay and only older 1.6.x builds remain; MaxQuant is a .NET/Windows
+  tool that does not containerise cleanly on Linux.  The `proteomics_dda`
+  recipe uses the open-source stack (msconvert → Comet → Percolator)
+  instead, so MaxQuant is not on any recipe's critical path.  To use it,
+  build a local image after accepting the license.
+replaced_by: comet

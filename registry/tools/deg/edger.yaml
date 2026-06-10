@@ -10,11 +10,12 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/bioconductor-edger:4.2.0--r43hf17093f_0
+  image: quay.io/biocontainers/bioconductor-edger:4.8.2--r45h01b2380_0
   pull_policy: if_not_present
+  image_digest: sha256:3d918aca6aee52981f097b61dfa4f50adbb624a83bc03f396c6298b2a71bc38c
 resources:
-  min:         { cpu: 2, ram_gb: 4,  disk_gb: 2 }
-  recommended: { cpu: 4, ram_gb: 16, disk_gb: 5 }
+  min: {cpu: 2, ram_gb: 4, disk_gb: 2}
+  recommended: {cpu: 4, ram_gb: 16, disk_gb: 5}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

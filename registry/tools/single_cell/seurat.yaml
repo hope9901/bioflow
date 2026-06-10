@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: satijalab/seurat:5.0.1
+  image: satijalab/seurat:5.0.0
   pull_policy: if_not_present
+  image_digest: sha256:fd8a2dfda142f4da85e4112f734f97b889e0bb314593e2709e0563d4fd95e87c
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 50}

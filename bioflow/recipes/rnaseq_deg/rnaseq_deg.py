@@ -73,7 +73,7 @@ def salmon_quant(idx, sample_id: str, r1_clean: Path, r2_clean: Path,
     )
 
 
-@stage(image="quay.io/biocontainers/bioconductor-deseq2:1.44.0--r43hf17093f_0",
+@stage(image="quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0",
        cpu=4, ram_gb=16, depends_on=salmon_quant)
 def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
     """DESeq2 differential expression via tximport + DESeqDataSetFromTximport."""
