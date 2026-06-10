@@ -12,9 +12,10 @@ applicable:
 container:
   image: teambraker/braker3:v3.0.8
   pull_policy: if_not_present
+  image_digest: sha256:9cc53f0990f87c026c17a09893a3e8fb076f67504ac659ee8c5708318f451660
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 30 }
-  recommended: { cpu: 32, ram_gb: 128, disk_gb: 100 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

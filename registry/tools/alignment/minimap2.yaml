@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/minimap2:2.28--he4a0461_0
   pull_policy: if_not_present
+  image_digest: sha256:da4304094b716fd7ac7ff5738442c117a2e65868d7ec2b790db7e98626c67e79
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 32, ram_gb: 64, disk_gb: 200 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

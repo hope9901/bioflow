@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/verkko:2.2.1--h45dadce_0
   pull_policy: if_not_present
+  image_digest: sha256:1d17089c1a4faeb415944ffefaca7d2d780e2732f1a60a337b20a026b9168a6f
 resources:
-  min:         { cpu: 16, ram_gb: 64,  disk_gb: 200 }
-  recommended: { cpu: 64, ram_gb: 512, disk_gb: 2000 }
+  min: {cpu: 16, ram_gb: 64, disk_gb: 200}
+  recommended: {cpu: 64, ram_gb: 512, disk_gb: 2000}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

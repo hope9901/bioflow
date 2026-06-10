@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/hifiasm:0.19.9--h43eeafb_0
   pull_policy: if_not_present
+  image_digest: sha256:b26655b54a8da99dac0e070262ade87c8a7a975bedb0b5af4774e89dc51884be
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
-  recommended: { cpu: 32, ram_gb: 128, disk_gb: 300 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 300}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

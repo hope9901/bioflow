@@ -10,11 +10,12 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/kallisto:0.51.1--h6de1650_1
+  image: quay.io/biocontainers/kallisto:0.51.1--h2b92561_2
   pull_policy: if_not_present
+  image_digest: sha256:6cc553ca3fd6e720dbae2b8825e8eb8677e155a3eb031bd30c103b2fadeec699
 resources:
-  min:         { cpu: 2, ram_gb: 4,  disk_gb: 5 }
-  recommended: { cpu: 8, ram_gb: 16, disk_gb: 20 }
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 20}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/seqkit:2.8.2--h9ee0642_0
   pull_policy: if_not_present
+  image_digest: sha256:a087c482d265d4209f2e2bd8f44550b0c79616c24f0f64d1f0f08d354bccd101
 resources:
-  min:         { cpu: 2, ram_gb: 4,  disk_gb: 5 }
-  recommended: { cpu: 8, ram_gb: 16, disk_gb: 50 }
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

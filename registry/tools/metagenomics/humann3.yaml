@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [profiling]
 container:
-  image: quay.io/biocontainers/humann:3.9--pyhdfd78af_0
+  image: quay.io/biocontainers/humann:3.9--py312hdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:5d4ad5983b133477b1738c0cc3505f60245836c3790db39361fa7a2c0fa84abf
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 64, disk_gb: 300}

@@ -12,6 +12,7 @@ applicable:
 container:
   image: staphb/fastani:1.34
   pull_policy: if_not_present
+  image_digest: sha256:d2c1bf7f1792c7d371904e8744f1a974535f0814d29212b254411e78c1436f59
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 2}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}

@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/bedtools:2.31.1--h13024bc_3
   pull_policy: if_not_present
+  image_digest: sha256:ffcd7aa5cd028e8156b8412cc4c88e4f7c4bfa44c4da24ac2737f82116940559
 resources:
-  min:         { cpu: 1, ram_gb: 2,  disk_gb: 5 }
-  recommended: { cpu: 4, ram_gb: 16, disk_gb: 50 }
+  min: {cpu: 1, ram_gb: 2, disk_gb: 5}
+  recommended: {cpu: 4, ram_gb: 16, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

@@ -12,6 +12,7 @@ applicable:
 container:
   image: staphb/abricate:1.2.0
   pull_policy: if_not_present
+  image_digest: sha256:c27bd61d507488669463d40447d7b3575f69e6b5f3d0435b1653b3cf28b6e38a
 resources:
   min: {cpu: 2, ram_gb: 2, disk_gb: 2}
   recommended: {cpu: 4, ram_gb: 4, disk_gb: 5}

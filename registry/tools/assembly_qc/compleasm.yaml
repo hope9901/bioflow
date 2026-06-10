@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0
   pull_policy: if_not_present
+  image_digest: sha256:9c1aa77517468dcd5a3bfca9a22c653ca76993305cdb04e3e09db5829fc7fb6b
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 32, ram_gb: 32, disk_gb: 100 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 32, ram_gb: 32, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

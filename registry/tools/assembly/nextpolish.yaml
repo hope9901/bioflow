@@ -10,11 +10,12 @@ applicable:
   read_type: [short, long_ont, long_hifi, hybrid]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/nextpolish:1.4.1--py39h7cff6ad_2
+  image: quay.io/biocontainers/nextpolish:1.4.1--h3952c39_7
   pull_policy: if_not_present
+  image_digest: sha256:b44db193cb1823f3465f621125abd52aa343570374f6ac6274829c3fcf5b52fb
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
-  recommended: { cpu: 32, ram_gb: 128, disk_gb: 200 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

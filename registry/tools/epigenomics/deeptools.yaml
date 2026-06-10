@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/deeptools:3.5.5--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:fab4182e0f1338745d9fe8315477e05a6484e717aac1430403dbc8d7e789ecf9
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}

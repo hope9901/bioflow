@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/snpeff:5.2--hdfd78af_1
   pull_policy: if_not_present
+  image_digest: sha256:e61e0025946651ce1715c5c343f974a53e3ec44cc5ac08c75b30b4de361e3286
 resources:
-  min:         { cpu: 2, ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 4, ram_gb: 16, disk_gb: 50 }
+  min: {cpu: 2, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 4, ram_gb: 16, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

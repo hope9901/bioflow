@@ -37,7 +37,7 @@ def trim(r1: Path, r2: Path, *, out_dir):
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0",
+@stage(image="quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     """Bowtie2 alignment → sorted, indexed BAM (samtools chained in image).
@@ -73,7 +73,7 @@ def dedup(aln, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/macs3:3.0.1--py310h58a0a2b_1",
+@stage(image="quay.io/biocontainers/macs3:3.0.1--py312he57d009_3",
        cpu=4, ram_gb=8, depends_on=dedup)
 def call_peaks(treat, sample_id: str, genome_size: str = "hs",
                *, out_dir, ctrl_bam: Optional[Path] = None):

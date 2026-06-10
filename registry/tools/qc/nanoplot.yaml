@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/nanoplot:1.43.0--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:036530f64f3699b35ec640c7884debc7af1dbe4de5f1f4324a5c2f26115924ec
 resources:
-  min:         { cpu: 2, ram_gb: 4,  disk_gb: 2 }
-  recommended: { cpu: 8, ram_gb: 16, disk_gb: 5 }
+  min: {cpu: 2, ram_gb: 4, disk_gb: 2}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

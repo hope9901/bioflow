@@ -10,11 +10,12 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/harmonypy:0.0.10--pyh7cba7a3_0
+  image: quay.io/biocontainers/harmonypy:0.0.10--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:ce1e87ee697dc2bc03242b7486a74c25235164f61bb4034b9449eb8c6c239fbb
 resources:
-  min:         { cpu: 4,  ram_gb: 16, disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 64, disk_gb: 50 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

@@ -10,11 +10,12 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/earlgrey:4.5.0--hdfd78af_0
+  image: quay.io/biocontainers/earlgrey:4.5.0--h4ac6f70_2
   pull_policy: if_not_present
+  image_digest: sha256:64365e81dd286950213042c25fb84c2ac760c10ef07460c3f40669bedbe9a8b4
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
-  recommended: { cpu: 32, ram_gb: 64,  disk_gb: 200 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

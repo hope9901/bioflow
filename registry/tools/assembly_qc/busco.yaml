@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/busco:5.7.1--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:dfdd6716b6ef376bb215fac3de664b4112bd212ef45cfb65a468e4067d4aec5e
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 30 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 30}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

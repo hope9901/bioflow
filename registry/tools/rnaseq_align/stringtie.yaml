@@ -10,11 +10,12 @@ applicable:
   read_type: [short, long_ont, long_hifi]
   mode: [any]
 container:
-  image: quay.io/biocontainers/stringtie:2.2.3--h29c0135_0
+  image: quay.io/biocontainers/stringtie:2.2.3--h29c0135_1
   pull_policy: if_not_present
+  image_digest: sha256:84207eb013dbcff90928d8ddc75902580d3885ce8edaa36b8fab7665a3dc2e3c
 resources:
-  min:         { cpu: 2,  ram_gb: 8,  disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  min: {cpu: 2, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

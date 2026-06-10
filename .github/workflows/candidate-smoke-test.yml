@@ -17,6 +17,11 @@ permissions:
   contents: read
   pull-requests: write   # for the summary comment
 
+# Opt into the Node 24 runtime ahead of the 2026-06-16 forced switch so
+# the v4/v5 actions stop emitting Node 20 deprecation warnings.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   smoke:
     name: Validate + smoke-test changed candidates

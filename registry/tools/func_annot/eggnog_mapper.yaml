@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:d32edadcbcca32d4783e5275f848df1ab23a7df7ce819ac64c161e850ae2b235
 resources:
-  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 5 }
-  recommended: { cpu: 16, ram_gb: 32,  disk_gb: 20 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 5}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 20}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

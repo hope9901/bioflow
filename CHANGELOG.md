@@ -12,6 +12,45 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ---
 
+## [Unreleased]
+
+### Fixed — registry freshness (stale BioContainer tags)
+- **Discovery**: an audit during digest-pinning found that ~half the
+  registry's `quay.io/biocontainers/*` image tags had 404'd.  Quay
+  rotates each package's `--<buildhash>_<n>` build suffix and garbage-
+  collects the old ones, so dozens of recipes (chip_seq, atac_seq,
+  eukaryote_assembly, metagenome_assembly, rnaseq_deg's Salmon stage,
+  …) would have failed at run time with "image not found" — unrelated
+  to the user's data.
+- `scripts/refresh_tags.py` (new): audits every Quay BioContainer
+  reference, and with `--apply` rewrites any dead tag to the newest
+  *same-version* build (never changing the upstream software version).
+  Non-Quay images and versions that have left Quay entirely are
+  reported for manual review.
+- Applied: **34 registry tool YAMLs** + **7 recipe-hardcoded images**
+  (bowtie2, bracken, flye, macs3, medaka, metabat2, tobias) re-pointed
+  to live tags.  Salmon's `1.10.3--hb950928_0` → `1.10.3--h45fbf2d_5`
+  fixed separately (it broke the rnaseq_deg quant stage).
+- Verified: the bumped images pull + run (e.g. `bowtie2 2.5.4`), and
+  the nightly smoke matrix is green.
+
+### Added — broader digest pinning
+- Digest coverage raised from 5/110 → **93/110** tools
+  (`scripts/pin_digests.py`).  The remaining 17 are BioConductor R
+  packages and Docker Hub images whose pinned version has left Quay and
+  needs a manual version bump (tracked separately).
+
+### Changed — CI
+- All workflows opt into the Node 24 runtime
+  (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`) ahead of the 2026-06-16 forced
+  switch, silencing the Node 20 deprecation warnings.
+
+### Fixed — nightly smoke
+- `rnaseq_deg.qc_one` smoke assertion matched the stage's real output
+  names (`<sample_id>_R1.clean.fq.gz`), fixing a false CI failure.
+
+---
+
 ## [0.2.0] — 2026-06-05
 
 First PyPI release.  Three months of 0.1.x work consolidated into a

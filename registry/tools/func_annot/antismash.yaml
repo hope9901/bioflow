@@ -12,9 +12,10 @@ applicable:
 container:
   image: antismash/standalone:7.1.0
   pull_policy: if_not_present
+  image_digest: sha256:83ffb2818ae8e8fa4c4e3421d8f66a02ac48a81ed4d5fbda67b249b411271af6
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

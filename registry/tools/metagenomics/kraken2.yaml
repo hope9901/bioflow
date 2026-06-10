@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0
   pull_policy: if_not_present
+  image_digest: sha256:c1a6841172e73fd7c8e323471b7f10eb53d980ba0f01f487bc50bf984add8cb3
 resources:
   min: {cpu: 8, ram_gb: 32, disk_gb: 100}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}

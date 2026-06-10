@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:42a736f8ce06092f50b77a2614318b52324e8862aa7517542ee95e8238b5105b
 resources:
-  min:         { cpu: 4,  ram_gb: 16, disk_gb: 50 }
-  recommended: { cpu: 16, ram_gb: 64, disk_gb: 200 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

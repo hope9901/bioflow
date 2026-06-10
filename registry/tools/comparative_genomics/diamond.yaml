@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/diamond:2.1.8--h43eeafb_0
   pull_policy: if_not_present
+  image_digest: sha256:88505719a7c8cf803b79016a2b0423e587c3b94dce6feecbe49e3d71c2f92e42
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 50 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

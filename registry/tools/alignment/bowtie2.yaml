@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, profiling, differential]
 container:
-  image: quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0
+  image: quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7
   pull_policy: if_not_present
+  image_digest: sha256:0f9ba15963c5d9ae86775ac137d517f0afe4feb3cbd1d3f444e979d86ad9c1d0
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}

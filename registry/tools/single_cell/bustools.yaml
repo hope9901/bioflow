@@ -10,11 +10,12 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/bustools:0.43.2--hd03093a_2
+  image: quay.io/biocontainers/bustools:0.43.2--he1fd2f9_2
   pull_policy: if_not_present
+  image_digest: sha256:1498806028f79f80a0a89d5765733a8386bc992749472ecc8d0c18bbc93e8f20
 resources:
-  min:         { cpu: 2,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  min: {cpu: 2, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

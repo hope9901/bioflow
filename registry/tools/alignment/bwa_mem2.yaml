@@ -17,9 +17,10 @@ applicable:
 container:
   image: quay.io/biocontainers/bwa-mem2:2.2.1--he513fc3_0
   pull_policy: if_not_present
+  image_digest: sha256:8489086047b16f49a01a077065c88258c28027c49c35281f77df353bcc370970
 resources:
-  min:         { cpu: 4,  ram_gb: 16,  disk_gb: 20 }
-  recommended: { cpu: 16, ram_gb: 64,  disk_gb: 100 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

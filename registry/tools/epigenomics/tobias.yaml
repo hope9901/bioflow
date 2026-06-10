@@ -10,8 +10,9 @@ applicable:
   read_type: [short]
   mode: [differential, peak_calling]
 container:
-  image: quay.io/biocontainers/tobias:0.16.1--py310h590aeec_0
+  image: quay.io/biocontainers/tobias:0.16.1--py312h1f1cfbb_1
   pull_policy: if_not_present
+  image_digest: sha256:6f225384747616d0311414c08c665c66a2b9b2fba7b6e4a7655e64a65b27f2db
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}

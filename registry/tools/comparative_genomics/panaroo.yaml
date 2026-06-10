@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/panaroo:1.5.0--pyhdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:f0a005e178530481ed53434f4b3bf27326c90a725481ce395ea5e1de1e6c42b2
 resources:
-  min:         { cpu: 4,  ram_gb: 16, disk_gb: 50 }
-  recommended: { cpu: 16, ram_gb: 64, disk_gb: 200 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0
   pull_policy: if_not_present
+  image_digest: sha256:2aefc5d5897d9f6400541767714ee15389f89e7a8beca0b13ccab916ab58dc31
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}

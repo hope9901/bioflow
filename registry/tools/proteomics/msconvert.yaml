@@ -12,6 +12,7 @@ applicable:
 container:
   image: chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest
   pull_policy: if_not_present
+  image_digest: sha256:52d830174eec595fc9fb17628effbbacec8b931fc13620a87fb44c77263daaef
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 50}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 200}

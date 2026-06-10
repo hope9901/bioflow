@@ -10,11 +10,12 @@ applicable:
   read_type: [long_ont, long_hifi]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/nextdenovo:2.5.2--py39h2add14b_3
+  image: quay.io/biocontainers/nextdenovo:2.5.2--py311hc29ee83_7
   pull_policy: if_not_present
+  image_digest: sha256:32180f4c243488f70e1e11393d86fa99f4f5ea0b5a0b7d8c770b3f9a9dbe191a
 resources:
-  min:         { cpu: 16, ram_gb: 64,  disk_gb: 200 }
-  recommended: { cpu: 64, ram_gb: 256, disk_gb: 1000 }
+  min: {cpu: 16, ram_gb: 64, disk_gb: 200}
+  recommended: {cpu: 64, ram_gb: 256, disk_gb: 1000}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

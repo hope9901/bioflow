@@ -12,9 +12,10 @@ applicable:
 container:
   image: dfam/tetools:1.89
   pull_policy: if_not_present
+  image_digest: sha256:f60775010b4dfee18a92aea9191f66cd727d9764c5ba6142e03d3f7719604c28
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 30 }
-  recommended: { cpu: 32, ram_gb: 64,  disk_gb: 100 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

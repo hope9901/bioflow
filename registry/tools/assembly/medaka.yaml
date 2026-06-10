@@ -10,11 +10,12 @@ applicable:
   read_type: [long_ont]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_2
+  image: quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0
   pull_policy: if_not_present
+  image_digest: sha256:ac4af46fe8046c60f78f72aad077e445319d1b8b985288e9460ae5fbe846c326
 resources:
-  min:         { cpu: 4,  ram_gb: 16, disk_gb: 30 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 100 }
+  min: {cpu: 4, ram_gb: 16, disk_gb: 30}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
   gpu: true
   arch: [x86_64, amd64]
 command_template: |

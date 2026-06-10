@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/cafe:5.1.0--h5ca1c30_1
   pull_policy: if_not_present
+  image_digest: sha256:67eefda842049ac5c39247e26c78698b11e6c77c549785133726fe7d845a01da
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 2}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}

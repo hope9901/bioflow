@@ -10,11 +10,12 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/salmon:1.10.3--hb950928_0
+  image: quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5
   pull_policy: if_not_present
+  image_digest: sha256:3938cc6dfaca6f7ee14eac0cdc0f305fdff8faa7f14541c72e684feb1b443a74
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 30 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 30}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

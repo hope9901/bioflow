@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/hisat2:2.2.1--h87f3376_4
   pull_policy: if_not_present
+  image_digest: sha256:21be9c91bf66404e677bc2c70e986e39ce9a40e7950d5034e3561bb992e82ec6
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 10 }
-  recommended: { cpu: 16, ram_gb: 32, disk_gb: 50 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

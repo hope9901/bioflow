@@ -10,11 +10,12 @@ applicable:
   read_type: [long_ont, long_hifi]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/flye:2.9.5--py39h3d6084e_1
+  image: quay.io/biocontainers/flye:2.9.5--py310h275bdba_2
   pull_policy: if_not_present
+  image_digest: sha256:961ee8afc44267dfafd63e5f945ab7333f7a1ce7d290d7e8bdae76a84f2b5fbe
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
-  recommended: { cpu: 32, ram_gb: 128, disk_gb: 300 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 300}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

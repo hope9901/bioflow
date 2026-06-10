@@ -10,11 +10,12 @@ applicable:
   read_type: [long_hifi, long_ont]
   mode: [any]
 container:
-  image: quay.io/biocontainers/filtlong:0.2.1--h9a82719_1
+  image: quay.io/biocontainers/filtlong:0.2.1--hdcf5f25_4
   pull_policy: if_not_present
+  image_digest: sha256:e6038605a5d350d0c20e798aa20e4de27018dd5b4db9d9cd3586393d805ea782
 resources:
-  min:         { cpu: 1, ram_gb: 4,  disk_gb: 5 }
-  recommended: { cpu: 4, ram_gb: 16, disk_gb: 20 }
+  min: {cpu: 1, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 4, ram_gb: 16, disk_gb: 20}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

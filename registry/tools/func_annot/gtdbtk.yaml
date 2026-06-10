@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/gtdbtk:2.4.0--pyhdfd78af_1
   pull_policy: if_not_present
+  image_digest: sha256:c2de30bd02c2be74e607ce3ca98ad1bd88a1eafaa0c805f507efd77171f8e5d7
 resources:
-  min:         { cpu: 8,  ram_gb: 32, disk_gb: 100 }
-  recommended: { cpu: 32, ram_gb: 128, disk_gb: 500 }
+  min: {cpu: 8, ram_gb: 32, disk_gb: 100}
+  recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

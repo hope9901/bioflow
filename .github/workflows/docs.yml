@@ -26,6 +26,11 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# Opt into the Node 24 runtime ahead of the 2026-06-16 forced switch so
+# the v3/v4/v5 actions stop emitting Node 20 deprecation warnings.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -12,9 +12,10 @@ applicable:
 container:
   image: quay.io/biocontainers/racon:1.5.0--h21ec9f0_2
   pull_policy: if_not_present
+  image_digest: sha256:1f8ba10982e9e534dfcdca612f330f08979ad5a146aac3ca1b1af7df29599130
 resources:
-  min:         { cpu: 4,  ram_gb: 8,  disk_gb: 20 }
-  recommended: { cpu: 32, ram_gb: 64, disk_gb: 100 }
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 100}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

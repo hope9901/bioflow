@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/star:2.7.11b--h43eeafb_0
   pull_policy: if_not_present
+  image_digest: sha256:a9c99039aaba7a6d903cd1cfba55aeaddeca889f10d60397cdb4dd7d9642da99
 resources:
   min: {cpu: 16, ram_gb: 32, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 64, disk_gb: 200}

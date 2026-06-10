@@ -33,7 +33,7 @@ def read_qc(long_reads: Path, *, out_dir):
     return f"NanoPlot --fastq {long_reads} -o {out_dir} -t 4"
 
 
-@stage(image="quay.io/biocontainers/flye:2.9.5--py39h3d6084e_1",
+@stage(image="quay.io/biocontainers/flye:2.9.5--py310h275bdba_2",
        cpu=16, ram_gb=64, depends_on=read_qc,
        retry=2, retry_with={"ram_gb": "2x"})
 def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
@@ -44,7 +44,7 @@ def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
     )
 
 
-@stage(image="quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_2",
+@stage(image="quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0",
        cpu=8, ram_gb=32, depends_on=assemble)
 def polish(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400bps_sup_v5.0.0"):
     """Medaka ONT consensus polish of the Flye assembly."""

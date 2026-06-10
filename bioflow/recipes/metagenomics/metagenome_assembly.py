@@ -65,7 +65,7 @@ def map_back(asm, clean, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/metabat2:2.17--h4da6f23_2",
+@stage(image="quay.io/biocontainers/metabat2:2.17--h6f16272_1",
        cpu=8, ram_gb=32, depends_on=map_back)
 def bin_genomes(mapped, asm, *, out_dir):
     """MetaBAT2 genome binning from contig coverage."""

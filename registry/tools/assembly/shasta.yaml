@@ -10,11 +10,12 @@ applicable:
   read_type: [long_ont]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/shasta:0.11.1--h9948957_2
+  image: quay.io/biocontainers/shasta:0.11.1--h4ac6f70_2
   pull_policy: if_not_present
+  image_digest: sha256:687879ecbac3447ed54b458343fa77ae1a2ec6cc12a2dd013db6979526e7007b
 resources:
-  min:         { cpu: 16, ram_gb: 64,  disk_gb: 200 }
-  recommended: { cpu: 64, ram_gb: 512, disk_gb: 2000 }
+  min: {cpu: 16, ram_gb: 64, disk_gb: 200}
+  recommended: {cpu: 64, ram_gb: 512, disk_gb: 2000}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

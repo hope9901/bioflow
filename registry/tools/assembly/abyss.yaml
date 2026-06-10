@@ -10,11 +10,12 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/abyss:2.3.7--he4a0461_2
+  image: quay.io/biocontainers/abyss:2.3.7--h103dbdd_4
   pull_policy: if_not_present
+  image_digest: sha256:4835f67c19770380934e926f46773ec55eaa796e47b6c627d9f6a8176afd6682
 resources:
-  min:         { cpu: 8,  ram_gb: 16,  disk_gb: 50 }
-  recommended: { cpu: 64, ram_gb: 256, disk_gb: 1000 }
+  min: {cpu: 8, ram_gb: 16, disk_gb: 50}
+  recommended: {cpu: 64, ram_gb: 256, disk_gb: 1000}
   gpu: false
   arch: [x86_64, amd64]
 command_template: |

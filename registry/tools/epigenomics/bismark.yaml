@@ -12,6 +12,7 @@ applicable:
 container:
   image: quay.io/biocontainers/bismark:0.24.2--hdfd78af_0
   pull_policy: if_not_present
+  image_digest: sha256:b06de320ad1ac9057e404105eac58587e2d5f076b62f146c11259dadfe07e20f
 resources:
   min: {cpu: 8, ram_gb: 32, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
