@@ -94,6 +94,10 @@ def recipe_cmd(
         help="NCBI cog-24.def.tab (cog_enrichment)."),
     dry_run: bool = typer.Option(False, "--dry-run",
         help="Print the DAG without running."),
+    provenance: bool = typer.Option(True, "--provenance/--no-provenance",
+        help="Record run provenance (input SHA-256, image digests, "
+             "commands, timestamps) and write provenance.json + "
+             "ro-crate-metadata.json into the workspace."),
 ) -> None:
     """Curated end-to-end pipelines (the Tier-B entry point).
 
@@ -198,11 +202,29 @@ def recipe_cmd(
             )
             raise typer.Exit(code=1)
 
+        from bioflow.core import provenance as _prov  # noqa: PLC0415
+
+        recorder = None
+        if provenance:
+            recorder = _prov.ProvenanceRecorder(pipeline=name, workspace=out)
+            _prov.set_recorder(recorder)
+
         try:
             result = pipe(**kwargs)
         except Exception as exc:
             rprint(f"[red]Recipe failed:[/] {exc}")
+            if recorder is not None:
+                written = _prov.write_all(recorder)
+                _prov.set_recorder(None)
+                for w in written:
+                    rprint(f"[dim]  provenance → {w}[/]")
             raise typer.Exit(code=1)
+
+        if recorder is not None:
+            written = _prov.write_all(recorder)
+            _prov.set_recorder(None)
+            for w in written:
+                rprint(f"[dim]  provenance → {w.name}[/]")
 
         rprint(f"\n[green]✓ Recipe done.[/]  result.out_dir = {getattr(result, 'out_dir', '?')}")
         return

@@ -335,7 +335,48 @@ behavioural changes.
 
 ---
 
-## Part 6 · What this guide intentionally does NOT cover
+## Part 7 · Publishing to Bioconda
+
+Most bioinformaticians install via conda/mamba, not pip, so a Bioconda
+package widens reach substantially.  The recipe lives at
+[`conda-recipe/meta.yaml`](../conda-recipe/meta.yaml); it is a
+`noarch: python` package (the actual tools run as Docker containers, so
+only bioflow's small pure-Python stack is a conda dependency).
+
+**Prerequisite**: bioflowkit must already be live on **real PyPI** — the
+recipe's `source.url` points at the PyPI sdist, and Bioconda's CI
+downloads it.
+
+Submission steps:
+
+1. Get the sdist sha256 from PyPI:
+   ```bash
+   pip download bioflowkit==X.Y.Z --no-deps --no-binary :all: -d /tmp/bf
+   sha256sum /tmp/bf/bioflowkit-X.Y.Z.tar.gz
+   ```
+2. Fork https://github.com/bioconda/bioconda-recipes and copy the recipe:
+   ```bash
+   mkdir -p recipes/bioflowkit
+   cp <bioflow>/conda-recipe/meta.yaml recipes/bioflowkit/meta.yaml
+   # paste the sha256 into the `source.sha256` field
+   ```
+3. (Optional) lint + build locally with the bioconda toolchain:
+   ```bash
+   conda install -c bioconda -c conda-forge bioconda-utils
+   bioconda-utils lint recipes config.yml --packages bioflowkit
+   bioconda-utils build recipes config.yml --packages bioflowkit
+   ```
+4. Open a PR to bioconda-recipes.  Their CI builds + tests it; once a
+   maintainer merges, the package auto-publishes to the `bioconda`
+   channel within ~an hour.
+
+For subsequent version bumps Bioconda's auto-bump bot usually opens the
+PR for you once the new PyPI release is detected — you just review and
+merge.
+
+---
+
+## Part 8 · What this guide intentionally does NOT cover
 
 These are out of scope for bioflow itself — use the right OS / cloud
 primitive instead:

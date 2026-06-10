@@ -14,6 +14,29 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — run provenance (RO-Crate + PROV-style JSON)
+- `bioflow/core/provenance.py` (new): every recipe run records, per
+  stage, the container **image + content digest**, the exact
+  **command**, every **input file's SHA-256 + size**, **start/end**
+  timestamps, exit code, and the bioflow version.
+- At the end of a run the workspace gains two self-describing files:
+  - `provenance.json` — flat, human-readable run record
+  - `ro-crate-metadata.json` — an [RO-Crate 1.1](https://www.researchobject.org/ro-crate/)
+    research object (the de-facto packaging standard for computational
+    workflow runs), so the output directory is consumable by reviewers
+    and downstream tools directly.
+- Wired into `bioflow recipe run` (on by default; `--no-provenance` to
+  skip).  Opt-in and **zero-cost when off** — the SDK hot path pays
+  nothing unless a recorder is installed, and provenance errors degrade
+  to warnings rather than aborting the science.
+- New `bioflow provenance show <workspace>` command (+ `--json`) renders
+  the recorded run: per-stage image, pinned digest, exit status, and
+  input hashes.  Builds directly on the digest-pinning work — pinned
+  tools show their `sha256:…` in the provenance.
+- Tests: +14 (`tests/unit/test_provenance.py`); verified end-to-end
+  against real Docker (digest resolved from the local image, RO-Crate
+  validates structurally).
+
 ### Fixed — registry freshness (stale BioContainer tags)
 - **Discovery**: an audit during digest-pinning found that ~half the
   registry's `quay.io/biocontainers/*` image tags had 404'd.  Quay
@@ -39,6 +62,12 @@ ship bug fixes only.  Breaking changes to the documented public API
   (`scripts/pin_digests.py`).  The remaining 17 are BioConductor R
   packages and Docker Hub images whose pinned version has left Quay and
   needs a manual version bump (tracked separately).
+
+### Added — Bioconda recipe (prep)
+- `conda-recipe/meta.yaml`: noarch-python Bioconda recipe (only
+  bioflow's pure-Python stack is a conda dep; tools run as Docker
+  containers).  Submission walkthrough in `docs/MAINTAINER.md` Part 7.
+  Gated on the real-PyPI publish (the recipe sources the PyPI sdist).
 
 ### Changed — CI
 - All workflows opt into the Node 24 runtime

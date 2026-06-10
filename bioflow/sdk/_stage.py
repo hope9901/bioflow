@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Optional, Union
 
+from bioflow.core import provenance as _prov
 from bioflow.core.logger import get_logger
 from bioflow.core.runner import CommandResult
 
@@ -86,6 +87,7 @@ class Stage:
 
     def _run_once(self, args: tuple, kwargs: dict) -> StageResult:
         workspace = _get_workspace()
+        started_at = _prov._now_iso()
 
         # ------------------------- cache lookup -------------------------
         cache_key = ""
@@ -98,6 +100,12 @@ class Stage:
             if sentinel.exists():
                 log.info(
                     f"CACHE HIT  stage={self.name}  key={cache_key[:8]}"
+                )
+                _prov.record_stage(
+                    name=self.name, image=self.image, command="(cached)",
+                    exit_code=0, cached=True, out_dir=cache_dir,
+                    started_at=started_at, ended_at=_prov._now_iso(),
+                    args=args, kwargs=kwargs,
                 )
                 return StageResult(
                     stage=self.name,
@@ -197,6 +205,12 @@ class Stage:
             stderr=result.stderr,
             cached=False,
             cache_key=cache_key,
+        )
+        _prov.record_stage(
+            name=self.name, image=self.image, command=translated,
+            exit_code=result.exit_code, cached=False, out_dir=out_dir,
+            started_at=started_at, ended_at=_prov._now_iso(),
+            args=args, kwargs=kwargs, backend=backend,
         )
         if sr.ok:
             log.info(f"DONE stage={self.name}  out_dir={out_dir.name}")

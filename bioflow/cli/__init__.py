@@ -18,6 +18,7 @@ Subcommands (MVP scope):
   bioflow update        Run the monthly registry update workflow.
   bioflow ncbi          Search / download genomes & proteins from NCBI.
   bioflow recipe        List or run a curated end-to-end recipe.
+  bioflow provenance    Inspect a recipe run's recorded provenance.
   bioflow llm           Opt-in LLM companion (explain / diagnose / …).
   bioflow setup         First-time LLM backend wizard.
 """
@@ -33,6 +34,7 @@ from bioflow.cli import (  # noqa: F401,E402
     llm,
     ncbi,
     pipelines,
+    provenance,
     recipe,
     setup,
     update,

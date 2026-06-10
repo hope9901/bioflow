@@ -34,6 +34,10 @@ and a privacy-first LLM companion is available when you want it.
   `runnable_slow` / `incompatible` against your CPU / RAM / GPU / arch.
 - **Input-hash caching**: re-running a recipe with unchanged inputs
   returns in seconds.
+- **Run provenance**: every recipe writes `provenance.json` +
+  `ro-crate-metadata.json` recording input SHA-256, container image
+  digests, commands, and timestamps — a self-describing research object
+  for reproducibility and journal submission.  `--no-provenance` to skip.
 - **Privacy-first LLM companion** (optional): terminology Q&A, sanitized
   error diagnosis, tool-registration assist.  Disabled by default.
 
