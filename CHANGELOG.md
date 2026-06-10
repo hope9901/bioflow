@@ -14,6 +14,22 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — `joint_genotyping` recipe (GATK cohort best practice)
+- New 7-stage recipe (`bioflow/recipes/variant_calling/joint_genotyping.py`)
+  implementing the canonical GATK **joint-genotyping** workflow for
+  cohorts, where `germline_variants` only does single-sample direct
+  calling:
+  - **per sample (fan-out)**: fastp → BWA-MEM → MarkDuplicates →
+    HaplotypeCaller `-ERC GVCF`
+  - **cohort (converge)**: CombineGVCFs → GenotypeGVCFs →
+    best-practice hard filtering (separate SNP / INDEL filters) → SnpEff
+- Takes a `sample_id,fastq_r1,fastq_r2` sample sheet and uses `.starmap`
+  to run the per-sample stages in parallel before converging on the
+  joint steps — the production pattern reviewers expect for population
+  and family studies, and a worked example of bioflow's fan-out.
+- Recipe count 19 → 20 (12 per-pipeline).  Tests: +3 (registration, DAG
+  shape, MockBackend e2e).
+
 ### Added — run provenance (RO-Crate + PROV-style JSON)
 - `bioflow/core/provenance.py` (new): every recipe run records, per
   stage, the container **image + content digest**, the exact

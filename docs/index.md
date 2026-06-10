@@ -13,10 +13,11 @@ privacy-first LLM companion is available when you want it.
 
 ## What you get
 
-- **19 cookbook recipes** invokable as one-liners — assembly (prokaryote
+- **20 cookbook recipes** invokable as one-liners — assembly (prokaryote
   short-read + eukaryote long-read), RNA-seq DEG, metagenomics
   (profiling + assembly/binning), scRNA-seq, ChIP-seq, ATAC-seq,
-  bisulfite methylation, LC-MS/MS proteomics, **variant calling**, and 8
+  bisulfite methylation, LC-MS/MS proteomics, **variant calling**
+  (single-sample + GATK cohort joint genotyping), and 8
   comparative-genomics analyses.
 - **110 tools** registered across 16 categories, all pulled as
   BioContainer images at run time — nothing to install on the host

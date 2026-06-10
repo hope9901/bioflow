@@ -19,14 +19,14 @@ and a privacy-first LLM companion is available when you want it.
 
 ## What you get
 
-- **19 cookbook recipes** invokable as one-liners:
+- **20 cookbook recipes** invokable as one-liners:
   - *Comparative genomics (8)*: pangenome, ANI, phylogeny, GWAS,
     gene-family evolution, AMR/VF catalogue, COG enrichment, NCBI
     download.
-  - *Per-pipeline (11)*: prokaryote_assembly, eukaryote_assembly,
+  - *Per-pipeline (12)*: prokaryote_assembly, eukaryote_assembly,
     rnaseq_deg, metagenomics_profile, metagenome_assembly, scrna_seq,
     chip_seq, atac_seq, methylation_wgbs, proteomics_dda,
-    germline_variants.
+    germline_variants, joint_genotyping (GATK cohort best practice).
 - **110 tools** registered across 16 categories, all pulled as
   BioContainer images at run time — nothing to install on the host
   beyond Docker + Python.

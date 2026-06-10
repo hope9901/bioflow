@@ -78,3 +78,4 @@ from bioflow.recipes.epigenomics import atac_seq as _atac                  # noq
 from bioflow.recipes.methylation import bismark_wgbs as _methyl            # noqa
 from bioflow.recipes.proteomics import proteomics_dda as _prot             # noqa
 from bioflow.recipes.variant_calling import germline_variants as _gvar     # noqa
+from bioflow.recipes.variant_calling import joint_genotyping as _joint     # noqa

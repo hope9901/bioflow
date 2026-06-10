@@ -24,6 +24,7 @@ EXPECTED_RECIPES = {
     "methylation_wgbs":     3,   # trim → bismark → methylkit
     "proteomics_dda":       3,   # msconvert → comet → percolator
     "germline_variants":    5,   # fastp → bwa → gatk → bcftools → snpeff
+    "joint_genotyping":     7,   # cohort: qc → align → gvcf → combine → genotype → filter → snpeff
 }
 
 
@@ -50,11 +51,11 @@ class TestPerPipelineRegistry:
 
 
 class TestRegistryTotal:
-    """8 comparative genomics + 11 per-pipeline = 19 recipes."""
+    """8 comparative genomics + 12 per-pipeline = 20 recipes."""
 
     def test_total_recipe_count(self):
         registered = set(names())
-        assert len(registered) >= 19, (
-            f"Expected ≥19 recipes, got {len(registered)}: "
+        assert len(registered) >= 20, (
+            f"Expected ≥20 recipes, got {len(registered)}: "
             f"{sorted(registered)}"
         )

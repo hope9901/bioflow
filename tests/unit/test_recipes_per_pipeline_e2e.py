@@ -70,6 +70,25 @@ class TestExecution:
         )
         assert result.ok
 
+    def test_joint_genotyping_runs(self, tmp_path):
+        """Cohort joint genotyping: fan-out per sample → converge."""
+        d = tmp_path / "reads"; d.mkdir()
+        rows = ["sample_id,fastq_r1,fastq_r2"]
+        for s in ("s1", "s2", "s3"):
+            r1 = d / f"{s}_R1.fq.gz"; r1.write_text("@x", encoding="utf-8")
+            r2 = d / f"{s}_R2.fq.gz"; r2.write_text("@x", encoding="utf-8")
+            rows.append(f"{s},{r1},{r2}")
+        sheet = tmp_path / "cohort.csv"
+        sheet.write_text("\n".join(rows) + "\n", encoding="utf-8")
+        ref = tmp_path / "ref.fa"
+        ref.write_text(">chr1\nACGTACGTACGT\n", encoding="utf-8")
+
+        result = get("joint_genotyping")(
+            sample_sheet=sheet, reference=ref, snpeff_db="test_db",
+            out_dir=tmp_path / "out",
+        )
+        assert result.ok
+
     def test_rnaseq_deg_runs(self, tmp_path):
         d = tmp_path / "reads"
         d.mkdir()
