@@ -26,6 +26,16 @@ ship bug fixes only.  Breaking changes to the documented public API
   refgenie can see which existing assets satisfy a bioflow requirement.
 - Tests: +5 (`tests/unit/test_db.py`).
 
+### Added — rnaseq_deg depth: GO enrichment + MultiQC
+- `rnaseq_deg` extended from 4 → 6 stages:
+  - **`enrich_go`** — GO enrichment on the significant DEGs via gseapy's
+    Enrichr query.  Symbol-based, so no organism-specific OrgDb package
+    is needed; an awk numeric-regex guard on the `padj` column avoids the
+    classic "NA-treated-as-0" false positive.
+  - **`multiqc_report`** — aggregates every per-sample fastp + Salmon
+    report into a single MultiQC HTML.
+- DAG-shape test updated; recipe still runs end-to-end under MockBackend.
+
 ### Added — `joint_genotyping` recipe (GATK cohort best practice)
 - New 7-stage recipe (`bioflow/recipes/variant_calling/joint_genotyping.py`)
   implementing the canonical GATK **joint-genotyping** workflow for

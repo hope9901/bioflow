@@ -96,6 +96,42 @@ def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
     )
 
 
+@stage(image="quay.io/biocontainers/gseapy:1.1.3--py311h5e00ca1_1",
+       cpu=2, ram_gb=4, depends_on=deseq2_diff)
+def enrich_go(deg, *, out_dir, gene_set: str = "GO_Biological_Process_2021",
+              padj_cutoff: float = 0.05):
+    """GO enrichment (Enrichr via gseapy) on the significant DEGs.
+
+    Symbol-based Enrichr query, so no organism-specific OrgDb package is
+    needed (works for any species Enrichr covers).  Pulls the gene IDs
+    from column 1 of ``deg_results.csv`` where ``padj`` (column 7) is
+    below *padj_cutoff*.
+    """
+    deg_csv = f"{deg.out_dir}/deg_results.csv"
+    # awk numeric-regex guard on column 7 (padj): only rows whose padj is
+    # an actual number below the cutoff pass.  Avoids a string literal in
+    # the awk program (so no nested-quote breakage) and the classic
+    # "NA"-treated-as-0 false positive.
+    return (
+        f"bash -c '"
+        f"awk -F, \"NR>1 && \\$7 ~ /^[0-9.eE+-]+\\$/ && \\$7 < {padj_cutoff} "
+        f"{{print \\$1}}\" {deg_csv} > {out_dir}/sig_genes.txt && "
+        f"gseapy enrichr -i {out_dir}/sig_genes.txt "
+        f"-g {gene_set} -o {out_dir}/enrichr || "
+        f"echo no significant genes or Enrichr unavailable'"
+    )
+
+
+@stage(image="quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0",
+       cpu=2, ram_gb=4)
+def multiqc_report(qc_results, quant_results, *, out_dir):
+    """Aggregate every per-sample fastp + Salmon report into one MultiQC HTML."""
+    search = " ".join(
+        str(r.out_dir) for r in list(qc_results) + list(quant_results)
+    )
+    return f"multiqc {search} -o {out_dir} -n multiqc_report"
+
+
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path, str]]:
@@ -120,8 +156,9 @@ def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path, str]]:
 
 
 @pipeline(
-    stages=[qc_one, salmon_index, salmon_quant, deseq2_diff],
-    description="RNA-seq DEG: fastp → Salmon → DESeq2",
+    stages=[qc_one, salmon_index, salmon_quant, deseq2_diff,
+            enrich_go, multiqc_report],
+    description="RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC",
 )
 def rnaseq_deg(
     sample_sheet: Path,
@@ -159,7 +196,15 @@ def rnaseq_deg(
     )
 
     # 4. DESeq2 on the assembled quants
-    return deseq2_diff(quant_results, Path(sample_sheet))
+    deg = deseq2_diff(quant_results, Path(sample_sheet))
+
+    # 5. GO enrichment on the significant DEGs (Enrichr via gseapy)
+    enrich = enrich_go(deg)
+
+    # 6. Aggregate every QC report into a single MultiQC HTML
+    multiqc_report(qc_results, quant_results)
+
+    return enrich
 
 
 register("rnaseq_deg", rnaseq_deg)

@@ -15,7 +15,7 @@ from bioflow.recipes import get, names
 EXPECTED_RECIPES = {
     "prokaryote_assembly":  4,   # fastp → spades → quast → prokka
     "eukaryote_assembly":   4,   # nanoplot → flye → medaka → compleasm
-    "rnaseq_deg":           4,   # fastp → salmon_index → salmon_quant → deseq2
+    "rnaseq_deg":           6,   # fastp → salmon_index → salmon_quant → deseq2 → enrich → multiqc
     "metagenomics_profile": 3,   # fastp → kraken2 → bracken
     "metagenome_assembly":  5,   # fastp → megahit → minimap2 → metabat2 → checkm2
     "scrna_seq":            2,   # starsolo → scanpy
