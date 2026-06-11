@@ -14,6 +14,23 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — nf-core concordance benchmark (harness + methodology)
+- `scripts/compare_nfcore.py` (new, stdlib-only): scores agreement
+  between a bioflow output and the matching nf-core output —
+  **Jaccard + genotype concordance** on normalised VCF sites
+  (vs nf-core/sarek), and **Spearman ρ** of per-gene counts
+  (vs nf-core/rnaseq).  Optional `--min-jaccard` / `--min-rho` gate for
+  CI.
+- `docs/benchmarks/nfcore-concordance.md`: golden datasets
+  (GIAB HG002 chr20; nf-core/rnaseq chr22), method, and initial
+  acceptance thresholds.
+- `.github/workflows/nfcore-concordance.yml`: manually-dispatched job
+  (not a per-PR gate — a full run needs staged references).
+- Honesty note: bioflow ships the *scoring* half (committed + tested);
+  the *production* half (running both pipelines on a machine with the
+  references) is operator-run and documented.
+- Tests: +13 (`tests/unit/test_compare_nfcore.py`).
+
 ### Added — GPU passthrough + Podman runtime
 - `@stage(..., gpu=True)` (and a tool YAML's `resources.gpu`) now attach
   all host GPUs to that stage's container via a Docker `DeviceRequest`

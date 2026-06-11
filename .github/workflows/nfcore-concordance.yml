@@ -1,0 +1,75 @@
+name: nf-core concordance
+
+# Manually-dispatched concordance benchmark: run bioflow and the matching
+# nf-core pipeline on a golden dataset, then score their agreement with
+# scripts/compare_nfcore.py.
+#
+# This is NOT a per-PR gate.  A real run needs tens of GB of references
+# and hours of compute, so it expects a runner that already has them
+# staged (a self-hosted runner, or a large GitHub runner the maintainer
+# provisions).  It is run deliberately before a release and its JSON
+# output is published with the release notes.
+#
+# See docs/benchmarks/nfcore-concordance.md for the datasets, method, and
+# acceptance thresholds.
+
+on:
+  workflow_dispatch:
+    inputs:
+      comparison:
+        description: "Which comparison to run"
+        type: choice
+        options: [vcf, counts]
+        default: vcf
+      bioflow_output:
+        description: "Path to the bioflow output (VCF or counts TSV) on the runner"
+        required: true
+      reference_output:
+        description: "Path to the nf-core output on the runner"
+        required: true
+      threshold:
+        description: "Min Jaccard (vcf) or Spearman rho (counts) to pass"
+        required: false
+        default: "0.90"
+
+# Opt into the Node 24 runtime ahead of the 2026-06-16 forced switch.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  score:
+    name: Score concordance
+    # The default GitHub runner cannot hold iGenomes references; point this
+    # at a self-hosted runner that has them staged.  Left as ubuntu-latest
+    # so the workflow is valid and the *scoring* step is exercisable on
+    # pre-staged outputs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Score bioflow vs nf-core
+        run: |
+          if [ "${{ inputs.comparison }}" = "vcf" ]; then
+            python scripts/compare_nfcore.py vcf \
+              --bioflow "${{ inputs.bioflow_output }}" \
+              --reference "${{ inputs.reference_output }}" \
+              --out concordance.json \
+              --min-jaccard "${{ inputs.threshold }}"
+          else
+            python scripts/compare_nfcore.py counts \
+              --bioflow "${{ inputs.bioflow_output }}" \
+              --reference "${{ inputs.reference_output }}" \
+              --out concordance.json \
+              --min-rho "${{ inputs.threshold }}"
+          fi
+
+      - name: Upload concordance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfcore-concordance
+          path: concordance.json

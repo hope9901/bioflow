@@ -53,6 +53,8 @@ nav:
       - Recipes: reference/recipes.md
       - Tools: reference/tools.md
   - Architecture: architecture.md
+  - Benchmarks:
+      - nf-core concordance: benchmarks/nfcore-concordance.md
   - Maintainer:
       - Guide: MAINTAINER.md
       - Update cadences: maintainer/UPDATE_CADENCES.md
