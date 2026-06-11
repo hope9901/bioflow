@@ -188,7 +188,7 @@ def retry(
                     delay *= backoff
             assert last_exc is not None
             raise last_exc
-        wrapper.__wrapped__ = fn   # so functools.wraps-style intros work
+        wrapper.__wrapped__ = fn   # type: ignore[attr-defined]  # functools.wraps-style intros
         wrapper.__name__ = getattr(fn, "__name__", "retry_wrapper")
         wrapper.__doc__ = getattr(fn, "__doc__", None)
         return wrapper

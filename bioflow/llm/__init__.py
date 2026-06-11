@@ -504,7 +504,8 @@ def _call_anthropic(prompt: dict, *, max_tokens: int) -> str:
         )
     except Exception as exc:
         raise LlmError(f"anthropic call failed: {exc}") from exc
-    text = msg.content[0].text.strip()
+    # content[0] is a union of block types; only TextBlock carries .text.
+    text = getattr(msg.content[0], "text", "").strip()
     # Actual token counts from the API (when available); fall back to
     # the cheap estimator if the SDK didn't surface usage (or it's a
     # MagicMock in a unit test).
@@ -532,7 +533,7 @@ def _call_openai(prompt: dict, *, max_tokens: int) -> str:
             "OPENAI_API_KEY env var not set; cannot use openai backend."
         )
     try:
-        from openai import OpenAI   # type: ignore[import-not-found]
+        from openai import OpenAI   # type: ignore[import-not-found,attr-defined]
     except ImportError as exc:
         raise LlmError(
             "Install the `openai` package: pip install openai"

@@ -45,7 +45,10 @@ import urllib.request
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Callable, Optional, Sequence
+
+if TYPE_CHECKING:
+    from rich.progress import TaskID
 
 from bioflow.core.logger import get_logger
 
@@ -283,7 +286,7 @@ class _RichBytesBar:
             TimeElapsedColumn(),
         )
         self._desc = description
-        self._task = None
+        self._task: Optional["TaskID"] = None
 
     def __enter__(self):
         self._prog.__enter__()
@@ -294,6 +297,8 @@ class _RichBytesBar:
         self._prog.__exit__(*args)
 
     def update_bytes(self, written: int, total: Optional[int]) -> None:
+        if self._task is None:
+            return
         self._prog.update(self._task, completed=written, total=total)
 
     def update_count(self, done: int) -> None:
@@ -315,7 +320,7 @@ class _RichCountBar:
         )
         self._desc = description
         self._total = total
-        self._task = None
+        self._task: Optional["TaskID"] = None
 
     def __enter__(self):
         self._prog.__enter__()
@@ -329,6 +334,8 @@ class _RichCountBar:
         pass
 
     def update_count(self, done: int) -> None:
+        if self._task is None:
+            return
         self._prog.update(self._task, completed=done)
 
 

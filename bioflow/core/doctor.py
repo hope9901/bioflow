@@ -57,7 +57,7 @@ class CheckResult:
     detail: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
-        d = {"name": self.name, "status": self.status, "message": self.message}
+        d: dict = {"name": self.name, "status": self.status, "message": self.message}
         if self.fix:
             d["fix"] = self.fix
         if self.detail:

@@ -27,7 +27,10 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Callable, Optional, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
+    from rich.progress import TaskID
 
 from bioflow.core.checkpoint import (
     load as _load_state,
@@ -153,9 +156,9 @@ class DockerBackend:
             or os.environ.get("DOCKER_HOST")
         )
         if url:
-            self.client = docker.DockerClient(base_url=url)
+            self.client = docker.DockerClient(base_url=url)  # type: ignore[attr-defined]
         else:
-            self.client = docker.from_env()
+            self.client = docker.from_env()  # type: ignore[attr-defined]
         self.runtime = os.environ.get("BIOFLOW_CONTAINER_RUNTIME", "docker")
 
     def _gpu_device_requests(self):
@@ -263,23 +266,27 @@ class _RichProgress:
             TimeElapsedColumn(),
         )
         self._total = total
-        self._task_id = None
+        self._task_id: Optional["TaskID"] = None
 
     def __enter__(self) -> "_RichProgress":
         self._prog.__enter__()
         self._task_id = self._prog.add_task("Initialising…", total=self._total)
         return self
 
-    def __exit__(self, *args: object) -> None:
+    def __exit__(self, *args) -> None:
         self._prog.__exit__(*args)
 
     def update_stage(self, stage_id: str, tool_id: str) -> None:
+        if self._task_id is None:
+            return
         self._prog.update(
             self._task_id,
             description=f"[{stage_id}]  {tool_id}",
         )
 
     def mark_done(self, failed: bool = False) -> None:
+        if self._task_id is None:
+            return
         if failed:
             self._prog.update(self._task_id, description="[red]FAILED")
         else:

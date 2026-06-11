@@ -52,12 +52,11 @@ jobs:
         run: ruff check .
 
   typecheck:
-    # Advisory only — mypy issues do not block merging.  Provides
-    # visibility while we gradually add type annotations.  Will be
-    # upgraded to a blocking check when the error count reaches 0.
-    name: Type check (mypy, advisory)
+    # Blocking: the bioflow package type-checks clean under mypy
+    # (--ignore-missing-imports for the un-stubbed docker / anthropic /
+    # openai SDKs).  Keep it that way — a new type error fails CI.
+    name: Type check (mypy)
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +70,7 @@ jobs:
         run: pip install -e ".[dev]" && pip install types-PyYAML types-requests
 
       - name: Run mypy
-        run: mypy bioflow --ignore-missing-imports || true
+        run: mypy bioflow --ignore-missing-imports
 
   registry-schema:
     name: Validate registry YAMLs

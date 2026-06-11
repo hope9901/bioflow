@@ -175,7 +175,7 @@ class Stage:
             )
             mounts = {str(workspace): str(_CONTAINER_WORKSPACE)}
             mounts.update(ext_mounts)
-            run_kw = dict(
+            run_kw: dict[str, Any] = dict(
                 image=self.image,
                 command=translated,
                 mounts=mounts,

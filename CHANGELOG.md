@@ -14,6 +14,15 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Changed — mypy type-checking is now blocking
+- Fixed all 33 mypy errors across 7 modules (Rich `TaskID` optionals in
+  the progress bars, `dict[str, Any]` run kwargs, anthropic/openai/docker
+  SDK union + missing-stub noise, a loop-variable shadow in
+  `cli/update.py`).  `mypy bioflow --ignore-missing-imports` now reports
+  **0 errors**.
+- CI's `typecheck` job drops `continue-on-error` — a new type error now
+  fails the build, closing the "advisory only" gap.
+
 ### Added — nf-core concordance benchmark (harness + methodology)
 - `scripts/compare_nfcore.py` (new, stdlib-only): scores agreement
   between a bioflow output and the matching nf-core output —

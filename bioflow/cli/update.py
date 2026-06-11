@@ -154,14 +154,15 @@ def update_cmd(
 
         # Walk every */ subdir under update/candidates/ — Deep Research
         # drops monthly batches under update/candidates/<YYYY-MM>/
-        root_dirs = [candidates_dir] if candidates_dir else [
-            Path("update/candidates"),
-        ]
+        root_dirs: list[Path] = (
+            [candidates_dir] if candidates_dir is not None
+            else [Path("update/candidates")]
+        )
         all_paths: list = []
-        for r in root_dirs:
-            if not r.exists():
+        for root in root_dirs:
+            if not root.exists():
                 continue
-            all_paths.extend(sorted(r.rglob("*.yaml")))
+            all_paths.extend(sorted(root.rglob("*.yaml")))
 
         if not all_paths:
             rprint("[yellow]No candidate YAML files found under "
