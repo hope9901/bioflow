@@ -153,9 +153,79 @@ _DB_CATALOG: dict[str, dict] = {
         "md5": None,
         "dest_file": "bowtie2/GRCh38_noalt_as.zip",
         "used_by": ["bowtie2"],
+        "genome": "hg38",
+        "asset": "bowtie2_index",
         "notes": (
             "Unzip to reveal the index prefix files.  Pass the prefix "
             "(e.g. /refs/bowtie2/GRCh38_noalt_as) to --bowtie2-index."
+        ),
+    },
+    # ── Variant-calling known sites (GATK best practices) ──────────────────
+    "dbsnp_grch38": {
+        "name": "dbSNP 138 — GRCh38 known SNP sites (GATK bundle)",
+        "url": (
+            "https://storage.googleapis.com/genomics-public-data/resources/"
+            "broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+        ),
+        "size_gb": 1.6,
+        "md5": None,
+        "dest_file": "gatk/hg38/Homo_sapiens_assembly38.dbsnp138.vcf.gz",
+        "used_by": ["gatk4"],
+        "genome": "hg38",
+        "asset": "dbsnp",
+        "notes": (
+            "Known-sites VCF for GATK BQSR / VQSR.  Also fetch its .tbi "
+            "(same URL + .tbi) or index with `gatk IndexFeatureFile`."
+        ),
+    },
+    "mills_indels_grch38": {
+        "name": "Mills & 1000G gold-standard indels — GRCh38 (GATK bundle)",
+        "url": (
+            "https://storage.googleapis.com/genomics-public-data/resources/"
+            "broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+        ),
+        "size_gb": 0.02,
+        "md5": None,
+        "dest_file": "gatk/hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
+        "used_by": ["gatk4"],
+        "genome": "hg38",
+        "asset": "known_indels",
+        "notes": "Known-indels VCF for GATK BQSR.  Fetch the .tbi alongside.",
+    },
+    # ── Epigenomics ────────────────────────────────────────────────────────
+    "encode_blacklist_grch38": {
+        "name": "ENCODE blacklist v2 — GRCh38 problematic regions",
+        "url": (
+            "https://github.com/Boyle-Lab/Blacklist/raw/master/lists/"
+            "hg38-blacklist.v2.bed.gz"
+        ),
+        "size_gb": 0.001,
+        "md5": None,
+        "dest_file": "encode/hg38-blacklist.v2.bed.gz",
+        "used_by": ["macs3", "tobias", "deeptools"],
+        "genome": "hg38",
+        "asset": "blacklist",
+        "notes": (
+            "Gunzip and pass to peak callers / coverage tools to exclude "
+            "ENCODE blacklisted regions (ChIP-seq / ATAC-seq)."
+        ),
+    },
+    # ── Transcriptome annotation ───────────────────────────────────────────
+    "gencode_grch38": {
+        "name": "GENCODE v46 — GRCh38 comprehensive gene annotation (GTF)",
+        "url": (
+            "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/"
+            "release_46/gencode.v46.annotation.gtf.gz"
+        ),
+        "size_gb": 0.05,
+        "md5": None,
+        "dest_file": "gencode/gencode.v46.annotation.gtf.gz",
+        "used_by": ["star", "salmon", "subread", "stringtie"],
+        "genome": "hg38",
+        "asset": "ensembl_gtf",
+        "notes": (
+            "Gene model GTF for STAR / Salmon (tximport) / featureCounts. "
+            "Pair with the matching GRCh38 primary-assembly FASTA."
         ),
     },
 }
@@ -174,9 +244,56 @@ def list_dbs() -> list[dict]:
             "name":    entry["name"],
             "size_gb": entry["size_gb"],
             "used_by": entry["used_by"],
+            "genome":  entry.get("genome"),
+            "asset":   entry.get("asset"),
             "notes":   entry.get("notes", ""),
         })
     return rows
+
+
+def refgenie_manifest(dest_root: Path | None = None) -> dict:
+    """Export the catalog as a refgenie-compatible asset manifest.
+
+    `refgenie <https://refgenie.databio.org/>`_ organises references as
+    ``<genome>/<asset>`` paths.  bioflow is not a refgenie server, but it
+    can emit a manifest that maps each catalogued DB onto refgenie's
+    genome/asset namespace so a lab already standardised on refgenie can
+    see, at a glance, which of its existing assets satisfy a bioflow
+    requirement (and where bioflow would place a freshly-fetched copy).
+
+    Only entries carrying ``genome`` + ``asset`` keys are emitted (the
+    organism-agnostic DBs like Pfam / eggNOG have no refgenie genome).
+
+    Returns a dict shaped like::
+
+        {
+          "genomes": {
+            "hg38": {
+              "assets": {
+                "dbsnp":    {"bioflow_db": "dbsnp_grch38", "path": "...", "used_by": [...]},
+                "blacklist":{...},
+                ...
+              }
+            }
+          }
+        }
+    """
+    genomes: dict[str, dict] = {}
+    for key, entry in _DB_CATALOG.items():
+        genome = entry.get("genome")
+        asset = entry.get("asset")
+        if not (genome and asset):
+            continue
+        path = entry["dest_file"]
+        if dest_root is not None:
+            path = str((Path(dest_root) / path).resolve())
+        genomes.setdefault(genome, {"assets": {}})["assets"][asset] = {
+            "bioflow_db": key,
+            "path": path,
+            "size_gb": entry.get("size_gb"),
+            "used_by": entry.get("used_by", []),
+        }
+    return {"refgenie_compatible": True, "genomes": genomes}
 
 
 def fetch_db(

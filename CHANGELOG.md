@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — reference-DB catalog expansion + refgenie manifest
+- `bioflow/core/db.py` catalog gains the references real recipes need:
+  GATK known-sites `dbsnp_grch38` + `mills_indels_grch38` (BQSR/VQSR),
+  `encode_blacklist_grch38` (ChIP/ATAC peak filtering), and
+  `gencode_grch38` (STAR/Salmon/featureCounts annotation).
+- Catalog entries now carry `genome` + `asset` tags, and a new
+  `refgenie_manifest()` / `bioflow db manifest` emits a
+  [refgenie](https://refgenie.databio.org/)-compatible JSON mapping
+  `<genome>/<asset>` → catalogued DB, so labs already standardised on
+  refgenie can see which existing assets satisfy a bioflow requirement.
+- Tests: +5 (`tests/unit/test_db.py`).
+
 ### Added — `joint_genotyping` recipe (GATK cohort best practice)
 - New 7-stage recipe (`bioflow/recipes/variant_calling/joint_genotyping.py`)
   implementing the canonical GATK **joint-genotyping** workflow for

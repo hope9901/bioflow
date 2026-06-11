@@ -174,19 +174,30 @@ Some pipelines need external databases (Pfam, eggNOG, BUSCO, etc.).
 
 ```bash
 bioflow db list                                  # show available DBs
-bioflow db fetch busco_bacteria --dest /refs
-bioflow db verify busco_bacteria --dest /refs
+bioflow db fetch dbsnp_grch38 --dest /refs
+bioflow db verify dbsnp_grch38 --dest /refs
+bioflow db manifest --dest /refs                 # refgenie-compatible asset map
 ```
 
-| Key | Size | Used by |
-|---|---:|---|
-| `busco_bacteria`   | 0.07 GB | busco |
-| `busco_insecta`    | 0.08 GB | busco |
-| `busco_vertebrata` | 0.30 GB | busco |
-| `pfam`             | 0.50 GB | interproscan |
-| `dfam_curated`     | 2.00 GB | repeatmasker, earlgrey |
-| `uniprot_sprot`    | 0.25 GB | braker3 |
-| `eggnog`           | 8.50 GB | eggnog_mapper |
+| Key | Size | Used by | refgenie asset |
+|---|---:|---|---|
+| `busco_bacteria`          | 0.07 GB | busco | — |
+| `busco_insecta`           | 0.08 GB | busco | — |
+| `busco_vertebrata`        | 0.30 GB | busco | — |
+| `pfam`                    | 0.50 GB | interproscan | — |
+| `dfam_curated`            | 2.00 GB | repeatmasker, earlgrey | — |
+| `uniprot_sprot`           | 0.25 GB | braker3 | — |
+| `eggnog`                  | 8.50 GB | eggnog_mapper | — |
+| `kraken2_standard_8gb`    | 7.50 GB | kraken2, bracken | — |
+| `bowtie2_grch38_noalt`    | 3.50 GB | bowtie2 | hg38/bowtie2_index |
+| `dbsnp_grch38`            | 1.60 GB | gatk4 | hg38/dbsnp |
+| `mills_indels_grch38`     | 0.02 GB | gatk4 | hg38/known_indels |
+| `encode_blacklist_grch38` | 0.001 GB | macs3, tobias | hg38/blacklist |
+| `gencode_grch38`          | 0.05 GB | star, salmon, subread | hg38/ensembl_gtf |
+
+`bioflow db manifest` emits a [refgenie](https://refgenie.databio.org/)-compatible
+JSON mapping `<genome>/<asset>` → catalogued DB, so a lab already on
+refgenie can see which existing assets satisfy a bioflow requirement.
 
 ---
 

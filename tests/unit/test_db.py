@@ -25,6 +25,51 @@ def test_list_dbs_all_have_used_by():
         assert len(r["used_by"]) > 0
 
 
+def test_catalog_has_variant_and_epigenomics_dbs():
+    """Regression guard for the 0.2.x reference-DB expansion."""
+    from bioflow.core.db import _DB_CATALOG
+    for key in ("dbsnp_grch38", "mills_indels_grch38",
+                "encode_blacklist_grch38", "gencode_grch38"):
+        assert key in _DB_CATALOG, f"missing catalogued DB {key}"
+
+
+# ---------------------------------------------------------------------------
+# refgenie manifest
+# ---------------------------------------------------------------------------
+
+def test_refgenie_manifest_maps_genome_assets():
+    from bioflow.core.db import refgenie_manifest
+    m = refgenie_manifest()
+    assert m["refgenie_compatible"] is True
+    hg38 = m["genomes"].get("hg38")
+    assert hg38, "expected hg38 genome in the manifest"
+    assets = hg38["assets"]
+    # dbSNP, known indels, blacklist, GTF all land under hg38.
+    for asset in ("dbsnp", "known_indels", "blacklist", "ensembl_gtf"):
+        assert asset in assets, f"missing refgenie asset {asset}"
+        assert assets[asset]["bioflow_db"]      # back-reference present
+
+
+def test_refgenie_manifest_resolves_paths_when_dest_given(tmp_path):
+    from bioflow.core.db import refgenie_manifest
+    m = refgenie_manifest(dest_root=tmp_path)
+    dbsnp = m["genomes"]["hg38"]["assets"]["dbsnp"]["path"]
+    assert str(tmp_path) in dbsnp and dbsnp.endswith(".vcf.gz")
+
+
+def test_refgenie_manifest_excludes_organism_agnostic_dbs():
+    """Pfam / eggNOG have no genome → must not appear under any genome."""
+    from bioflow.core.db import refgenie_manifest
+    m = refgenie_manifest()
+    all_dbs = {
+        a["bioflow_db"]
+        for g in m["genomes"].values()
+        for a in g["assets"].values()
+    }
+    assert "pfam" not in all_dbs
+    assert "eggnog" not in all_dbs
+
+
 # ---------------------------------------------------------------------------
 # fetch_db
 # ---------------------------------------------------------------------------
