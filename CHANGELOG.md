@@ -14,6 +14,22 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — GPU passthrough + Podman runtime
+- `@stage(..., gpu=True)` (and a tool YAML's `resources.gpu`) now attach
+  all host GPUs to that stage's container via a Docker `DeviceRequest`
+  (the API equivalent of `--gpus all`); needs the NVIDIA Container
+  Toolkit, and degrades to a warning on CPU-only hosts rather than
+  failing.  Threaded through `Stage`, the `@stage` decorator, and the
+  preset `run_plan` path.
+- `DockerBackend` works with **Podman**: it honours `BIOFLOW_DOCKER_HOST`
+  / `DOCKER_HOST` (point it at the Podman API socket) and an optional
+  `base_url`, and reads `BIOFLOW_CONTAINER_RUNTIME`.
+- `bioflow doctor` recognises Podman as a Docker alternative — the
+  `docker_cli` / `docker_daemon` checks fall back to `podman` and report
+  which runtime they found.
+- Tests: +10 (`tests/unit/test_gpu_podman.py`).  Backend `run()` gains a
+  `gpu` kwarg (the `ContainerBackend` protocol + MockBackend updated).
+
 ### Added — reference-DB catalog expansion + refgenie manifest
 - `bioflow/core/db.py` catalog gains the references real recipes need:
   GATK known-sites `dbsnp_grch38` + `mills_indels_grch38` (BQSR/VQSR),

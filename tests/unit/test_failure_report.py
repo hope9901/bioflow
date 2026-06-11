@@ -51,7 +51,8 @@ class _FailOnStepBackend:
     """Mock backend that fails on the first run() call."""
     def __init__(self):
         self.call_count = 0
-    def run(self, *, image, command, mounts, cpu, ram_gb, workdir):
+    def run(self, *, image, command, mounts, cpu, ram_gb, workdir,
+            gpu=False, **_ignored):
         from bioflow.core.runner import CommandResult
         self.call_count += 1
         if self.call_count == 1:

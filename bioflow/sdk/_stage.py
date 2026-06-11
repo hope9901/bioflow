@@ -60,6 +60,10 @@ class Stage:
     image: str
     cpu: int = 2
     ram_gb: float = 4.0
+    gpu: bool = False
+    """Request all host GPUs for this stage's container (Docker
+    ``--gpus all`` equivalent).  Needs the NVIDIA Container Toolkit on
+    the host; ignored with a warning on CPU-only hosts."""
     description: str = ""
     cache: bool = True
     depends_on: tuple = ()
@@ -178,6 +182,7 @@ class Stage:
                 cpu=cur_cpu,
                 ram_gb=cur_ram,
                 workdir=str(_CONTAINER_WORKSPACE),
+                gpu=self.gpu,
             )
             # Only pass log_callback when (a) the backend supports
             # streaming (DockerBackend sets _STREAMING_SUPPORTED=True;
@@ -465,6 +470,7 @@ def stage(
     image: str,
     cpu: int = 2,
     ram_gb: float = 4.0,
+    gpu: bool = False,
     description: str = "",
     cache: bool = True,
     depends_on: Optional[Union["Stage", Iterable["Stage"]]] = None,
@@ -523,6 +529,7 @@ def stage(
             image=image,
             cpu=cpu,
             ram_gb=ram_gb,
+            gpu=bool(gpu),
             description=description or (func.__doc__ or "").strip().split("\n")[0],
             cache=cache,
             depends_on=deps,

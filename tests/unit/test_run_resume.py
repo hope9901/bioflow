@@ -37,6 +37,7 @@ class FaultyBackend:
 
     def run(
         self, *, image, command, mounts, cpu, ram_gb, workdir,
+        gpu=False, **_ignored,
     ) -> CommandResult:
         # Map back from the workdir to the stage_id we're running.  The
         # runner sets workdir="/workspace" inside the container, so we

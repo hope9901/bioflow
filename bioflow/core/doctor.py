@@ -88,37 +88,54 @@ def _check_python() -> CheckResult:
     )
 
 
+def _container_runtime() -> "tuple[Optional[str], Optional[str]]":
+    """Return (cli_name, path) — prefers docker, falls back to podman.
+
+    Podman ships a Docker-compatible CLI + API socket, so bioflow's
+    sibling-container model works through it unchanged.  ``BIOFLOW_
+    CONTAINER_RUNTIME`` forces a choice when both are installed.
+    """
+    forced = os.environ.get("BIOFLOW_CONTAINER_RUNTIME", "").strip().lower()
+    candidates = [forced] if forced in ("docker", "podman") else ["docker", "podman"]
+    for name in candidates:
+        p = shutil.which(name)
+        if p:
+            return name, p
+    return None, None
+
+
 def _check_docker_cli() -> CheckResult:
-    path = shutil.which("docker")
-    if not path:
+    cli, path = _container_runtime()
+    if not cli:
         return CheckResult(
             name="docker_cli",
             status="fail",
-            message="`docker` executable not on PATH.",
+            message="no `docker` or `podman` executable on PATH.",
             fix=(
-                "Install Docker Desktop (Windows/macOS) or the docker engine "
-                "package (Linux), then restart this shell."
+                "Install Docker Desktop (Windows/macOS), the docker engine "
+                "(Linux), or Podman; then restart this shell."
             ),
         )
     return CheckResult(
         name="docker_cli",
         status="ok",
-        message=f"docker CLI at {path}",
-        detail={"path": path},
+        message=f"{cli} CLI at {path}",
+        detail={"runtime": cli, "path": path},
     )
 
 
 def _check_docker_daemon() -> CheckResult:
-    if shutil.which("docker") is None:
+    cli, _ = _container_runtime()
+    if cli is None:
         return CheckResult(
             name="docker_daemon",
             status="fail",
-            message="docker CLI missing — cannot probe daemon.",
+            message="no docker/podman CLI — cannot probe daemon.",
             fix="Resolve the docker_cli check first.",
         )
     try:
         r = subprocess.run(
-            ["docker", "info", "--format", "{{.ServerVersion}}"],
+            [cli, "info", "--format", "{{.ServerVersion}}"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -128,29 +145,30 @@ def _check_docker_daemon() -> CheckResult:
         return CheckResult(
             name="docker_daemon",
             status="fail",
-            message=f"`docker info` could not run: {exc}",
+            message=f"`{cli} info` could not run: {exc}",
             fix="Start Docker Desktop or `sudo systemctl start docker`.",
         )
     if r.returncode != 0:
         # Trim noisy lines, keep the first signal-bearing one.
         first_err = (r.stderr or r.stdout or "").strip().splitlines()
-        msg = first_err[0] if first_err else "non-zero exit from `docker info`"
+        msg = first_err[0] if first_err else f"non-zero exit from `{cli} info`"
         return CheckResult(
             name="docker_daemon",
             status="fail",
-            message=f"Docker daemon unreachable ({msg}).",
+            message=f"{cli} daemon unreachable ({msg}).",
             fix=(
                 "Start Docker Desktop (Windows/macOS) or "
                 "`sudo systemctl start docker` (Linux). "
-                "On Linux add your user to the `docker` group to avoid sudo."
+                "On Linux add your user to the `docker` group to avoid sudo. "
+                "For Podman, `podman system service` exposes the API socket."
             ),
         )
     server = r.stdout.strip() or "unknown"
     return CheckResult(
         name="docker_daemon",
         status="ok",
-        message=f"docker daemon reachable (server {server})",
-        detail={"server_version": server},
+        message=f"{cli} daemon reachable (server {server})",
+        detail={"runtime": cli, "server_version": server},
     )
 
 

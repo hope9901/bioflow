@@ -4,6 +4,12 @@ bioflow needs **Python ≥ 3.9** and a reachable **Docker** daemon.  It
 never installs bioinformatics tools on the host — each tool runs as a
 sibling container pulled from BioContainers on first use.
 
+> **Podman** works too: point `DOCKER_HOST` (or `BIOFLOW_DOCKER_HOST`)
+> at the Podman API socket and bioflow routes every container through
+> Podman unchanged.  `bioflow doctor` detects either runtime.
+> **GPU**: stages declaring `gpu=True` attach all host GPUs (needs the
+> NVIDIA Container Toolkit).
+
 ## From a git checkout (development)
 
 Use this when you want to edit recipes or tool YAMLs in place.

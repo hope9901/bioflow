@@ -63,6 +63,7 @@ class ContainerBackend(Protocol):
         cpu: int,
         ram_gb: float,
         workdir: str,
+        gpu: bool = False,
     ) -> CommandResult: ...
 
 
@@ -90,6 +91,8 @@ class MockBackend:
         cpu: int,
         ram_gb: float,
         workdir: str,
+        gpu: bool = False,
+        **_ignored,
     ) -> CommandResult:
         self.calls.append(
             {
@@ -99,6 +102,7 @@ class MockBackend:
                 "cpu": cpu,
                 "ram_gb": ram_gb,
                 "workdir": workdir,
+                "gpu": gpu,
             }
         )
         for p in self._pending_outputs:
@@ -118,13 +122,50 @@ class DockerBackend:
     Streams container stdout/stderr in real time via
     ``container.logs(stream=True, follow=True)`` and surfaces them through
     an optional ``log_callback`` so callers can display or buffer them.
+
+    Container runtime
+    -----------------
+    Works with **Podman** as well as Docker: Podman ships a
+    Docker-compatible API socket, so pointing ``DOCKER_HOST`` (or the
+    bioflow-specific ``BIOFLOW_DOCKER_HOST``) at the Podman socket — e.g.
+    ``unix:///run/user/1000/podman/podman.sock`` — routes every sibling
+    container through Podman with no other change.  ``base_url`` overrides
+    both.
+
+    GPU
+    ---
+    When ``run(..., gpu=True)`` the backend attaches all host GPUs via a
+    Docker ``DeviceRequest`` (the API equivalent of ``--gpus all``).  The
+    host needs the NVIDIA Container Toolkit; on a CPU-only host the
+    request is dropped with a warning rather than failing the run.
     """
 
     _STREAMING_SUPPORTED = True    # sentinel for run_plan
 
-    def __init__(self) -> None:
+    def __init__(self, base_url: Optional[str] = None) -> None:
+        import os  # noqa: PLC0415
+
         import docker  # type: ignore[import-not-found]
-        self.client = docker.from_env()
+
+        url = (
+            base_url
+            or os.environ.get("BIOFLOW_DOCKER_HOST")
+            or os.environ.get("DOCKER_HOST")
+        )
+        if url:
+            self.client = docker.DockerClient(base_url=url)
+        else:
+            self.client = docker.from_env()
+        self.runtime = os.environ.get("BIOFLOW_CONTAINER_RUNTIME", "docker")
+
+    def _gpu_device_requests(self):
+        """Return device_requests for all GPUs, or None if unavailable."""
+        try:
+            import docker  # type: ignore[import-not-found]
+            return [docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])]
+        except Exception as exc:
+            log.warning(f"GPU requested but device request could not be built: {exc}")
+            return None
 
     def run(
         self,
@@ -135,10 +176,16 @@ class DockerBackend:
         cpu: int,
         ram_gb: float,
         workdir: str,
+        gpu: bool = False,
         log_callback: Optional[Callable[[str], None]] = None,
         timeout: Optional[int] = None,   # seconds; None = no limit
     ) -> CommandResult:
         volumes = {h: {"bind": c, "mode": "rw"} for h, c in mounts.items()}
+        extra: dict = {}
+        if gpu:
+            dr = self._gpu_device_requests()
+            if dr is not None:
+                extra["device_requests"] = dr
         container = None
         try:
             container = self.client.containers.run(
@@ -150,6 +197,7 @@ class DockerBackend:
                 nano_cpus=int(cpu * 1_000_000_000),
                 detach=True,
                 remove=False,
+                **extra,
             )
 
             stdout_lines: list[str] = []
@@ -359,6 +407,7 @@ def run_plan(
                 cpu=tool.resources.min.cpu,
                 ram_gb=tool.resources.min.ram_gb,
                 workdir="/workspace",
+                gpu=bool(tool.resources.gpu),
             )
             if supports_streaming:
                 run_kwargs["log_callback"] = lambda line: log.debug(
