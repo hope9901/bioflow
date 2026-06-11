@@ -113,6 +113,15 @@ def _run_abricate(mod, _ws):
     return mod.abricate_one(FIXTURE_REF.resolve(), db="ncbi")
 
 
+def _run_chip_trim(mod, _ws):
+    # TrimGalore container — shared by chip_seq / atac_seq / methylation.
+    return mod.trim(FIXTURE_R1.resolve(), FIXTURE_R2.resolve())
+
+
+def _run_germline_qc(mod, _ws):
+    return mod.qc_trim(FIXTURE_R1.resolve(), FIXTURE_R2.resolve())
+
+
 # ---------------------------------------------------------------------------
 # The smoke matrix.
 # ---------------------------------------------------------------------------
@@ -128,6 +137,7 @@ def _build_matrix() -> list[SmokeCase]:
         metagenome_assembly,
         metagenomics_profile,
     )
+    from bioflow.recipes.epigenomics import chip_seq  # noqa: F401
     from bioflow.recipes.rnaseq_deg import rnaseq_deg  # noqa: F401
     from bioflow.recipes.variant_calling import germline_variants  # noqa: F401
 
@@ -158,6 +168,23 @@ def _build_matrix() -> list[SmokeCase]:
             expect=[],  # abricate writes to stdout in many modes; presence of out_dir is enough
             fixture_required=[FIXTURE_REF],
             notes="abricate vs its bundled NCBI database — tiny, fast",
+        ),
+        SmokeCase(
+            recipe="chip_seq",
+            stage_attr="trim",
+            invoke=_run_chip_trim,
+            # TrimGalore names paired outputs <basename>_val_{1,2}.fq.gz.
+            expect=["real_R1_val_1.fq.gz", "real_R2_val_2.fq.gz"],
+            fixture_required=[FIXTURE_R1, FIXTURE_R2],
+            notes="TrimGalore container — distinct image from fastp",
+        ),
+        SmokeCase(
+            recipe="germline_variants",
+            stage_attr="qc_trim",
+            invoke=_run_germline_qc,
+            expect=["clean_R1.fq.gz", "fastp.json"],
+            fixture_required=[FIXTURE_R1, FIXTURE_R2],
+            notes="validates the variant recipe's fastp wiring",
         ),
     ]
 

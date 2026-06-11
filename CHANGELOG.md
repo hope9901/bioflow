@@ -14,6 +14,14 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Changed — nightly smoke matrix expanded (3 → 5 recipes)
+- Added real-container smoke cases for **chip_seq** (TrimGalore — a
+  container family shared by chip/atac/methylation, previously
+  unexercised) and **germline_variants** (validates the variant recipe's
+  fastp wiring).  All five pass against real BioContainers locally
+  (~90 s) — more of the "522 mostly-mock tests" critique closed with
+  genuine end-to-end coverage.
+
 ### Changed — mypy type-checking is now blocking
 - Fixed all 33 mypy errors across 7 modules (Rich `TaskID` optionals in
   the progress bars, `dict[str, Any]` run kwargs, anthropic/openai/docker
