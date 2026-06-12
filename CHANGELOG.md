@@ -12,7 +12,16 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ---
 
-## [Unreleased]
+## [0.2.1] — 2026-06-12
+
+> **Why upgrade from 0.2.0**: the `v0.2.0` tag predated the registry
+> freshness fix, so the 0.2.0 wheel bundled a registry whose
+> `quay.io/biocontainers/*` tags had been garbage-collected from Quay —
+> `rnaseq_deg`, `chip_seq`, `atac_seq`, `eukaryote_assembly`,
+> `metagenome_assembly`, and others would fail at run time with "image
+> not found".  **0.2.1 ships the repaired, 107/107-pinned registry**, so
+> recipes actually pull their containers.  Everything below landed after
+> the 0.2.0 cut and is new to PyPI users here.
 
 ### Changed — nightly smoke matrix expanded (3 → 5 recipes)
 - Added real-container smoke cases for **chip_seq** (TrimGalore — a

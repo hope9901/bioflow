@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 # name and the CLI command remain `bioflow` — only the `pip install`
 # argument changes.
 name = "bioflowkit"
-version = "0.2.0"
+version = "0.2.1"
 description = "bioflow: one-line comparative-genomics recipes + Tier-A SDK, orchestrated over per-tool Docker BioContainers."
 readme = "README.md"
 requires-python = ">=3.9"

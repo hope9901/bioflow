@@ -1,5 +1,5 @@
 {% set name = "bioflowkit" %}
-{% set version = "0.2.0" %}
+{% set version = "0.2.1" %}
 
 # Bioconda recipe for bioflow (PyPI distribution name: bioflowkit).
 #
