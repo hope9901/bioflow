@@ -19,7 +19,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000  # TODO: fill from PyPI sdist
+  sha256: 3e8411b0a00676045f8ba3549f8c989b80be605f6384a15e8b24a71a40cca3e5
 
 build:
   noarch: python
