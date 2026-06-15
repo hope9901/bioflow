@@ -95,3 +95,36 @@ def test_fast_container_with_generous_timeout_not_killed():
         workdir="/work", timeout=30,
     )
     assert r.exit_code == 0   # finished well within the timeout
+
+
+class _ChattyContainer:
+    """Fake container that emits far more lines than the retention cap."""
+
+    def __init__(self, n: int) -> None:
+        self.n = n
+
+    def logs(self, **_):
+        for i in range(self.n):
+            yield f"line {i}\n".encode()
+
+    def wait(self, **_):
+        return {"StatusCode": 0}
+
+    def remove(self, **_):
+        pass
+
+
+def test_stdout_is_capped_to_tail():
+    """A tool emitting millions of lines must not be kept in full."""
+    from bioflow.core.runner import _STDOUT_TAIL_LINES
+
+    n = _STDOUT_TAIL_LINES + 1000
+    b = _backend_with(_ChattyContainer(n))
+    r = b.run(image="x:1", command="noisy", mounts={}, cpu=1, ram_gb=1,
+              workdir="/work")
+    assert r.exit_code == 0
+    lines = r.stdout.splitlines()
+    assert len(lines) == _STDOUT_TAIL_LINES, "stdout not capped to the tail"
+    # It kept the *tail*, not the head.
+    assert lines[-1] == f"line {n - 1}"
+    assert lines[0] == f"line {n - _STDOUT_TAIL_LINES}"

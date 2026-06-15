@@ -14,6 +14,15 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — bounded stdout retention (no orchestrator OOM on chatty tools)
+- `DockerBackend.run` accumulated **every** stdout line in memory; a
+  tool that emits millions of lines (Roary, IQ-TREE) could OOM the
+  orchestrator.  It now retains only the trailing `_STDOUT_TAIL_LINES`
+  (5000) via a bounded `deque` for the diagnostic `CommandResult.stdout`
+  — every line still streams live to `log_callback`, and real artifacts
+  go to files in the workspace.
+- Tests: +1 (`test_docker_timeout.py`) asserting the tail is kept.
+
 ### Fixed — clear error for shell-unsafe external input filenames
 - An external input file whose **basename** contained a space or shell
   metacharacter silently corrupted the recipe's command — bioflow mounts

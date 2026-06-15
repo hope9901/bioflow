@@ -116,6 +116,13 @@ class MockBackend:
         return CommandResult(exit_code=0)
 
 
+# How many trailing stdout lines a stage retains in memory for error
+# reporting.  Live output still streams in full to log_callback; only the
+# in-memory copy returned in CommandResult is capped, so a tool that emits
+# millions of lines can't OOM the orchestrator.
+_STDOUT_TAIL_LINES = 5000
+
+
 def _clamp_resources(cpu: int, ram_gb: float) -> "tuple[int, float]":
     """Clamp a stage's requested CPU / RAM to the host's capacity.
 
@@ -257,7 +264,15 @@ class DockerBackend:
                 timer.daemon = True
                 timer.start()
 
-            stdout_lines: list[str] = []
+            # Retain only the tail in memory: the returned stdout is used
+            # for error diagnosis, not as the artifact (tools write their
+            # real output to files in the workspace).  A chatty tool
+            # (Roary, IQ-TREE) can emit millions of lines, which would
+            # OOM the orchestrator if kept in full.  Every line is still
+            # streamed live to log_callback.
+            from collections import deque  # noqa: PLC0415
+
+            stdout_lines: "deque[str]" = deque(maxlen=_STDOUT_TAIL_LINES)
             for chunk in container.logs(stream=True, follow=True):
                 line = chunk.decode(errors="replace").rstrip("\n")
                 stdout_lines.append(line)
