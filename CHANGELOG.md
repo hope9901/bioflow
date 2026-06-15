@@ -14,6 +14,19 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — clear error for shell-unsafe external input filenames
+- An external input file whose **basename** contained a space or shell
+  metacharacter silently corrupted the recipe's command — bioflow mounts
+  the file's parent at the space-free `/inputs/<n>` and splices the
+  basename in unquoted, and it can't be quoted generically because many
+  recipes wrap the whole command in `bash -c '…'`.  (A spaced *directory*
+  was already fine — only the basename survives into the command.)
+- `_collect_external_mounts` now raises an actionable `ValueError`
+  naming the offending characters and telling the user to rename /
+  symlink to a safe name.
+- Tests: +12 (`tests/unit/test_unsafe_paths.py`), incl. confirmation
+  that spaced *directories* and workspace-internal paths are unaffected.
+
 ### Fixed — stage_timeout now actually bounds runtime
 - **Latent bug**: `run_plan(stage_timeout=…)` never worked.  The log
   loop (`container.logs(stream=True, follow=True)`) blocks until the

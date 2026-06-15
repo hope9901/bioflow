@@ -20,6 +20,32 @@ from typing import Any
 _CONTAINER_WORKSPACE = PurePosixPath("/work")
 _CONTAINER_INPUTS = PurePosixPath("/inputs")
 
+# Characters in an external input's *basename* that would break the
+# unquoted token the recipe builds into its shell command.  (The parent
+# directory is safe — it is replaced by the space-free /inputs/<n>.)
+_SHELL_UNSAFE_CHARS = set(" \t\n'\"\\;&|<>()$`*?{}[]")
+
+
+def _reject_unsafe_basename(path: Path) -> None:
+    """Raise if *path*'s basename contains a shell-unsafe character.
+
+    bioflow mounts an external file's parent at /inputs/<n> and splices
+    the basename into the recipe's command unquoted.  A space or shell
+    metacharacter there silently corrupts the command, so we surface a
+    clear error and tell the user to rename / symlink to a safe name.
+    """
+    bad = sorted({c for c in path.name if c in _SHELL_UNSAFE_CHARS})
+    if bad:
+        shown = ", ".join(repr(c) for c in bad)
+        raise ValueError(
+            f"Input file name {path.name!r} contains shell-unsafe "
+            f"character(s) {shown}. bioflow splices external input names "
+            f"into container commands unquoted, so they must avoid spaces "
+            f"and shell metacharacters. Rename (or symlink) the file to a "
+            f"name without those characters and re-run. (The containing "
+            f"directory may contain spaces — only the file name matters.)"
+        )
+
 
 def _to_container_path(host_path: Path, workspace: Path) -> str:
     """Translate a host path inside the workspace to its /work-relative
@@ -115,7 +141,15 @@ def _collect_external_mounts(
             translation[str(p)] = cdir
             translation[str(resolved)] = cdir
         elif resolved.exists() or resolved.parent.is_dir():
-            # a real file, or an index prefix whose parent dir exists
+            # a real file, or an index prefix whose parent dir exists.
+            # The parent dir is mounted at a space-free /inputs/<n>, so a
+            # spaced *directory* is fine — only the basename survives into
+            # the command.  An unsafe basename (space / shell metachar)
+            # would silently corrupt the unquoted token in a recipe's
+            # command (and can't be quoted generically because many
+            # recipes wrap the whole command in `bash -c '…'`).  Fail
+            # early with an actionable message instead.
+            _reject_unsafe_basename(resolved)
             cdir = _container_dir_for(resolved.parent)
             cpath = f"{cdir}/{resolved.name}"
             translation[str(p)] = cpath
