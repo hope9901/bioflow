@@ -25,6 +25,7 @@ Log streaming
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Optional, Protocol, runtime_checkable
@@ -115,6 +116,30 @@ class MockBackend:
         return CommandResult(exit_code=0)
 
 
+def _clamp_resources(cpu: int, ram_gb: float) -> "tuple[int, float]":
+    """Clamp a stage's requested CPU / RAM to the host's capacity.
+
+    Docker refuses to create a container whose ``--cpus`` exceeds the host
+    core count, so a stage declaring ``cpu=8`` must not be sent verbatim to
+    a 4-core host — it would fail to start.  Memory is clamped too (a
+    ``mem_limit`` above host RAM is meaningless and risks an instant OOM).
+    Both floor at 1 so a container is always launchable.
+    """
+    host_cpu = os.cpu_count() or 1
+    eff_cpu = max(1, min(int(cpu), host_cpu))
+
+    eff_ram = ram_gb
+    try:
+        import psutil  # noqa: PLC0415
+
+        host_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
+        # Leave a little headroom for the host/OS.
+        eff_ram = max(1.0, min(float(ram_gb), host_ram_gb * 0.9))
+    except Exception:
+        eff_ram = max(1.0, float(ram_gb))
+    return eff_cpu, eff_ram
+
+
 # ---------------------------------------------------------------------------
 # Docker backend (production)
 # ---------------------------------------------------------------------------
@@ -146,8 +171,6 @@ class DockerBackend:
     _STREAMING_SUPPORTED = True    # sentinel for run_plan
 
     def __init__(self, base_url: Optional[str] = None) -> None:
-        import os  # noqa: PLC0415
-
         import docker  # type: ignore[import-not-found]
 
         url = (
@@ -189,6 +212,15 @@ class DockerBackend:
             dr = self._gpu_device_requests()
             if dr is not None:
                 extra["device_requests"] = dr
+
+        # Clamp the requested CPU/RAM to what the host actually has.  Docker
+        # *rejects* a container whose --cpus exceeds the host core count
+        # ("range of CPUs is from 0.01 to N.00"), so a stage declaring
+        # cpu=8 would fail to even start on a 4-core CI runner or a small
+        # workstation.  A request larger than the host should degrade to
+        # "use everything available", not crash.
+        eff_cpu, eff_ram = _clamp_resources(cpu, ram_gb)
+
         container = None
         try:
             container = self.client.containers.run(
@@ -196,8 +228,8 @@ class DockerBackend:
                 command=["sh", "-c", command],
                 volumes=volumes,
                 working_dir=workdir,
-                mem_limit=f"{max(math.ceil(ram_gb), 1)}g",
-                nano_cpus=int(cpu * 1_000_000_000),
+                mem_limit=f"{max(math.ceil(eff_ram), 1)}g",
+                nano_cpus=int(eff_cpu * 1_000_000_000),
                 detach=True,
                 remove=False,
                 **extra,

@@ -14,6 +14,19 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — DockerBackend now clamps CPU/RAM to host capacity
+- **Bug the full-pipeline e2e caught**: a stage declaring `cpu=8` (e.g.
+  SPAdes in `prokaryote_assembly`) failed to even *start* on any host
+  with fewer cores — Docker rejects a container whose `--cpus` exceeds
+  the host count ("range of CPUs is from 0.01 to N.00"), so all 3 retry
+  attempts died instantly.  Passed locally (12 cores) but failed on the
+  4-core CI runner — and would hit any user on a small workstation.
+- `DockerBackend.run` now clamps the requested CPU to the host core count
+  and RAM to ~90% of host memory (`_clamp_resources`), so an
+  over-ambitious resource request degrades to "use what's available"
+  instead of crashing.
+- Tests: +5 (`tests/unit/test_resource_clamp.py`).
+
 ### Added — first full-pipeline end-to-end test
 - `tests/integration/test_full_pipeline_e2e.py`: runs the **entire**
   `prokaryote_assembly` recipe (fastp → SPAdes → QUAST → Prokka) against
