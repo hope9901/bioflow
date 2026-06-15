@@ -48,12 +48,20 @@ jobs:
             -v -m docker \
             --junitxml=reports/smoke.xml
 
-      - name: Upload junit report
+      - name: Run full-pipeline e2e (fastp → SPAdes → QUAST → Prokka on phiX)
+        env:
+          BIOFLOW_LOG_LEVEL: INFO
+        run: |
+          python -m pytest tests/integration/test_full_pipeline_e2e.py \
+            -v -m docker \
+            --junitxml=reports/full_e2e.xml
+
+      - name: Upload junit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: smoke-junit
-          path: reports/smoke.xml
+          path: reports/*.xml
 
       - name: Fail the job on red results
         if: failure()

@@ -12,6 +12,22 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ---
 
+## [Unreleased]
+
+### Added — first full-pipeline end-to-end test
+- `tests/integration/test_full_pipeline_e2e.py`: runs the **entire**
+  `prokaryote_assembly` recipe (fastp → SPAdes → QUAST → Prokka) against
+  real BioContainers — the first time a complete pipeline (not just a
+  first stage, as the smoke matrix does) is validated end-to-end.
+- New `data/test/phix_small/` fixture: phiX174 (`NC_001422.1`, 5386 bp) +
+  1000 wgsim-simulated 150 bp pairs (~56×, seed 42 → deterministic).
+  phiX assembles into a single ~5.4 kb contig in <1 min, so the whole
+  chain finishes in ~45 s.
+- Asserts real data flow: assembled contig length 4.5–6 kb, QUAST
+  `report.tsv`, and Prokka annotation with ≥1 CDS.  Verified locally
+  (phiX → 1 contig 5377 bp, 6 CDS).
+- Wired into the nightly-smoke workflow as a second step.
+
 ## [0.2.1] — 2026-06-12
 
 > **Why upgrade from 0.2.0**: the `v0.2.0` tag predated the registry

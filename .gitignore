@@ -98,3 +98,4 @@ build/
 
 # MkDocs build output
 site/
+data/test/**/_e2e_out/
