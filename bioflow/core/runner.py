@@ -222,6 +222,8 @@ class DockerBackend:
         eff_cpu, eff_ram = _clamp_resources(cpu, ram_gb)
 
         container = None
+        timer = None
+        timed_out = {"flag": False}
         try:
             container = self.client.containers.run(
                 image=image,
@@ -235,6 +237,26 @@ class DockerBackend:
                 **extra,
             )
 
+            # Enforce stage_timeout with a watchdog.  The log-streaming loop
+            # below blocks until the container exits, so ``container.wait
+            # (timeout=…)`` (a docker-py HTTP read timeout, not a runtime
+            # cap) can never fire for a runaway container — a timer that
+            # kills the container is the only thing that actually bounds
+            # the runtime.
+            if timeout is not None and timeout > 0:
+                import threading  # noqa: PLC0415
+
+                def _kill() -> None:
+                    timed_out["flag"] = True
+                    try:
+                        container.kill()
+                    except Exception:
+                        pass
+
+                timer = threading.Timer(timeout, _kill)
+                timer.daemon = True
+                timer.start()
+
             stdout_lines: list[str] = []
             for chunk in container.logs(stream=True, follow=True):
                 line = chunk.decode(errors="replace").rstrip("\n")
@@ -242,15 +264,25 @@ class DockerBackend:
                 if log_callback:
                     log_callback(line)
 
-            result = container.wait(timeout=timeout)
+            result = container.wait()
+            if timer is not None:
+                timer.cancel()
             container.remove(force=True)
 
+            if timed_out["flag"]:
+                return CommandResult(
+                    exit_code=124,   # conventional timeout exit code
+                    stdout="\n".join(stdout_lines),
+                    stderr=f"stage exceeded timeout of {timeout}s and was killed",
+                )
             return CommandResult(
                 exit_code=int(result.get("StatusCode", 1)),
                 stdout="\n".join(stdout_lines),
             )
         except Exception as exc:
-            # If timeout expired, the container may still be running — remove it
+            if timer is not None:
+                timer.cancel()
+            # On any error the container may still be running — remove it.
             if container is not None:
                 try:
                     container.remove(force=True)

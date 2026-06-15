@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — stage_timeout now actually bounds runtime
+- **Latent bug**: `run_plan(stage_timeout=…)` never worked.  The log
+  loop (`container.logs(stream=True, follow=True)`) blocks until the
+  container exits, so the subsequent `container.wait(timeout=…)` — a
+  docker-py HTTP read timeout, not a runtime cap — could never fire for
+  a runaway container; it would hang forever.
+- `DockerBackend.run` now starts a watchdog `threading.Timer` that
+  `container.kill()`s the stage when the timeout elapses, returning the
+  conventional exit code **124** with a clear message.
+- Tests: +3 (`tests/unit/test_docker_timeout.py`, fake-container based,
+  deterministic).
+
 ### Fixed — DockerBackend now clamps CPU/RAM to host capacity
 - **Bug the full-pipeline e2e caught**: a stage declaring `cpu=8` (e.g.
   SPAdes in `prokaryote_assembly`) failed to even *start* on any host
