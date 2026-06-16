@@ -56,6 +56,10 @@ CAFE = REPO / "data" / "test" / "cafe_small"
 CAFE_TREE = CAFE / "tree.nwk"
 CAFE_FAMILIES = CAFE / "families.tsv"
 
+PHYLO = REPO / "data" / "test" / "phylo_small"
+PHYLO_GFFS = PHYLO / "gffs"
+PHYLO_GPA = PHYLO / "gene_presence_absence.csv"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -231,3 +235,23 @@ def test_cafe_evolution_full_chain(_runtime):
     assert report is not None, "no CAFE5 Base_report.cafe"
     fam = _find_one(ws, "Base_family_results.txt")
     assert fam is not None, "no CAFE5 Base_family_results.txt"
+
+
+@pytest.mark.skipif(not PHYLO_GPA.exists(), reason="phylo_small fixture missing")
+def test_phylogeny_full_chain(_runtime):
+    """Single-copy core → MAFFT × N → IQ-TREE end-to-end on 4 strains."""
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("phylogeny")(
+        gff_dir=PHYLO_GFFS, out_dir=ws / "out",
+        _gpa_csv=PHYLO_GPA, bootstrap=1000,
+    )
+    assert result.ok, f"phylogeny failed: {(result.stderr or '')[:500]}"
+
+    tree = _find_one(ws, "iqtree.treefile")
+    assert tree is not None, "no IQ-TREE .treefile"
+    newick = tree.read_text().strip()
+    # All four strains must appear as leaves in the Newick tree.
+    for taxon in ("g1", "g2", "g3", "g4"):
+        assert taxon in newick, f"{taxon} missing from tree: {newick[:120]}"

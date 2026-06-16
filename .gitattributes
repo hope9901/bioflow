@@ -10,6 +10,8 @@ data/test/**/*.tsv   text eol=lf
 data/test/**/*.csv   text eol=lf
 data/test/**/*.nwk   text eol=lf
 data/test/**/*.txt   text eol=lf
+data/test/**/*.gff   text eol=lf
+data/test/**/*.ffn   text eol=lf
 data/test/**/*.gz    binary
 
 # Registry + recipe shell commands also end up inside Linux containers;

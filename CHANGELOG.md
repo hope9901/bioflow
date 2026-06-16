@@ -40,6 +40,9 @@ ship bug fixes only.  Breaking changes to the documented public API
 - **cafe_evolution** (CAFE5 gene-family expansion/contraction) added as
   the 6th, on `data/test/cafe_small/` (ultrametric 4-taxon tree + 60
   families).
+- **phylogeny** (single-copy core → MAFFT × N → IQ-TREE) added as the
+  7th, on `data/test/phylo_small/` (Prokka GFF + CDS + Roary GPA for 4
+  phiX strains; IQ-TREE recovers a 4-taxon ML tree).
 
 ### Fixed — LF line endings for container-read fixtures
 - A new `.gitattributes` pins text test fixtures (and registry YAMLs) to
