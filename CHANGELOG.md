@@ -14,6 +14,27 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — ani_matrix broken for genomes outside the workspace
+- **Bug a full e2e caught**: FastANI reads genome paths from a *list
+  file*, not the command, so the SDK's command-path translator and
+  auto-mount never applied to them — every external genome failed with
+  `Could not open <host path>`.  Since genomes normally live outside the
+  output workspace, this broke the recipe's primary documented use.
+- New SDK helper **`stage_input(path)`** copies an external file into the
+  active workspace (always mounted at `/work`) and returns its container
+  path — the clean primitive for any recipe that feeds a tool a list
+  file of paths.  Also exported **`container_path(path)`**.
+- `ani_matrix` now stages genomes via `stage_input` and writes container
+  paths into the FastANI list; verified end-to-end (genome1 vs genome2 =
+  99.5% ANI).
+
+### Added — full e2e for the comparative-genomics recipes
+- `tests/integration/test_full_pipeline_e2e.py` gains real end-to-end
+  tests for **amr_vf_catalogue** (ABRicate fan-out, bundled DBs),
+  **ani_matrix** (all-vs-all FastANI), and **pangenome** (Prokka × N →
+  Roary), all on a new `data/test/genomes_small/` fixture (phiX174 + a
+  25-SNP variant).  Recipes validated end-to-end: 1 (prokaryote) → 4.
+
 ### Fixed — bounded stdout retention (no orchestrator OOM on chatty tools)
 - `DockerBackend.run` accumulated **every** stdout line in memory; a
   tool that emits millions of lines (Roary, IQ-TREE) could OOM the

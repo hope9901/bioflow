@@ -44,6 +44,10 @@ FIX = REPO / "data" / "test" / "phix_small"
 R1 = FIX / "sim_R1.fastq.gz"
 R2 = FIX / "sim_R2.fastq.gz"
 
+GENOMES = REPO / "data" / "test" / "genomes_small"
+G1 = GENOMES / "genome1.fna"
+G2 = GENOMES / "genome2.fna"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -95,3 +99,85 @@ def test_prokaryote_assembly_full_chain(_runtime):
     assert prokka_txt is not None, "no Prokka summary (.txt)"
     body = prokka_txt.read_text()
     assert "CDS:" in body, f"Prokka produced no CDS line:\n{body[:300]}"
+
+
+@pytest.mark.skipif(not G1.exists(), reason="genomes_small fixture missing")
+def test_amr_vf_catalogue_full_chain(_runtime):
+    """ABRicate fan-out (2 genomes × 2 DBs) end-to-end.
+
+    abricate bundles its own databases, so this needs no external DB.
+    phiX carries no AMR / plasmid genes, so the TSVs contain only the
+    header — which is exactly what proves abricate ran and wrote output
+    for every (genome, db) pair.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    results = get("amr_vf_catalogue")(
+        out_dir=ws / "out",
+        genome_paths=[G1, G2],
+        dbs=("vfdb", "plasmidfinder"),
+    )
+
+    # Fan-out returns one StageResult per (genome, db) pair.
+    assert isinstance(results, list)
+    assert len(results) == 4, f"expected 4 abricate runs, got {len(results)}"
+    assert all(r.ok for r in results), "an abricate run failed"
+
+    # Every pair produced its TSV with the canonical ABRicate header.
+    tsvs = list(ws.rglob("*.tsv"))
+    abr = [t for t in tsvs if t.read_text(errors="replace").startswith("#FILE")]
+    assert len(abr) >= 4, f"expected ≥4 ABRicate TSVs, found {len(abr)}"
+    for t in abr:
+        assert "DATABASE" in t.read_text(errors="replace").splitlines()[0]
+
+
+@pytest.mark.skipif(not G1.exists(), reason="genomes_small fixture missing")
+def test_ani_matrix_full_chain(_runtime):
+    """All-vs-all FastANI end-to-end on two external genomes.
+
+    Regression guard for the list-file path bug: FastANI reads genome
+    paths from a list file (not the command), so the recipe must stage
+    the genomes into the workspace and write *container* paths — external
+    genomes used to fail with 'Could not open <host path>'.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("ani_matrix")(out_dir=ws / "out", genome_paths=[G1, G2])
+    assert result.ok, f"ani_matrix failed: {(result.stderr or '')[:500]}"
+
+    mat = _find_one(ws, "ani_matrix.tsv")
+    assert mat is not None, "no ani_matrix.tsv produced"
+    rows = [r for r in mat.read_text().splitlines() if r.strip()]
+    # 2 genomes all-vs-all → up to 4 rows; the cross pair must be present
+    # with a high ANI (the two genomes differ by only 25 SNPs).
+    assert rows, "ANI matrix is empty"
+    cross = [r for r in rows if r.split("\t")[0] != r.split("\t")[1]]
+    assert cross, "no cross-genome ANI row"
+    ani = float(cross[0].split("\t")[2])
+    assert ani > 95.0, f"expected high ANI for near-identical genomes, got {ani}"
+
+
+@pytest.mark.skipif(not G1.exists(), reason="genomes_small fixture missing")
+def test_pangenome_full_chain(_runtime):
+    """Prokka × N (fan-out) → Roary end-to-end on two external genomes."""
+    from bioflow.recipes import get
+
+    ws = _runtime
+    # _genome_paths is the recipe's test hatch that skips the NCBI fetch.
+    result = get("pangenome")(
+        taxon="test", out_dir=ws / "out", _genome_paths=[G1, G2],
+    )
+    assert result.ok, f"pangenome failed: {(result.stderr or '')[:500]}"
+
+    # Roary's core artifact.
+    gpa = _find_one(ws, "gene_presence_absence.csv")
+    assert gpa is not None, "no Roary gene_presence_absence.csv"
+
+    summary = _find_one(ws, "summary_statistics.txt")
+    assert summary is not None, "no Roary summary_statistics.txt"
+    # The two near-identical genomes share their genes as core.
+    body = summary.read_text()
+    assert "Core genes" in body
+    assert "Total genes" in body

@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Optional
 
-from bioflow import stage, pipeline
+from bioflow import pipeline, stage, stage_input
 from bioflow.io import write_text
 from bioflow.recipes import register
 
@@ -54,11 +54,15 @@ def ani_matrix(
     if not fnas:
         raise RuntimeError("No genomes given to ani_matrix")
 
+    # FastANI reads genome paths from the list FILE, not the command, so
+    # the SDK's command-path translator + auto-mount don't apply to them.
+    # stage_input() copies each genome into the workspace (always mounted
+    # at /work) and returns the container path to write into the list,
+    # which FastANI (working dir /work) can then open.
+    container_paths = [stage_input(g, subdir="ani_genomes") for g in fnas]
+
     list_path = out_dir / "genome_list.txt"
-    write_text(
-        list_path,
-        "\n".join(str(p) for p in fnas) + "\n",
-    )
+    write_text(list_path, "\n".join(container_paths) + "\n")
     return fastani_all_vs_all(list_path)
 
 

@@ -16,6 +16,8 @@ from bioflow.sdk import (  # noqa: E402,F401
     clear_cache,
     set_log_streaming,
     is_log_streaming_enabled,
+    container_path,
+    stage_input,
     MockBackend,
     DockerBackend,
 )

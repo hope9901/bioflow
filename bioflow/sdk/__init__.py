@@ -87,7 +87,50 @@ from bioflow.sdk._runtime import (  # noqa: F401
 )
 from bioflow.sdk._stage import Stage, stage  # noqa: F401
 
+
+def container_path(path) -> str:
+    """Container-side (/work-relative) path for a workspace file.
+
+    Recipes that build a *list file* of input paths consumed by a tool
+    (e.g. FastANI's ``--ql``) can't rely on the command-string path
+    translator — it only rewrites paths in the command, not inside files.
+    Such recipes should stage their inputs into the workspace and write
+    this container path into the list so the tool (whose working dir is
+    ``/work``) can open them.
+
+    Raises ``ValueError`` if *path* is outside the active workspace.
+    """
+    from pathlib import Path  # noqa: PLC0415
+    return _to_container_path(Path(path), _get_workspace())
+
+
+def stage_input(path, subdir: str = "staged_inputs") -> str:
+    """Copy an external file into the workspace and return its container path.
+
+    The one-stop helper for recipes that feed a tool a *list file* of
+    input paths.  External inputs are normally bind-mounted at
+    ``/inputs/<n>`` only when they appear as command arguments — paths
+    that live *inside a file* the tool reads are neither mounted nor
+    translated.  ``stage_input`` copies the file under the active
+    workspace (which is always mounted at ``/work``) and returns the
+    container path to write into the list, so it works regardless of
+    whether the caller's ``out_dir`` equals the workspace.
+    """
+    import shutil  # noqa: PLC0415
+    from pathlib import Path  # noqa: PLC0415
+
+    src = Path(path)
+    dest_dir = _get_workspace() / subdir
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / src.name
+    if src.resolve() != dest.resolve():
+        shutil.copy2(src, dest)
+    return _to_container_path(dest, _get_workspace())
+
+
 __all__ = [
+    "container_path",
+    "stage_input",
     # Public Stage API
     "stage",
     "Stage",

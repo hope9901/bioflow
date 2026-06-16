@@ -48,7 +48,7 @@ jobs:
             -v -m docker \
             --junitxml=reports/smoke.xml
 
-      - name: Run full-pipeline e2e (fastp → SPAdes → QUAST → Prokka on phiX)
+      - name: Run full-pipeline e2e (prokaryote_assembly + comparative genomics)
         env:
           BIOFLOW_LOG_LEVEL: INFO
         run: |
