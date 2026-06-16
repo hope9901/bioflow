@@ -76,18 +76,31 @@ def salmon_quant(idx, sample_id: str, r1_clean: Path, r2_clean: Path,
 @stage(image="quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0",
        cpu=4, ram_gb=16, depends_on=salmon_quant)
 def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
-    """DESeq2 differential expression via tximport + DESeqDataSetFromTximport."""
-    # All per-sample quant.sf files live under their per-sample out_dir
+    """Transcript-level DESeq2 differential expression from Salmon quants.
+
+    The ``bioconductor-deseq2`` BioContainer ships DESeq2 but **not**
+    tximport, so the count matrix is assembled in base R directly from
+    each sample's ``quant.sf`` (the ``NumReads`` column, rounded) and fed
+    to ``DESeqDataSetFromMatrix`` — no tximport dependency.  This is
+    transcript-level (no tx2gene collapse), which is what's available
+    without an external gene map.
+    """
+    # Each salmon_quant stage wrote <out_dir>/<sample_id>/quant.sf.
     quant_dirs = ",".join(str(q.out_dir) for q in quants)
     return (
         f"Rscript -e \""
-        f"library(tximport); library(DESeq2); "
+        f"library(DESeq2); "
         f"samples <- read.csv('{sample_sheet}'); "
         f"quant_dirs <- strsplit('{quant_dirs}', ',')[[1]]; "
-        f"files <- file.path(quant_dirs, samples$sample_id, 'quant.sf'); "
-        f"names(files) <- samples$sample_id; "
-        f"txi <- tximport(files, type='salmon', txOut=TRUE); "
-        f"dds <- DESeqDataSetFromTximport(txi, colData=samples, design=~condition); "
+        f"files <- file.path(quant_dirs, samples\\$sample_id, 'quant.sf'); "
+        f"tabs <- lapply(files, function(f) read.delim(f, stringsAsFactors=FALSE)); "
+        f"genes <- tabs[[1]]\\$Name; "
+        f"mat <- sapply(tabs, function(t) round(t\\$NumReads[match(genes, t\\$Name)])); "
+        f"mat[is.na(mat)] <- 0; "
+        f"rownames(mat) <- genes; colnames(mat) <- samples\\$sample_id; "
+        f"storage.mode(mat) <- 'integer'; "
+        f"samples\\$condition <- factor(samples\\$condition); "
+        f"dds <- DESeqDataSetFromMatrix(countData=mat, colData=samples, design=~condition); "
         f"dds <- DESeq(dds); "
         f"res <- results(dds); "
         f"write.csv(as.data.frame(res), "
@@ -195,8 +208,15 @@ def rnaseq_deg(
         parallel="auto", progress=True,
     )
 
-    # 4. DESeq2 on the assembled quants
+    # 4. DESeq2 on the assembled quants.  Fail fast — the downstream
+    #    enrichment tolerates an empty gene list (Enrichr may be offline),
+    #    so without this guard a broken DEG step would be silently masked.
     deg = deseq2_diff(quant_results, Path(sample_sheet))
+    if not deg.ok:
+        raise RuntimeError(
+            f"DESeq2 stage failed (exit {deg.exit_code}); see {deg.out_dir}. "
+            f"{(deg.stderr or deg.stdout or '')[-500:]}"
+        )
 
     # 5. GO enrichment on the significant DEGs (Enrichr via gseapy)
     enrich = enrich_go(deg)

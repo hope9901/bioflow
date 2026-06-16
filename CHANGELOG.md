@@ -36,13 +36,33 @@ ship bug fixes only.  Breaking changes to the documented public API
   recovers a planted association).  Fixtures:
   `data/test/genomes_small/` (phiX174 + a 25-SNP variant) and
   `data/test/gwas_small/` (12-gene × 10-sample GPA).  Recipes validated
-  end-to-end: 1 (prokaryote) → 5.
+  end-to-end: 1 (prokaryote) → 8 (see below).
 - **cafe_evolution** (CAFE5 gene-family expansion/contraction) added as
   the 6th, on `data/test/cafe_small/` (ultrametric 4-taxon tree + 60
   families).
 - **phylogeny** (single-copy core → MAFFT × N → IQ-TREE) added as the
   7th, on `data/test/phylo_small/` (Prokka GFF + CDS + Roary GPA for 4
   phiX strains; IQ-TREE recovers a 4-taxon ML tree).
+- **rnaseq_deg** (fastp → Salmon → DESeq2 → enrichment + MultiQC) added
+  as the 8th, on `data/test/rnaseq_small/` (60 synthetic transcripts, 4
+  samples, 10 transcripts planted ~4× up in the treated group).  DESeq2
+  recovers the planted signal (`tx0001` log2FC ≈ 2) and the run finishes
+  in seconds.  The sample sheet is built by the test at run time so no
+  machine-specific paths are committed.
+
+### Fixed — rnaseq_deg DESeq2 step (two latent bugs)
+- The `deseq2_diff` stage required **tximport**, which the
+  `bioconductor-deseq2` BioContainer does not ship — every run failed
+  with "there is no package called 'tximport'".  Rewritten to assemble
+  the count matrix in base R straight from each sample's `quant.sf`
+  (`NumReads`, rounded) and feed `DESeqDataSetFromMatrix`, dropping the
+  tximport dependency entirely.
+- A second, masked bug: `samples$sample_id` inside the `Rscript -e "…"`
+  body (run via `sh -c`) was shell-expanded because the `$` was
+  unescaped, so the `file.path(...)` of `quant.sf` paths was wrong.
+  Escaped to `\$sample_id`.  The pipeline now also **fails fast** if the
+  DESeq2 stage exits non-zero (the downstream Enrichr step tolerates an
+  empty gene list, which previously masked a broken DEG table).
 
 ### Fixed — LF line endings for container-read fixtures
 - A new `.gitattributes` pins text test fixtures (and registry YAMLs) to

@@ -60,6 +60,9 @@ PHYLO = REPO / "data" / "test" / "phylo_small"
 PHYLO_GFFS = PHYLO / "gffs"
 PHYLO_GPA = PHYLO / "gene_presence_absence.csv"
 
+RNASEQ = REPO / "data" / "test" / "rnaseq_small"
+RNASEQ_TX = RNASEQ / "transcriptome.fa"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -255,3 +258,45 @@ def test_phylogeny_full_chain(_runtime):
     # All four strains must appear as leaves in the Newick tree.
     for taxon in ("g1", "g2", "g3", "g4"):
         assert taxon in newick, f"{taxon} missing from tree: {newick[:120]}"
+
+
+@pytest.mark.skipif(not RNASEQ_TX.exists(), reason="rnaseq_small fixture missing")
+def test_rnaseq_deg_full_chain(_runtime):
+    """fastp → Salmon → DESeq2 (→ enrichment + MultiQC) end-to-end.
+
+    The sample sheet is written at run time with absolute paths to the
+    committed reads (a committed sheet would hard-code one machine's
+    paths).  10 transcripts are planted ~4× up in the treated group, so
+    DESeq2 must recover a positive log2FoldChange for them.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    sheet = ws / "samples.csv"
+    rows = ["sample_id,fastq_r1,fastq_r2,condition"]
+    for s, cond in [("ctl1", "control"), ("ctl2", "control"),
+                    ("trt1", "treated"), ("trt2", "treated")]:
+        r1 = (RNASEQ / f"{s}_R1.fastq.gz").resolve()
+        r2 = (RNASEQ / f"{s}_R2.fastq.gz").resolve()
+        rows.append(f"{s},{r1},{r2},{cond}")
+    sheet.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    result = get("rnaseq_deg")(
+        sample_sheet=sheet, transcriptome=RNASEQ_TX.resolve(),
+        out_dir=ws / "out",
+    )
+    assert result.ok, f"rnaseq_deg failed: {(result.stderr or '')[:500]}"
+
+    deg = _find_one(ws, "deg_results.csv")
+    assert deg is not None, "no DESeq2 deg_results.csv"
+    lines = deg.read_text().splitlines()
+    assert "log2FoldChange" in lines[0], "missing DESeq2 columns"
+    assert len(lines) - 1 >= 50, f"expected ~60 transcripts, got {len(lines)-1}"
+    # The planted up-regulated transcript must show a positive fold change.
+    tx1 = [r for r in lines if r.startswith("tx0001,")]
+    assert tx1, "tx0001 missing from results"
+    log2fc = float(tx1[0].split(",")[2])
+    assert log2fc > 1.0, f"planted DE transcript should be up, got log2FC={log2fc}"
+
+    # MultiQC aggregated report.
+    assert _find_one(ws, "multiqc_report.html") is not None, "no MultiQC report"
