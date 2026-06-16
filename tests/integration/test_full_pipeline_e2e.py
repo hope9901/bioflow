@@ -52,6 +52,10 @@ GWAS = REPO / "data" / "test" / "gwas_small"
 GWAS_GPA = GWAS / "gene_presence_absence.csv"
 GWAS_TRAITS = GWAS / "traits.csv"
 
+CAFE = REPO / "data" / "test" / "cafe_small"
+CAFE_TREE = CAFE / "tree.nwk"
+CAFE_FAMILIES = CAFE / "families.tsv"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -205,3 +209,25 @@ def test_gwas_full_chain(_runtime):
     assert "Benjamini_H_p" in text.splitlines()[0], "missing Scoary stat columns"
     # The perfectly-associated gene must surface as a hit.
     assert "gene_0005" in text, "Scoary missed the planted association"
+
+
+@pytest.mark.skipif(not CAFE_TREE.exists(), reason="cafe_small fixture missing")
+def test_cafe_evolution_full_chain(_runtime):
+    """CAFE5 gene-family expansion/contraction end-to-end.
+
+    Also guards the LF-line-ending requirement: CAFE5 reads the species
+    columns from the table header and a stray CR breaks the last one.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("cafe_evolution")(
+        tree=CAFE_TREE, count_table=CAFE_FAMILIES, out_dir=ws / "out",
+    )
+    assert result.ok, f"cafe_evolution failed: {(result.stderr or '')[:500]}"
+
+    # CAFE5's core outputs.
+    report = _find_one(ws, "Base_report.cafe")
+    assert report is not None, "no CAFE5 Base_report.cafe"
+    fam = _find_one(ws, "Base_family_results.txt")
+    assert fam is not None, "no CAFE5 Base_family_results.txt"

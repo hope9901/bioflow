@@ -1,0 +1,18 @@
+# Test fixtures are read by Linux containers (FastANI, CAFE5, …).  Some
+# tool parsers don't strip a stray CR, so a CRLF checkout on Windows
+# silently corrupts them (CAFE5 read the last column header as "D\r" and
+# reported "D was not found").  Force LF for text fixtures everywhere,
+# and mark the compressed reads binary so git never touches them.
+data/test/**/*.fna   text eol=lf
+data/test/**/*.fa    text eol=lf
+data/test/**/*.fasta text eol=lf
+data/test/**/*.tsv   text eol=lf
+data/test/**/*.csv   text eol=lf
+data/test/**/*.nwk   text eol=lf
+data/test/**/*.txt   text eol=lf
+data/test/**/*.gz    binary
+
+# Registry + recipe shell commands also end up inside Linux containers;
+# keep them LF regardless of host.
+*.yaml text eol=lf
+registry/** text eol=lf

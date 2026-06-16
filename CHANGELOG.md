@@ -37,6 +37,17 @@ ship bug fixes only.  Breaking changes to the documented public API
   `data/test/genomes_small/` (phiX174 + a 25-SNP variant) and
   `data/test/gwas_small/` (12-gene × 10-sample GPA).  Recipes validated
   end-to-end: 1 (prokaryote) → 5.
+- **cafe_evolution** (CAFE5 gene-family expansion/contraction) added as
+  the 6th, on `data/test/cafe_small/` (ultrametric 4-taxon tree + 60
+  families).
+
+### Fixed — LF line endings for container-read fixtures
+- A new `.gitattributes` pins text test fixtures (and registry YAMLs) to
+  LF.  CAFE5 doesn't strip a trailing CR, so a CRLF checkout on Windows
+  made it read the last species column as `D\r` and fail with "D was not
+  found in gene family …".  FASTA parsers tolerated the CR, but the
+  table parser did not — LF is now enforced so fixtures are safe on
+  every host.
 
 ### Fixed — bounded stdout retention (no orchestrator OOM on chatty tools)
 - `DockerBackend.run` accumulated **every** stdout line in memory; a
