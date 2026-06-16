@@ -48,6 +48,10 @@ GENOMES = REPO / "data" / "test" / "genomes_small"
 G1 = GENOMES / "genome1.fna"
 G2 = GENOMES / "genome2.fna"
 
+GWAS = REPO / "data" / "test" / "gwas_small"
+GWAS_GPA = GWAS / "gene_presence_absence.csv"
+GWAS_TRAITS = GWAS / "traits.csv"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -181,3 +185,23 @@ def test_pangenome_full_chain(_runtime):
     body = summary.read_text()
     assert "Core genes" in body
     assert "Total genes" in body
+
+
+@pytest.mark.skipif(not GWAS_GPA.exists(), reason="gwas_small fixture missing")
+def test_gwas_full_chain(_runtime):
+    """Scoary GWAS end-to-end on a synthetic Roary GPA + phenotype."""
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("gwas")(
+        traits_csv=GWAS_TRAITS, gpa_csv=GWAS_GPA, out_dir=ws / "out",
+    )
+    assert result.ok, f"gwas failed: {(result.stderr or '')[:500]}"
+
+    # Scoary writes <Trait>.results.csv (one per phenotype column).
+    res = _find_one(ws, "Resistant.results.csv")
+    assert res is not None, "no Scoary results CSV"
+    text = res.read_text(errors="replace")
+    assert "Benjamini_H_p" in text.splitlines()[0], "missing Scoary stat columns"
+    # The perfectly-associated gene must surface as a hit.
+    assert "gene_0005" in text, "Scoary missed the planted association"

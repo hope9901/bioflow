@@ -31,9 +31,12 @@ ship bug fixes only.  Breaking changes to the documented public API
 ### Added — full e2e for the comparative-genomics recipes
 - `tests/integration/test_full_pipeline_e2e.py` gains real end-to-end
   tests for **amr_vf_catalogue** (ABRicate fan-out, bundled DBs),
-  **ani_matrix** (all-vs-all FastANI), and **pangenome** (Prokka × N →
-  Roary), all on a new `data/test/genomes_small/` fixture (phiX174 + a
-  25-SNP variant).  Recipes validated end-to-end: 1 (prokaryote) → 4.
+  **ani_matrix** (all-vs-all FastANI), **pangenome** (Prokka × N →
+  Roary), and **gwas** (Scoary on a synthetic Roary GPA + phenotype,
+  recovers a planted association).  Fixtures:
+  `data/test/genomes_small/` (phiX174 + a 25-SNP variant) and
+  `data/test/gwas_small/` (12-gene × 10-sample GPA).  Recipes validated
+  end-to-end: 1 (prokaryote) → 5.
 
 ### Fixed — bounded stdout retention (no orchestrator OOM on chatty tools)
 - `DockerBackend.run` accumulated **every** stdout line in memory; a
