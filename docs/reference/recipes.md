@@ -1,6 +1,6 @@
 # Recipes
 
-**19 recipes**, each invokable as `bioflow recipe run <name> [options]`.  Auto-generated from the recipe registry by `scripts/gen_docs.py`.
+**20 recipes**, each invokable as `bioflow recipe run <name> [options]`.  Auto-generated from the recipe registry by `scripts/gen_docs.py`.
 
 ## `amr_vf_catalogue`
 
@@ -25,10 +25,10 @@ ATAC-seq: TrimGalore → Bowtie2 → Picard → MACS3 → TOBIAS
 *5 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0`
-- **align** — `quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0`
+- **align** — `quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7`
 - **dedup** — `quay.io/biocontainers/picard:3.2.0--hdfd78af_0`
-- **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py310h58a0a2b_1`
-- **footprint** — `quay.io/biocontainers/tobias:0.16.1--py310h590aeec_0`
+- **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py312he57d009_3`
+- **footprint** — `quay.io/biocontainers/tobias:0.16.1--py312h1f1cfbb_1`
 
 ## `cafe_evolution`
 
@@ -45,10 +45,10 @@ ChIP-seq: TrimGalore → Bowtie2 → Picard → MACS3 → HOMER
 *5 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0`
-- **align** — `quay.io/biocontainers/bowtie2:2.5.4--py39h6fed5c7_0`
+- **align** — `quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7`
 - **dedup** — `quay.io/biocontainers/picard:3.2.0--hdfd78af_0`
-- **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py310h58a0a2b_1`
-- **annotate_peaks** — `quay.io/biocontainers/homer:4.11.1--pl5321h9f5acd7_7`
+- **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py312he57d009_3`
+- **annotate_peaks** — `quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1`
 
 ## `cog_enrichment`
 
@@ -73,8 +73,8 @@ Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm
 *4 stage(s):*
 
 - **read_qc** — `quay.io/biocontainers/nanoplot:1.43.0--pyhdfd78af_0`
-- **assemble** — `quay.io/biocontainers/flye:2.9.5--py39h3d6084e_1`
-- **polish** — `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_2`
+- **assemble** — `quay.io/biocontainers/flye:2.9.5--py310h275bdba_2`
+- **polish** — `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0`
 - **assess** — `quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0`
 
 ## `germline_variants`
@@ -97,6 +97,20 @@ Scoary GWAS over a Roary pangenome
 
 - **run_scoary** — `quay.io/biocontainers/scoary:1.6.16--py_2`
 
+## `joint_genotyping`
+
+Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs → GenotypeGVCFs → hard-filter → SnpEff
+
+*7 stage(s):*
+
+- **qc_one** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **align_one** — `quay.io/biocontainers/bwa:0.7.18--he4a0461_0`
+- **call_gvcf** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
+- **combine_gvcfs** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
+- **genotype_cohort** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
+- **hard_filter** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
+- **annotate_cohort** — `quay.io/biocontainers/snpeff:5.2--hdfd78af_1`
+
 ## `metagenome_assembly`
 
 Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → CheckM2
@@ -106,7 +120,7 @@ Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → C
 - **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
 - **assemble** — `quay.io/biocontainers/megahit:1.2.9--h2e03b76_1`
 - **map_back** — `quay.io/biocontainers/minimap2:2.28--he4a0461_0`
-- **bin_genomes** — `quay.io/biocontainers/metabat2:2.17--h4da6f23_2`
+- **bin_genomes** — `quay.io/biocontainers/metabat2:2.17--h6f16272_1`
 - **assess_bins** — `quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0`
 
 ## `metagenomics_profile`
@@ -117,17 +131,18 @@ Shotgun metagenomic profiling: fastp → Kraken2 → Bracken
 
 - **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
 - **kraken2_classify** — `quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0`
-- **bracken_abundance** — `quay.io/biocontainers/bracken:2.9--py39h7cff6ad_0`
+- **bracken_abundance** — `quay.io/biocontainers/bracken:2.9--py39h9e0f934_1`
 
 ## `methylation_wgbs`
 
 WGBS methylation: TrimGalore → Bismark → methylKit
 
-*3 stage(s):*
+*4 stage(s):*
 
+- **bismark_prep** — `quay.io/biocontainers/bismark:0.24.2--hdfd78af_0`
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0`
 - **bismark_align** — `quay.io/biocontainers/bismark:0.24.2--hdfd78af_0`
-- **methylkit_dmr** — `bioconductor/bioconductor_full:RELEASE_3_18`
+- **methylkit_dmr** — `quay.io/biocontainers/bioconductor-methylkit:1.36.0--r45ha27e39d_0`
 
 ## `pangenome`
 
@@ -165,19 +180,21 @@ LC-MS/MS DDA proteomics: msconvert → Comet → Percolator
 *3 stage(s):*
 
 - **msconvert** — `chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest`
-- **comet_search** — `quay.io/biocontainers/comet-ms:2024020--h7ec2334_0`
-- **percolator_fdr** — `quay.io/biocontainers/percolator:3.06.1--hf1761c0_2`
+- **comet_search** — `quay.io/biocontainers/comet-ms:2026011--h9ee0642_0`
+- **percolator_fdr** — `quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2`
 
 ## `rnaseq_deg`
 
-RNA-seq DEG: fastp → Salmon → DESeq2
+RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC
 
-*4 stage(s):*
+*6 stage(s):*
 
+- **multiqc_report** — `quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0`
 - **qc_one** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
-- **salmon_index** — `quay.io/biocontainers/salmon:1.10.3--hb950928_0`
-- **salmon_quant** — `quay.io/biocontainers/salmon:1.10.3--hb950928_0`
-- **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.44.0--r43hf17093f_0`
+- **salmon_index** — `quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5`
+- **salmon_quant** — `quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5`
+- **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0`
+- **enrich_go** — `quay.io/biocontainers/gseapy:1.1.3--py311h5e00ca1_1`
 
 ## `scrna_seq`
 
@@ -186,5 +203,5 @@ scRNA-seq (10x): STARsolo + Scanpy QC/cluster/UMAP
 *2 stage(s):*
 
 - **starsolo** — `quay.io/biocontainers/star:2.7.11b--h43eeafb_0`
-- **scanpy_analyze** — `quay.io/biocontainers/scanpy:1.10.1--pyhdfd78af_0`
+- **scanpy_analyze** — `quay.io/biocontainers/scanpy:1.7.2--pyhdfd78af_0`
 

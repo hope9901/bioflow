@@ -52,6 +52,7 @@ nav:
   - Reference:
       - Recipes: reference/recipes.md
       - Tools: reference/tools.md
+      - E2E coverage & external data: reference/e2e-coverage.md
   - Architecture: architecture.md
   - Benchmarks:
       - nf-core concordance: benchmarks/nfcore-concordance.md

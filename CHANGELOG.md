@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Docs — strict build fixed + e2e-coverage page
+- `mkdocs build --strict` was aborting: three docs links pointed at repo
+  files outside the `docs/` tree (`conda-recipe/meta.yaml`,
+  `scripts/compare_nfcore.py`, the nf-core workflow), which strict mode
+  flags as unresolved.  Re-pointed them at GitHub blob URLs.
+- New **`reference/e2e-coverage.md`** documents which 9 recipes have a
+  committed full end-to-end fixture and which 10 are gated on external
+  reference data (with the `bioflow db fetch` key for each), plus the one
+  utility recipe.  Regenerated `reference/recipes.md` / `tools.md` from
+  the registry (now 20 recipes; `joint_genotyping` was missing and image
+  tags were stale).
+
 ### Fixed — ani_matrix broken for genomes outside the workspace
 - **Bug a full e2e caught**: FastANI reads genome paths from a *list
   file*, not the command, so the SDK's command-path translator and
