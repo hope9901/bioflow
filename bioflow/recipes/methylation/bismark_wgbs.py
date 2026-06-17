@@ -5,9 +5,15 @@ End-to-end workflow:
         → Bismark (genome prep + bisulfite alignment + methylation extract)
         → methylKit (differentially-methylated region calling)
 
-Bismark needs a pre-prepared bisulfite genome (`bismark_genome_preparation`)
-in the directory passed via --bismark-genome.  If the directory hasn't
-been bisulfite-converted yet, the genome-prep stage handles it.
+The ``--bismark-genome`` argument accepts **either**:
+
+* a reference FASTA (``.fa`` / ``.fasta`` / ``.fna``), or a directory
+  containing one — bioflow runs ``bismark_genome_preparation`` for you
+  (the ``bismark_prep`` stage), so the recipe works from a plain
+  reference; **or**
+* an already-prepared Bismark genome directory (one that already holds a
+  ``Bisulfite_Genome/`` subdirectory) — preparation is skipped and the
+  index is used directly.
 
 methylKit assumes a paired study design: treatment vs. control with a
 matched-length list of CpG report files.  Pass --sample-ids /
@@ -17,7 +23,7 @@ Researcher (Tier B) usage::
 
     bioflow recipe run methylation_wgbs \\
         --r1 sample_R1.fq.gz --r2 sample_R2.fq.gz \\
-        --bismark-genome /refs/bismark/hg38 \\
+        --bismark-genome /refs/hg38.fa \\
         --sample-id sample01 --out ./out
 """
 from __future__ import annotations
@@ -43,7 +49,25 @@ def trim(r1: Path, r2: Path, *, out_dir):
 
 
 @stage(image="quay.io/biocontainers/bismark:0.24.2--hdfd78af_0",
-       cpu=8, ram_gb=32, depends_on=trim,
+       cpu=4, ram_gb=8)
+def bismark_prep(genome: Path, *, out_dir):
+    """``bismark_genome_preparation`` — bisulfite-convert the reference.
+
+    Copies the reference FASTA into a fresh, writable genome directory
+    under the workspace and runs genome preparation there.  Bismark
+    writes the ``Bisulfite_Genome/`` index *next to* the FASTA, so the
+    FASTA must sit on a writable mount — an external, read-only
+    ``--bismark-genome`` reference can't be prepared in place, hence the
+    copy into ``out_dir`` (always under the ``/work`` mount).
+    """
+    return (
+        f"bash -c 'cp {genome} {out_dir}/ && "
+        f"bismark_genome_preparation {out_dir}'"
+    )
+
+
+@stage(image="quay.io/biocontainers/bismark:0.24.2--hdfd78af_0",
+       cpu=8, ram_gb=32, depends_on=(trim, bismark_prep),
        retry=2, retry_with={"ram_gb": "2x"})
 def bismark_align(clean, bismark_genome: Path, sample_id: str, *, out_dir):
     """Bismark bisulfite alignment + methylation extractor.
@@ -78,8 +102,11 @@ def methylkit_dmr(bismark, sample_id: str, *, out_dir,
     return (
         f"Rscript -e \""
         f"library(methylKit); "
+        # Match the CpG report (optionally .gz) with a [.] character class
+        # for the literal dot — a backslash escape (\\.) would be eaten by
+        # the shell before R sees it and trips R's "unrecognized escape".
         f"f <- list.files('{bismark.out_dir}/extracted', "
-        f"pattern='CpG_report.txt(\\\\.gz)?$', full.names=TRUE)[1]; "
+        f"pattern='CpG_report[.]txt', full.names=TRUE)[1]; "
         f"if (is.na(f)) stop('No CpG_report found'); "
         f"obj <- methRead(as.list(f), sample.id=as.list('{sample_id}'), "
         f"assembly='{genome_build}', pipeline='bismarkCytosineReport', "
@@ -93,8 +120,39 @@ def methylkit_dmr(bismark, sample_id: str, *, out_dir,
 
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
+def _resolve_genome_dir(bismark_genome: Path) -> Path:
+    """Return a prepared Bismark genome directory.
+
+    * already-prepared dir (has ``Bisulfite_Genome/``) → use as-is, no
+      preparation stage.
+    * reference FASTA, or a dir containing one → run ``bismark_prep`` and
+      return its output dir.
+    """
+    bismark_genome = Path(bismark_genome)
+    if (bismark_genome / "Bisulfite_Genome").is_dir():
+        return bismark_genome  # already prepared — skip preparation
+
+    if bismark_genome.is_dir():
+        fastas = sorted(
+            p for ext in ("*.fa", "*.fasta", "*.fna")
+            for p in bismark_genome.glob(ext)
+        )
+        if not fastas:
+            raise FileNotFoundError(
+                f"--bismark-genome {bismark_genome} is a directory with no "
+                f"FASTA (*.fa/*.fasta/*.fna) to prepare and no "
+                f"Bisulfite_Genome/ index; pass a reference FASTA or a "
+                f"pre-prepared Bismark genome directory."
+            )
+        genome_fa = fastas[0]
+    else:
+        genome_fa = bismark_genome  # a FASTA file
+
+    return Path(bismark_prep(genome_fa).out_dir)
+
+
 @pipeline(
-    stages=[trim, bismark_align, methylkit_dmr],
+    stages=[trim, bismark_prep, bismark_align, methylkit_dmr],
     description="WGBS methylation: TrimGalore → Bismark → methylKit",
 )
 def methylation_wgbs(
@@ -112,7 +170,8 @@ def methylation_wgbs(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = trim(Path(r1), Path(r2))
-    bm = bismark_align(clean, Path(bismark_genome), sample_id)
+    genome_dir = _resolve_genome_dir(bismark_genome)
+    bm = bismark_align(clean, genome_dir, sample_id)
     return methylkit_dmr(bm, sample_id,
                         genome_build=genome_build, context=context)
 

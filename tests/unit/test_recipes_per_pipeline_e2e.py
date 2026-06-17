@@ -168,13 +168,23 @@ class TestExecution:
 
     def test_methylation_wgbs_runs(self, tmp_path):
         r1, r2 = _make_fastq_pair(tmp_path)
-        bg = tmp_path / "bisgen"
-        bg.mkdir()
+        # A bare reference FASTA: exercises the auto-prep path
+        # (trim → bismark_prep → bismark_align → methylkit).
+        ref = tmp_path / "genome.fa"
+        ref.write_text(">chr1\nACGTACGTACGT\n", encoding="utf-8")
         result = get("methylation_wgbs")(
-            r1=r1, r2=r2, bismark_genome=bg,
+            r1=r1, r2=r2, bismark_genome=ref,
             out_dir=tmp_path / "out", sample_id="s",
         )
         assert result.ok
+
+    def test_methylation_wgbs_prepared_genome_skips_prep(self, tmp_path):
+        """A dir that already holds Bisulfite_Genome/ is used directly."""
+        from bioflow.recipes.methylation.bismark_wgbs import _resolve_genome_dir
+
+        prepared = tmp_path / "hg38"
+        (prepared / "Bisulfite_Genome").mkdir(parents=True)
+        assert _resolve_genome_dir(prepared) == prepared
 
     def test_proteomics_dda_runs(self, tmp_path):
         raw = tmp_path / "raw"

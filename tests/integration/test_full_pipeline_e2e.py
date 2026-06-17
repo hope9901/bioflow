@@ -63,6 +63,11 @@ PHYLO_GPA = PHYLO / "gene_presence_absence.csv"
 RNASEQ = REPO / "data" / "test" / "rnaseq_small"
 RNASEQ_TX = RNASEQ / "transcriptome.fa"
 
+METHYL = REPO / "data" / "test" / "methyl_small"
+METHYL_GENOME = METHYL / "genome.fa"
+METHYL_R1 = METHYL / "sample01_R1.fastq.gz"
+METHYL_R2 = METHYL / "sample01_R2.fastq.gz"
+
 
 @pytest.fixture
 def _runtime(tmp_path):
@@ -300,3 +305,39 @@ def test_rnaseq_deg_full_chain(_runtime):
 
     # MultiQC aggregated report.
     assert _find_one(ws, "multiqc_report.html") is not None, "no MultiQC report"
+
+
+@pytest.mark.skipif(not METHYL_GENOME.exists(), reason="methyl_small fixture missing")
+def test_methylation_wgbs_full_chain(_runtime):
+    """TrimGalore → bismark_prep → Bismark → methylKit end-to-end.
+
+    Passing a bare reference FASTA exercises the auto-prep stage
+    (bismark_genome_preparation) as well as alignment, methylation
+    extraction, and the methylKit summary.  The synthetic reads are
+    ~70 % CpG-methylated, so the run produces a real cytosine report and
+    methylation-density plot.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("methylation_wgbs")(
+        r1=METHYL_R1.resolve(), r2=METHYL_R2.resolve(),
+        bismark_genome=METHYL_GENOME.resolve(),
+        out_dir=ws / "out", sample_id="sample01",
+    )
+    assert result.ok, f"methylation_wgbs failed: {(result.stderr or '')[:500]}"
+
+    # methylKit density/coverage summary.
+    assert _find_one(ws, "methylation_density.pdf") is not None, \
+        "no methylKit methylation_density.pdf"
+
+    # Bismark cytosine report — must carry real CpG calls.
+    report = _find_one(ws, "*CpG_report.txt", "*CpG_report.txt.gz")
+    assert report is not None, "no Bismark CpG_report"
+    body = report.read_text()
+    # At least one CpG with a non-zero methylated *or* unmethylated count.
+    has_call = any(
+        len(cols) >= 5 and (cols[3] != "0" or cols[4] != "0")
+        for cols in (line.split("\t") for line in body.splitlines())
+    )
+    assert has_call, "CpG report has no covered cytosines"

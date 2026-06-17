@@ -36,7 +36,7 @@ ship bug fixes only.  Breaking changes to the documented public API
   recovers a planted association).  Fixtures:
   `data/test/genomes_small/` (phiX174 + a 25-SNP variant) and
   `data/test/gwas_small/` (12-gene × 10-sample GPA).  Recipes validated
-  end-to-end: 1 (prokaryote) → 8 (see below).
+  end-to-end: 1 (prokaryote) → 9 (see below).
 - **cafe_evolution** (CAFE5 gene-family expansion/contraction) added as
   the 6th, on `data/test/cafe_small/` (ultrametric 4-taxon tree + 60
   families).
@@ -49,6 +49,32 @@ ship bug fixes only.  Breaking changes to the documented public API
   recovers the planted signal (`tx0001` log2FC ≈ 2) and the run finishes
   in seconds.  The sample sheet is built by the test at run time so no
   machine-specific paths are committed.
+- **methylation_wgbs** (TrimGalore → Bismark → methylKit) added as the
+  9th, on `data/test/methyl_small/` (phiX174 + 3,000 synthetic
+  directional bisulfite read pairs, ~70 % CpG-methylated).  The reads
+  map at 100 % and Bismark produces a real cytosine report; the genome
+  is **not** committed pre-prepared — the new `bismark_prep` stage
+  (below) bisulfite-converts it at run time, so no version-tied bowtie2
+  index lands in git.  Regenerated deterministically by
+  `scripts/gen_methyl_fixture.py`.
+
+### Added — methylation_wgbs prepares its genome (matches the docs)
+- The recipe's docstring promised automatic genome preparation, but the
+  pipeline had no such stage — it silently required a pre-prepared
+  `Bisulfite_Genome/` directory, so running from a plain reference FASTA
+  failed.  A new **`bismark_prep`** stage now runs
+  `bismark_genome_preparation` when `--bismark-genome` is a FASTA (or a
+  directory holding one); an already-prepared directory is detected and
+  used directly, skipping preparation.  `methylation_wgbs` is now 4
+  stages (trim → bismark_prep → bismark → methylkit).
+
+### Fixed — methylKit CpG-report glob (shell ate the regex escape)
+- `methylkit_dmr` matched the cytosine report with `pattern='…txt(\.gz)?$'`,
+  but the `\.` escape was stripped by the shell before R parsed the
+  string, so R aborted with *"'\.' is an unrecognized escape in character
+  string"* and the whole recipe failed at the final stage.  Replaced with
+  a `[.]` character class (no backslash to escape), which matches the
+  report — with or without a `.gz` suffix — robustly.
 
 ### Fixed — rnaseq_deg DESeq2 step (two latent bugs)
 - The `deseq2_diff` stage required **tximport**, which the
