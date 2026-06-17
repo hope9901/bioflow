@@ -92,8 +92,11 @@ def percolator_fdr(search, *, out_dir, fdr_threshold: float = 0.01):
         f"             --results-psms {out_dir}/$base.psms.tsv "
         f"             \"$f\"; "
         f"done && "
-        # 1% FDR cut for downstream
-        f"awk -F\\t -v q={fdr_threshold} "
+        # 1% FDR cut for downstream.  -F must reach awk as the two chars
+        # \\t (which awk reads as a tab); a bare -F\\t would have its
+        # backslash stripped by bash, leaving the field separator the
+        # literal letter 't'.  Double-quoting keeps the backslash.
+        f"awk -F\"\\t\" -v q={fdr_threshold} "
         f"      \"NR==1 || \\$3 < q\" "
         f"      {out_dir}/*.psms.tsv > {out_dir}/passing_psms.tsv'"
     )

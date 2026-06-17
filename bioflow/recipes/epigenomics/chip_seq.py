@@ -7,9 +7,10 @@ End-to-end workflow:
         → MACS3 callpeak (narrow peaks vs. input control)
         → HOMER annotatePeaks + findMotifsGenome (annotation + motifs)
 
-Optional input/IgG control: pass --ctrl-r1 / --ctrl-r2 to mirror the
-sample arm; control reads go through the same Bowtie2 + Picard chain
-and the resulting BAM is handed to MACS3 as ``-c``.
+Optional input/IgG control: pass ``--ctrl-bam`` pointing at a
+pre-aligned, deduplicated control BAM; MACS3 receives it as ``-c``.
+(Raw control reads are not aligned by this recipe — run the sample arm
+on the control FASTQs separately, or use the BAM you already have.)
 
 Researcher (Tier B) usage::
 

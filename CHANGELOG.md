@@ -14,6 +14,25 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — static audit of the never-e2e'd recipes (round 1)
+A static pass over the 10 recipes that have no committed full-e2e fixture
+(they need external reference data) turned up several latent defects:
+- **proteomics_dda**: the percolator FDR cut used ``awk -F\t``, whose
+  backslash bash strips before awk sees it — so the field separator
+  became the literal letter ``t`` instead of a tab, and
+  ``passing_psms.tsv`` was filtered on garbage columns.  Now ``-F"\t"``,
+  which reaches awk as a real tab (verified).
+- **eukaryote_assembly**: the docstring advertised ``polish=False`` to
+  skip Medaka for HiFi reads, but no such parameter existed.  Added it
+  (the ``polish`` stage is renamed ``polish_consensus`` to free the
+  name); ``assess`` already falls back to Flye's ``assembly.fasta``.
+- **chip_seq**: docstring promised ``--ctrl-r1 / --ctrl-r2`` raw-control
+  alignment the recipe never implemented — corrected to document the
+  actual ``--ctrl-bam`` (pre-aligned control) input.
+- **metagenomics_profile**: ``bioflow db fetch`` example used a
+  catalog key that doesn't exist (``kraken2_standard`` →
+  ``kraken2_standard_8gb``) and now notes Bracken's ``kmer_distrib`` need.
+
 ### Docs — strict build fixed + e2e-coverage page
 - `mkdocs build --strict` was aborting: three docs links pointed at repo
   files outside the `docs/` tree (`conda-recipe/meta.yaml`,

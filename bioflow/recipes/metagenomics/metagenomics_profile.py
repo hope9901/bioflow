@@ -6,10 +6,11 @@ End-to-end short-read shotgun-metagenomic workflow:
 Requires a prebuilt Kraken2 database mounted into the workspace (e.g.
 the standard MiniKraken2 or PlusPF DB).  Use::
 
-    bioflow db fetch kraken2_standard --dest /refs
+    bioflow db fetch kraken2_standard_8gb --dest /refs
 
-…to install one (when the catalog has it), or pass --kraken2-db pointing
-to a pre-existing directory.
+…to install one, or pass --kraken2-db pointing to a pre-existing
+directory.  (Bracken also needs the ``databaseNNmers.kmer_distrib``
+files that ship inside the standard Kraken2 DB tarball.)
 
 Researcher (Tier B) usage::
 

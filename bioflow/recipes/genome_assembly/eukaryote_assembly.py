@@ -7,7 +7,7 @@ End-to-end ONT/HiFi workflow using the long-read tools added in 0.1.10:
         → compleasm + gfastats (assembly QC)
 
 For HiFi reads, polishing is usually unnecessary — pass
-``polish=False`` to skip the Medaka step.
+``--polish false`` (``polish=False``) to skip the Medaka step.
 
 Researcher (Tier B) usage::
 
@@ -46,7 +46,7 @@ def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
 
 @stage(image="quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0",
        cpu=8, ram_gb=32, depends_on=assemble)
-def polish(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400bps_sup_v5.0.0"):
+def polish_consensus(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400bps_sup_v5.0.0"):
     """Medaka ONT consensus polish of the Flye assembly."""
     return (
         f"medaka_consensus -i {long_reads} "
@@ -56,7 +56,7 @@ def polish(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400
 
 
 @stage(image="quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0",
-       cpu=8, ram_gb=16, depends_on=polish)
+       cpu=8, ram_gb=16, depends_on=polish_consensus)
 def assess(polished, *, out_dir, busco_lineage: str = "eukaryota_odb10",
            busco_db: Path = Path("/refs/busco")):
     """compleasm completeness + gfastats contiguity (gfastats chained)."""
@@ -72,7 +72,7 @@ def assess(polished, *, out_dir, busco_lineage: str = "eukaryota_odb10",
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[read_qc, assemble, polish, assess],
+    stages=[read_qc, assemble, polish_consensus, assess],
     description="Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm",
 )
 def eukaryote_assembly(
@@ -80,19 +80,26 @@ def eukaryote_assembly(
     *,
     out_dir: Path,
     read_mode: str = "--nano-hq",
+    polish: bool = True,
     medaka_model: str = "r1041_e82_400bps_sup_v5.0.0",
     busco_lineage: str = "eukaryota_odb10",
     busco_db: Path = Path("/refs/busco"),
 ):
-    """NanoPlot → Flye → Medaka → compleasm end-to-end."""
+    """NanoPlot → Flye → Medaka → compleasm end-to-end.
+
+    ``polish=False`` skips the Medaka step — appropriate for HiFi reads,
+    whose per-base accuracy makes ONT consensus polishing unnecessary.
+    ``assess`` then reads Flye's ``assembly.fasta`` directly (it already
+    falls back from ``consensus.fasta``).
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     lr = Path(long_reads)
     qc = read_qc(lr)
     asm = assemble(qc, lr, read_mode=read_mode)
-    pol = polish(asm, lr, medaka_model=medaka_model)
-    return assess(pol, busco_lineage=busco_lineage, busco_db=Path(busco_db))
+    polished = polish_consensus(asm, lr, medaka_model=medaka_model) if polish else asm
+    return assess(polished, busco_lineage=busco_lineage, busco_db=Path(busco_db))
 
 
 register("eukaryote_assembly", eukaryote_assembly)
