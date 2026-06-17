@@ -339,7 +339,7 @@ behavioural changes.
 
 Most bioinformaticians install via conda/mamba, not pip, so a Bioconda
 package widens reach substantially.  The recipe lives at
-[`conda-recipe/meta.yaml`](../conda-recipe/meta.yaml); it is a
+[`conda-recipe/meta.yaml`](https://github.com/hope9901/bioflow/blob/main/conda-recipe/meta.yaml); it is a
 `noarch: python` package (the actual tools run as Docker containers, so
 only bioflow's small pure-Python stack is a conda dependency).
 

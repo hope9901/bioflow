@@ -4,7 +4,7 @@
 > recipes produce the same calls as the community-standard nf-core
 > pipelines?  This page defines the golden datasets, the method, and the
 > acceptance thresholds.  The scoring harness is
-> [`scripts/compare_nfcore.py`](../../scripts/compare_nfcore.py).
+> [`scripts/compare_nfcore.py`](https://github.com/hope9901/bioflow/blob/main/scripts/compare_nfcore.py).
 
 ## Why this matters
 
@@ -82,7 +82,7 @@ agreed values become the CI gate.
 
 ## Running it (operator)
 
-See [`.github/workflows/nfcore-concordance.yml`](../../.github/workflows/nfcore-concordance.yml)
+See [`.github/workflows/nfcore-concordance.yml`](https://github.com/hope9901/bioflow/blob/main/.github/workflows/nfcore-concordance.yml)
 — a `workflow_dispatch` job that expects a self-hosted runner (or a large
 GitHub runner) with the references staged, runs both pipelines, and
 invokes the harness with the thresholds above.  The job is **not** part
