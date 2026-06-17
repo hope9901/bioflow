@@ -48,7 +48,7 @@ jobs:
             -v -m docker \
             --junitxml=reports/smoke.xml
 
-      - name: Run full-pipeline e2e (prokaryote_assembly + comparative genomics)
+      - name: Run full-pipeline e2e (all 9 recipes with committed fixtures)
         env:
           BIOFLOW_LOG_LEVEL: INFO
         run: |
