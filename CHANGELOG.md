@@ -14,6 +14,8 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-18
+
 ### Fixed — aligner images had no samtools (5 recipes broke at alignment)
 The plain single-tool aligner BioContainers (`bwa`, `bowtie2`,
 `minimap2`) do **not** bundle samtools, yet five recipes ran

@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
 [![Downloads](https://img.shields.io/pypi/dm/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
 [![python](https://img.shields.io/pypi/pyversions/bioflowkit.svg)](https://pypi.org/project/bioflowkit/)
-[![tests](https://img.shields.io/badge/tests-609%20passed-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-631%20passed-brightgreen)](tests/)
 [![nightly smoke](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml/badge.svg)](https://github.com/hope9901/bioflow/actions/workflows/nightly-smoke.yml)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://hope9901.github.io/bioflow/)
