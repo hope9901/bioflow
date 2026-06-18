@@ -28,6 +28,15 @@ from pathlib import Path
 from bioflow import stage, pipeline
 from bioflow.recipes import register
 
+# A BioContainer that bundles **both** bwa and samtools.  The plain
+# ``quay.io/biocontainers/bwa`` image carries bwa only (no samtools), so
+# any ``bwa mem | samtools sort`` chain fails there — this mulled image
+# (bwa 0.7.19 + samtools 1.22.1) is the one that actually works.
+_BWA_SAMTOOLS = (
+    "quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:"
+    "f45ad9036aa41bb10f875a330fa877d8869018a1-0"
+)
+
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
@@ -42,17 +51,37 @@ def qc_trim(r1: Path, r2: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bwa:0.7.18--he4a0461_0",
-       cpu=8, ram_gb=16, depends_on=qc_trim)
-def align(clean, reference: Path, sample_id: str, *, out_dir):
-    """BWA-MEM alignment → sorted, indexed BAM with read-group.
+@stage(image=_BWA_SAMTOOLS, cpu=4, ram_gb=8)
+def prepare_reference(reference: Path, *, out_dir):
+    """Build the BWA index + ``.fai`` + sequence ``.dict``, once.
 
-    Builds the BWA index in-place if the reference hasn't been indexed.
-    samtools is bundled in the BWA BioContainer.
+    GATK needs all three next to the reference, and the per-sample
+    ``align`` / ``call_variants`` stages would otherwise each have to
+    build them — wasteful here, and an outright race in the cohort
+    recipe's fan-out.  Doing it once up front (and writing the
+    side-effect index files next to the reference, on its read-write
+    mount) lets the gatk-image call stage stay samtools-free.
     """
     return (
         f"bash -c '"
-        f"[ -f {reference}.bwt ] || bwa index {reference}; "
+        f"REF={reference}; "
+        f"[ -f \"$REF\".bwt ] || bwa index \"$REF\"; "
+        f"[ -f \"$REF\".fai ] || samtools faidx \"$REF\"; "
+        f"DICT=\"${{REF%.*}}.dict\"; "
+        f"[ -f \"$DICT\" ] || samtools dict \"$REF\" -o \"$DICT\"'"
+    )
+
+
+@stage(image=_BWA_SAMTOOLS, cpu=8, ram_gb=16, depends_on=(qc_trim, prepare_reference))
+def align(clean, reference: Path, sample_id: str, *, out_dir):
+    """BWA-MEM alignment → sorted, indexed BAM with read-group.
+
+    The reference is already indexed by :func:`prepare_reference`; this
+    mulled image carries both bwa and samtools so the sort/index chain
+    works.
+    """
+    return (
+        f"bash -c '"
         f"bwa mem -t 8 -R \"@RG\\tID:{sample_id}\\tSM:{sample_id}\\tPL:ILLUMINA\" "
         f"{reference} {clean.out_dir}/clean_R1.fq.gz {clean.out_dir}/clean_R2.fq.gz "
         f"| samtools sort -@ 8 -o {out_dir}/{sample_id}.bam - && "
@@ -66,15 +95,16 @@ def align(clean, reference: Path, sample_id: str, *, out_dir):
 def call_variants(aln, reference: Path, sample_id: str, *, out_dir):
     """GATK MarkDuplicates + HaplotypeCaller.
 
-    Requires a reference .dict and .fai; builds both if missing.
+    The reference ``.fai`` / ``.dict`` come from
+    :func:`prepare_reference`, and ``MarkDuplicates --CREATE_INDEX``
+    writes the dedup BAM's index — so this stage needs only gatk (the
+    gatk4 image ships no samtools).
     """
     return (
         f"bash -c '"
         f"gatk MarkDuplicates -I {aln.out_dir}/{sample_id}.bam "
-        f"-O {out_dir}/{sample_id}.dedup.bam -M {out_dir}/dup_metrics.txt && "
-        f"samtools index {out_dir}/{sample_id}.dedup.bam && "
-        f"[ -f {reference}.fai ] || samtools faidx {reference}; "
-        f"gatk CreateSequenceDictionary -R {reference} 2>/dev/null || true; "
+        f"-O {out_dir}/{sample_id}.dedup.bam -M {out_dir}/dup_metrics.txt "
+        f"--CREATE_INDEX true && "
         f"gatk HaplotypeCaller -R {reference} "
         f"-I {out_dir}/{sample_id}.dedup.bam "
         f"-O {out_dir}/{sample_id}.raw.vcf.gz "
@@ -112,7 +142,8 @@ def annotate_variants(filtered, snpeff_db: str, sample_id: str, *, out_dir):
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, align, call_variants, filter_variants, annotate_variants],
+    stages=[qc_trim, prepare_reference, align, call_variants,
+            filter_variants, annotate_variants],
     description="Germline variants: fastp → BWA → GATK → bcftools → SnpEff",
 )
 def germline_variants(
@@ -129,10 +160,12 @@ def germline_variants(
     """End-to-end germline SNP/indel calling + annotation."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+    reference = Path(reference)
 
     clean = qc_trim(Path(r1), Path(r2))
-    aln = align(clean, Path(reference), sample_id)
-    raw = call_variants(aln, Path(reference), sample_id)
+    prepare_reference(reference)            # index + .fai + .dict, once
+    aln = align(clean, reference, sample_id)
+    raw = call_variants(aln, reference, sample_id)
     filt = filter_variants(raw, sample_id, min_qual=min_qual, min_depth=min_depth)
     return annotate_variants(filt, snpeff_db, sample_id)
 

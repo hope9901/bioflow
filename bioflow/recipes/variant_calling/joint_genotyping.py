@@ -37,6 +37,37 @@ from typing import List, Tuple
 from bioflow import pipeline, stage
 from bioflow.recipes import register
 
+# Mulled BioContainer carrying both bwa and samtools (the plain bwa
+# image has no samtools, so a ``bwa mem | samtools sort`` chain fails on
+# it).  bwa 0.7.19 + samtools 1.22.1.
+_BWA_SAMTOOLS = (
+    "quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:"
+    "f45ad9036aa41bb10f875a330fa877d8869018a1-0"
+)
+
+
+# ── Reference prep (once, before the fan-out) ────────────────────────────────
+
+@stage(image=_BWA_SAMTOOLS, cpu=4, ram_gb=8)
+def prepare_reference(reference: Path, *, out_dir):
+    """BWA index + ``.fai`` + sequence ``.dict`` for the reference, once.
+
+    Crucial for the cohort recipe: the per-sample ``align_one`` /
+    ``call_gvcf`` stages fan out via ``.starmap``, so indexing inside
+    them would have several containers racing to build the *same* shared
+    reference index files (corruption on multi-core hosts).  Building
+    them here, before the fan-out, removes the race and lets the
+    gatk-image call stage stay samtools-free.
+    """
+    return (
+        f"bash -c '"
+        f"REF={reference}; "
+        f"[ -f \"$REF\".bwt ] || bwa index \"$REF\"; "
+        f"[ -f \"$REF\".fai ] || samtools faidx \"$REF\"; "
+        f"DICT=\"${{REF%.*}}.dict\"; "
+        f"[ -f \"$DICT\" ] || samtools dict \"$REF\" -o \"$DICT\"'"
+    )
+
 
 # ── Per-sample stages (fan-out) ──────────────────────────────────────────────
 
@@ -53,13 +84,16 @@ def qc_one(sample_id: str, r1: Path, r2: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bwa:0.7.18--he4a0461_0",
-       cpu=8, ram_gb=16, depends_on=qc_one)
+@stage(image=_BWA_SAMTOOLS, cpu=8, ram_gb=16,
+       depends_on=(qc_one, prepare_reference))
 def align_one(sample_id: str, clean, reference: Path, *, out_dir):
-    """BWA-MEM → sorted, indexed BAM with a per-sample read group."""
+    """BWA-MEM → sorted, indexed BAM with a per-sample read group.
+
+    The reference is already indexed by :func:`prepare_reference`; this
+    mulled image carries bwa + samtools so the sort/index chain works.
+    """
     return (
         f"bash -c '"
-        f"[ -f {reference}.bwt ] || bwa index {reference}; "
         f"bwa mem -t 8 -R \"@RG\\tID:{sample_id}\\tSM:{sample_id}\\tPL:ILLUMINA\" "
         f"{reference} "
         f"{clean.out_dir}/{sample_id}_R1.clean.fq.gz "
@@ -73,14 +107,17 @@ def align_one(sample_id: str, clean, reference: Path, *, out_dir):
        cpu=8, ram_gb=32, depends_on=align_one,
        retry=2, retry_with={"ram_gb": "2x"})
 def call_gvcf(sample_id: str, aln, reference: Path, *, out_dir):
-    """MarkDuplicates + HaplotypeCaller in GVCF mode (one g.vcf.gz)."""
+    """MarkDuplicates + HaplotypeCaller in GVCF mode (one g.vcf.gz).
+
+    Reference ``.fai`` / ``.dict`` are prebuilt by
+    :func:`prepare_reference`, and ``MarkDuplicates --CREATE_INDEX``
+    indexes the dedup BAM — so this gatk-image stage needs no samtools.
+    """
     return (
         f"bash -c '"
         f"gatk MarkDuplicates -I {aln.out_dir}/{sample_id}.bam "
-        f"-O {out_dir}/{sample_id}.dedup.bam -M {out_dir}/{sample_id}.dup.txt && "
-        f"samtools index {out_dir}/{sample_id}.dedup.bam && "
-        f"[ -f {reference}.fai ] || samtools faidx {reference}; "
-        f"gatk CreateSequenceDictionary -R {reference} 2>/dev/null || true; "
+        f"-O {out_dir}/{sample_id}.dedup.bam -M {out_dir}/{sample_id}.dup.txt "
+        f"--CREATE_INDEX true && "
         f"gatk HaplotypeCaller -R {reference} "
         f"-I {out_dir}/{sample_id}.dedup.bam "
         # Fixed output name so the converge step can reference each GVCF
@@ -185,7 +222,7 @@ def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path]]:
 # ── Pipeline ─────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_one, align_one, call_gvcf, combine_gvcfs,
+    stages=[prepare_reference, qc_one, align_one, call_gvcf, combine_gvcfs,
             genotype_cohort, hard_filter, annotate_cohort],
     description=(
         "Cohort joint genotyping (GATK best practice): "
@@ -205,6 +242,10 @@ def joint_genotyping(
     reference = Path(reference)
 
     samples = _parse_sample_sheet(Path(sample_sheet))
+
+    # 0. Index the reference ONCE before the per-sample fan-out — building
+    #    it inside the parallel align/call stages would race.
+    prepare_reference(reference)
 
     # 1. QC every sample in parallel.
     qc_results = qc_one.starmap(

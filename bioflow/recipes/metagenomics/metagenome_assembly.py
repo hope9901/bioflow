@@ -48,12 +48,16 @@ def assemble(clean, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/minimap2:2.28--he4a0461_0",
+@stage(image=("quay.io/biocontainers/mulled-v2-"
+              "66534bcbb7031a148b13e2ad42583020b9cd25c4:"
+              "b411340b52d82a9c276d87c7a3dcffc880be762f-0"),
        cpu=16, ram_gb=32, depends_on=assemble)
 def map_back(asm, clean, *, out_dir):
     """Map QC reads back to contigs for coverage (minimap2 + samtools).
 
-    samtools is bundled in the minimap2 BioContainer.
+    Uses a mulled minimap2 + samtools BioContainer (minimap2 2.31 +
+    samtools 1.23) — the plain ``biocontainers/minimap2`` image ships no
+    samtools, so the ``minimap2 | samtools sort`` chain fails on it.
     """
     contigs = f"{asm.out_dir}/megahit/final.contigs.fa"
     return (

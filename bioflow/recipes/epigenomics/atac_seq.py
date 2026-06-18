@@ -36,13 +36,15 @@ def trim(r1: Path, r2: Path, *, out_dir):
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7",
+@stage(image="staphb/bowtie2:2.5.4",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     """Bowtie2 align with -X 2000 (ATAC-seq fragment max), sort + index.
 
-    Trimmed-read filenames are resolved at runtime via ``ls | head -1``
-    so the recipe is robust to TrimGalore's naming conventions.
+    Uses the StaPH-B bowtie2 image, which bundles samtools (the plain
+    ``biocontainers/bowtie2`` image does not).  Trimmed-read filenames
+    are resolved at runtime via ``ls | head -1`` so the recipe is robust
+    to TrimGalore's naming conventions.
     """
     return (
         f"bash -c '"

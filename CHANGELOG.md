@@ -14,6 +14,28 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — aligner images had no samtools (5 recipes broke at alignment)
+The plain single-tool aligner BioContainers (`bwa`, `bowtie2`,
+`minimap2`) do **not** bundle samtools, yet five recipes ran
+`aligner | samtools sort` / `samtools index` inside them — so every one
+failed at its alignment stage with `samtools: command not found`.  The
+smoke matrix only exercises each recipe's *first* stage, so this stayed
+invisible.  (See #2.)  Each aligner stage now uses an image that carries
+both tools:
+- **germline_variants**, **joint_genotyping**: a mulled
+  `bwa 0.7.19 + samtools 1.22` image.  A new **`prepare_reference`**
+  stage builds the BWA index + `.fai` + `.dict` **once** (in the cohort
+  recipe, before the per-sample fan-out — previously each parallel
+  sample raced to index the *shared* reference), and the gatk call stage
+  drops its own `samtools` calls (`MarkDuplicates --CREATE_INDEX`
+  indexes the dedup BAM; the gatk4 image ships no samtools either).
+  Verified end-to-end on phiX: prep → bwa-mem → sort/index →
+  MarkDuplicates → HaplotypeCaller now produces a valid VCF.
+- **chip_seq**, **atac_seq**: `staphb/bowtie2:2.5.4` (bundles samtools).
+- **metagenome_assembly**: a mulled `minimap2 2.31 + samtools 1.23` image.
+- `registry/tools/alignment/bowtie2.yaml` had the same broken
+  assumption (and `samtools.yaml` documented it as fact) — both fixed.
+
 ### Fixed — static audit of the never-e2e'd recipes (round 1)
 A static pass over the 10 recipes that have no committed full-e2e fixture
 (they need external reference data) turned up several latent defects:

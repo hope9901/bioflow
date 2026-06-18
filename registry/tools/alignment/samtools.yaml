@@ -3,9 +3,12 @@ name: samtools
 version: "1.20"
 category: alignment
 stage:
-  # samtools is bundled inside several aligner BioContainers (Bowtie2,
-  # HISAT2, …) and used inline within those stages.  It also ships as
-  # a standalone utility for ad-hoc BAM filtering / coverage / view.
+  # NOTE: plain single-tool aligner BioContainers (bwa, bowtie2,
+  # minimap2) do NOT bundle samtools — recipes that need a
+  # ``aligner | samtools sort`` chain must use a combined image (a
+  # mulled bwa+samtools / minimap2+samtools, or staphb/bowtie2).  This
+  # entry is samtools as a standalone utility for ad-hoc BAM
+  # filtering / coverage / view.
   - utility.bam_processing
 input_types: [bam, sam]
 output_types: [bam, bai]

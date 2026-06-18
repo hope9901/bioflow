@@ -10,9 +10,12 @@ applicable:
   read_type: [short]
   mode: [peak_calling, profiling, differential]
 container:
-  image: quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7
+  # StaPH-B image bundles bowtie2 + samtools; the plain
+  # biocontainers/bowtie2 image has no samtools, so the sort/index part of
+  # command_template fails on it.
+  image: staphb/bowtie2:2.5.4
   pull_policy: if_not_present
-  image_digest: sha256:0f9ba15963c5d9ae86775ac137d517f0afe4feb3cbd1d3f444e979d86ad9c1d0
+  image_digest: sha256:db1bf0dcac0e8bd76e8a837765447e153b67c136c95296bd281c7b54f1abfaa8
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}

@@ -38,14 +38,16 @@ def trim(r1: Path, r2: Path, *, out_dir):
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7",
+@stage(image="staphb/bowtie2:2.5.4",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
-    """Bowtie2 alignment → sorted, indexed BAM (samtools chained in image).
+    """Bowtie2 alignment → sorted, indexed BAM.
 
-    The trimmed-read filenames are resolved at runtime (``ls | head -1``)
-    so the recipe survives variations in TrimGalore's naming and never
-    feeds a glob with multiple matches to ``bowtie2 -1``.
+    Uses the StaPH-B bowtie2 image, which bundles samtools (the plain
+    ``biocontainers/bowtie2`` image does not, so the sort/index chain
+    would fail there).  Trimmed-read filenames are resolved at runtime
+    (``ls | head -1``) so the recipe survives TrimGalore's naming and
+    never feeds a glob with multiple matches to ``bowtie2 -1``.
     """
     return (
         f"bash -c '"
