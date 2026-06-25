@@ -14,6 +14,23 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — image-capability guard (catches "wrong image" bugs)
+- New `tests/integration/test_image_capabilities.py`: for every recipe
+  stage it renders the command, extracts the binaries it invokes, and
+  asserts each one exists in that stage's image (`docker run <image> sh
+  -c 'command -v …'`, keeping the image's entrypoint so conda-activation
+  containers still resolve their `PATH`).  This is the guard that would have
+  caught the 0.3.0 samtools breakage immediately — it needs no databases
+  or fixtures, only that the tools are present.  Runs as its own nightly
+  job with `BIOFLOW_PRUNE_IMAGES=1` to keep disk bounded.
+
+### Fixed — ChIP/ATAC dedup also needed samtools (found by the guard)
+- The guard immediately surfaced one the 0.3.0 fix missed: `chip_seq` /
+  `atac_seq` `dedup` ran `picard MarkDuplicates && samtools index` in the
+  **picard** image, which ships no samtools.  Replaced the `samtools
+  index` with Picard's own `CREATE_INDEX=true` (verified it writes the
+  `.bai`), so the stage needs only picard.
+
 ## [0.3.0] — 2026-06-18
 
 ### Fixed — aligner images had no samtools (5 recipes broke at alignment)

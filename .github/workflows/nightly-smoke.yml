@@ -69,3 +69,48 @@ jobs:
           echo "::error::Nightly recipe smoke matrix failed — inspect the junit"
           echo "         artifact and the per-recipe stderr in the log above."
           exit 1
+
+  image-capabilities:
+    name: Image capability guard
+    runs-on: ubuntu-latest
+    # Pulls every recipe image to verify each ships the tools its stages
+    # invoke.  BIOFLOW_PRUNE_IMAGES=1 ``docker rmi``s each image right
+    # after its check so peak disk stays near the largest single image.
+    # Its own runner (separate disk) keeps it clear of the e2e job above.
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Confirm Docker is up on the runner
+        run: docker --version
+
+      - name: Install bioflow with dev extras
+        run: pip install -e ".[dev]"
+
+      - name: Verify every stage image ships the tools it invokes
+        env:
+          BIOFLOW_PRUNE_IMAGES: "1"
+        run: |
+          python -m pytest tests/integration/test_image_capabilities.py \
+            -v -m docker \
+            --junitxml=reports/image_capabilities.xml
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-capabilities-junit
+          path: reports/*.xml
+
+      - name: Fail the job on red results
+        if: failure()
+        run: |
+          echo "::error::An image is missing a tool one of its stages invokes."
+          echo "         See the failing parametrization for image + tool + recipe."
+          exit 1

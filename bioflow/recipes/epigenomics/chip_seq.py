@@ -65,14 +65,18 @@ def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
 @stage(image="quay.io/biocontainers/picard:3.2.0--hdfd78af_0",
        cpu=4, ram_gb=16, depends_on=align)
 def dedup(aln, sample_id: str, *, out_dir):
-    """Picard MarkDuplicates: drop PCR / optical duplicates."""
+    """Picard MarkDuplicates: drop PCR / optical duplicates.
+
+    ``CREATE_INDEX=true`` writes the ``.bai`` — the plain picard
+    BioContainer ships no samtools, so calling ``samtools index`` here
+    would fail.
+    """
     return (
-        f"sh -c 'picard MarkDuplicates "
+        f"picard MarkDuplicates "
         f"I={aln.out_dir}/{sample_id}.bam "
         f"O={out_dir}/{sample_id}.dedup.bam "
         f"M={out_dir}/{sample_id}.dup_metrics.txt "
-        f"REMOVE_DUPLICATES=true && "
-        f"samtools index {out_dir}/{sample_id}.dedup.bam' "
+        f"REMOVE_DUPLICATES=true CREATE_INDEX=true"
     )
 
 
