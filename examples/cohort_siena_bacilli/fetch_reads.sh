@@ -26,8 +26,10 @@ declare -A RUN=(
 )
 
 ena_urls() {  # echo the two fastq_ftp URLs for a run accession
+  # ENA prepends run_accession, and the two URLs are ';'-joined — pull the
+  # *.fastq.gz tokens directly so column layout can't trip us up.
   curl -fsSL "https://www.ebi.ac.uk/ena/portal/api/filereport?accession=$1&result=read_run&fields=fastq_ftp&format=tsv" \
-    | tail -n +2 | cut -f1 | tr ';' '\n'
+    | grep -oE '[^;[:space:]]+fastq\.gz'
 }
 
 for sid in "${!RUN[@]}"; do
