@@ -31,6 +31,14 @@ ship bug fixes only.  Breaking changes to the documented public API
   index` with Picard's own `CREATE_INDEX=true` (verified it writes the
   `.bai`), so the stage needs only picard.
 
+### Fixed — proteomics_dda msconvert must run under wine (found by the guard)
+- The full guard run flagged a third one: `proteomics_dda` `msconvert`
+  called `msconvert` directly, but the ProteoWizard image ships it only
+  as `/wineprefix64/.../msconvert.exe` (no `msconvert` on `PATH`) — so
+  the stage would have died with `command not found`.  Now invokes it as
+  `wine msconvert …`, the image's documented entry point (`wine` is at
+  `/usr/bin/wine`, verified).
+
 ## [0.3.0] — 2026-06-18
 
 ### Fixed — aligner images had no samtools (5 recipes broke at alignment)

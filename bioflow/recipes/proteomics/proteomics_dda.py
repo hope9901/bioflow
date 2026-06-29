@@ -47,10 +47,17 @@ from bioflow.recipes import register
 @stage(image="chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest",
        cpu=4, ram_gb=8)
 def msconvert(raw_dir: Path, *, out_dir):
-    """msconvert: vendor (.raw / .d / .wiff) → mzML with vendor peak-picking."""
+    """msconvert: vendor (.raw / .d / .wiff) → mzML with vendor peak-picking.
+
+    The ProteoWizard image ships ``msconvert`` only as a Windows
+    ``msconvert.exe`` under ``/wineprefix64`` — there is no ``msconvert``
+    on ``PATH``, so it must be launched through ``wine`` (the image's
+    documented invocation).  Calling ``msconvert`` directly would fail
+    with ``command not found``.
+    """
     return (
         f"sh -c 'for f in {raw_dir}/*.raw {raw_dir}/*.d {raw_dir}/*.wiff; "
-        f"do [ -e \\\"$f\\\" ] && msconvert \\\"$f\\\" --mzML "
+        f"do [ -e \\\"$f\\\" ] && wine msconvert \\\"$f\\\" --mzML "
         f"--filter \\\"peakPicking vendor msLevel=1-\\\" "
         f"--outdir {out_dir}; done'"
     )
