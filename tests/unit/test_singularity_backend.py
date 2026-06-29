@@ -11,7 +11,6 @@ import subprocess
 import pytest
 
 from bioflow.core.runner import (
-    DockerBackend,
     SingularityBackend,
     make_backend,
 )
