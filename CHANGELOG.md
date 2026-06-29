@@ -14,6 +14,19 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — cohort runner (fan a single-sample recipe across a samplesheet)
+- `bioflow cohort <recipe> --samplesheet samples.csv [--jobs N]` runs a
+  single-sample recipe (`prokaryote_assembly`, `germline_variants`,
+  `metagenomics_profile`, …) once per samplesheet row, each in its own
+  `<out>/<sample_id>` workspace, optionally in parallel, then aggregates
+  per-sample QC with MultiQC.  Shared options (e.g. `--reference`) apply to
+  every sample; per-sample columns override them.  One sample failing records
+  the error and the cohort continues (failure isolation).  Each sample runs as
+  an isolated `bioflow recipe run` subprocess — the SDK workspace/backend are
+  process-global, so subprocess isolation is what makes parallel samples safe.
+  Recipes that already loop over a samplesheet internally (`rnaseq_deg`,
+  `joint_genotyping`) are not cohort targets.
+
 ### Added — Apptainer/Singularity execution backend (run on HPC, no Docker daemon)
 - New `SingularityBackend` runs each stage via `apptainer exec [--nv]
   --cleanenv --bind <host>:<ctr> --pwd <workdir> docker://<image> sh -c …`,
