@@ -24,6 +24,11 @@ source:
 build:
   noarch: python
   number: 0
+  # 0.x software → pin downstream consumers to the same minor (semver lets
+  # 0.x minors break).  Required by bioconda's missing_run_exports lint
+  # (Case 2: max_pin="x.x").
+  run_exports:
+    - {{ pin_subpackage("bioflowkit", max_pin="x.x") }}
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   entry_points:
     - bioflow = bioflow.cli:app
