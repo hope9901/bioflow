@@ -14,6 +14,20 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — Apptainer/Singularity execution backend (run on HPC, no Docker daemon)
+- New `SingularityBackend` runs each stage via `apptainer exec [--nv]
+  --cleanenv --bind <host>:<ctr> --pwd <workdir> docker://<image> sh -c …`,
+  so bioflow works on the many HPC clusters that ship Apptainer but forbid
+  the Docker daemon.  BioContainers are pulled over the docker transport and
+  cached as SIFs.
+- `make_backend()` factory selects the backend from `BIOFLOW_BACKEND`
+  (`docker` default / `podman` / `singularity` / `apptainer`); `run_plan`,
+  the SDK runtime, and MultiQC now route through it.  Binary auto-resolves
+  `apptainer` → `singularity`, overridable with `BIOFLOW_APPTAINER_BIN`.
+- CPU/RAM are advisory for this backend (the job scheduler enforces them on
+  a cluster) — a future SlurmBackend will translate them into `sbatch`
+  directives.
+
 ## [0.3.1] — 2026-06-29
 
 ### Added — image-capability guard (catches "wrong image" bugs)

@@ -37,7 +37,13 @@ from __future__ import annotations
 
 # Container backends re-exported for tests + first-party users that
 # previously imported them from bioflow.sdk.
-from bioflow.core.runner import CommandResult, DockerBackend, MockBackend
+from bioflow.core.runner import (
+    CommandResult,
+    DockerBackend,
+    MockBackend,
+    SingularityBackend,
+    make_backend,
+)
 
 # Cache + log-streaming toggles
 from bioflow.sdk._cache import (  # noqa: F401
@@ -149,8 +155,10 @@ __all__ = [
     # Log streaming
     "set_log_streaming",
     "is_log_streaming_enabled",
-    # Backends (for tests)
+    # Backends
     "MockBackend",
     "DockerBackend",
+    "SingularityBackend",
+    "make_backend",
     "CommandResult",
 ]

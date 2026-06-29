@@ -307,6 +307,171 @@ class DockerBackend:
 
 
 # ---------------------------------------------------------------------------
+# Singularity / Apptainer backend (HPC — no Docker daemon)
+# ---------------------------------------------------------------------------
+
+def _apptainer_bin() -> str:
+    """Resolve the container CLI: ``BIOFLOW_APPTAINER_BIN``, then apptainer,
+    then singularity (apptainer is the renamed successor)."""
+    import shutil  # noqa: PLC0415
+
+    override = os.environ.get("BIOFLOW_APPTAINER_BIN")
+    if override:
+        return override
+    for cand in ("apptainer", "singularity"):
+        if shutil.which(cand):
+            return cand
+    # Fall back to "apptainer"; the missing-binary error surfaces at run().
+    return "apptainer"
+
+
+class SingularityBackend:
+    """Run each stage through Apptainer/Singularity instead of Docker.
+
+    Most HPC clusters forbid the Docker daemon but ship Apptainer
+    (formerly Singularity).  BioContainers images are pullable directly
+    over the Docker transport, so each stage runs as::
+
+        apptainer exec [--nv] --cleanenv --bind <host>:<ctr> --pwd <workdir> \\
+            docker://<image> sh -c '<command>'
+
+    The image is pulled + converted to a SIF on first use and cached by
+    Apptainer (``APPTAINER_CACHEDIR``); later stages reuse it.  ``--cleanenv``
+    keeps the host environment out of the container, matching Docker's
+    isolation.
+
+    Resources
+    ---------
+    Unlike Docker, Apptainer does not itself cap CPU/RAM — on a cluster that
+    is the job scheduler's responsibility (e.g. the Slurm allocation).
+    ``cpu`` / ``ram_gb`` are accepted but not enforced here; a future
+    SlurmBackend will translate them into ``sbatch`` directives.
+    """
+
+    _STREAMING_SUPPORTED = True
+
+    def __init__(self, binary: Optional[str] = None) -> None:
+        self.binary = binary or _apptainer_bin()
+
+    def _build_argv(
+        self, *, image: str, command: str, mounts: dict[str, str],
+        workdir: str, gpu: bool,
+    ) -> "list[str]":
+        argv = [self.binary, "exec", "--cleanenv"]
+        if gpu:
+            argv.append("--nv")
+        for host, ctr in mounts.items():
+            argv += ["--bind", f"{host}:{ctr}"]
+        if workdir:
+            argv += ["--pwd", workdir]
+        # A bare registry ref (quay.io/biocontainers/…) needs the docker
+        # transport; a SIF path or oras://… ref is used as-is.
+        ref = image if "://" in image else f"docker://{image}"
+        argv += [ref, "sh", "-c", command]
+        return argv
+
+    def run(
+        self,
+        *,
+        image: str,
+        command: str,
+        mounts: dict[str, str],
+        cpu: int,
+        ram_gb: float,
+        workdir: str,
+        gpu: bool = False,
+        log_callback: Optional[Callable[[str], None]] = None,
+        timeout: Optional[int] = None,
+    ) -> CommandResult:
+        import subprocess  # noqa: PLC0415
+        from collections import deque  # noqa: PLC0415
+
+        argv = self._build_argv(
+            image=image, command=command, mounts=mounts,
+            workdir=workdir, gpu=gpu,
+        )
+        try:
+            proc = subprocess.Popen(
+                argv,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+        except FileNotFoundError:
+            return CommandResult(
+                exit_code=127,
+                stderr=(
+                    f"'{self.binary}' not found — install Apptainer/Singularity "
+                    "or set BIOFLOW_APPTAINER_BIN (HPC backend)."
+                ),
+            )
+
+        timed_out = {"flag": False}
+        timer = None
+        if timeout is not None and timeout > 0:
+            import threading  # noqa: PLC0415
+
+            def _kill() -> None:
+                timed_out["flag"] = True
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+
+            timer = threading.Timer(timeout, _kill)
+            timer.daemon = True
+            timer.start()
+
+        # Retain only the tail in memory (the real artifacts are files in the
+        # workspace); every line still streams live to log_callback.
+        stdout_lines: "deque[str]" = deque(maxlen=_STDOUT_TAIL_LINES)
+        if proc.stdout is not None:
+            for line in proc.stdout:
+                line = line.rstrip("\n")
+                stdout_lines.append(line)
+                if log_callback:
+                    log_callback(line)
+        proc.wait()
+        if timer is not None:
+            timer.cancel()
+
+        if timed_out["flag"]:
+            return CommandResult(
+                exit_code=124,   # conventional timeout exit code
+                stdout="\n".join(stdout_lines),
+                stderr=f"stage exceeded timeout of {timeout}s and was killed",
+            )
+        return CommandResult(
+            exit_code=int(proc.returncode or 0),
+            stdout="\n".join(stdout_lines),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Backend factory
+# ---------------------------------------------------------------------------
+
+def make_backend(name: Optional[str] = None) -> ContainerBackend:
+    """Construct the container backend selected by *name* or ``BIOFLOW_BACKEND``.
+
+    - ``docker`` (default) / ``podman`` → :class:`DockerBackend` (Podman speaks
+      the Docker API; point ``BIOFLOW_DOCKER_HOST`` at its socket).
+    - ``singularity`` / ``apptainer`` → :class:`SingularityBackend` (HPC, no
+      daemon, no ``docker`` Python package needed).
+    """
+    name = (name or os.environ.get("BIOFLOW_BACKEND") or "docker").lower().strip()
+    if name in ("singularity", "apptainer"):
+        return SingularityBackend()
+    if name in ("docker", "podman", ""):
+        return DockerBackend()
+    raise ValueError(
+        f"Unknown BIOFLOW_BACKEND '{name}' — expected one of: "
+        "docker, podman, singularity, apptainer."
+    )
+
+
+# ---------------------------------------------------------------------------
 # Rich progress context
 # ---------------------------------------------------------------------------
 
@@ -442,7 +607,7 @@ def run_plan(
     * On failure, records the error in the checkpoint (``mark_failed``) so
       ``report.py`` can highlight it in the HTML summary.
     """
-    backend = backend or DockerBackend()
+    backend = backend or make_backend()
     tools_by_id = {t.id: t for t in load_registry(registry_dir or plan.registry_dir)}
     workdir = Path(plan.workdir)
     workdir.mkdir(parents=True, exist_ok=True)

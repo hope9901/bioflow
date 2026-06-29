@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 from bioflow.core.logger import get_logger
-from bioflow.core.runner import ContainerBackend, DockerBackend
+from bioflow.core.runner import ContainerBackend, make_backend
 
 log = get_logger()
 
@@ -56,7 +56,7 @@ def _get_backend() -> ContainerBackend:
     if _active_backend is None:
         with _workspace_lock:
             if _active_backend is None:
-                _active_backend = DockerBackend()
+                _active_backend = make_backend()
     return _active_backend
 
 
