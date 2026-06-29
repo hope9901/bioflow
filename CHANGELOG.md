@@ -14,6 +14,8 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-06-29
+
 ### Added — image-capability guard (catches "wrong image" bugs)
 - New `tests/integration/test_image_capabilities.py`: for every recipe
   stage it renders the command, extracts the binaries it invokes, and
