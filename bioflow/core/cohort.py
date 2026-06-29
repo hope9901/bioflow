@@ -15,6 +15,7 @@ internally (``rnaseq_deg``, ``joint_genotyping``) are *not* the use case here.
 from __future__ import annotations
 
 import csv
+import shutil
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -180,11 +181,68 @@ def run_cohort(
     return report
 
 
+# Small QC-ish files worth handing to MultiQC.  Per-sample stage outputs live
+# under a hidden ``.cache/`` dir, which MultiQC skips — so we mirror these into
+# a visible tree first.  The size cap keeps assemblies / BAMs out.
+_QC_SUFFIXES = {
+    ".json", ".tsv", ".csv", ".txt", ".html", ".log", ".out",
+    ".zip", ".stats", ".flagstat", ".yaml", ".yml",
+}
+_QC_MAX_BYTES = 25 * 1024 * 1024
+
+
+def _stage_qc(out_dir: Path, qc_root: Path) -> int:
+    """Mirror each sample's small QC files into a visible ``qc_root`` tree.
+
+    Returns the number of files staged.  Each file is copied to
+    ``qc_root/<sample_id>/<sample_id>_<flattened-path>`` so that (a) MultiQC,
+    which skips hidden paths, actually scans it, and (b) the sample-id prefix
+    keeps generically named outputs (``fastp.json``, ``report.tsv``) distinct
+    per sample in the merged report.
+    """
+    staged = 0
+    for sample_dir in sorted(
+        p for p in out_dir.iterdir()
+        if p.is_dir() and p.name not in ("_cohort_qc", "cohort_multiqc")
+    ):
+        sid = sample_dir.name
+        for f in sample_dir.rglob("*"):
+            if not f.is_file() or f.suffix.lower() not in _QC_SUFFIXES:
+                continue
+            try:
+                if f.stat().st_size > _QC_MAX_BYTES:
+                    continue
+            except OSError:
+                continue
+            rel = f.relative_to(sample_dir)
+            flat = "_".join(part.lstrip(".") or "cache" for part in rel.parts)
+            dest = qc_root / sid / f"{sid}_{flat}"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                shutil.copy2(f, dest)
+                staged += 1
+            except OSError:
+                continue
+    return staged
+
+
 def _aggregate(out_dir: Path) -> "Optional[Path]":
-    """Run MultiQC over every per-sample workspace → one cohort report."""
+    """Run MultiQC across all per-sample QC → one cohort report.
+
+    Stage outputs sit under each sample's hidden ``.cache/`` dir, which MultiQC
+    skips, so the recognised QC files are first mirrored into a visible
+    ``_cohort_qc/`` tree.  Best-effort: never fails the cohort.
+    """
     try:
+        qc_root = out_dir / "_cohort_qc"
+        if qc_root.exists():
+            shutil.rmtree(qc_root, ignore_errors=True)
+        staged = _stage_qc(out_dir, qc_root)
+        if not staged:
+            log.warning("Cohort aggregation: no per-sample QC files found.")
+            return None
         from bioflow.core.report import run_multiqc  # noqa: PLC0415
-        return run_multiqc(out_dir, out_dir / "cohort_multiqc")
+        return run_multiqc(qc_root, out_dir / "cohort_multiqc")
     except Exception as exc:   # aggregation is best-effort, never fatal
         log.warning(f"Cohort MultiQC aggregation skipped: {exc}")
         return None

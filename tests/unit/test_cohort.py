@@ -157,3 +157,63 @@ def test_run_cohort_skips_aggregate_when_all_fail(tmp_path, monkeypatch):
     monkeypatch.setattr(cohort, "_aggregate", lambda out_dir: pytest.fail("should not aggregate"))
     report = run_cohort("x", sheet, tmp_path / "o", jobs=1, aggregate=True, run_one=_Recorder(fail={"x"}))
     assert report.multiqc_report is None
+
+
+# ---------------------------------------------------------------------------
+# QC staging for aggregation (the hidden-.cache fix)
+# ---------------------------------------------------------------------------
+
+def _make_sample_qc(out: Path, sid: str) -> None:
+    """Write per-sample QC files under a hidden .cache dir, like a real run."""
+    d = out / sid / ".cache" / f"qc_trim__{sid}hash"
+    d.mkdir(parents=True)
+    (d / "fastp.json").write_text("{}")
+    (d / "report.tsv").write_text("metric\tvalue\n")
+    asm = out / sid / ".cache" / f"assemble__{sid}"
+    asm.mkdir(parents=True)
+    (asm / "contigs.fasta").write_text(">c\nACGT\n")   # not a QC suffix → skipped
+
+
+def test_stage_qc_mirrors_hidden_cache_into_visible_tree(tmp_path):
+    out = tmp_path / "out"
+    _make_sample_qc(out, "SC1")
+    _make_sample_qc(out, "SC2")
+    qc_root = out / "_cohort_qc"
+    n = cohort._stage_qc(out, qc_root)
+    assert n == 4   # 2 samples x (fastp.json + report.tsv); the .fasta is skipped
+    staged = [p for p in qc_root.rglob("*") if p.is_file()]
+    names = sorted(p.name for p in staged)
+    # visible (no hidden path component) + sample-id-prefixed + suffix preserved
+    assert not any(part.startswith(".") for p in staged for part in p.relative_to(qc_root).parts)
+    assert any(n.startswith("SC1_") and n.endswith("fastp.json") for n in names)
+    assert any(n.startswith("SC2_") and n.endswith("report.tsv") for n in names)
+
+
+def test_stage_qc_skips_large_files(tmp_path, monkeypatch):
+    monkeypatch.setattr(cohort, "_QC_MAX_BYTES", 100)
+    out = tmp_path / "out"
+    d = out / "S" / ".cache" / "x"
+    d.mkdir(parents=True)
+    (d / "huge.txt").write_text("0" * 500)     # > 100-byte cap → skipped
+    (d / "small.json").write_text("{}")
+    assert cohort._stage_qc(out, out / "_cohort_qc") == 1
+
+
+def test_aggregate_points_multiqc_at_visible_tree(tmp_path, monkeypatch):
+    out = tmp_path / "out"
+    _make_sample_qc(out, "S1")
+    captured: dict = {}
+    import bioflow.core.report as report_mod
+    monkeypatch.setattr(
+        report_mod, "run_multiqc",
+        lambda wd, od, **k: captured.update(wd=wd, od=od) or (od / "multiqc_report.html"),
+    )
+    res = cohort._aggregate(out)
+    assert captured["wd"] == out / "_cohort_qc"       # scans staged tree, not raw out/
+    assert res is not None
+
+
+def test_aggregate_returns_none_without_qc(tmp_path):
+    out = tmp_path / "out"
+    (out / "S1").mkdir(parents=True)                  # sample dir but no QC files
+    assert cohort._aggregate(out) is None
