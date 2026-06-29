@@ -1,0 +1,53 @@
+id: bustools
+name: bustools
+version: 0.45.1
+category: single_cell
+stage:
+- scrna_seq.step1
+input_types:
+- bus_file
+output_types:
+- count_matrix
+applicable:
+  species:
+  - eukaryote
+  - eukaryote_small
+  - any
+  read_type:
+  - short
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/bustools:0.45.1
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 2
+    ram_gb: 8
+    disk_gb: 20
+  recommended:
+    cpu: 16
+    ram_gb: 32
+    disk_gb: 100
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "bustools sort -t {cpu} -o {out_dir}/sorted.bus {input_bus} &&\n\
+  bustools correct -w {whitelist} -o {out_dir}/corrected.bus {out_dir}/sorted.bus\
+  \ &&\nbustools count --genecounts -o {out_dir}/counts\n               -g {t2g} -e\
+  \ {ec} -t {transcripts} {out_dir}/corrected.bus\n"
+references: []
+citation: Melsted 2019, PMID 31133686
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: BUStools/bustools
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 0.43.2
+  previous_image: quay.io/biocontainers/bustools:0.43.2--hd03093a_2
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

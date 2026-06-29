@@ -1,0 +1,53 @@
+id: kraken2
+name: kraken2
+version: 2.17.1
+category: metagenomics
+stage:
+- metagenomics.step3
+input_types:
+- clean_fastq
+output_types:
+- kraken2_report
+applicable:
+  species:
+  - any
+  read_type:
+  - short
+  mode:
+  - profiling
+container:
+  image: quay.io/biocontainers/kraken2:2.17.1
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 8
+    ram_gb: 32
+    disk_gb: 100
+  recommended:
+    cpu: 32
+    ram_gb: 128
+    disk_gb: 500
+  gpu: false
+  arch:
+  - x86_64
+command_template: 'kraken2 --db {kraken2_db} --paired --threads {cpu}
+
+  --output {out_dir}/kraken2.out --report {out_dir}/kraken2_report.txt
+
+  {r1_clean} {r2_clean}
+
+  '
+references: []
+citation: Wood et al. 2019, PMID 31779668
+added: '2026-04-20'
+last_reviewed: '2026-06-01'
+source_repo: DerrickWood/kraken2
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 2.1.3
+  previous_image: quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

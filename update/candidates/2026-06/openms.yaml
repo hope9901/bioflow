@@ -1,0 +1,55 @@
+id: openms
+name: OpenMS
+version: release/3.5.0
+category: proteomics
+stage:
+- proteomics.step2
+- proteomics.step4
+input_types:
+- mzml
+- idxml
+output_types:
+- idxml
+- featurexml
+- quant_results
+applicable:
+  species:
+  - any
+  read_type:
+  - ms_dda
+  - ms_dia
+  mode:
+  - dda
+  - dia
+container:
+  image: quay.io/biocontainers/openms:release/3.5.0
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 4
+    ram_gb: 16
+    disk_gb: 50
+  recommended:
+    cpu: 16
+    ram_gb: 64
+    disk_gb: 200
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "CometAdapter -in {mzml} -out {out_dir}/{sample_id}.idXML\n    \
+  \         -database {protein_fasta} -threads {cpu}\n"
+references: []
+citation: Rost 2016, PMID 27575624
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: OpenMS/OpenMS
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 3.2.0
+  previous_image: quay.io/biocontainers/openms:3.2.0--h135ec03_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

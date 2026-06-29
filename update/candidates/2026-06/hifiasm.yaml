@@ -1,0 +1,51 @@
+id: hifiasm
+name: hifiasm
+version: 0.25.0
+category: assembly
+stage:
+- genome_assembly.step2
+input_types:
+- fastq_long_hifi
+output_types:
+- assembly_fasta
+- assembly_gfa
+applicable:
+  species:
+  - prokaryote
+  - eukaryote
+  - eukaryote_small
+  read_type:
+  - long_hifi
+  mode:
+  - de_novo
+container:
+  image: quay.io/biocontainers/hifiasm:0.25.0
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 8
+    ram_gb: 16
+    disk_gb: 50
+  recommended:
+    cpu: 32
+    ram_gb: 128
+    disk_gb: 300
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "hifiasm -o {out_dir}/{sample_id} -t {cpu} {r1_long} &&\nawk '/^S/{{print\
+  \ \">\"$2\"\\n\"$3}}' {out_dir}/{sample_id}.bp.p_ctg.gfa \\\n    > {out_dir}/asm.bp.p_ctg.fa\n"
+citation: Cheng 2021, PMID 33526886
+added: '2026-04-16'
+last_reviewed: '2026-06-01'
+source_repo: chhylp123/hifiasm
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 0.19.9
+  previous_image: quay.io/biocontainers/hifiasm:0.19.9--h43eeafb_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

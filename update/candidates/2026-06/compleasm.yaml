@@ -1,0 +1,51 @@
+id: compleasm
+name: compleasm
+version: 0.2.8
+category: assembly_qc
+stage:
+- genome_assembly.step3
+input_types:
+- assembly_fasta
+output_types:
+- busco_report
+- completeness_summary
+applicable:
+  species:
+  - any
+  read_type:
+  - any
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/compleasm:0.2.8
+  pull_policy: if_not_present
+  image_digest: sha256:9c1aa77517468dcd5a3bfca9a22c653ca76993305cdb04e3e09db5829fc7fb6b
+resources:
+  min:
+    cpu: 4
+    ram_gb: 8
+    disk_gb: 20
+  recommended:
+    cpu: 32
+    ram_gb: 32
+    disk_gb: 100
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "compleasm run -a {assembly_fasta} -o {out_dir}\n              -l\
+  \ {busco_lineage} -L {busco_db} -t {cpu}\n"
+references: []
+citation: Huang & Li 2023, PMID 37862556
+added: '2026-05-15'
+last_reviewed: '2026-06-22'
+source_repo: huangnengCSU/compleasm
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 0.2.6
+  previous_image: quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

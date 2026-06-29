@@ -1,0 +1,53 @@
+id: gatk4
+name: GATK4
+version: 4.6.2.0
+category: variant_calling
+stage:
+- variant_calling.step2
+input_types:
+- bam
+- reference_fasta
+output_types:
+- vcf
+- gvcf
+applicable:
+  species:
+  - eukaryote
+  - eukaryote_small
+  - prokaryote
+  read_type:
+  - short
+  mode:
+  - resequencing
+container:
+  image: quay.io/biocontainers/gatk4:4.6.2.0
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 4
+    ram_gb: 16
+    disk_gb: 50
+  recommended:
+    cpu: 16
+    ram_gb: 64
+    disk_gb: 200
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "gatk HaplotypeCaller -R {reference_fasta} -I {input_bam}\n    \
+  \ -O {out_dir}/{sample_id}.vcf.gz --native-pair-hmm-threads {cpu}\n"
+references: []
+citation: McKenna 2010, PMID 20644199
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: broadinstitute/gatk
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 4.6.1.0
+  previous_image: quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

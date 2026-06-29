@@ -1,0 +1,55 @@
+id: multiqc
+name: MultiQC
+version: '1.35'
+category: qc
+stage:
+- genome_assembly.step1
+- rnaseq_deg.step1
+- chip_seq.step4
+- methylation.step1
+input_types:
+- qc_html
+- qc_json
+- log
+output_types:
+- multiqc_report_html
+applicable:
+  species:
+  - any
+  read_type:
+  - any
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/multiqc:1.35
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 1
+    ram_gb: 2
+    disk_gb: 5
+  recommended:
+    cpu: 4
+    ram_gb: 8
+    disk_gb: 20
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: 'multiqc {scan_dirs} -o {out_dir} --force
+
+  '
+references: []
+citation: Ewels 2016, PMID 27312411
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: MultiQC/MultiQC
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 1.25.1
+  previous_image: quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

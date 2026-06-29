@@ -1,0 +1,54 @@
+id: stringtie
+name: StringTie
+version: 3.0.3
+category: rnaseq_align
+stage:
+- rnaseq_deg.step2
+input_types:
+- bam
+- annotation_gtf
+output_types:
+- transcripts_gtf
+- count_matrix
+applicable:
+  species:
+  - eukaryote
+  - eukaryote_small
+  read_type:
+  - short
+  - long_ont
+  - long_hifi
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/stringtie:3.0.3
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 2
+    ram_gb: 8
+    disk_gb: 10
+  recommended:
+    cpu: 16
+    ram_gb: 32
+    disk_gb: 100
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "stringtie {alignment_bam} -G {annotation_gtf}\n          -o {out_dir}/transcripts.gtf\
+  \ -p {cpu} -e -B\n"
+references: []
+citation: Pertea 2015, PMID 25690850
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: gpertea/stringtie
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 2.2.3
+  previous_image: quay.io/biocontainers/stringtie:2.2.3--h29c0135_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

@@ -1,0 +1,58 @@
+id: minimap2
+name: minimap2
+version: '2.31'
+category: alignment
+stage:
+- genome_assembly.step2
+- methylation.step2
+- comparative_genomics.step2
+input_types:
+- fasta
+- fastq_long_ont
+- fastq_long_pacbio
+- fastq_long_hifi
+output_types:
+- sam
+- paf
+- bam
+applicable:
+  species:
+  - any
+  read_type:
+  - long_ont
+  - long_hifi
+  - short
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/minimap2:2.31
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 4
+    ram_gb: 8
+    disk_gb: 20
+  recommended:
+    cpu: 32
+    ram_gb: 64
+    disk_gb: 200
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "minimap2 -ax {preset} -t {cpu} {reference} {query}\n         >\
+  \ {out_dir}/aln.sam\n"
+references: []
+citation: Li 2018, PMID 29750242
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: lh3/minimap2
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: '2.28'
+  previous_image: quay.io/biocontainers/minimap2:2.28--he4a0461_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

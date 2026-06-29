@@ -1,0 +1,53 @@
+id: macs3
+name: macs3
+version: 3.0.4
+category: epigenomics
+stage:
+- chip_seq.step3
+- atac_seq.step3
+input_types:
+- bam
+output_types:
+- peaks_bed
+applicable:
+  species:
+  - any
+  read_type:
+  - short
+  mode:
+  - peak_calling
+  - differential
+container:
+  image: quay.io/biocontainers/macs3:3.0.4
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 4
+    ram_gb: 8
+    disk_gb: 10
+  recommended:
+    cpu: 8
+    ram_gb: 16
+    disk_gb: 30
+  gpu: false
+  arch:
+  - x86_64
+command_template: 'macs3 callpeak -t {alignment_bam} {control_arg} -f BAMPE -g {genome_size}
+
+  -n {sample_id} --outdir {out_dir} -B --SPMR 2>{out_dir}/macs3.log
+
+  '
+references: []
+citation: Zhang et al. 2008, PMID 18798982
+added: '2026-04-20'
+last_reviewed: '2026-06-01'
+source_repo: macs3-project/MACS
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 3.0.1
+  previous_image: quay.io/biocontainers/macs3:3.0.1--py310h58a0a2b_1
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

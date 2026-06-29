@@ -1,0 +1,56 @@
+id: masurca
+name: MaSuRCA
+version: 4.1.4
+category: assembly
+stage:
+- genome_assembly.step2
+input_types:
+- fastq_short_paired_clean
+- fastq_long_ont
+- fastq_long_hifi
+output_types:
+- assembly_fasta
+applicable:
+  species:
+  - eukaryote
+  - eukaryote_small
+  read_type:
+  - hybrid
+  - short
+  mode:
+  - de_novo
+container:
+  image: quay.io/biocontainers/masurca:4.1.4
+  pull_policy: if_not_present
+resources:
+  min:
+    cpu: 16
+    ram_gb: 64
+    disk_gb: 200
+  recommended:
+    cpu: 64
+    ram_gb: 512
+    disk_gb: 2000
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: 'cd {out_dir} && masurca {config_file}
+
+  && bash assemble.sh
+
+  '
+references: []
+citation: Zimin 2017, PMID 28298434
+added: '2026-05-15'
+last_reviewed: '2026-06-01'
+source_repo: alekseyzimin/masurca
+update_meta:
+  month: 2026-06
+  source: release_watch
+  previous_version: 4.1.0
+  previous_image: quay.io/biocontainers/masurca:4.1.0--pl5321h470a237_2
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag
