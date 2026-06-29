@@ -1,0 +1,7 @@
+sample_id,r1,r2
+SC107,data/SC107_R1.fastq.gz,data/SC107_R2.fastq.gz
+SC111,data/SC111_R1.fastq.gz,data/SC111_R2.fastq.gz
+SC112,data/SC112_R1.fastq.gz,data/SC112_R2.fastq.gz
+SC114,data/SC114_R1.fastq.gz,data/SC114_R2.fastq.gz
+SC116,data/SC116_R1.fastq.gz,data/SC116_R2.fastq.gz
+SC117,data/SC117_R1.fastq.gz,data/SC117_R2.fastq.gz
