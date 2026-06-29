@@ -10,13 +10,16 @@ closes that gap **statically + cheaply**:
    mock arguments.
 2. Extract the binaries the command invokes (the first token of every
    pipeline / ``&&`` / ``;`` / ``$(...)`` segment), minus shell builtins
-   and coreutils.
+   and coreutils.  Wrapper commands (``wine msconvert``) contribute the
+   wrapper as a ``PATH`` tool **and** the wrapped Windows ``.exe`` as a
+   separate must-exist binary.
 3. Group the required binaries per image and assert — with one
    ``docker run <image> sh -c 'command -v …'`` per image — that every
-   one is present.  The image's own entrypoint is kept (not bypassed
-   with ``--entrypoint sh``): some biocontainers activate a conda env
-   on entry to set up ``PATH``, so probing past it would wrongly report
-   tools missing.
+   one is present (wrapped ``.exe`` files are located on disk instead,
+   since they aren't on ``PATH``).  The image's own entrypoint is kept
+   (not bypassed with ``--entrypoint sh``): some biocontainers activate
+   a conda env on entry to set up ``PATH``, so probing past it would
+   wrongly report tools missing.
 
 No reference databases or fixtures are needed: it never runs the tools,
 only checks they exist.  Marked ``docker`` + ``slow``; it pulls every
@@ -126,14 +129,27 @@ _NON_TOOLS = {
     "date", "wait", "kill", "head1", "mktemp", "cmp", "diff", "wget", "curl",
 }
 
+# Wrappers that exec another program: the real tool is the *next* word, run
+# through the wrapper.  For these we check the wrapper is on PATH **and** that
+# the wrapped Windows ``.exe`` actually ships in the image — otherwise a stage
+# like ``wine msconvert`` would pass on ``command -v wine`` alone even if
+# ``msconvert.exe`` were missing (the exact gap behind the 0.3.0-era pwiz bug).
+_WRAPPERS = {"wine", "wine64", "wine64_anyuser"}
+
 _WRAP_RE = re.compile(r"^\s*(?:bash|sh) -c '(.*)'\s*$", re.DOTALL)
 # Shell keywords that introduce a command (so the word after them is one).
 _KEYWORDS = r"\b(?:do|then|else|elif|fi|done|while|if|case|esac)\b"
 _LEAD = re.compile(r"\s*([A-Za-z_][\w.\-/]*)")
 
 
-def _extract_tools(cmd: str) -> set[str]:
-    """Return the set of binaries *cmd* invokes (best-effort shell parse)."""
+def _extract_tools(cmd: str) -> "tuple[set[str], set[str]]":
+    """Return ``(tools, wine_exes)`` the command invokes (best-effort parse).
+
+    ``tools`` are binaries that must be on ``PATH``; ``wine_exes`` are the
+    Windows executables launched through a :data:`_WRAPPERS` command (e.g.
+    ``msconvert`` in ``wine msconvert``) — checked by locating ``<name>.exe``
+    in the image rather than via ``command -v``.
+    """
     # 1. Unwrap a leading ``bash -c '…'`` / ``sh -c '…'`` so the inner
     #    first command isn't swallowed.
     m = _WRAP_RE.match(cmd)
@@ -151,6 +167,7 @@ def _extract_tools(cmd: str) -> set[str]:
     cmd = re.sub(r"\|\||&&|[|&;`]|\$\(|\)|" + _KEYWORDS, "\n", cmd)
 
     tools: set[str] = set()
+    wine_exes: set[str] = set()
     for seg in cmd.split("\n"):
         seg = seg.lstrip()
         mt = _LEAD.match(seg)
@@ -159,17 +176,30 @@ def _extract_tools(cmd: str) -> set[str]:
         tok = mt.group(1)
         if seg[mt.end(1):mt.end(1) + 1] == "=":   # VAR=value assignment
             continue
-        if tok in _NON_TOOLS or tok.startswith("/"):
+        if tok.startswith("/"):
+            continue
+        if tok in _WRAPPERS:
+            tools.add(tok)                        # the wrapper must be present
+            for w in seg.split()[1:]:             # first real arg = wrapped exe
+                if w.startswith("-") or "=" in w or w.startswith("/"):
+                    continue
+                wm = _LEAD.match(w)
+                if wm:
+                    wine_exes.add(wm.group(1))
+                break
+            continue
+        if tok in _NON_TOOLS:
             continue
         tools.add(tok)
-    return tools
+    return tools, wine_exes
 
 
-def _collect() -> "tuple[dict[str, set[str]], dict[str, set[str]], list[str]]":
-    """Return (image→tools, image→'recipe.stage' sources, render-failures)."""
+def _collect() -> "tuple[dict[str, set[str]], dict[str, set[str]], dict[str, set[str]], list[str]]":
+    """Return (image→tools, image→wine_exes, image→sources, render-failures)."""
     from bioflow import recipes
 
     image_tools: dict[str, set[str]] = {}
+    image_wine: dict[str, set[str]] = {}
     image_src: dict[str, set[str]] = {}
     failures: list[str] = []
 
@@ -190,14 +220,15 @@ def _collect() -> "tuple[dict[str, set[str]], dict[str, set[str]], list[str]]":
                 continue
             if not isinstance(cmd, str):
                 continue
-            tools = _extract_tools(cmd)
-            if tools:
+            tools, wine_exes = _extract_tools(cmd)
+            if tools or wine_exes:
                 image_tools.setdefault(image, set()).update(tools)
+                image_wine.setdefault(image, set()).update(wine_exes)
                 image_src.setdefault(image, set()).add(f"{rname}.{stage.name}")
-    return image_tools, image_src, failures
+    return image_tools, image_wine, image_src, failures
 
 
-_IMAGE_TOOLS, _IMAGE_SRC, _RENDER_FAILURES = _collect()
+_IMAGE_TOOLS, _IMAGE_WINE, _IMAGE_SRC, _RENDER_FAILURES = _collect()
 
 
 def test_all_stage_commands_render():
@@ -211,16 +242,26 @@ def test_all_stage_commands_render():
 
 def pytest_generate_tests(metafunc):
     if "image" in metafunc.fixturenames:
-        images = sorted(_IMAGE_TOOLS)
+        images = sorted(set(_IMAGE_TOOLS) | set(_IMAGE_WINE))
         metafunc.parametrize("image", images, ids=[i.split("/")[-1] for i in images])
 
 
 def test_image_provides_invoked_tools(image: str):
     """Assert *image* contains every binary the recipes invoke from it."""
-    tools = sorted(_IMAGE_TOOLS[image])
-    check = "; ".join(
+    tools = sorted(_IMAGE_TOOLS.get(image, set()))
+    wine_exes = sorted(_IMAGE_WINE.get(image, set()))
+    checks = [
         f'command -v "{t}" >/dev/null 2>&1 || echo "MISSING:{t}"' for t in tools
-    )
+    ]
+    # Wrapped Windows tools (e.g. ``wine msconvert``) are not on PATH, so
+    # ``command -v`` can't see them — confirm the ``<name>.exe`` actually
+    # ships by locating it on disk, which avoids wine's slow/flaky startup.
+    checks += [
+        f'find / -iname "{e}.exe" 2>/dev/null | head -n1 | grep -q . '
+        f'|| echo "MISSING:{e}.exe"'
+        for e in wine_exes
+    ]
+    check = "; ".join(checks)
     try:
         # Mirror how the DockerBackend invokes a stage — ``sh -c`` as the
         # *command*, keeping the image's entrypoint (some biocontainers

@@ -23,6 +23,10 @@ ship bug fixes only.  Breaking changes to the documented public API
   caught the 0.3.0 samtools breakage immediately — it needs no databases
   or fixtures, only that the tools are present.  Runs as its own nightly
   job with `BIOFLOW_PRUNE_IMAGES=1` to keep disk bounded.
+- The guard is wrapper-aware: for `wine <tool>` stages it checks both that
+  `wine` is on `PATH` and that the wrapped `<tool>.exe` actually ships in
+  the image (located on disk, no wine runtime) — so it can't be fooled into
+  passing on the wrapper alone while the real tool is missing.
 
 ### Fixed — ChIP/ATAC dedup also needed samtools (found by the guard)
 - The guard immediately surfaced one the 0.3.0 fix missed: `chip_seq` /
