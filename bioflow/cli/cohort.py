@@ -88,10 +88,10 @@ def cohort_cmd(
     )
 
     console.print()
-    for r in report.results:
-        mark = "[green]✓[/]" if r.ok else "[red]✗[/]"
-        detail = "" if r.ok else f"  [red]{r.error}[/]"
-        console.print(f"  {mark} [cyan]{r.sample_id:<16}[/] {r.workspace}{detail}")
+    for res in report.results:
+        mark = "[green]✓[/]" if res.ok else "[red]✗[/]"
+        detail = "" if res.ok else f"  [red]{res.error}[/]"
+        console.print(f"  {mark} [cyan]{res.sample_id:<16}[/] {res.workspace}{detail}")
     console.print(
         f"\n[bold]{report.n_ok} ok[/], [bold]{report.n_failed} failed[/] "
         f"of {len(report.results)}."
