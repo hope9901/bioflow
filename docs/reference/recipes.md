@@ -25,7 +25,7 @@ ATAC-seq: TrimGalore → Bowtie2 → Picard → MACS3 → TOBIAS
 *5 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0`
-- **align** — `quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7`
+- **align** — `staphb/bowtie2:2.5.4`
 - **dedup** — `quay.io/biocontainers/picard:3.2.0--hdfd78af_0`
 - **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py312he57d009_3`
 - **footprint** — `quay.io/biocontainers/tobias:0.16.1--py312h1f1cfbb_1`
@@ -45,7 +45,7 @@ ChIP-seq: TrimGalore → Bowtie2 → Picard → MACS3 → HOMER
 *5 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0`
-- **align** — `quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7`
+- **align** — `staphb/bowtie2:2.5.4`
 - **dedup** — `quay.io/biocontainers/picard:3.2.0--hdfd78af_0`
 - **call_peaks** — `quay.io/biocontainers/macs3:3.0.1--py312he57d009_3`
 - **annotate_peaks** — `quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1`
@@ -74,17 +74,18 @@ Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm
 
 - **read_qc** — `quay.io/biocontainers/nanoplot:1.43.0--pyhdfd78af_0`
 - **assemble** — `quay.io/biocontainers/flye:2.9.5--py310h275bdba_2`
-- **polish** — `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0`
+- **polish_consensus** — `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0`
 - **assess** — `quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0`
 
 ## `germline_variants`
 
 Germline variants: fastp → BWA → GATK → bcftools → SnpEff
 
-*5 stage(s):*
+*6 stage(s):*
 
+- **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
-- **align** — `quay.io/biocontainers/bwa:0.7.18--he4a0461_0`
+- **align** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_variants** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
 - **filter_variants** — `quay.io/biocontainers/bcftools:1.21--h8b25389_0`
 - **annotate_variants** — `quay.io/biocontainers/snpeff:5.2--hdfd78af_1`
@@ -101,10 +102,11 @@ Scoary GWAS over a Roary pangenome
 
 Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs → GenotypeGVCFs → hard-filter → SnpEff
 
-*7 stage(s):*
+*8 stage(s):*
 
+- **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **qc_one** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
-- **align_one** — `quay.io/biocontainers/bwa:0.7.18--he4a0461_0`
+- **align_one** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_gvcf** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
 - **combine_gvcfs** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
 - **genotype_cohort** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
@@ -119,7 +121,7 @@ Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → C
 
 - **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
 - **assemble** — `quay.io/biocontainers/megahit:1.2.9--h2e03b76_1`
-- **map_back** — `quay.io/biocontainers/minimap2:2.28--he4a0461_0`
+- **map_back** — `quay.io/biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:b411340b52d82a9c276d87c7a3dcffc880be762f-0`
 - **bin_genomes** — `quay.io/biocontainers/metabat2:2.17--h6f16272_1`
 - **assess_bins** — `quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0`
 

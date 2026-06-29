@@ -7,7 +7,7 @@
 | Tool | Version | Image | Citation |
 |---|---|---|---|
 | `bedtools` | 2.31.1 | `quay.io/biocontainers/bedtools:2.31.1--h13024bc_3` | Quinlan & Hall 2010, PMID 20110278 |
-| `bowtie2` | 2.5.4 | `quay.io/biocontainers/bowtie2:2.5.4--he96a11b_7` | Langmead & Salzberg 2012, PMID 22388286 |
+| `bowtie2` | 2.5.4 | `staphb/bowtie2:2.5.4` | Langmead & Salzberg 2012, PMID 22388286 |
 | `bwa` | 0.7.18 | `quay.io/biocontainers/bwa:0.7.18--he4a0461_0` | Li & Durbin 2009, PMID 19451168 |
 | `bwa_mem2` | 2.2.1 | `quay.io/biocontainers/bwa-mem2:2.2.1--he513fc3_0` | Vasimuddin 2019, PMID 31355760 |
 | `minimap2` | 2.28 | `quay.io/biocontainers/minimap2:2.28--he4a0461_0` | Li 2018, PMID 29750242 |
