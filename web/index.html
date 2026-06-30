@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bioflow — reproducible bioinformatics, one line at a time</title>
+<meta name="description" content="An open-source SDK + cookbook for one-line, fully reproducible bioinformatics. 111 pinned tools as Docker BioContainers, 20 curated recipes, provenance and a results overview out of the box.">
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#f6f8fb; --card:#ffffff; --ink:#0f172a; --muted:#5b6675;
+    --line:#e6eaf0; --accent:#2c5fe0; --accent-soft:#eaf0fe; --mono:#0b1220; --mono-ink:#d6e2ff;
+    --ok:#0f9d6b; --radius:14px; --maxw:1080px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --code:"SFMono-Regular",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b0f17; --bg-soft:#0f1522; --card:#121a28; --ink:#eaf0f8; --muted:#9aa7b8;
+      --line:#1f2a3a; --accent:#6f9bff; --accent-soft:#16203a; --mono:#0a0f1a; --mono-ink:#d6e2ff; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;
+    -webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  code,kbd{font-family:var(--code)}
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:18px;height:60px}
+  .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+  .brand b{color:var(--accent)}
+  nav .sp{flex:1}
+  nav a{color:var(--muted);font-size:14px} nav a:hover{color:var(--ink);text-decoration:none}
+  .pill{border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--ink);font-size:14px}
+  /* hero */
+  .hero{padding:72px 0 36px;text-align:center}
+  .kicker{display:inline-block;font-size:13px;color:var(--accent);background:var(--accent-soft);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px;margin-bottom:18px}
+  h1{font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.03em;margin:.1em 0 .25em;font-weight:800}
+  .sub{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:680px;margin:0 auto 26px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+  .btn{border-radius:10px;padding:11px 18px;font-size:15px;font-weight:600;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn:hover{text-decoration:none;transform:translateY(-1px)}
+  .install{display:inline-flex;align-items:center;gap:12px;background:var(--mono);color:var(--mono-ink);
+    border-radius:12px;padding:12px 16px;font-family:var(--code);font-size:15px;border:1px solid var(--line)}
+  .install button{background:transparent;border:0;color:#8fb4ff;cursor:pointer;font-size:13px;font-family:var(--font)}
+  /* terminal */
+  .term{max-width:760px;margin:34px auto 0;background:var(--mono);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;text-align:left;box-shadow:0 18px 50px -28px rgba(0,0,0,.5)}
+  .term .bar{display:flex;gap:7px;padding:11px 14px;border-bottom:1px solid #1d2738;background:#0c1320}
+  .term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block;background:#3a475c}
+  .term pre{margin:0;padding:18px 20px;color:#d6e2ff;font-family:var(--code);font-size:14px;
+    line-height:1.7;overflow-x:auto}
+  .term .c{color:#7da2ff} .term .g{color:#5fd0a0} .term .d{color:#7c8aa0}
+  /* sections */
+  section{padding:54px 0}
+  .h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;font-weight:800;margin:0 0 6px;text-align:center}
+  .lead{color:var(--muted);text-align:center;max-width:640px;margin:0 auto 34px}
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:860px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}}
+  @media(max-width:520px){.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .card h3{margin:.1em 0 .35em;font-size:17px}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .ic{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+  .soft{background:var(--bg-soft)}
+  .step{display:flex;gap:16px;align-items:flex-start}
+  .step .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:880px;margin:0 auto}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;
+    font-size:13.5px;font-family:var(--code);color:var(--ink)}
+  .stats{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 26px;text-align:center;min-width:150px}
+  .stat b{display:block;font-size:30px;letter-spacing:-.02em} .stat span{color:var(--muted);font-size:13.5px}
+  .two{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:center}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+  ul.tick{list-style:none;padding:0;margin:0} ul.tick li{padding:6px 0 6px 26px;position:relative;color:var(--muted)}
+  ul.tick li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+  ul.tick b{color:var(--ink)}
+  footer{border-top:1px solid var(--line);padding:34px 0 48px;color:var(--muted);font-size:14px}
+  footer .wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+  .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="brand"><b>bio</b>flow</span>
+  <span class="sp"></span>
+  <a href="#features">Features</a>
+  <a href="#how">How it works</a>
+  <a href="#recipes">Recipes</a>
+  <a href="https://hope9901.github.io/bioflow/">Docs</a>
+  <a class="pill" href="https://github.com/hope9901/bioflow">GitHub ↗</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="kicker">Open source · MIT · pip + conda</span>
+  <h1>Reproducible bioinformatics,<br>one line at a time.</h1>
+  <p class="sub">An SDK + cookbook that runs real analyses on your own machine — every tool a
+    digest-pinned Docker BioContainer, every run self-documenting. No cloud account, no lock-in.</p>
+  <div class="cta">
+    <span class="install"><code>pip install bioflowkit</code>
+      <button onclick="navigator.clipboard.writeText('pip install bioflowkit')">copy</button></span>
+    <a class="btn primary" href="https://hope9901.github.io/bioflow/">Read the docs</a>
+    <a class="btn" href="https://github.com/hope9901/bioflow">Star on GitHub</a>
+  </div>
+  <div class="term">
+    <div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="d"># assemble + annotate a genome, end to end</span>
+<span class="c">$</span> bioflow recipe run <span class="g">prokaryote_assembly</span> \
+      --r1 reads_R1.fastq.gz --r2 reads_R2.fastq.gz --out ./run
+
+  <span class="g">✓</span> fastp → SPAdes → QUAST → Bandage → Prokka
+  <span class="g">✓</span> provenance.json + ro-crate-metadata.json written
+  <span class="g">✓</span> overview → run/results/overview.html</pre>
+  </div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <h2 class="h2">Built for results you can trust</h2>
+  <p class="lead">Most tools optimise for speed. bioflow optimises for the thing that actually
+    matters in research — being able to reproduce, audit, and explain what you ran.</p>
+  <div class="grid g4">
+    <div class="card"><div class="ic">⛓</div><h3>Reproducible by default</h3>
+      <p>Every container is pinned by image digest, every run records input SHA-256 + commands +
+        image digests as an RO-Crate. Unchanged inputs hit the cache.</p></div>
+    <div class="card"><div class="ic">✓</div><h3>Curated &amp; tested</h3>
+      <p>20 hand-written recipes, a nightly real-tool integration matrix, and a guard that
+        statically catches “wrong image” bugs before they ship.</p></div>
+    <div class="card"><div class="ic">⌗</div><h3>Runs anywhere</h3>
+      <p>Your workstation with Docker, or an HPC cluster with Apptainer/Singularity — no daemon
+        needed. Podman and GPU pass-through supported.</p></div>
+    <div class="card"><div class="ic">◍</div><h3>Open &amp; inspectable</h3>
+      <p>MIT-licensed, on PyPI and bioconda. No black box: read every recipe, swap any tool,
+        and an optional privacy-first LLM helper stays off by default.</p></div>
+  </div>
+</div></section>
+
+<section id="how" class="soft"><div class="wrap">
+  <h2 class="h2">How it works</h2>
+  <p class="lead">One CLI line orchestrates a chain of single-tool containers over a shared
+    workspace — bioflow never installs a bioinformatics binary on your host.</p>
+  <div class="grid g3">
+    <div class="card"><div class="step"><span class="n">1</span><div>
+      <h3>Pick a recipe</h3><p>Call one curated pipeline, or compose your own with the
+      <code>@stage</code> / <code>@pipeline</code> SDK in Python.</p></div></div></div>
+    <div class="card"><div class="step"><span class="n">2</span><div>
+      <h3>Each tool, its own container</h3><p>Stages run as sibling BioContainers pinned to a
+      digest — fan out across samples with <code>bioflow cohort</code>.</p></div></div></div>
+    <div class="card"><div class="step"><span class="n">3</span><div>
+      <h3>Tidy results + an overview</h3><p>You get analysis-ready tables, full provenance, and an
+      auto-built report that links each tool’s own figures.</p></div></div></div>
+  </div>
+</div></section>
+
+<section id="recipes"><div class="wrap">
+  <h2 class="h2">20 recipes, one command each</h2>
+  <p class="lead">From comparative genomics to RNA-seq, assembly, variants, metagenomics,
+    epigenomics, single-cell and proteomics.</p>
+  <div class="chips">
+    <span class="chip">pangenome</span><span class="chip">phylogeny</span>
+    <span class="chip">ani_matrix</span><span class="chip">prokaryote_assembly</span>
+    <span class="chip">eukaryote_assembly</span><span class="chip">rnaseq_deg</span>
+    <span class="chip">germline_variants</span><span class="chip">joint_genotyping</span>
+    <span class="chip">metagenomics_profile</span><span class="chip">metagenome_assembly</span>
+    <span class="chip">scrna_seq</span><span class="chip">chip_seq</span>
+    <span class="chip">atac_seq</span><span class="chip">methylation_wgbs</span>
+    <span class="chip">proteomics_dda</span><span class="chip">gwas</span>
+    <span class="chip">cog_enrichment</span><span class="chip">cafe_evolution</span>
+    <span class="chip">amr_vf_catalogue</span><span class="chip">download_taxon</span>
+  </div>
+</div></section>
+
+<section class="soft"><div class="wrap">
+  <div class="two">
+    <div>
+      <h2 class="h2" style="text-align:left">Reproducibility isn’t a feature.<br>It’s the default.</h2>
+      <ul class="tick">
+        <li><b>Digest-pinned images</b> — a silently re-tagged upstream image can’t change your result.</li>
+        <li><b>Run provenance</b> — input hashes, image digests, commands and timestamps as an RO-Crate.</li>
+        <li><b>Input-hash caching</b> — re-running with unchanged inputs returns in seconds.</li>
+        <li><b>Hardware-aware</b> — every tool classified against your CPU / RAM / GPU before it runs.</li>
+        <li><b>CI-enforced</b> — image-capability guard + digest audit gate every change.</li>
+      </ul>
+    </div>
+    <div class="card">
+<pre style="margin:0;font-family:var(--code);font-size:13px;color:var(--ink);overflow-x:auto">{
+  "stage": "assemble",
+  "image": "staphb/spades:4.0.0",
+  "image_digest": "sha256:…",
+  "inputs": { "reads": "sha256:9f2c…" },
+  "command": "spades.py -k auto …",
+  "started_at": "2026-06-30T07:54:…Z"
+}</pre>
+      <p style="margin:.7rem 0 0;color:var(--muted);font-size:13px">excerpt from <code>provenance.json</code></p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2 class="h2">Visualisation, done honestly</h2>
+  <p class="lead">bioflow doesn’t reinvent plotting. It runs the field-standard visual tools as
+    stages and surfaces their own output — a report hub plus the tidy data, so you plot the rest.</p>
+  <div class="grid g3">
+    <div class="card"><h3>Layer 1 · tidy data</h3><p>One row per sample +
+      a <code>results.json</code> schema. Load it in R/Python and make any figure.</p></div>
+    <div class="card"><h3>Layer 2 · overview</h3><p>A metrics table + the assembly graph (Bandage),
+      QUAST/Icarus and fastp reports — embedded or linked, never redrawn.</p></div>
+    <div class="card"><h3>Layer 3 · interactive</h3><p>Standard BAM / BED / GFF outputs open straight
+      in IGV — we delegate, we don’t lock you in.</p></div>
+  </div>
+</div></section>
+
+<section class="soft"><div class="wrap">
+  <div class="stats">
+    <div class="stat"><b>111</b><span>pinned tools</span></div>
+    <div class="stat"><b>16</b><span>categories</span></div>
+    <div class="stat"><b>20</b><span>one-line recipes</span></div>
+    <div class="stat"><b>MIT</b><span>open source</span></div>
+  </div>
+  <div class="cta" style="margin-top:30px">
+    <span class="install"><code>pip install bioflowkit</code>
+      <button onclick="navigator.clipboard.writeText('pip install bioflowkit')">copy</button></span>
+    <a class="btn primary" href="https://github.com/hope9901/bioflow">Get started ↗</a>
+  </div>
+  <p class="note">Requires Python ≥ 3.9 and a reachable Docker (or Apptainer on HPC).</p>
+</div></section>
+
+<footer><div class="wrap">
+  <span class="brand"><b>bio</b>flow</span>
+  <span class="sp" style="flex:1"></span>
+  <a href="https://github.com/hope9901/bioflow">GitHub</a>
+  <a href="https://pypi.org/project/bioflowkit/">PyPI</a>
+  <a href="https://hope9901.github.io/bioflow/">Docs</a>
+  <span>· MIT License</span>
+</div></footer>
+
+</body>
+</html>
