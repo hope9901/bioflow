@@ -1,0 +1,99 @@
+"""Unit tests for the results harvester + overview (visualization Layers 1 & 2).
+
+Synthetic QUAST/Prokka fixture files — no Docker, no real assembly.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from bioflow.core.results import (
+    _parse_prokka,
+    _parse_quast,
+    build_overview,
+)
+
+
+def _mk_sample(root: Path, sid: str, *, contigs, total, n50, gc, cds, rrna, trna):
+    """Write a sample's QUAST report.tsv + Prokka .txt under a hidden .cache,
+    mimicking a finished cohort run."""
+    q = root / sid / ".cache" / f"assembly_qc__{sid}h"
+    q.mkdir(parents=True)
+    (q / "report.tsv").write_text(
+        "Assembly\tscaffolds\n"
+        f"# contigs (>= 0 bp)\t{contigs + 50}\n"      # must be ignored
+        f"# contigs\t{contigs}\n"
+        f"Total length (>= 0 bp)\t{total + 9000}\n"   # must be ignored
+        f"Total length\t{total}\n"
+        f"N50\t{n50}\n"
+        f"GC (%)\t{gc}\n"
+        f"Largest contig\t{n50 * 2}\n",
+        encoding="utf-8",
+    )
+    p = root / sid / ".cache" / f"annotate__{sid}h" / "prokka"
+    p.mkdir(parents=True)
+    (p / f"{sid}.txt").write_text(
+        f"organism: Genus species {sid}\ncontigs: {contigs}\nbases: {total}\n"
+        f"CDS: {cds}\nrRNA: {rrna}\ntRNA: {trna}\n",
+        encoding="utf-8",
+    )
+
+
+def test_parse_quast_takes_bare_metrics(tmp_path):
+    f = tmp_path / "report.tsv"
+    f.write_text(
+        "# contigs (>= 0 bp)\t999\n# contigs\t353\nTotal length\t6033993\n"
+        "N50\t30700\nGC (%)\t37.46\nLargest contig\t149871\n",
+        encoding="utf-8",
+    )
+    d = _parse_quast(f)
+    assert d == {"n_contigs": 353, "total_bp": 6033993, "n50": 30700,
+                 "gc_pct": 37.46, "largest_contig": 149871}
+
+
+def test_parse_prokka(tmp_path):
+    f = tmp_path / "s.txt"
+    f.write_text("organism: x\ncontigs: 252\nbases: 4812425\nCDS: 4594\n"
+                 "rRNA: 9\ntRNA: 90\n", encoding="utf-8")
+    d = _parse_prokka(f)
+    assert d == {"n_contigs": 252, "total_bp": 4812425, "cds": 4594,
+                 "rrna": 9, "trna": 90}
+
+
+def test_build_overview_end_to_end(tmp_path):
+    out = tmp_path / "out"
+    _mk_sample(out, "S1", contigs=300, total=5_000_000, n50=40000, gc=37.5,
+               cds=4800, rrna=9, trna=80)
+    _mk_sample(out, "S2", contigs=200, total=4_000_000, n50=90000, gc=41.0,
+               cds=4000, rrna=6, trna=70)
+
+    res = build_overview("prokaryote_assembly", out)
+    rows = {r["sample_id"]: r for r in res["rows"]}
+    assert set(rows) == {"S1", "S2"}
+    # QUAST wins for shared metrics; values land tidily
+    assert rows["S1"]["total_bp"] == 5_000_000
+    assert rows["S1"]["n50"] == 40000 and rows["S1"]["gc_pct"] == 37.5
+    assert rows["S1"]["cds"] == 4800 and rows["S1"]["trna"] == 80
+
+    # Layer 1 artifacts
+    assert Path(res["csv"]).exists()
+    manifest = json.loads(Path(res["manifest"]).read_text(encoding="utf-8"))
+    assert manifest["recipe"] == "prokaryote_assembly"
+    assert manifest["n_samples"] == 2
+    assert manifest["tables"][0]["columns"][0] == "sample_id"
+
+    # Layer 2 artifact — self-contained HTML with both samples + charts
+    page = Path(res["overview"]).read_text(encoding="utf-8")
+    assert "<svg" in page and "S1" in page and "S2" in page
+
+
+def test_build_overview_unknown_recipe_raises(tmp_path):
+    with pytest.raises(ValueError, match="No results harvester"):
+        build_overview("rnaseq_deg", tmp_path)
+
+
+def test_build_overview_empty_workspace_raises(tmp_path):
+    with pytest.raises(ValueError, match="No per-sample outputs"):
+        build_overview("prokaryote_assembly", tmp_path)

@@ -34,6 +34,7 @@ from bioflow.cli import (  # noqa: F401,E402
     hw,
     llm,
     ncbi,
+    overview,
     pipelines,
     provenance,
     recipe,
