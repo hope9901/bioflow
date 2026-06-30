@@ -89,6 +89,7 @@ from bioflow.sdk._runtime import (  # noqa: F401
     _get_workspace,
     _next_run_id,
     set_backend,
+    set_param_overrides,
     set_workspace,
 )
 from bioflow.sdk._stage import Stage, stage  # noqa: F401
@@ -147,6 +148,7 @@ __all__ = [
     # Workspace / backend
     "set_workspace",
     "set_backend",
+    "set_param_overrides",
     # Cache controls
     "set_cache_enabled",
     "is_cache_enabled",

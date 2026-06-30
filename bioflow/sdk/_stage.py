@@ -31,9 +31,53 @@ from bioflow.sdk._paths import (
     _translate_command,
 )
 from bioflow.sdk._result import StageResult
-from bioflow.sdk._runtime import _get_backend, _get_workspace, _next_run_id
+from bioflow.sdk._runtime import (
+    _get_backend,
+    _get_param_overrides,
+    _get_workspace,
+    _next_run_id,
+)
 
 log = get_logger()
+
+
+def _coerce_scalar(v: Any) -> Any:
+    """Coerce a string override value to int/float when it clearly is one;
+    leave everything else (incl. comma lists like ``21,33,55``) as text."""
+    if not isinstance(v, str):
+        return v
+    s = v.strip()
+    if s.lstrip("-").isdigit():
+        return int(s)
+    try:
+        return float(s)
+    except ValueError:
+        return v
+
+
+def _apply_param_overrides(stage_name: str, func: Callable, kwargs: dict) -> dict:
+    """Overlay ``--set`` overrides onto a stage's keyword-only parameters.
+
+    Only keyword-only params are touched (the bioflow convention puts tunable
+    knobs after ``*``; data dependencies stay positional), so an override can
+    never collide with a positional argument.  ``<stage>.<param>`` beats a
+    bare ``<param>``.  Applied before cache-key + provenance so both see it.
+    """
+    overrides = _get_param_overrides()
+    if not overrides:
+        return kwargs
+    applied: dict = {}
+    for pname, p in inspect.signature(func).parameters.items():
+        if p.kind is not inspect.Parameter.KEYWORD_ONLY or pname == "out_dir":
+            continue
+        if f"{stage_name}.{pname}" in overrides:
+            applied[pname] = _coerce_scalar(overrides[f"{stage_name}.{pname}"])
+        elif pname in overrides:
+            applied[pname] = _coerce_scalar(overrides[pname])
+    if applied:
+        log.info(f"OVERRIDE stage={stage_name}  {applied}")
+        return {**kwargs, **applied}
+    return kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -92,6 +136,10 @@ class Stage:
     def _run_once(self, args: tuple, kwargs: dict) -> StageResult:
         workspace = _get_workspace()
         started_at = _prov._now_iso()
+
+        # Apply `--set` parameter overrides up front so the cache key and
+        # provenance both reflect them (and the rendered command uses them).
+        kwargs = _apply_param_overrides(self.name, self.func, kwargs)
 
         # ------------------------- cache lookup -------------------------
         cache_key = ""

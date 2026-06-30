@@ -98,6 +98,13 @@ def recipe_cmd(
         help="Record run provenance (input SHA-256, image digests, "
              "commands, timestamps) and write provenance.json + "
              "ro-crate-metadata.json into the workspace."),
+    set_overrides: "list[str]" = typer.Option(
+        [], "--set",
+        help="Override a stage parameter without editing the recipe: "
+             "--set <stage>.<param>=<value> (repeatable).  "
+             "E.g. --set assemble.kmer=21,33,55.  Overrides land in the "
+             "cache key + provenance, so reproducibility is preserved.",
+    ),
 ) -> None:
     """Curated end-to-end pipelines (the Tier-B entry point).
 
@@ -148,6 +155,19 @@ def recipe_cmd(
         out.mkdir(parents=True, exist_ok=True)
         set_workspace(out)
         rprint(f"\n[bold]Running recipe[/] [cyan]{name}[/]  workspace=[dim]{out}[/]")
+
+        # Stage-parameter overrides (--set <stage>.<param>=<value>)
+        overrides: "dict[str, object]" = {}
+        for item in set_overrides:
+            if "=" not in item:
+                rprint(f"[red]--set expects <key>=<value>, got {item!r}.[/]")
+                raise typer.Exit(code=1)
+            key, val = item.split("=", 1)
+            overrides[key.strip()] = val
+        if overrides:
+            from bioflow.sdk import set_param_overrides  # noqa: PLC0415
+            set_param_overrides(overrides)
+            rprint(f"[dim]parameter overrides: {overrides}[/]")
 
         # Build kwargs intelligently — pass only what the pipeline accepts.
         # Explicit options below cover the comparative-genomics recipes;

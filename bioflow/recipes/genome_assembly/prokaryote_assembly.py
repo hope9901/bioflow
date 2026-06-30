@@ -29,11 +29,16 @@ from bioflow.recipes import register
 
 @stage(image="quay.io/biocontainers/fastp:0.23.4--h5f740d0_0",
        cpu=4, ram_gb=4)
-def qc_trim(r1: Path, r2: Path, *, out_dir):
-    """fastp: adapter trim + quality filter for paired-end short reads."""
+def qc_trim(r1: Path, r2: Path, *, out_dir, min_qual: int = 15):
+    """fastp: adapter trim + quality filter for paired-end short reads.
+
+    ``min_qual`` is fastp's per-base quality threshold (its default, 15) —
+    override per run with ``--set qc_trim.min_qual=30``.
+    """
     return (
         f"fastp -i {r1} -I {r2} "
         f"-o {out_dir}/clean_R1.fastq.gz -O {out_dir}/clean_R2.fastq.gz "
+        f"--qualified_quality_phred {min_qual} "
         f"--json {out_dir}/fastp.json --html {out_dir}/fastp.html "
         f"--thread 4"
     )
@@ -41,12 +46,17 @@ def qc_trim(r1: Path, r2: Path, *, out_dir):
 
 @stage(image="staphb/spades:4.0.0", cpu=8, ram_gb=16, depends_on=qc_trim,
        retry=2, retry_with={"ram_gb": "2x"})
-def assemble(clean, *, out_dir):
-    """SPAdes de novo assembly from QC-cleaned reads."""
+def assemble(clean, *, out_dir, kmer: str = "auto"):
+    """SPAdes de novo assembly from QC-cleaned reads.
+
+    ``kmer`` is SPAdes' ``-k`` (default ``auto``) — override per run with
+    ``--set assemble.kmer=21,33,55,77``.
+    """
     return (
         f"spades.py "
         f"-1 {clean.out_dir}/clean_R1.fastq.gz "
         f"-2 {clean.out_dir}/clean_R2.fastq.gz "
+        f"-k {kmer} "
         f"-o {out_dir} -t 8 -m 16 --only-assembler"
     )
 

@@ -20,6 +20,7 @@ _workspace_lock = threading.Lock()
 _active_workspace: Optional[Path] = None
 _active_backend: Optional[ContainerBackend] = None
 _run_counter = 0
+_param_overrides: "dict[str, object]" = {}
 
 
 def set_workspace(path: Path) -> None:
@@ -41,6 +42,25 @@ def set_backend(backend: ContainerBackend) -> None:
     global _active_backend
     with _workspace_lock:
         _active_backend = backend
+
+
+def set_param_overrides(overrides: "dict[str, object]") -> None:
+    """Replace the active per-stage parameter overrides.
+
+    Keys are ``"<stage>.<param>"`` (stage-scoped) or ``"<param>"`` (any stage
+    with a keyword-only param of that name); stage-scoped wins.  Powers
+    ``bioflow recipe run --set <stage>.<param>=<value>``.  The @stage engine
+    applies these *before* it computes the cache key, so an override both
+    invalidates the cache and is recorded in provenance — reproducibility is
+    preserved, only the value changes.
+    """
+    global _param_overrides
+    with _workspace_lock:
+        _param_overrides = dict(overrides or {})
+
+
+def _get_param_overrides() -> "dict[str, object]":
+    return _param_overrides
 
 
 def _get_workspace() -> Path:

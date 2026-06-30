@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — per-run stage parameter overrides (`--set`)
+- `bioflow recipe run <recipe> --set <stage>.<param>=<value>` (repeatable)
+  tweaks a stage's tunable knobs without editing the recipe — e.g.
+  `--set assemble.kmer=21,33,55 --set qc_trim.min_qual=30`.  Only keyword-only
+  stage params are targetable (data dependencies stay positional, so an
+  override can never collide with one); a `<stage>.<param>` key beats a bare
+  `<param>`.  Overrides are applied **before** the cache key + provenance, so
+  they invalidate the cache and are recorded — reproducibility is preserved,
+  only the value changes.  Also exposed programmatically as
+  `set_param_overrides()`.  `prokaryote_assembly` now surfaces `qc_trim.min_qual`
+  and `assemble.kmer` as the first tunable parameters (defaults unchanged).
+
 ### Added — cohort runner (fan a single-sample recipe across a samplesheet)
 - `bioflow cohort <recipe> --samplesheet samples.csv [--jobs N]` runs a
   single-sample recipe (`prokaryote_assembly`, `germline_variants`,
