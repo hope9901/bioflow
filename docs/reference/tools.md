@@ -1,6 +1,6 @@
 # Tools
 
-**110 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**111 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## alignment  (6)
 
@@ -34,10 +34,11 @@
 | `unicycler` | 0.5.1 | `quay.io/biocontainers/unicycler:0.5.1--py312hdcc493e_5` | Wick 2017, PMID 28594827 |
 | `verkko` | 2.2.1 | `quay.io/biocontainers/verkko:2.2.1--h45dadce_0` | Rautiainen 2023, PMID 36797492 |
 
-## assembly_qc  (6)
+## assembly_qc  (7)
 
 | Tool | Version | Image | Citation |
 |---|---|---|---|
+| `bandage` | 0.8.1 | `staphb/bandage:0.8.1` | Wick 2015, PMID 26099265 |
 | `busco` | 5.7.1 | `quay.io/biocontainers/busco:5.7.1--pyhdfd78af_0` | Manni 2021, PMID 34320675 |
 | `checkm2` | 1.0.2 | `quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0` | Chklovski 2023, PMID 37501070 |
 | `compleasm` | 0.2.6 | `quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0` | Huang & Li 2023, PMID 37862556 |

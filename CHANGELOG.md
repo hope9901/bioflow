@@ -14,6 +14,15 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — Bandage assembly-graph visualization in prokaryote_assembly
+- New `Bandage` tool (`staphb/bandage:0.8.1`, digest-pinned) + a `graph_image`
+  stage that renders the SPAdes assembly graph to `assembly_graph.png`
+  (headless via `QT_QPA_PLATFORM=offscreen`).  The results overview **embeds**
+  that image per sample — a real, paper-grade assembly-graph picture instead of
+  a hand-drawn chart.  First demonstration of the "integrate the field-standard
+  viz tool as a stage, then surface its output" pattern (Bandage: Wick 2015,
+  PMID 26099265).
+
 ### Added — results overview (experimental): tidy data + a report hub
 - `bioflow overview <recipe> <workspace>` post-processes a finished run/cohort
   into **Layer 1** tidy data (`results/assembly_metrics.csv` + a `results.json`

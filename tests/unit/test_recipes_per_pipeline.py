@@ -13,7 +13,7 @@ from bioflow.recipes import get, names
 
 
 EXPECTED_RECIPES = {
-    "prokaryote_assembly":  4,   # fastp → spades → quast → prokka
+    "prokaryote_assembly":  5,   # fastp → spades → quast → bandage → prokka
     "eukaryote_assembly":   4,   # nanoplot → flye → medaka → compleasm
     "rnaseq_deg":           6,   # fastp → salmon_index → salmon_quant → deseq2 → enrich → multiqc
     "metagenomics_profile": 3,   # fastp → kraken2 → bracken

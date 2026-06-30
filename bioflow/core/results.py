@@ -118,6 +118,7 @@ def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
             "QUAST report": _find_report(root, "report.html"),
             "Icarus contig browser": _find_report(root, "icarus.html"),
             "fastp read QC": _find_report(root, "fastp.html"),
+            "Assembly graph (Bandage)": _find_report(root, "assembly_graph.png"),
         }
         reports[sid] = {k: v for k, v in found.items() if v is not None}
     return rows, reports
@@ -175,16 +176,28 @@ def _rel(p: Path, base: Path) -> str:
         return Path(p).resolve().as_uri()
 
 
+_IMAGE_SUFFIXES = {".png", ".svg", ".jpg", ".jpeg", ".gif"}
+
+
 def _report_block(sid: str, links: "dict[str, Path]", base: Path) -> str:
-    """One sample's links to the established tools' own report pages."""
+    """One sample's reports: image outputs are embedded, HTML pages are linked."""
     if not links:
-        items = "<span class='muted'>no report pages found</span>"
-    else:
-        items = " · ".join(
-            f'<a href="{html.escape(_rel(p, base))}">{html.escape(label)}</a>'
-            for label, p in links.items()
-        )
-    return f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> {items}</div>"
+        return (f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> "
+                "<span class='muted'>no report pages found</span></div>")
+    anchors, figures = [], []
+    for label, p in links.items():
+        href = html.escape(_rel(p, base))
+        if p.suffix.lower() in _IMAGE_SUFFIXES:
+            figures.append(
+                f'<figure><a href="{href}"><img src="{href}" '
+                f'alt="{html.escape(label)}" loading="lazy"></a>'
+                f"<figcaption>{html.escape(label)}</figcaption></figure>")
+        else:
+            anchors.append(f'<a href="{href}">{html.escape(label)}</a>')
+    body = " · ".join(anchors)
+    if figures:
+        body += "<div class='imgs'>" + "".join(figures) + "</div>"
+    return f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> {body}</div>"
 
 
 def _table(rows: "list[dict]") -> str:
@@ -216,8 +229,13 @@ def render_overview(recipe: str, rows: "list[dict]", reports: dict,
  th,td{{border:1px solid #e3e3e3;padding:.35rem .55rem;text-align:right;}}
  th:first-child,td:first-child{{text-align:left;}} th{{background:#f4f6fa;}}
  tr:nth-child(even){{background:#fafafa;}}
- .rep{{padding:.3rem 0;font-size:.9rem;}} .sid{{font-weight:600;margin-right:.6rem;}}
+ .rep{{padding:.5rem 0;font-size:.9rem;border-top:1px solid #eee;}}
+ .sid{{font-weight:600;margin-right:.6rem;}}
  .rep a{{color:#2c7be5;text-decoration:none;margin-right:.2rem;}}
+ .imgs{{display:flex;gap:14px;flex-wrap:wrap;margin:.5rem 0 .2rem;}}
+ .imgs figure{{margin:0;}}
+ .imgs img{{max-width:340px;max-height:240px;border:1px solid #e3e3e3;border-radius:6px;}}
+ .imgs figcaption{{font-size:.75rem;color:#888;margin-top:.15rem;}}
  .note{{font-size:.8rem;color:#666;border-left:3px solid #2c7be5;padding:.2rem .8rem;background:#f7f9fc;}}
 </style></head><body>
 <h1>{html.escape(recipe)} — overview</h1>

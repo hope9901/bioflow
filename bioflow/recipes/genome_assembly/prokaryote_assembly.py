@@ -92,10 +92,26 @@ def annotate(asm, *, out_dir, sample_id: str = "sample"):
     )
 
 
+@stage(image="staphb/bandage:0.8.1", cpu=2, ram_gb=4, depends_on=assemble)
+def graph_image(asm, *, out_dir):
+    """Bandage: render the SPAdes assembly graph to a PNG.
+
+    Headless render needs Qt's offscreen platform (no X server in the
+    container).  Prefers ``assembly_graph_with_scaffolds.gfa`` and falls back
+    to the plain ``assembly_graph.gfa``.
+    """
+    return (
+        f"bash -c 'export QT_QPA_PLATFORM=offscreen; "
+        f"GFA={asm.out_dir}/assembly_graph_with_scaffolds.gfa; "
+        f"[ -f \"$GFA\" ] || GFA={asm.out_dir}/assembly_graph.gfa; "
+        f"Bandage image \"$GFA\" {out_dir}/assembly_graph.png'"
+    )
+
+
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, assemble, assembly_qc, annotate],
+    stages=[qc_trim, assemble, assembly_qc, graph_image, annotate],
     description="Prokaryote short-read de novo assembly + Prokka annotation",
 )
 def prokaryote_assembly(
@@ -105,13 +121,14 @@ def prokaryote_assembly(
     out_dir: Path,
     sample_id: str = "sample",
 ):
-    """fastp → SPAdes → QUAST + Prokka end-to-end."""
+    """fastp → SPAdes → QUAST + Bandage graph + Prokka end-to-end."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = qc_trim(Path(r1), Path(r2))
     asm = assemble(clean)
     assembly_qc(asm)                # QUAST report lands in its own out_dir
+    graph_image(asm)                # Bandage assembly-graph PNG
     return annotate(asm, sample_id=sample_id)
 
 
