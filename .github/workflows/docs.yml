@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'web/**'
       - 'mkdocs.yml'
       - 'registry/**'
       - 'bioflow/recipes/**'
@@ -49,6 +50,12 @@ jobs:
 
       - name: Build site (strict)
         run: mkdocs build --strict
+
+      - name: Use the landing page as the site home
+        # The promotional landing (web/index.html) becomes the Pages root;
+        # the MkDocs pages stay at their sub-paths (/install/, /quickstart/,
+        # /reference/…) and the landing links into them.
+        run: cp web/index.html site/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
