@@ -17,8 +17,8 @@ from bioflow.core.results import (
 
 
 def _mk_sample(root: Path, sid: str, *, contigs, total, n50, gc, cds, rrna, trna):
-    """Write a sample's QUAST report.tsv + Prokka .txt under a hidden .cache,
-    mimicking a finished cohort run."""
+    """Write a sample's QUAST + Prokka + fastp outputs (data files AND the
+    tools' own report pages) under a hidden .cache, mimicking a finished run."""
     q = root / sid / ".cache" / f"assembly_qc__{sid}h"
     q.mkdir(parents=True)
     (q / "report.tsv").write_text(
@@ -32,6 +32,8 @@ def _mk_sample(root: Path, sid: str, *, contigs, total, n50, gc, cds, rrna, trna
         f"Largest contig\t{n50 * 2}\n",
         encoding="utf-8",
     )
+    (q / "report.html").write_text("<html>quast</html>", encoding="utf-8")
+    (q / "icarus.html").write_text("<html>icarus</html>", encoding="utf-8")
     p = root / sid / ".cache" / f"annotate__{sid}h" / "prokka"
     p.mkdir(parents=True)
     (p / f"{sid}.txt").write_text(
@@ -39,6 +41,9 @@ def _mk_sample(root: Path, sid: str, *, contigs, total, n50, gc, cds, rrna, trna
         f"CDS: {cds}\nrRNA: {rrna}\ntRNA: {trna}\n",
         encoding="utf-8",
     )
+    qc = root / sid / ".cache" / f"qc_trim__{sid}h"
+    qc.mkdir(parents=True)
+    (qc / "fastp.html").write_text("<html>fastp</html>", encoding="utf-8")
 
 
 def test_parse_quast_takes_bare_metrics(tmp_path):
@@ -83,10 +88,17 @@ def test_build_overview_end_to_end(tmp_path):
     assert manifest["recipe"] == "prokaryote_assembly"
     assert manifest["n_samples"] == 2
     assert manifest["tables"][0]["columns"][0] == "sample_id"
+    # manifest indexes each tool's own report page (relative, forward slashes)
+    assert set(manifest["reports"]["S1"]) == {
+        "QUAST report", "Icarus contig browser", "fastp read QC"}
+    assert manifest["reports"]["S1"]["QUAST report"].endswith("report.html")
+    assert "\\" not in manifest["reports"]["S1"]["QUAST report"]
 
-    # Layer 2 artifact — self-contained HTML with both samples + charts
+    # Layer 2 artifact — table + links to the tools' own reports (not redrawn)
     page = Path(res["overview"]).read_text(encoding="utf-8")
-    assert "<svg" in page and "S1" in page and "S2" in page
+    assert "S1" in page and "S2" in page
+    assert "QUAST report" in page and "Icarus contig browser" in page
+    assert "report.html" in page and "<svg" not in page
 
 
 def test_build_overview_unknown_recipe_raises(tmp_path):

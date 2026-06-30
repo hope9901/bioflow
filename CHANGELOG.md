@@ -14,15 +14,16 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
-### Added — results overview (experimental): tidy data + at-a-glance report
+### Added — results overview (experimental): tidy data + a report hub
 - `bioflow overview <recipe> <workspace>` post-processes a finished run/cohort
   into **Layer 1** tidy data (`results/assembly_metrics.csv` + a `results.json`
   manifest naming the tables + column schema — load it and plot however you
-  like) and **Layer 2** a self-contained `results/overview.html` (metrics table
-  + canonical inline-SVG bar charts; no server, no JS).  `prokaryote_assembly`
-  only for now (QUAST + Prokka + fastp harvested per sample; works for single
-  runs and cohorts).  Design stance: bioflow hands over clean data + a canonical
-  summary, not a bespoke figure GUI — deep/interactive views stay delegated to
+  like) and **Layer 2** `results/overview.html`: a metrics table plus links to
+  each tool's *own* report page.  bioflow does NOT redraw plots — it surfaces
+  the established, paper-grade reports the pipeline already produces (QUAST
+  `report.html` + the Icarus contig browser, fastp QC; MultiQC for the cohort),
+  and `results.json` indexes them too.  `prokaryote_assembly` only for now
+  (works for single runs and cohorts).  Deep/interactive views stay delegated to
   standard tools (emit BAM/BED/GFF → open in IGV).
 
 
