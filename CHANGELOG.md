@@ -25,6 +25,8 @@ ship bug fixes only.  Breaking changes to the documented public API
   and `results.json` indexes them too.  `prokaryote_assembly` only for now
   (works for single runs and cohorts).  Deep/interactive views stay delegated to
   standard tools (emit BAM/BED/GFF → open in IGV).
+- Runs automatically at the end of `bioflow recipe run` and `bioflow cohort`
+  (best-effort — a no-op for recipes without a harvester, never fails the run).
 
 
 ### Added — per-run stage parameter overrides (`--set`)

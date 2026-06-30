@@ -247,6 +247,12 @@ def recipe_cmd(
                 rprint(f"[dim]  provenance → {w.name}[/]")
 
         rprint(f"\n[green]✓ Recipe done.[/]  result.out_dir = {getattr(result, 'out_dir', '?')}")
+
+        # Best-effort results overview (no-op for recipes without a harvester).
+        from bioflow.core.results import maybe_build_overview  # noqa: PLC0415
+        ov = maybe_build_overview(name, out)
+        if ov:
+            rprint(f"[dim]  overview → {ov['overview']}[/]")
         return
 
     rprint(f"[red]Unknown action {action!r}.[/]  Use: list | show | run")

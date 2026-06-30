@@ -261,3 +261,23 @@ def build_overview(recipe: str, workspace: Path, out_dir: "Path | None" = None) 
                                         out_dir / "overview.html")
     paths["rows"] = rows
     return paths
+
+
+def has_harvester(recipe: str) -> bool:
+    """Whether *recipe* can produce a results overview."""
+    return recipe in _HARVESTERS
+
+
+def maybe_build_overview(recipe: str, workspace: Path) -> "dict | None":
+    """Build the overview at the end of a run, best-effort — never raises.
+
+    Returns the paths dict on success, or ``None`` if the recipe has no
+    harvester yet or harvesting failed (a warning is logged).
+    """
+    if recipe not in _HARVESTERS:
+        return None
+    try:
+        return build_overview(recipe, Path(workspace))
+    except Exception as exc:        # results are a convenience, never fatal
+        log.warning(f"Results overview skipped: {exc}")
+        return None

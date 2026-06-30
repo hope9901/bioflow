@@ -109,3 +109,27 @@ def test_build_overview_unknown_recipe_raises(tmp_path):
 def test_build_overview_empty_workspace_raises(tmp_path):
     with pytest.raises(ValueError, match="No per-sample outputs"):
         build_overview("prokaryote_assembly", tmp_path)
+
+
+# ---------------------------------------------------------------------------
+# maybe_build_overview — best-effort end-of-run hook (never raises)
+# ---------------------------------------------------------------------------
+
+def test_maybe_overview_unknown_recipe_is_none(tmp_path):
+    from bioflow.core.results import maybe_build_overview
+    assert maybe_build_overview("rnaseq_deg", tmp_path) is None
+
+
+def test_maybe_overview_swallows_errors(tmp_path):
+    from bioflow.core.results import maybe_build_overview
+    # known recipe but empty workspace → build raises → hook returns None
+    assert maybe_build_overview("prokaryote_assembly", tmp_path) is None
+
+
+def test_maybe_overview_success(tmp_path):
+    from bioflow.core.results import maybe_build_overview
+    out = tmp_path / "out"
+    _mk_sample(out, "S1", contigs=300, total=5_000_000, n50=40000, gc=37.5,
+               cds=4800, rrna=9, trna=80)
+    res = maybe_build_overview("prokaryote_assembly", out)
+    assert res is not None and Path(res["overview"]).exists()

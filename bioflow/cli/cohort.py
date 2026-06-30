@@ -98,5 +98,12 @@ def cohort_cmd(
     )
     if report.multiqc_report:
         rprint(f"[dim]cohort MultiQC → {report.multiqc_report}[/]")
+
+    # Best-effort results overview across the cohort (no-op without a harvester).
+    from bioflow.core.results import maybe_build_overview  # noqa: PLC0415
+    ov = maybe_build_overview(recipe, out)
+    if ov:
+        rprint(f"[dim]results overview → {ov['overview']}[/]")
+
     if report.n_failed:
         raise typer.Exit(code=1)
