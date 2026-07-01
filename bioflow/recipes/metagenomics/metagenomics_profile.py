@@ -68,11 +68,28 @@ def bracken_abundance(k2, kraken2_db: Path, sample_id: str,
     )
 
 
+@stage(image="staphb/krona:2.8.1", cpu=2, ram_gb=4, depends_on=bracken_abundance)
+def krona_chart(bk, sample_id: str, *, out_dir):
+    """Krona: interactive taxonomic sunburst from the Bracken abundance table.
+
+    Reshapes the Bracken TSV (``new_est_reads`` = col 6, taxon name = col 1)
+    into Krona's ``<value>\\t<label>`` text with cut/paste (no taxonomy DB
+    needed), then ``ktImportText`` writes a self-contained ``krona.html``.
+    """
+    return (
+        f"bash -c 'B={bk.out_dir}/{sample_id}.bracken.tsv; "
+        f"tail -n +2 \"$B\" | cut -f6 > {out_dir}/val.tmp; "
+        f"tail -n +2 \"$B\" | cut -f1 > {out_dir}/name.tmp; "
+        f"paste {out_dir}/val.tmp {out_dir}/name.tmp > {out_dir}/krona.txt; "
+        f"ktImportText {out_dir}/krona.txt -o {out_dir}/krona.html'"
+    )
+
+
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, kraken2_classify, bracken_abundance],
-    description="Shotgun metagenomic profiling: fastp → Kraken2 → Bracken",
+    stages=[qc_trim, kraken2_classify, bracken_abundance, krona_chart],
+    description="Shotgun metagenomic profiling: fastp → Kraken2 → Bracken → Krona",
 )
 def metagenomics_profile(
     r1: Path,
@@ -85,16 +102,18 @@ def metagenomics_profile(
     level: str = "S",
     threshold: int = 10,
 ):
-    """fastp → Kraken2 → Bracken end-to-end taxonomic profile."""
+    """fastp → Kraken2 → Bracken → Krona end-to-end taxonomic profile."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = qc_trim(Path(r1), Path(r2))
     k2 = kraken2_classify(clean, Path(kraken2_db), sample_id)
-    return bracken_abundance(
+    bk = bracken_abundance(
         k2, Path(kraken2_db), sample_id,
         read_length=read_length, level=level, threshold=threshold,
     )
+    krona_chart(bk, sample_id)      # interactive Krona sunburst
+    return bk
 
 
 register("metagenomics_profile", metagenomics_profile)

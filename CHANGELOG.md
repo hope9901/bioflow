@@ -14,6 +14,16 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — Krona interactive taxonomy chart in metagenomics_profile
+- New `Krona` tool (`staphb/krona:2.8.1`, digest-pinned) + a `krona_chart` stage
+  that turns the Bracken abundance table into a self-contained interactive
+  `krona.html` sunburst — no taxonomy DB needed (it reshapes Bracken with
+  cut/paste, then `ktImportText`).  The results overview surfaces it.  Second
+  recipe wired into the results system: `bioflow.core.results` is now a small
+  per-recipe registry (`_RECIPES`), each with its own tidy table + harvester —
+  `prokaryote_assembly` → `assembly_metrics.csv`, `metagenomics_profile` →
+  `taxonomic_profile.csv`.  (Krona: Ondov 2011, PMID 21961884.)
+
 ### Added — Bandage assembly-graph visualization in prokaryote_assembly
 - New `Bandage` tool (`staphb/bandage:0.8.1`, digest-pinned) + a `graph_image`
   stage that renders the SPAdes assembly graph to `assembly_graph.png`

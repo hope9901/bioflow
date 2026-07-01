@@ -1,6 +1,6 @@
 # Tools
 
-**111 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**112 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## alignment  (6)
 
@@ -102,7 +102,7 @@
 | `gtdbtk` | 2.4.0 | `quay.io/biocontainers/gtdbtk:2.4.0--pyhdfd78af_1` | Chaumeil 2022, PMID 35906921 |
 | `interproscan` | 5.67-99.0 | `quay.io/biocontainers/interproscan:5.59_91.0--hec16e2b_1` | Blum 2021, PMID 33220566 |
 
-## metagenomics  (8)
+## metagenomics  (9)
 
 | Tool | Version | Image | Citation |
 |---|---|---|---|
@@ -110,6 +110,7 @@
 | `humann3` | 3.9 | `quay.io/biocontainers/humann:3.9--py312hdfd78af_0` | Beghini et al. 2021, PMID 33944776 |
 | `kneaddata` | 0.12.0 | `quay.io/biocontainers/kneaddata:0.12.0--pyhdfd78af_0` | McIver et al. 2018, PMID 31616210 |
 | `kraken2` | 2.1.3 | `quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0` | Wood et al. 2019, PMID 31779668 |
+| `krona` | 2.8.1 | `staphb/krona:2.8.1` | Ondov 2011, PMID 21961884 |
 | `lefse` | 1.1.2 | `quay.io/biocontainers/lefse:1.1.2--pyhdfd78af_0` | Segata et al. 2011, PMID 21702898 |
 | `maxbin2` | 2.2.7 | `quay.io/biocontainers/maxbin2:2.2.7--h503566f_8` | Wu 2016, PMID 26515820 |
 | `metabat2` | 2.17 | `quay.io/biocontainers/metabat2:2.17--h6f16272_1` | Kang 2019, PMID 31336383 |

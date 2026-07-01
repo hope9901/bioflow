@@ -1,18 +1,23 @@
 """Results harvesting + overview report — visualization Layers 1 & 2.
 
-EXPERIMENTAL prototype (one recipe: ``prokaryote_assembly``).  Post-processes a
-finished workspace into:
+EXPERIMENTAL.  Post-processes a finished workspace (single ``recipe run`` or a
+``cohort``) into:
 
-* **Layer 1 — tidy, analysis-ready data** the researcher plots themselves:
-  ``results/assembly_metrics.csv`` (one row per sample) + ``results/results.json``
-  (a manifest naming the tables + their column schema).
+* **Layer 1 — tidy, analysis-ready data** the researcher plots themselves: a
+  per-recipe ``results/<name>.csv`` (one row per sample) + ``results/results.json``
+  (a manifest naming the tables + their column schema, and indexing each tool's
+  report).
 * **Layer 2 — an at-a-glance overview**: ``results/overview.html``, a
-  self-contained page with a metrics table and a few canonical inline-SVG bar
-  charts.  No server, no JS dependency — embeddable straight into the RO-Crate.
+  self-contained page — a metrics table plus links to (or embeds of) each
+  tool's *own* report.  No server, no JS dependency.
 
-Design stance: bioflow hands over clean data + a canonical summary; it does NOT
-try to be a bespoke figure GUI.  Deep/interactive views are delegated to
-standard tools (emit BAM+BAI / BED / GFF and open them in IGV).
+Design stance: bioflow hands over clean data + links to the field-standard viz
+tools' output; it does NOT redraw plots or own a figure GUI.  Deep/interactive
+views are delegated to standard tools (BAM+BAI / BED / GFF → IGV).
+
+Recipes with a harvester so far: ``prokaryote_assembly`` (QUAST + Prokka +
+fastp + Bandage) and ``metagenomics_profile`` (Bracken + Krona).  Add one by
+registering it in :data:`_RECIPES`.
 """
 from __future__ import annotations
 
@@ -27,10 +32,13 @@ from bioflow.core.logger import get_logger
 
 log = get_logger()
 
-# Columns of the tidy per-sample table, in display order.
-_COLUMNS = [
+# Tidy per-sample table columns (display order), per recipe.
+_ASM_COLUMNS = [
     "sample_id", "n_contigs", "total_bp", "n50", "gc_pct",
     "largest_contig", "cds", "rrna", "trna", "reads_after",
+]
+_META_COLUMNS = [
+    "sample_id", "classified_reads", "n_taxa", "top_taxon", "top_fraction",
 ]
 
 
@@ -80,6 +88,29 @@ def _parse_fastp(path: Path) -> dict:
         return {}
 
 
+def _parse_bracken(path: Path) -> dict:
+    """Summarise a Bracken TSV (name / … / new_est_reads / fraction) into a
+    per-sample row: total classified reads, taxa count, and the top taxon."""
+    taxa: "list[tuple[str, int, float]]" = []
+    for line in path.read_text(encoding="utf-8").splitlines()[1:]:
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        try:
+            taxa.append((parts[0], int(parts[5]), float(parts[6])))
+        except ValueError:
+            continue
+    if not taxa:
+        return {}
+    top = max(taxa, key=lambda t: t[1])
+    return {
+        "classified_reads": sum(t[1] for t in taxa),
+        "n_taxa": len(taxa),
+        "top_taxon": top[0],
+        "top_fraction": round(top[2], 4),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Harvest — workspace → tidy rows
 # ---------------------------------------------------------------------------
@@ -124,7 +155,47 @@ def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
     return rows, reports
 
 
-_HARVESTERS = {"prokaryote_assembly": harvest_prokaryote_assembly}
+def harvest_metagenomics_profile(workspace: Path) -> "tuple[list[dict], dict]":
+    """Per sample: a Bracken profile summary + a link to the Krona sunburst.
+
+    The Bracken stage writes ``<sample_id>.bracken.tsv``; the sample root is the
+    dir holding that stage's ``.cache``.
+    """
+    rows: "list[dict]" = []
+    reports: "dict[str, dict[str, Path]]" = {}
+    for bt in sorted(workspace.rglob("*.bracken.tsv")):
+        if "_cohort_qc" in bt.parts:
+            continue
+        sid = bt.name[: -len(".bracken.tsv")]
+        root = bt.parents[2] if len(bt.parents) >= 3 else workspace
+        row: dict = {"sample_id": sid}
+        row.update(_parse_bracken(bt))
+        rows.append(row)
+        found = {
+            "Krona taxonomy (interactive)": _find_report(root, "krona.html"),
+            "fastp read QC": _find_report(root, "fastp.html"),
+        }
+        reports[sid] = {k: v for k, v in found.items() if v is not None}
+    return rows, reports
+
+
+# recipe → how to harvest it + what its tidy table looks like.
+_RECIPES: "dict[str, dict]" = {
+    "prokaryote_assembly": {
+        "harvest": harvest_prokaryote_assembly,
+        "table": "assembly_metrics.csv",
+        "columns": _ASM_COLUMNS,
+        "desc": "Per-sample assembly + annotation metrics "
+                "(tidy, one row per sample — plot however you like).",
+    },
+    "metagenomics_profile": {
+        "harvest": harvest_metagenomics_profile,
+        "table": "taxonomic_profile.csv",
+        "columns": _META_COLUMNS,
+        "desc": "Per-sample taxonomic profile summary from Bracken "
+                "(tidy, one row per sample).",
+    },
+}
 
 
 # ---------------------------------------------------------------------------
@@ -132,10 +203,12 @@ _HARVESTERS = {"prokaryote_assembly": harvest_prokaryote_assembly}
 # ---------------------------------------------------------------------------
 
 def write_results(recipe: str, rows: "list[dict]", reports: dict, out_dir: Path) -> dict:
+    cfg = _RECIPES[recipe]
+    columns = cfg["columns"]
     out_dir.mkdir(parents=True, exist_ok=True)
-    csv_path = out_dir / "assembly_metrics.csv"
+    csv_path = out_dir / cfg["table"]
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=_COLUMNS, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=columns, extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
     manifest = {
@@ -145,9 +218,8 @@ def write_results(recipe: str, rows: "list[dict]", reports: dict, out_dir: Path)
         "tables": [{
             "name": csv_path.name,
             "rows": len(rows),
-            "columns": _COLUMNS,
-            "description": "Per-sample assembly + annotation metrics "
-                           "(tidy, one row per sample — plot however you like).",
+            "columns": columns,
+            "description": cfg["desc"],
         }],
         # Each tool's own report page, relative to this manifest — the
         # canonical interactive views, not redrawn by bioflow.
@@ -200,12 +272,12 @@ def _report_block(sid: str, links: "dict[str, Path]", base: Path) -> str:
     return f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> {body}</div>"
 
 
-def _table(rows: "list[dict]") -> str:
-    head = "".join(f"<th>{html.escape(c)}</th>" for c in _COLUMNS)
+def _table(rows: "list[dict]", columns: "list[str]") -> str:
+    head = "".join(f"<th>{html.escape(c)}</th>" for c in columns)
     body = []
     for r in rows:
         cells = []
-        for c in _COLUMNS:
+        for c in columns:
             v = r.get(c, "")
             cells.append(f"<td>{html.escape(f'{v:,}' if isinstance(v, int) else str(v))}</td>")
         body.append("<tr>" + "".join(cells) + "</tr>")
@@ -214,6 +286,7 @@ def _table(rows: "list[dict]") -> str:
 
 def render_overview(recipe: str, rows: "list[dict]", reports: dict,
                     out_html: Path) -> Path:
+    cfg = _RECIPES[recipe]
     base = out_html.parent
     report_blocks = "\n".join(
         _report_block(r["sample_id"], reports.get(r["sample_id"], {}), base)
@@ -241,11 +314,11 @@ def render_overview(recipe: str, rows: "list[dict]", reports: dict,
 <h1>{html.escape(recipe)} — overview</h1>
 <p class="muted">{len(rows)} sample(s) · generated {_now()}</p>
 <p class="note">Headline numbers below; the same data is in
-<code>assembly_metrics.csv</code> + <code>results.json</code> — load those to make
-your own figures. The links open each tool's own interactive report (QUAST,
-Icarus, fastp) — bioflow surfaces those rather than redrawing them.</p>
+<code>{html.escape(cfg["table"])}</code> + <code>results.json</code> — load those
+to make your own figures. The links open each tool's own interactive report —
+bioflow surfaces those rather than redrawing them.</p>
 <h2>Metrics</h2>
-{_table(rows)}
+{_table(rows, cfg["columns"])}
 <h2>Reports</h2>
 {report_blocks}
 </body></html>"""
@@ -265,12 +338,12 @@ def build_overview(recipe: str, workspace: Path, out_dir: "Path | None" = None) 
     a recipe without a harvester (only ``prokaryote_assembly`` for now).
     """
     workspace = Path(workspace)
-    if recipe not in _HARVESTERS:
+    if recipe not in _RECIPES:
         raise ValueError(
             f"No results harvester for recipe {recipe!r} yet "
-            f"(have: {', '.join(sorted(_HARVESTERS))})."
+            f"(have: {', '.join(sorted(_RECIPES))})."
         )
-    rows, reports = _HARVESTERS[recipe](workspace)
+    rows, reports = _RECIPES[recipe]["harvest"](workspace)
     if not rows:
         raise ValueError(f"No per-sample outputs found under {workspace}.")
     out_dir = Path(out_dir) if out_dir else workspace / "results"
@@ -283,7 +356,7 @@ def build_overview(recipe: str, workspace: Path, out_dir: "Path | None" = None) 
 
 def has_harvester(recipe: str) -> bool:
     """Whether *recipe* can produce a results overview."""
-    return recipe in _HARVESTERS
+    return recipe in _RECIPES
 
 
 def maybe_build_overview(recipe: str, workspace: Path) -> "dict | None":
@@ -292,7 +365,7 @@ def maybe_build_overview(recipe: str, workspace: Path) -> "dict | None":
     Returns the paths dict on success, or ``None`` if the recipe has no
     harvester yet or harvesting failed (a warning is logged).
     """
-    if recipe not in _HARVESTERS:
+    if recipe not in _RECIPES:
         return None
     try:
         return build_overview(recipe, Path(workspace))

@@ -139,3 +139,41 @@ def test_maybe_overview_success(tmp_path):
                cds=4800, rrna=9, trna=80)
     res = maybe_build_overview("prokaryote_assembly", out)
     assert res is not None and Path(res["overview"]).exists()
+
+
+# ---------------------------------------------------------------------------
+# metagenomics_profile harvester (2nd recipe — Bracken + Krona)
+# ---------------------------------------------------------------------------
+
+def _mk_meta_sample(root: Path, sid: str) -> None:
+    b = root / sid / ".cache" / f"bracken_abundance__{sid}h"
+    b.mkdir(parents=True)
+    (b / f"{sid}.bracken.tsv").write_text(
+        "name\ttaxonomy_id\ttaxonomy_lvl\tkraken_assigned_reads\tadded_reads\t"
+        "new_est_reads\tfraction_total_reads\n"
+        "Escherichia coli\t562\tS\t8000\t1200\t9200\t0.46\n"
+        "Bacillus subtilis\t1423\tS\t5000\t800\t5800\t0.29\n",
+        encoding="utf-8",
+    )
+    k = root / sid / ".cache" / f"krona_chart__{sid}h"
+    k.mkdir(parents=True)
+    (k / "krona.html").write_text("<html>krona</html>", encoding="utf-8")
+
+
+def test_metagenomics_overview_end_to_end(tmp_path):
+    out = tmp_path / "out"
+    _mk_meta_sample(out, "M1")
+    res = build_overview("metagenomics_profile", out)
+    row = {r["sample_id"]: r for r in res["rows"]}["M1"]
+    assert row["classified_reads"] == 15000 and row["n_taxa"] == 2
+    assert row["top_taxon"] == "Escherichia coli" and row["top_fraction"] == 0.46
+
+    # Layer 1 — a metagenomics-specific tidy table (not assembly_metrics.csv)
+    assert Path(res["csv"]).name == "taxonomic_profile.csv"
+    manifest = json.loads(Path(res["manifest"]).read_text(encoding="utf-8"))
+    assert "Krona taxonomy (interactive)" in manifest["reports"]["M1"]
+
+    # Layer 2 — overview links the interactive Krona report + the right columns
+    page = Path(res["overview"]).read_text(encoding="utf-8")
+    assert "Krona taxonomy (interactive)" in page and "krona.html" in page
+    assert "top_taxon" in page and "taxonomic_profile.csv" in page
