@@ -234,6 +234,20 @@
     <figcaption style="color:var(--muted);font-size:13px;margin-top:9px">
       A real results overview — labelled metrics, a circular genome map rendered by GenoVi (Circos), plus one-click links to each tool's own report (QUAST, Icarus, fastp, Bandage), generated automatically at the end of the run.</figcaption>
   </figure>
+
+  <figure style="margin:34px auto 0;max-width:600px;text-align:center">
+    <img src="assets/genome-circos.png" alt="Circular genome map of the SC117 draft assembly rendered by GenoVi (Circos): a numbered contig ring with a cumulative Mb scale, CDS coloured by COG category on both strands, tRNA/rRNA, GC content and GC skew, with a full colour legend"
+      style="width:100%;border:1px solid var(--line);border-radius:14px;background:#fff">
+    <figcaption style="color:var(--muted);font-size:13px;margin-top:10px;text-align:left;line-height:1.6">
+      <b>Circular genome map of the <code>SC117</code> draft assembly.</b> Rings, outermost to
+      innermost: contigs (numbered 1–26 by descending size, with a cumulative Mb scale);
+      protein-coding genes on the forward (+) and reverse (−) strands, coloured by COG functional
+      category; tRNA / rRNA; GC content (black, deviation from the genome mean); and GC skew
+      (green / yellow). Only contigs large enough to label are numbered; the full colour key is at
+      the foot of the figure. Rendered by GenoVi (Circos) from the Prokka annotation as the
+      pipeline's <code>genome_plot</code> stage — the actual, unedited output of a
+      <code>bioflow recipe run</code>.</figcaption>
+  </figure>
 </div></section>
 
 <section class="soft"><div class="wrap">

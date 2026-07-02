@@ -22,6 +22,11 @@ ship bug fixes only.  Breaking changes to the documented public API
   The results overview embeds it (the harvester surfaces `genome_plot.png` as
   "Circular genome map (GenoVi)"), and it is now the headline visual on the
   landing page in place of the Bandage graph.
+- Publication styling: white background, a colour-blind-safe palette (Okabe-Ito),
+  per-track labels and a full genomic-feature + COG colour legend (`-bc/-cs/-te`),
+  plus a post-processing pass (Pillow) that numbers each contig by descending
+  size — only contigs whose arc is wide enough to read are labelled, so a
+  fragmented draft stays uncluttered.
 - Robust to Prokka's malformed GenBank `LOCUS` lines: SPAdes' long contig names
   overflow the fixed-width columns and collide the length with the coverage
   field (`…cov_6.882027283413 bp`), which aborts Biopython's strict parser — so

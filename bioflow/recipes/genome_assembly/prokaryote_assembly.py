@@ -147,6 +147,60 @@ sys.stderr.write("genome_plot: kept %d contigs >= %d bp\n" % (kept, cut))
 '''
 
 
+# Post-process: overlay a size-rank number on every contig whose arc is wide
+# enough to read (>= 1.2% of the circle), just outside the ideogram ring.
+# GenoVi orders contigs largest-first, so this labels the big ones (1, 2, 3 …)
+# and leaves the tiny fragments uncluttered.  Circos geometry: 0 at 12 o'clock,
+# clockwise, with a 0.001r gap between contigs.  Best effort — any failure
+# leaves GenoVi's own PNG untouched.
+_GENOME_PLOT_NUMBER = r'''import re, sys, math
+from PIL import Image, ImageDraw, ImageFont
+gbk, png, out = sys.argv[1], sys.argv[2], sys.argv[3]
+RFAC, MINFRAC, GAP = 0.965, 0.012, 0.001
+def _font(px):
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "C:/Windows/Fonts/arialbd.ttf"):
+        try:
+            return ImageFont.truetype(p, px)
+        except Exception:
+            pass
+    return ImageFont.load_default()
+try:
+    lengths = []
+    for line in open(gbk, encoding="utf-8", errors="replace"):
+        if line.startswith("LOCUS"):
+            m = re.search(r"(\d+)\s+bp", line)
+            if m:
+                lengths.append(int(m.group(1)))
+    n = len(lengths); total = sum(lengths); span = total + n * GAP * total
+    img = Image.open(png).convert("RGB"); W, H = img.size
+    top = img.crop((0, 0, W, int(H * 0.63))); px = top.load()
+    minx, miny, maxx, maxy = W, H, 0, 0
+    for y in range(0, top.height, 3):
+        for x in range(0, W, 3):
+            r, g, b = px[x, y]
+            if r < 245 or g < 245 or b < 245:
+                minx = min(minx, x); maxx = max(maxx, x); miny = min(miny, y); maxy = max(maxy, y)
+    cx = (minx + maxx) / 2; cy = (miny + maxy) / 2; R = max(maxx - minx, maxy - miny) / 2
+    d = ImageDraw.Draw(img); fnum = _font(int(R * 0.037)); cum = 0; drawn = 0
+    for i, L in enumerate(lengths):
+        if L / span >= MINFRAC:
+            ang = math.radians(-90 + 360 * (cum + L / 2 + i * GAP * total) / span)
+            x = cx + RFAC * R * math.cos(ang); y = cy + RFAC * R * math.sin(ang)
+            lbl = str(i + 1); bb = d.textbbox((0, 0), lbl, font=fnum)
+            d.text((x - (bb[2] - bb[0]) / 2, y - (bb[3] - bb[1]) / 2 - bb[1]), lbl, font=fnum, fill=(20, 20, 20))
+            drawn += 1
+        cum += L
+    img.save(out, "PNG")
+    sys.stderr.write("genome_plot: numbered %d/%d contigs\n" % (drawn, n))
+except Exception as e:
+    sys.stderr.write("genome_plot: numbering skipped (%s)\n" % e)
+    try:
+        Image.open(png).save(out, "PNG")
+    except Exception:
+        pass
+'''
+
+
 @stage(image="staphb/genovi:0.4.3", cpu=4, ram_gb=8, depends_on=annotate)
 def genome_plot(ann, *, out_dir, sample_id: str = "sample", min_contig: int = 5000):
     """GenoVi: a Circos-style circular genome map from the Prokka annotation.
@@ -171,7 +225,17 @@ def genome_plot(ann, *, out_dir, sample_id: str = "sample", min_contig: int = 50
         f'python - "{gbk}" "{min_contig}" filtered.gbk <<\'PY\'\n'
         f"{_GENOME_PLOT_FILTER}"
         "PY\n"
-        f'genovi -i filtered.gbk -s draft -o genome -t "{sample_id}" || true\n'
+        # White background, a colour-blind-safe scheme (Okabe-Ito "autumn"),
+        # and -te/-cs give per-track labels + a full feature/COG colour legend
+        # so the figure is self-explanatory.
+        f'genovi -i filtered.gbk -s draft -o genome '
+        f'-bc white -cs autumn -te -t "{sample_id}" || true\n'
+        # Overlay contig size-rank numbers on the readable arcs.
+        f"python - filtered.gbk genome/genome.png {out_dir}/genome_plot.png <<'PYNUM'\n"
+        f"{_GENOME_PLOT_NUMBER}"
+        "PYNUM\n"
+        # Fallback if the overlay could not run at all.
+        f"[ -f {out_dir}/genome_plot.png ] || "
         f"cp genome/genome.png {out_dir}/genome_plot.png 2>/dev/null || true\n"
         "true\n"
     )
