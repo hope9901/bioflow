@@ -156,7 +156,7 @@ sys.stderr.write("genome_plot: kept %d contigs >= %d bp\n" % (kept, cut))
 _GENOME_PLOT_NUMBER = r'''import re, sys, math
 from PIL import Image, ImageDraw, ImageFont
 gbk, png, out = sys.argv[1], sys.argv[2], sys.argv[3]
-RFAC, MINFRAC, GAP = 0.965, 0.012, 0.001
+RFAC, MINFRAC, GAP = 1.05, 0.012, 0.001   # RFAC>1: sit in the outer white halo
 def _font(px):
     for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "C:/Windows/Fonts/arialbd.ttf"):
         try:
@@ -187,7 +187,9 @@ try:
             ang = math.radians(-90 + 360 * (cum + L / 2 + i * GAP * total) / span)
             x = cx + RFAC * R * math.cos(ang); y = cy + RFAC * R * math.sin(ang)
             lbl = str(i + 1); bb = d.textbbox((0, 0), lbl, font=fnum)
-            d.text((x - (bb[2] - bb[0]) / 2, y - (bb[3] - bb[1]) / 2 - bb[1]), lbl, font=fnum, fill=(20, 20, 20))
+            tw = bb[2] - bb[0]; th = bb[3] - bb[1]; pad = int(R * 0.012)
+            d.ellipse([x - tw / 2 - pad, y - th / 2 - pad, x + tw / 2 + pad, y + th / 2 + pad], fill=(255, 255, 255))
+            d.text((x - tw / 2, y - th / 2 - bb[1]), lbl, font=fnum, fill=(20, 20, 20))
             drawn += 1
         cum += L
     img.save(out, "PNG")
