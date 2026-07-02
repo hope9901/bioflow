@@ -155,6 +155,11 @@ def _extract_tools(cmd: str) -> "tuple[set[str], set[str]]":
     m = _WRAP_RE.match(cmd)
     if m:
         cmd = m.group(1)
+    # 1b. Strip here-doc bodies (``python - <<'PY' … PY``): the interpreter on
+    #     the command line is captured as the tool; the script fed on stdin is
+    #     data, not shell commands, so its identifiers must not be parsed.
+    cmd = re.sub(r"<<-?\s*[\"']?(\w+)[\"']?[ \t]*\n.*?\n\1[ \t]*(?:\n|$)",
+                 "\n", cmd, flags=re.DOTALL)
     # 2. Drop quoted substrings (Rscript -e "…", awk programs, -R "@RG…")
     #    so their internal ``;`` / identifiers aren't read as commands.
     cmd = re.sub(r"'[^']*'", " ", cmd)
