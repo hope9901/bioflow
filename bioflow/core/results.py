@@ -146,6 +146,7 @@ def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
         # Links to the established tools' own report pages — paper-grade,
         # interactive; we surface them rather than redrawing the plots.
         found = {
+            "Circular genome map (GenoVi)": _find_report(root, "genome_plot.png"),
             "QUAST report": _find_report(root, "report.html"),
             "Icarus contig browser": _find_report(root, "icarus.html"),
             "fastp read QC": _find_report(root, "fastp.html"),

@@ -108,10 +108,79 @@ def graph_image(asm, *, out_dir):
     )
 
 
+# Standalone filter, kept as a raw string so every backslash (regex escapes,
+# ``\n``) reaches the container's Python verbatim through the heredoc.
+#
+# Why not ``Bio.SeqIO``?  Prokka writes GenBank ``LOCUS`` lines from SPAdes'
+# long contig names (``NODE_1_length_283413_cov_6.882027``); when the name
+# overflows the fixed-width columns the length field collides with the
+# coverage (``…cov_6.882027283413 bp``) and Biopython's strict parser aborts
+# the whole file.  We instead split records on ``//`` and read the true length
+# from the always-present ``length_<N>`` token in the name, rewriting each
+# LOCUS line to a canonical, Biopython-parseable form (GenoVi itself parses
+# with Biopython, so the rewrite is what lets it read the assembly at all).
+_GENOME_PLOT_FILTER = r'''import sys, re
+src, cut, dst = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+data = open(src, encoding="utf-8", errors="replace").read()
+records = re.split(r"(?m)^//\s*$", data)
+out, kept = [], 0
+for rec in records:
+    rec = rec.strip("\n")
+    if not rec.strip():
+        continue
+    lines = rec.split("\n")
+    loc_idx = next((j for j, l in enumerate(lines) if l.startswith("LOCUS")), None)
+    if loc_idx is None:
+        continue
+    m = re.search(r"length_(\d+)", lines[loc_idx])
+    if not m:
+        continue
+    L = int(m.group(1))
+    if L < cut:
+        continue
+    kept += 1
+    lines[loc_idx] = "LOCUS       C%-16d%11d bp    DNA     linear   UNK 01-JAN-1980" % (kept, L)
+    out.append("\n".join(lines).rstrip("\n") + "\n//")
+with open(dst, "w", encoding="utf-8") as fh:
+    fh.write("\n".join(out) + "\n")
+sys.stderr.write("genome_plot: kept %d contigs >= %d bp\n" % (kept, cut))
+'''
+
+
+@stage(image="staphb/genovi:0.4.3", cpu=4, ram_gb=8, depends_on=annotate)
+def genome_plot(ann, *, out_dir, sample_id: str = "sample", min_contig: int = 5000):
+    """GenoVi: a Circos-style circular genome map from the Prokka annotation.
+
+    Draws CDS coloured by COG functional category (forward/reverse strands),
+    GC content, and GC skew — a publication-style figure that is far more
+    legible than the raw assembly graph.
+
+    Circos chokes on the hundreds of sub-kb fragments a draft SPAdes assembly
+    leaves behind, so we first drop contigs shorter than ``min_contig``
+    (default 5 kb — keeps ~all of a typical bacterial genome; override per run
+    with ``--set genome_plot.min_contig=20000`` for a cleaner figure on very
+    fragmented assemblies).
+
+    Best effort: the plot is a convenience, so a genome that GenoVi cannot
+    render never fails the pipeline (the run's QUAST / Prokka / fastp outputs
+    are unaffected).
+    """
+    gbk = f"{ann.out_dir}/prokka/{sample_id}.gbk"
+    return (
+        f"cd {out_dir}\n"
+        f'python - "{gbk}" "{min_contig}" filtered.gbk <<\'PY\'\n'
+        f"{_GENOME_PLOT_FILTER}"
+        "PY\n"
+        f'genovi -i filtered.gbk -s draft -o genome -t "{sample_id}" || true\n'
+        f"cp genome/genome.png {out_dir}/genome_plot.png 2>/dev/null || true\n"
+        "true\n"
+    )
+
+
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, assemble, assembly_qc, graph_image, annotate],
+    stages=[qc_trim, assemble, assembly_qc, graph_image, annotate, genome_plot],
     description="Prokaryote short-read de novo assembly + Prokka annotation",
 )
 def prokaryote_assembly(
@@ -121,7 +190,7 @@ def prokaryote_assembly(
     out_dir: Path,
     sample_id: str = "sample",
 ):
-    """fastp → SPAdes → QUAST + Bandage graph + Prokka end-to-end."""
+    """fastp → SPAdes → QUAST + Bandage graph + Prokka + GenoVi genome map."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -129,7 +198,9 @@ def prokaryote_assembly(
     asm = assemble(clean)
     assembly_qc(asm)                # QUAST report lands in its own out_dir
     graph_image(asm)                # Bandage assembly-graph PNG
-    return annotate(asm, sample_id=sample_id)
+    ann = annotate(asm, sample_id=sample_id)
+    genome_plot(ann, sample_id=sample_id)   # GenoVi circular genome map
+    return ann
 
 
 register("prokaryote_assembly", prokaryote_assembly)

@@ -14,6 +14,25 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — GenoVi circular genome map in prokaryote_assembly
+- New `GenoVi` tool (`staphb/genovi:0.4.3`, digest-pinned) + a `genome_plot`
+  stage that turns the Prokka annotation into a Circos-style **circular genome
+  map** — CDS coloured by COG functional category, GC content and GC skew — a
+  publication-style figure that is far more legible than the raw assembly graph.
+  The results overview embeds it (the harvester surfaces `genome_plot.png` as
+  "Circular genome map (GenoVi)"), and it is now the headline visual on the
+  landing page in place of the Bandage graph.
+- Robust to Prokka's malformed GenBank `LOCUS` lines: SPAdes' long contig names
+  overflow the fixed-width columns and collide the length with the coverage
+  field (`…cov_6.882027283413 bp`), which aborts Biopython's strict parser — so
+  the stage splits records on `//`, reads the true length from the `length_<N>`
+  token, and rewrites each `LOCUS` line to a canonical, parseable form before
+  handing the assembly to GenoVi.
+- A `min_contig` knob (default 5000) drops the sub-kb fragments Circos chokes
+  on; override per run with `--set genome_plot.min_contig=20000` for a cleaner
+  figure on very fragmented assemblies.  Best effort: a genome GenoVi cannot
+  render never fails the pipeline.  (GenoVi: Cumsille et al. 2023, PMID 37014908.)
+
 ### Added — Krona interactive taxonomy chart in metagenomics_profile
 - New `Krona` tool (`staphb/krona:2.8.1`, digest-pinned) + a `krona_chart` stage
   that turns the Bracken abundance table into a self-contained interactive

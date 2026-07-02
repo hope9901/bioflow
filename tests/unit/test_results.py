@@ -47,6 +47,9 @@ def _mk_sample(root: Path, sid: str, *, contigs, total, n50, gc, cds, rrna, trna
     g = root / sid / ".cache" / f"graph_image__{sid}h"
     g.mkdir(parents=True)
     (g / "assembly_graph.png").write_bytes(b"\x89PNG\r\n\x1a\n")   # Bandage output
+    gp = root / sid / ".cache" / f"genome_plot__{sid}h"
+    gp.mkdir(parents=True)
+    (gp / "genome_plot.png").write_bytes(b"\x89PNG\r\n\x1a\n")     # GenoVi output
 
 
 def test_parse_quast_takes_bare_metrics(tmp_path):
@@ -93,18 +96,19 @@ def test_build_overview_end_to_end(tmp_path):
     assert manifest["tables"][0]["columns"][0] == "sample_id"
     # manifest indexes each tool's own report page (relative, forward slashes)
     assert set(manifest["reports"]["S1"]) == {
-        "QUAST report", "Icarus contig browser", "fastp read QC",
-        "Assembly graph (Bandage)"}
+        "Circular genome map (GenoVi)", "QUAST report", "Icarus contig browser",
+        "fastp read QC", "Assembly graph (Bandage)"}
     assert manifest["reports"]["S1"]["QUAST report"].endswith("report.html")
     assert "\\" not in manifest["reports"]["S1"]["QUAST report"]
 
     # Layer 2 artifact — table + links to the tools' own reports (not redrawn);
-    # image outputs (Bandage PNG) are embedded, HTML pages are linked.
+    # image outputs (GenoVi + Bandage PNGs) are embedded, HTML pages are linked.
     page = Path(res["overview"]).read_text(encoding="utf-8")
     assert "S1" in page and "S2" in page
     assert "QUAST report" in page and "Icarus contig browser" in page
     assert "report.html" in page
     assert "<img" in page and "assembly_graph.png" in page
+    assert "Circular genome map (GenoVi)" in page and "genome_plot.png" in page
 
 
 def test_build_overview_unknown_recipe_raises(tmp_path):

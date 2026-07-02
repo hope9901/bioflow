@@ -1,0 +1,25 @@
+id: genovi
+name: GenoVi
+version: "0.4.3"
+category: assembly_qc
+stage: [genome_assembly.step3c]
+input_types: [genbank]
+output_types: [genome_map_image]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: staphb/genovi:0.4.3
+  pull_policy: if_not_present
+  image_digest: sha256:5e827f9c2fede4357424bc77b4fdd0205af452e60d632a3a7a0a9f08bd3cdd88
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 4}
+  recommended: {cpu: 4, ram_gb: 8, disk_gb: 8}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  genovi -i {genbank} -s draft -o {out_dir}/genome
+citation: "Cumsille et al. 2023, PMID 37014908"
+added: "2026-07-02"
+last_reviewed: "2026-07-02"
