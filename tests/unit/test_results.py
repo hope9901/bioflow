@@ -181,3 +181,43 @@ def test_metagenomics_overview_end_to_end(tmp_path):
     page = Path(res["overview"]).read_text(encoding="utf-8")
     assert "Krona taxonomy (interactive)" in page and "krona.html" in page
     assert "top_taxon" in page and "taxonomic_profile.csv" in page
+
+
+# ---------------------------------------------------------------------------
+# germline_variants harvester (3rd recipe — bcftools + snpEff)
+# ---------------------------------------------------------------------------
+
+def _mk_variant_sample(root: Path, sid: str, *, n_variants: int, n_genes: int) -> None:
+    a = root / sid / ".cache" / f"annotate_variants__{sid}h"
+    a.mkdir(parents=True)
+    vcf = ["##fileformat=VCFv4.2",
+           "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"]
+    vcf += [f"chr1\t{100 + i}\t.\tA\tG\t50\tPASS\tANN=x" for i in range(n_variants)]
+    (a / f"{sid}.annotated.vcf").write_text("\n".join(vcf) + "\n", encoding="utf-8")
+    genes = ["# snpEff genes table", "#GeneName\tGeneId\tvariants"]
+    genes += [f"gene{i}\tG{i}\t1" for i in range(n_genes)]
+    (a / "snpEff_genes.txt").write_text("\n".join(genes) + "\n", encoding="utf-8")
+    (a / "snpEff_summary.html").write_text("<html>snpeff</html>", encoding="utf-8")
+    qc = root / sid / ".cache" / f"qc_trim__{sid}h"
+    qc.mkdir(parents=True)
+    (qc / "fastp.html").write_text("<html>fastp</html>", encoding="utf-8")
+
+
+def test_germline_variants_overview_end_to_end(tmp_path):
+    out = tmp_path / "out"
+    _mk_variant_sample(out, "V1", n_variants=5, n_genes=3)
+
+    res = build_overview("germline_variants", out)
+    row = {r["sample_id"]: r for r in res["rows"]}["V1"]
+    # header/comment lines ignored; only real records + gene rows counted
+    assert row["n_variants"] == 5 and row["n_genes_affected"] == 3
+
+    assert Path(res["csv"]).name == "variant_summary.csv"
+    manifest = json.loads(Path(res["manifest"]).read_text(encoding="utf-8"))
+    assert set(manifest["reports"]["V1"]) == {
+        "snpEff annotation report", "fastp read QC"}
+
+    # Layer 2 — overview links snpEff's own report + the right columns
+    page = Path(res["overview"]).read_text(encoding="utf-8")
+    assert "snpEff annotation report" in page and "snpEff_summary.html" in page
+    assert "n_variants" in page and "variant_summary.csv" in page

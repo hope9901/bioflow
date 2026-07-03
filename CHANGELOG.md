@@ -14,6 +14,16 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — results overview for germline_variants + JOSS paper draft
+- `germline_variants` now has a results harvester (the 3rd recipe wired into the
+  overview system): a tidy per-sample table (variant + affected-gene counts from
+  the annotated VCF) plus a link to snpEff's own `snpEff_summary.html` report —
+  surfaced, not redrawn. Unit-tested with synthetic fixtures.
+- Draft JOSS paper (`paper/paper.md` + `paper.bib`) and a non-blocking workflow
+  that compiles it to a PDF, for a citable software publication.
+- Housekeeping: the landing tool count is corrected (113), and the README test
+  badge is now a live CI-status badge instead of a hard-coded, drift-prone count.
+
 ### Added — citation-integrity guard + tests for the new tooling
 - `tests/unit/test_citation_integrity.py` (offline, blocking): the committed
   `tool_citations.json` may only carry unverified PMIDs from a tight

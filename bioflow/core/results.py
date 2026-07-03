@@ -16,8 +16,9 @@ tools' output; it does NOT redraw plots or own a figure GUI.  Deep/interactive
 views are delegated to standard tools (BAM+BAI / BED / GFF → IGV).
 
 Recipes with a harvester so far: ``prokaryote_assembly`` (QUAST + Prokka +
-fastp + Bandage) and ``metagenomics_profile`` (Bracken + Krona).  Add one by
-registering it in :data:`_RECIPES`.
+fastp + Bandage + GenoVi), ``metagenomics_profile`` (Bracken + Krona), and
+``germline_variants`` (bcftools + snpEff).  Add one by registering it in
+:data:`_RECIPES`.
 """
 from __future__ import annotations
 
@@ -40,6 +41,7 @@ _ASM_COLUMNS = [
 _META_COLUMNS = [
     "sample_id", "classified_reads", "n_taxa", "top_taxon", "top_fraction",
 ]
+_VAR_COLUMNS = ["sample_id", "n_variants", "n_genes_affected"]
 
 
 def _now() -> str:
@@ -180,6 +182,50 @@ def harvest_metagenomics_profile(workspace: Path) -> "tuple[list[dict], dict]":
     return rows, reports
 
 
+def _count_lines(path: Path, skip_prefix: str = "#") -> int:
+    """Count non-empty lines not starting with *skip_prefix* (streamed, so a
+    multi-GB VCF doesn't land in memory)."""
+    n = 0
+    try:
+        with path.open(encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                s = line.strip()
+                if s and not s.startswith(skip_prefix):
+                    n += 1
+    except OSError:
+        return 0
+    return n
+
+
+def harvest_germline_variants(workspace: Path) -> "tuple[list[dict], dict]":
+    """Per sample: variant counts + a link to snpEff's own annotation report.
+
+    The annotate stage writes ``<sample_id>.annotated.vcf`` plus snpEff's
+    ``snpEff_summary.html`` (variant-type breakdown, quality histograms) and
+    ``snpEff_genes.txt``.  We count records + affected genes and surface
+    snpEff's rich report rather than redrawing it.  The sample root is the dir
+    holding that stage's ``.cache``.
+    """
+    rows: "list[dict]" = []
+    reports: "dict[str, dict[str, Path]]" = {}
+    for vcf in sorted(workspace.rglob("*.annotated.vcf")):
+        if "_cohort_qc" in vcf.parts:
+            continue
+        sid = vcf.name[: -len(".annotated.vcf")]
+        root = vcf.parents[2] if len(vcf.parents) >= 3 else workspace
+        row: dict = {"sample_id": sid, "n_variants": _count_lines(vcf)}
+        genes = _find_report(root, "snpEff_genes.txt")
+        if genes is not None:
+            row["n_genes_affected"] = _count_lines(genes)
+        rows.append(row)
+        found = {
+            "snpEff annotation report": _find_report(root, "snpEff_summary.html"),
+            "fastp read QC": _find_report(root, "fastp.html"),
+        }
+        reports[sid] = {k: v for k, v in found.items() if v is not None}
+    return rows, reports
+
+
 # recipe → how to harvest it + what its tidy table looks like.
 _RECIPES: "dict[str, dict]" = {
     "prokaryote_assembly": {
@@ -194,6 +240,13 @@ _RECIPES: "dict[str, dict]" = {
         "table": "taxonomic_profile.csv",
         "columns": _META_COLUMNS,
         "desc": "Per-sample taxonomic profile summary from Bracken "
+                "(tidy, one row per sample).",
+    },
+    "germline_variants": {
+        "harvest": harvest_germline_variants,
+        "table": "variant_summary.csv",
+        "columns": _VAR_COLUMNS,
+        "desc": "Per-sample variant counts + snpEff annotation summary "
                 "(tidy, one row per sample).",
     },
 }
