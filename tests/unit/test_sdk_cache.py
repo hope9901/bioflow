@@ -20,6 +20,10 @@ from bioflow import (
     MockBackend,
 )
 
+# Module-level constant a builder splices into its command — used to prove the
+# cache key tracks referenced globals, not just the function body.
+_CACHE_TEMPLATE = "alpha"
+
 
 @pytest.fixture(autouse=True)
 def _isolated_runtime(tmp_path):
@@ -186,6 +190,24 @@ class TestStageDefinitionInvalidation:
         def go(x): return f"echo new: {x}"
         go("v")
         assert len(_isolated_runtime.calls) == 2
+
+    def test_referenced_module_constant_invalidates_cache(self, _isolated_runtime):
+        """Editing a module-level constant a builder splices into its command
+        must bust the cache even though the function *body* is unchanged —
+        otherwise a code change silently reuses a stale result."""
+        global _CACHE_TEMPLATE
+
+        @stage(image="busybox:latest")
+        def go(x):
+            return f"echo {_CACHE_TEMPLATE} {x}"
+
+        try:
+            go("v")                       # command builds with "alpha"
+            _CACHE_TEMPLATE = "beta"       # same body, different spliced constant
+            go("v")
+            assert len(_isolated_runtime.calls) == 2
+        finally:
+            _CACHE_TEMPLATE = "alpha"
 
 
 # ---------------------------------------------------------------------------

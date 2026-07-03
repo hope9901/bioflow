@@ -14,6 +14,16 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — cache key now tracks module-level constants a stage references
+- A stage's cache key hashed only `inspect.getsource(func)`, so editing a
+  module-level constant/helper the builder *splices into its command* (e.g. a
+  command-template string) did **not** invalidate the cache — a code change
+  could silently reuse a stale result, breaking the reproducibility guarantee.
+  The key now also includes a digest of the referenced module-level constants
+  (str/bytes/number/bool) and same-module helper functions
+  (`_referenced_globals_digest`).  Imports from other modules and builtins are
+  ignored (pinned by the dependency set).  Regression test added.
+
 ### Added — GenoVi circular genome map in prokaryote_assembly
 - New `GenoVi` tool (`staphb/genovi:0.4.3`, digest-pinned) + a `genome_plot`
   stage that turns the Prokka annotation into a Circos-style **circular genome

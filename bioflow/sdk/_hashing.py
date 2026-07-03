@@ -69,6 +69,49 @@ def _hash_input_value(v: Any, _depth: int = 0) -> str:
     return f"val:{hashlib.sha256(repr(v).encode()).hexdigest()[:16]}"
 
 
+def _referenced_globals_digest(func) -> str:
+    """Digest of the module-level names a builder function splices in.
+
+    ``inspect.getsource(func)`` captures only the function body, so a change to
+    a module-level *constant or helper it references* — e.g. a command-template
+    string held in ``_GENOME_PLOT_FILTER`` — would NOT bust the cache and a run
+    could silently reuse a stale result.  Reproducibility beats cache hits, so
+    we walk the function's referenced global names (and, transitively, those of
+    any helper defined in the same module) and hash:
+
+      * ``str`` / ``bytes`` / number / ``bool`` constants (spliced into the
+        command), and
+      * the source of same-module helper functions.
+
+    Imports from other modules (``Path``, ``re`` …) and builtins are ignored —
+    their behaviour is pinned by the dependency set, not the recipe.
+    """
+    seen: "set[str]" = set()
+    parts: "list[str]" = []
+
+    def _walk(fn) -> None:
+        code = getattr(fn, "__code__", None)
+        g = getattr(fn, "__globals__", {})
+        mod = getattr(fn, "__module__", None)
+        for name in sorted(set(getattr(code, "co_names", ()))):
+            if name in seen or name not in g:
+                continue
+            val = g[name]
+            if isinstance(val, (str, bytes, int, float, bool)):
+                seen.add(name)
+                parts.append(f"{name}={val!r}")
+            elif callable(val) and getattr(val, "__module__", None) == mod:
+                seen.add(name)
+                try:
+                    parts.append(f"{name}:{inspect.getsource(val)}")
+                except (OSError, TypeError):
+                    parts.append(f"{name}:{getattr(val, '__qualname__', name)}")
+                _walk(val)   # helper may splice in its own module-level names
+
+    _walk(func)
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
+
+
 def _compute_cache_key(stage_obj, args: tuple, kwargs: dict) -> str:
     """Deterministic 24-hex-char key from stage definition + inputs.
 
@@ -76,7 +119,9 @@ def _compute_cache_key(stage_obj, args: tuple, kwargs: dict) -> str:
       * container image
       * cpu / ram_gb (different resources may produce different output for
         non-deterministic tools)
-      * source code of the command-builder function
+      * source code of the command-builder function **and the module-level
+        constants / helpers it references** (see
+        :func:`_referenced_globals_digest`)
       * any positional argument's hash (Path content / mtime / size, or repr)
       * any keyword argument's hash (out_dir is excluded — it's SDK-injected)
     """
@@ -90,6 +135,7 @@ def _compute_cache_key(stage_obj, args: tuple, kwargs: dict) -> str:
     except (OSError, TypeError):
         src = stage_obj.func.__qualname__   # fallback for lambdas / built-ins
     parts.append(f"src={hashlib.sha256(src.encode()).hexdigest()[:16]}")
+    parts.append(f"gsrc={_referenced_globals_digest(stage_obj.func)}")
 
     parts.extend(_hash_input_value(a) for a in args)
     for k in sorted(kwargs):
