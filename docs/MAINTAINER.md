@@ -413,7 +413,7 @@ One-time connect, then automatic per release — no server, no compute.
    - a **version DOI** (that exact release), and
    - a **concept DOI** (always resolves to the latest release — cite this one in
      papers for "the software" rather than a pinned version).
-6. Put the concept DOI in [`CITATION.cff`](../CITATION.cff) (`doi:` line) and add
+6. Put the concept DOI in [`CITATION.cff`](https://github.com/hope9901/bioflow/blob/main/CITATION.cff) (`doi:` line) and add
    the Zenodo badge to the README; bump `version:` / `date-released:`. Commit.
 
 Notes
