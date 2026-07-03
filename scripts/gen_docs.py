@@ -21,10 +21,13 @@ TOOLS_DIR = REPO_ROOT / "registry" / "tools"
 OUT_DIR = REPO_ROOT / "docs" / "reference"
 README = REPO_ROOT / "README.md"
 CITES_JSON = REPO_ROOT / "registry" / "tool_citations.json"
+WEB_INDEX = REPO_ROOT / "web" / "index.html"
 
 # README section regenerated in place between these markers.
 README_START = "<!-- TOOLS-TABLE:START -->"
 README_END = "<!-- TOOLS-TABLE:END -->"
+LB_START = "<!-- LEADERBOARD:START -->"
+LB_END = "<!-- LEADERBOARD:END -->"
 
 
 def _load_citations() -> "tuple[dict, dict | None]":
@@ -216,6 +219,59 @@ def gen_recipes() -> str:
     return "\n".join(lines) + "\n"
 
 
+def _landing_leaderboard_html(cites: dict, window: "dict | None", top: int = 12) -> str:
+    """A styled HTML leaderboard table for the promo landing (web/index.html)."""
+    ranked = sorted(
+        ((tid, c) for tid, c in cites.items() if isinstance(c.get("recent"), int)),
+        key=lambda kv: kv[1]["recent"], reverse=True,
+    )[:top]
+    if not ranked:
+        return ""
+    w = _window_label(window)
+    _thbase = ("padding:10px 14px;border-bottom:2px solid var(--line);"
+               "color:var(--muted);font-weight:600;font-size:13px")
+    th_l = f'style="text-align:left;{_thbase}"'
+    th_r = f'style="text-align:right;{_thbase}"'
+    _tdb = "padding:9px 14px;border-bottom:1px solid var(--line)"
+    td_mut = f'style="{_tdb};color:var(--muted)"'
+    td_tool = f'style="{_tdb}"'
+    td_num = (f'style="{_tdb};text-align:right;'
+              'font-variant-numeric:tabular-nums;font-weight:600"')
+    rows = "".join(
+        f'<tr><td {td_mut}>{i}</td>'
+        f'<td {td_tool}><code>{tid}</code></td>'
+        f'<td {td_mut}>{c.get("category","")}</td>'
+        f'<td {td_num}>{c["recent"]:,}</td></tr>'
+        for i, (tid, c) in enumerate(ranked, 1)
+    )
+    return (
+        '<div style="max-width:640px;margin:22px auto 0;border:1px solid var(--line);'
+        'border-radius:14px;overflow:hidden">'
+        '<table style="width:100%;border-collapse:collapse;font-size:14px">'
+        f'<thead><tr><th {th_l}>#</th><th {th_l}>Tool</th><th {th_l}>Category</th>'
+        f'<th {th_r}>Cites {w}</th></tr></thead><tbody>{rows}</tbody></table></div>'
+    )
+
+
+def update_landing() -> bool:
+    """Inject the citation leaderboard into web/index.html between markers."""
+    if not WEB_INDEX.exists():
+        return False
+    cites, window = _load_citations()
+    text = WEB_INDEX.read_text(encoding="utf-8")
+    if not cites or LB_START not in text or LB_END not in text:
+        return False
+    block = _landing_leaderboard_html(cites, window)
+    new = text.split(LB_START)[0] + LB_START + "\n" + block + "\n  " + \
+        LB_END + text.split(LB_END, 1)[1]
+    if new != text:
+        WEB_INDEX.write_text(new, encoding="utf-8")
+        print(f"Updated {WEB_INDEX} leaderboard.")
+        return True
+    print(f"{WEB_INDEX} leaderboard already current.")
+    return False
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "tools.md").write_text(gen_tools(), encoding="utf-8")
@@ -223,6 +279,7 @@ def main() -> None:
     print(f"Wrote {OUT_DIR / 'tools.md'}")
     print(f"Wrote {OUT_DIR / 'recipes.md'}")
     update_readme()
+    update_landing()
 
 
 if __name__ == "__main__":

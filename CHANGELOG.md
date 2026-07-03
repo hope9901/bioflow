@@ -27,8 +27,12 @@ ship bug fixes only.  Breaking changes to the documented public API
   tools without a PMID show `n/a`. Added the citation metadata (CITATION.cff).
 - The fetch **verifies** each PMID against the citation's author + year before
   trusting it; a count is published only on a match. This surfaced that **34
-  registry citation PMIDs point to unrelated papers** (author/year mismatch) —
-  those show `n/a` and are flagged in tools.md pending a curated correction.
+  registry citation PMIDs pointed to unrelated papers** (e.g. `flye` → a
+  Netrin-1 study, `metabat2` → a career essay). **29 were corrected** to the
+  right canonical paper (each re-verified by title + author + year); the
+  remaining 5 have no MEDLINE record and show `n/a`.
+- The most-used leaderboard is now also on the promo landing page (web), and a
+  monthly workflow refreshes counts, docs, README, and landing together.
 
 ### Fixed — cache key now tracks module-level constants a stage references
 - A stage's cache key hashed only `inspect.getsource(func)`, so editing a

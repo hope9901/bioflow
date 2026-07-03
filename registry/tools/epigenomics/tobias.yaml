@@ -24,6 +24,6 @@ command_template: |
   && TOBIAS ScoreBigwig --signal {out_dir}/corrected.bw
   --regions {peaks_bed} --output {out_dir}/footprints.bw --cores {cpu}
 references: []
-citation: "Bentsen et al. 2020, PMID 32024838"
+citation: "Bentsen et al. 2020, PMID 32848148"
 added: "2026-04-20"
 last_reviewed: "2026-04-20"

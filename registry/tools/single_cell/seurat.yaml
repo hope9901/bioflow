@@ -34,6 +34,6 @@ command_template: |
   write.csv(markers,'{out_dir}/markers.csv');
   saveRDS(so,'{out_dir}/seurat_object.rds')"
 references: []
-citation: "Hao et al. 2024, PMID 38066579"
+citation: "Hao et al. 2024, PMID 37231261"
 added: "2026-04-20"
 last_reviewed: "2026-04-20"

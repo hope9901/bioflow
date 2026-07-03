@@ -22,6 +22,6 @@ command_template: |
   checkm2 predict --input {assembly_fasta} --output-directory {out_dir}
                   --threads {cpu} --force
 references: ["/refs/dbs/checkm2"]
-citation: "Chklovski 2023, PMID 37501070"
+citation: "Chklovski 2023, PMID 37500759"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

@@ -21,6 +21,6 @@ resources:
 command_template: |
   earlGrey -g {assembly_fasta} -s {sample_id} -o {out_dir} -t {cpu}
            -r {repeat_species}
-citation: "Baril 2024, PMID 38162708"
+citation: "Baril 2024, PMID 38577785"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

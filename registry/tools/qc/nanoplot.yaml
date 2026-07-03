@@ -21,6 +21,6 @@ resources:
 command_template: |
   NanoPlot --fastq {r1_long} --outdir {out_dir} --threads {cpu}
             --N50 --title {sample_id}
-citation: "De Coster 2023, PMID 36939539"
+citation: "De Coster 2023, PMID 37171891"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

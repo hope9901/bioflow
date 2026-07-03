@@ -21,7 +21,7 @@ resources:
 command_template: |
   gfastats {assembly_fasta} > {out_dir}/stats.txt
 references: []
-citation: "Formenti 2022, PMID 35639517"
+citation: "Formenti 2022, PMID 35799367"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: vgl-hub/gfastats

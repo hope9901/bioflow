@@ -22,7 +22,7 @@ command_template: |
   compleasm run -a {assembly_fasta} -o {out_dir}
                 -l {busco_lineage} -L {busco_db} -t {cpu}
 references: []
-citation: "Huang & Li 2023, PMID 37862556"
+citation: "Huang & Li 2023, PMID 37758247"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: huangnengCSU/compleasm

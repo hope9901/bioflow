@@ -6,11 +6,11 @@
     "end": 2025,
     "years": 5
   },
-  "fetched_at": "2026-07-03T04:36:37+00:00",
+  "fetched_at": "2026-07-03T05:11:50+00:00",
   "n_tools": 113,
   "n_with_pmid": 103,
-  "n_fetched": 69,
-  "n_pmid_mismatch": 34,
+  "n_fetched": 98,
+  "n_pmid_mismatch": 5,
   "tools": {
     "abricate": {
       "pmid": null,
@@ -21,22 +21,20 @@
       "category": "comparative_genomics"
     },
     "abyss": {
-      "pmid": "28298430",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "28232478",
+      "total": 477,
+      "recent": 311,
+      "verified": true,
       "name": "ABySS",
-      "category": "assembly",
-      "ref_title": "metaSPAdes: a new versatile metagenomic assembler."
+      "category": "assembly"
     },
     "antismash": {
-      "pmid": "37140037",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37140036",
+      "total": 1589,
+      "recent": 1399,
+      "verified": true,
       "name": "antiSMASH",
-      "category": "func_annot",
-      "ref_title": "Proksee: in-depth characterization and visualization of bacterial genomes."
+      "category": "func_annot"
     },
     "augustus": {
       "pmid": "18218656",
@@ -64,7 +62,7 @@
     },
     "bcftools": {
       "pmid": "33590861",
-      "total": 11740,
+      "total": 11742,
       "recent": 10490,
       "verified": true,
       "name": "bcftools",
@@ -72,8 +70,8 @@
     },
     "bedtools": {
       "pmid": "20110278",
-      "total": 22787,
-      "recent": 13551,
+      "total": 22790,
+      "recent": 13552,
       "verified": true,
       "name": "bedtools",
       "category": "alignment"
@@ -88,8 +86,8 @@
     },
     "bowtie2": {
       "pmid": "22388286",
-      "total": 43610,
-      "recent": 25504,
+      "total": 43614,
+      "recent": 25505,
       "verified": true,
       "name": "bowtie2",
       "category": "alignment"
@@ -104,36 +102,33 @@
       "ref_title": "Post-operative analgesic effect of dexmedetomidine administration in wound infil"
     },
     "braker3": {
-      "pmid": "37739920",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "38866550",
+      "total": 487,
+      "recent": 370,
+      "verified": true,
       "name": "BRAKER3",
-      "category": "struct_annot",
-      "ref_title": "Integrating theory and models of musical group interaction."
+      "category": "struct_annot"
     },
     "busco": {
-      "pmid": "34320675",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "34320186",
+      "total": 5712,
+      "recent": 5172,
+      "verified": true,
       "name": "BUSCO",
-      "category": "assembly_qc",
-      "ref_title": "[Update cochlear-implantation: indications and surgical aspects]."
+      "category": "assembly_qc"
     },
     "bustools": {
-      "pmid": "31133686",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "31073610",
+      "total": 121,
+      "recent": 108,
+      "verified": true,
       "name": "bustools",
-      "category": "single_cell",
-      "ref_title": "Revisiting the cold case of cold fusion."
+      "category": "single_cell"
     },
     "bwa": {
       "pmid": "19451168",
-      "total": 36962,
-      "recent": 18290,
+      "total": 36964,
+      "recent": 18291,
       "verified": true,
       "name": "BWA",
       "category": "alignment"
@@ -173,17 +168,16 @@
       "category": "single_cell"
     },
     "checkm2": {
-      "pmid": "37501070",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37500759",
+      "total": 1007,
+      "recent": 783,
+      "verified": true,
       "name": "CheckM2",
-      "category": "assembly_qc",
-      "ref_title": "Correction: Limited wedge resection for T1 colon cancer (LIMERIC-II trial) - rat"
+      "category": "assembly_qc"
     },
     "clusterprofiler": {
       "pmid": "34557778",
-      "total": 9447,
+      "total": 9449,
       "recent": 8821,
       "verified": true,
       "name": "clusterProfiler",
@@ -191,20 +185,19 @@
     },
     "comet": {
       "pmid": "23148064",
-      "total": 1273,
+      "total": 1274,
       "recent": 734,
       "verified": true,
       "name": "Comet",
       "category": "proteomics"
     },
     "compleasm": {
-      "pmid": "37862556",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37758247",
+      "total": 260,
+      "recent": 210,
+      "verified": true,
       "name": "compleasm",
-      "category": "assembly_qc",
-      "ref_title": "Uncertainty-aware refinement framework for ovarian tumor segmentation in CECT vo"
+      "category": "assembly_qc"
     },
     "cutadapt": {
       "pmid": null,
@@ -215,17 +208,16 @@
       "category": "qc"
     },
     "dbcan": {
-      "pmid": "29905870",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "29771380",
+      "total": 1660,
+      "recent": 1340,
+      "verified": true,
       "name": "dbCAN",
-      "category": "func_annot",
-      "ref_title": "The Microbial Genomes Atlas (MiGA) webserver: taxonomic and gene diversity analy"
+      "category": "func_annot"
     },
     "deeptools": {
       "pmid": "27079975",
-      "total": 6674,
+      "total": 6675,
       "recent": 5100,
       "verified": true,
       "name": "deeptools",
@@ -233,7 +225,7 @@
     },
     "deseq2": {
       "pmid": "25516281",
-      "total": 72131,
+      "total": 72133,
       "recent": 52515,
       "verified": true,
       "name": "DESeq2",
@@ -248,13 +240,12 @@
       "category": "comparative_genomics"
     },
     "earlgrey": {
-      "pmid": "38162708",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "38577785",
+      "total": 169,
+      "recent": 128,
+      "verified": true,
       "name": "Earl Grey",
-      "category": "repeat",
-      "ref_title": "Enhancing Patient Safety through Education in a Low-to-Middle-Income Country: Tr"
+      "category": "repeat"
     },
     "edger": {
       "pmid": "19910308",
@@ -290,8 +281,8 @@
     },
     "fastp": {
       "pmid": "30423086",
-      "total": 19888,
-      "recent": 17349,
+      "total": 19891,
+      "recent": 17350,
       "verified": true,
       "name": "fastp",
       "category": "qc"
@@ -313,13 +304,12 @@
       "category": "qc"
     },
     "flye": {
-      "pmid": "31907358",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "30936562",
+      "total": 4600,
+      "recent": 3951,
+      "verified": true,
       "name": "Flye",
-      "category": "assembly",
-      "ref_title": "Author Correction: Sensory innervation in porous endplates by Netrin-1 from oste"
+      "category": "assembly"
     },
     "fragpipe": {
       "pmid": "33338430",
@@ -355,13 +345,12 @@
       "category": "assembly_qc"
     },
     "gfastats": {
-      "pmid": "35639517",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "35799367",
+      "total": 1395,
+      "recent": 1188,
+      "verified": true,
       "name": "gfastats",
-      "category": "assembly_qc",
-      "ref_title": "PADLOC: a web server for the identification of antiviral defence systems in micr"
+      "category": "assembly_qc"
     },
     "gseapy": {
       "pmid": "36426870",
@@ -372,13 +361,12 @@
       "category": "enrichment"
     },
     "gtdbtk": {
-      "pmid": "35906921",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "36218463",
+      "total": 1451,
+      "recent": 1200,
+      "verified": true,
       "name": "GTDB-Tk",
-      "category": "func_annot",
-      "ref_title": "Pyridoxine-responsive KCNQ2 epileptic encephalopathy: Additional cases and liter"
+      "category": "func_annot"
     },
     "harmony": {
       "pmid": "31740819",
@@ -406,7 +394,7 @@
     },
     "homer": {
       "pmid": "20513432",
-      "total": 11224,
+      "total": 11225,
       "recent": 6357,
       "verified": true,
       "name": "homer",
@@ -414,25 +402,24 @@
     },
     "humann3": {
       "pmid": "33944776",
-      "total": 1713,
+      "total": 1714,
       "recent": 1553,
       "verified": true,
       "name": "humann3",
       "category": "metagenomics"
     },
     "interproscan": {
-      "pmid": "33220566",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "33156333",
+      "total": 1733,
+      "recent": 1643,
+      "verified": true,
       "name": "InterProScan",
-      "category": "func_annot",
-      "ref_title": "High birth weight and risk of multiple sclerosis: A multicentre study in Argenti"
+      "category": "func_annot"
     },
     "iqtree": {
       "pmid": "32011700",
-      "total": 11088,
-      "recent": 9794,
+      "total": 11089,
+      "recent": 9795,
       "verified": true,
       "name": "IQ-TREE",
       "category": "comparative_genomics"
@@ -456,7 +443,7 @@
     },
     "kraken2": {
       "pmid": "31779668",
-      "total": 4964,
+      "total": 4965,
       "recent": 4332,
       "verified": true,
       "name": "kraken2",
@@ -496,7 +483,7 @@
     },
     "macs3": {
       "pmid": "18798982",
-      "total": 15267,
+      "total": 15268,
       "recent": 8481,
       "verified": true,
       "name": "macs3",
@@ -504,8 +491,8 @@
     },
     "mafft": {
       "pmid": "23329690",
-      "total": 31030,
-      "recent": 19245,
+      "total": 31032,
+      "recent": 19246,
       "verified": true,
       "name": "MAFFT",
       "category": "comparative_genomics"
@@ -519,13 +506,12 @@
       "category": "comparative_genomics"
     },
     "masurca": {
-      "pmid": "28298434",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "28130360",
+      "total": 363,
+      "recent": 224,
+      "verified": true,
       "name": "MaSuRCA",
-      "category": "assembly",
-      "ref_title": "Everything has its time: Id2 clocks embryonic specification of Lgr5<sup>+</sup> "
+      "category": "assembly"
     },
     "maxbin2": {
       "pmid": "26515820",
@@ -560,26 +546,24 @@
       "category": "assembly"
     },
     "merqury": {
-      "pmid": "33025931",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "32928274",
+      "total": 3770,
+      "recent": 3358,
+      "verified": true,
       "name": "Merqury",
-      "category": "assembly_qc",
-      "ref_title": "Effect of Intracanal Medicaments (Modified Triple Antibiotic Paste, Calcium Hydr"
+      "category": "assembly_qc"
     },
     "metabat2": {
-      "pmid": "31336383",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "31388474",
+      "total": 2891,
+      "recent": 2504,
+      "verified": true,
       "name": "MetaBAT 2",
-      "category": "metagenomics",
-      "ref_title": "Arnold J. Levine and my career development."
+      "category": "metagenomics"
     },
     "metaphlan4": {
       "pmid": "36823356",
-      "total": 1016,
+      "total": 1017,
       "recent": 840,
       "verified": true,
       "name": "metaphlan4",
@@ -594,18 +578,17 @@
       "category": "epigenomics"
     },
     "methylpy": {
-      "pmid": "26039496",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "26030523",
+      "total": 554,
+      "recent": 224,
+      "verified": true,
       "name": "methylpy",
-      "category": "epigenomics",
-      "ref_title": "Detecting minimal hepatic encephalopathy in an endemic country for hepatitis B: "
+      "category": "epigenomics"
     },
     "minimap2": {
       "pmid": "29750242",
-      "total": 12256,
-      "recent": 10212,
+      "total": 12258,
+      "recent": 10214,
       "verified": true,
       "name": "minimap2",
       "category": "alignment"
@@ -619,13 +602,12 @@
       "category": "single_cell"
     },
     "msconvert": {
-      "pmid": "22796944",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "23051804",
+      "total": 3175,
+      "recent": 2056,
+      "verified": true,
       "name": "msconvert",
-      "category": "proteomics",
-      "ref_title": "Pol II CTD kinases Bur1 and Kin28 promote Spt5 CTR-independent recruitment of Pa"
+      "category": "proteomics"
     },
     "msfragger": {
       "pmid": "28394336",
@@ -644,31 +626,28 @@
       "category": "qc"
     },
     "nanoplot": {
-      "pmid": "36939539",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37171891",
+      "total": 574,
+      "recent": 456,
+      "verified": true,
       "name": "NanoPlot",
-      "category": "qc",
-      "ref_title": "Assessment of Muscular Weakness in Severe Sleep Apnea Patients: A Prospective St"
+      "category": "qc"
     },
     "nextdenovo": {
-      "pmid": "38630727",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "38671502",
+      "total": 364,
+      "recent": 303,
+      "verified": true,
       "name": "NextDenovo",
-      "category": "assembly",
-      "ref_title": "Technology empowerment: Digital transformation and enterprise ESG performance-Ev"
+      "category": "assembly"
     },
     "nextpolish": {
-      "pmid": "31504201",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "31778144",
+      "total": 978,
+      "recent": 911,
+      "verified": true,
       "name": "NextPolish",
-      "category": "assembly",
-      "ref_title": "Unification of miRNA and isomiR research: the mirGFF3 format and the mirtop API."
+      "category": "assembly"
     },
     "openms": {
       "pmid": "27575624",
@@ -680,20 +659,19 @@
     },
     "panaroo": {
       "pmid": "32698896",
-      "total": 978,
-      "recent": 856,
+      "total": 979,
+      "recent": 857,
       "verified": true,
       "name": "Panaroo",
       "category": "comparative_genomics"
     },
     "percolator": {
-      "pmid": "17944918",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "17952086",
+      "total": 1948,
+      "recent": 923,
+      "verified": true,
       "name": "percolator",
-      "category": "proteomics",
-      "ref_title": "The prognostic value of nuclear morphometric analysis in serous ovarian carcinom"
+      "category": "proteomics"
     },
     "picard": {
       "pmid": null,
@@ -705,16 +683,16 @@
     },
     "pilon": {
       "pmid": "25409509",
-      "total": 7412,
-      "recent": 5160,
+      "total": 7413,
+      "recent": 5161,
       "verified": true,
       "name": "Pilon",
       "category": "assembly"
     },
     "prokka": {
       "pmid": "24642063",
-      "total": 14430,
-      "recent": 9716,
+      "total": 14432,
+      "recent": 9717,
       "verified": true,
       "name": "Prokka",
       "category": "struct_annot"
@@ -736,13 +714,12 @@
       "category": "assembly"
     },
     "raven": {
-      "pmid": "33526886",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "38217213",
+      "total": 360,
+      "recent": 317,
+      "verified": true,
       "name": "Raven",
-      "category": "assembly",
-      "ref_title": "Haplotype-resolved de novo assembly using phased assembly graphs with hifiasm."
+      "category": "assembly"
     },
     "repeatmasker": {
       "pmid": null,
@@ -753,17 +730,16 @@
       "category": "repeat"
     },
     "repeatmodeler": {
-      "pmid": "32591352",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "32300014",
+      "total": 3090,
+      "recent": 2788,
+      "verified": true,
       "name": "RepeatModeler",
-      "category": "repeat",
-      "ref_title": "Analysis of real-world PD-L1 IHC 28-8 and 22C3 pharmDx assay utilisation, turnar"
+      "category": "repeat"
     },
     "roary": {
       "pmid": "26198102",
-      "total": 4454,
+      "total": 4455,
       "recent": 3096,
       "verified": true,
       "name": "Roary",
@@ -787,7 +763,7 @@
     },
     "samtools": {
       "pmid": "33590861",
-      "total": 11740,
+      "total": 11741,
       "recent": 10490,
       "verified": true,
       "name": "samtools",
@@ -795,7 +771,7 @@
     },
     "scanpy": {
       "pmid": "29409532",
-      "total": 6676,
+      "total": 6677,
       "recent": 5615,
       "verified": true,
       "name": "scanpy",
@@ -811,7 +787,7 @@
     },
     "scrublet": {
       "pmid": "30954476",
-      "total": 2181,
+      "total": 2182,
       "recent": 1854,
       "verified": true,
       "name": "Scrublet",
@@ -826,36 +802,33 @@
       "category": "qc"
     },
     "seurat": {
-      "pmid": "38066579",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37231261",
+      "total": 3586,
+      "recent": 2820,
+      "verified": true,
       "name": "seurat",
-      "category": "single_cell",
-      "ref_title": "Evaluation of two treatment concepts of four implants supporting fixed prosthesi"
+      "category": "single_cell"
     },
     "shasta": {
-      "pmid": "32514112",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "32686750",
+      "total": 424,
+      "recent": 370,
+      "verified": true,
       "name": "Shasta",
-      "category": "assembly",
-      "ref_title": "Multilayered VBC score predicts sgRNAs that efficiently generate loss-of-functio"
+      "category": "assembly"
     },
     "skani": {
-      "pmid": "37419955",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "37735570",
+      "total": 131,
+      "recent": 111,
+      "verified": true,
       "name": "skani",
-      "category": "comparative_genomics",
-      "ref_title": "Orbital infarction during drug abuse: tissues of the globe do not appear to reco"
+      "category": "comparative_genomics"
     },
     "snpeff": {
       "pmid": "22728672",
-      "total": 9392,
-      "recent": 5399,
+      "total": 9393,
+      "recent": 5400,
       "verified": true,
       "name": "SnpEff",
       "category": "variant_calling"
@@ -870,7 +843,7 @@
     },
     "star": {
       "pmid": "23104886",
-      "total": 41941,
+      "total": 41943,
       "recent": 29063,
       "verified": true,
       "name": "STAR",
@@ -878,7 +851,7 @@
     },
     "starsolo": {
       "pmid": "23104886",
-      "total": 41941,
+      "total": 41943,
       "recent": 29063,
       "verified": true,
       "name": "starsolo",
@@ -901,13 +874,12 @@
       "category": "rnaseq_align"
     },
     "tobias": {
-      "pmid": "32024838",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "32848148",
+      "total": 567,
+      "recent": 519,
+      "verified": true,
       "name": "tobias",
-      "category": "epigenomics",
-      "ref_title": "Transcriptional effects of copy number alterations in a large set of human cance"
+      "category": "epigenomics"
     },
     "topgo": {
       "pmid": null,
@@ -934,13 +906,12 @@
       "category": "assembly"
     },
     "verkko": {
-      "pmid": "36797492",
-      "total": null,
-      "recent": null,
-      "verified": false,
+      "pmid": "36797493",
+      "total": 302,
+      "recent": 275,
+      "verified": true,
       "name": "Verkko",
-      "category": "assembly",
-      "ref_title": "Prediction of prime editing insertion efficiencies using sequence features and D"
+      "category": "assembly"
     },
     "xtandem": {
       "pmid": "14976030",

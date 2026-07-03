@@ -23,6 +23,6 @@ command_template: |
   -X {out_dir}/percolator.psms.xml
   --decoy-results-psms {out_dir}/percolator.decoy.psms.tsv {psm_tsv}
 references: []
-citation: "Kall et al. 2007, PMID 17944918"
+citation: "Kall et al. 2007, PMID 17952086"
 added: "2026-04-20"
 last_reviewed: "2026-04-20"

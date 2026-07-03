@@ -23,7 +23,7 @@ command_template: |
         --graphical-fragment-assembly {out_dir}/assembly.gfa
         > {out_dir}/assembly.fasta
 references: []
-citation: "Vaser & Sikic 2021, PMID 33526886"
+citation: "Vaser & Sikic 2021, PMID 38217213"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: lbcb-sci/raven

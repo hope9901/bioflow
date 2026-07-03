@@ -20,6 +20,6 @@ resources:
   arch: [x86_64, amd64]
 command_template: |
   merqury.sh {out_dir}/read.meryl {assembly_fasta} {sample_id}
-citation: "Rhie 2020, PMID 33025931"
+citation: "Rhie 2020, PMID 32928274"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

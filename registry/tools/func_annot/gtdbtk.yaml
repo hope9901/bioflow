@@ -22,7 +22,7 @@ command_template: |
   gtdbtk classify_wf --genome_dir {genome_dir} --out_dir {out_dir}
                      --cpus {cpu} --mash_db {gtdbtk_mash_db}
 references: ["/refs/dbs/gtdbtk"]
-citation: "Chaumeil 2022, PMID 35906921"
+citation: "Chaumeil 2022, PMID 36218463"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: Ecogenomics/GTDBTk

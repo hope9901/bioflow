@@ -22,7 +22,7 @@ command_template: |
   cd {out_dir} && masurca {config_file}
   && bash assemble.sh
 references: []
-citation: "Zimin 2017, PMID 28298434"
+citation: "Zimin 2017, PMID 28130360"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: alekseyzimin/masurca

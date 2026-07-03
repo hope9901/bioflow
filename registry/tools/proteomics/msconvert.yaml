@@ -23,6 +23,6 @@ command_template: |
     [ -e "$f" ] && msconvert "$f" --mzML --filter "peakPicking vendor msLevel=1-" --outdir {out_dir}
   done
 references: []
-citation: "Chambers et al. 2012, PMID 22796944"
+citation: "Chambers et al. 2012, PMID 23051804"
 added: "2026-04-20"
 last_reviewed: "2026-04-20"

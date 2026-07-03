@@ -22,7 +22,7 @@ command_template: |
   skani triangle -t {cpu} {genome_files}
         > {out_dir}/skani_triangle.tsv
 references: []
-citation: "Shaw & Yu 2023, PMID 37419955"
+citation: "Shaw & Yu 2023, PMID 37735570"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: bluenote-1577/skani

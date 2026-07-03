@@ -21,7 +21,7 @@ resources:
 command_template: |
   nextDenovo {config_file}
 references: []
-citation: "Hu 2024, PMID 38630727"
+citation: "Hu 2024, PMID 38671502"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: Nextomics/NextDenovo

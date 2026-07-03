@@ -22,7 +22,7 @@ command_template: |
   antismash --cpus {cpu} --output-dir {out_dir}
             --genefinding-tool prodigal {assembly_fasta}
 references: []
-citation: "Blin 2023, PMID 37140037"
+citation: "Blin 2023, PMID 37140036"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: antismash/antismash

@@ -22,7 +22,7 @@ command_template: |
   verkko -d {out_dir} --hifi {hifi_reads} --nano {ont_reads}
          --threads {cpu} --slurm none
 references: []
-citation: "Rautiainen 2023, PMID 36797492"
+citation: "Rautiainen 2023, PMID 36797493"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: marbl/verkko

@@ -23,6 +23,6 @@ command_template: |
             --threads={cpu} --species={sample_id}
             {rnaseq_bam_arg}
 references: ["/refs/dbs/OrthoDB"]
-citation: "Gabriel 2024, PMID 37739920"
+citation: "Gabriel 2024, PMID 38866550"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

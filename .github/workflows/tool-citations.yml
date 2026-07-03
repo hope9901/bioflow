@@ -40,7 +40,7 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add registry/tool_citations.json docs/reference/tools.md README.md
+            git add registry/tool_citations.json docs/reference/tools.md README.md web/index.html
             git commit -m "chore(cite): monthly refresh of tool citation counts"
             git push
           else

@@ -24,7 +24,7 @@ command_template: |
   bustools count --genecounts -o {out_dir}/counts
                  -g {t2g} -e {ec} -t {transcripts} {out_dir}/corrected.bus
 references: []
-citation: "Melsted 2019, PMID 31133686"
+citation: "Melsted 2019, PMID 31073610"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: BUStools/bustools

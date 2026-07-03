@@ -24,7 +24,7 @@ command_template: |
            --reverse-ref {reverse_ref} --ref-fasta {reference}
            --num-procs {cpu} --path-to-output {out_dir}
 references: []
-citation: "Schultz 2015, PMID 26039496"
+citation: "Schultz 2015, PMID 26030523"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: yupenghe/methylpy

@@ -23,7 +23,7 @@ command_template: |
   metabat2 -i {assembly_fasta} -a {out_dir}/depth.txt
            -o {out_dir}/bin --numThreads {cpu}
 references: []
-citation: "Kang 2019, PMID 31336383"
+citation: "Kang 2019, PMID 31388474"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: bioboxes/metabat

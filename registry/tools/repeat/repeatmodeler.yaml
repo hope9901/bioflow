@@ -21,6 +21,6 @@ resources:
 command_template: |
   BuildDatabase -name {sample_id} {assembly_fasta} &&
   RepeatModeler -database {sample_id} -pa {cpu} -LTRStruct
-citation: "Flynn 2020, PMID 32591352"
+citation: "Flynn 2020, PMID 32300014"
 added: "2026-04-16"
 last_reviewed: "2026-04-16"

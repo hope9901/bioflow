@@ -22,7 +22,7 @@ command_template: |
   abyss-pe -C {out_dir} name={sample_id} k=96 B=2G
            in='{r1} {r2}' np={cpu}
 references: []
-citation: "Jackman 2017, PMID 28298430"
+citation: "Jackman 2017, PMID 28232478"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: bcgsc/abyss

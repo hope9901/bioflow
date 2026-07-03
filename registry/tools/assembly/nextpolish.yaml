@@ -21,7 +21,7 @@ resources:
 command_template: |
   nextPolish {config_file}
 references: []
-citation: "Hu 2020, PMID 31504201"
+citation: "Hu 2020, PMID 31778144"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: Nextomics/NextPolish

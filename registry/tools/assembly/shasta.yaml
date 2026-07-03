@@ -22,7 +22,7 @@ command_template: |
   shasta --input {long_reads} --assemblyDirectory {out_dir}
          --threads {cpu} --config Nanopore-May2022
 references: []
-citation: "Shafin 2020, PMID 32514112"
+citation: "Shafin 2020, PMID 32686750"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: paoloshasta/shasta

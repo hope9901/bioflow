@@ -22,7 +22,7 @@ command_template: |
   run_dbcan {protein_faa} protein --db_dir {dbcan_db}
             --out_dir {out_dir} --threads {cpu}
 references: ["/refs/dbs/dbcan"]
-citation: "Zhang 2018, PMID 29905870"
+citation: "Zhang 2018, PMID 29771380"
 added: "2026-05-15"
 last_reviewed: "2026-05-15"
 source_repo: linnabrown/run_dbcan
