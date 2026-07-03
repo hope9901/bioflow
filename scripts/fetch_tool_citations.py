@@ -33,9 +33,18 @@ import json
 import re
 import sys
 import time
+import unicodedata
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+
+def _norm(s: str) -> str:
+    """Lower-case + strip diacritics so 'Röst' matches 'Rost', 'Ramírez'
+    matches 'Ramirez', etc. (author surnames carry accents inconsistently)."""
+    return "".join(
+        c for c in unicodedata.normalize("NFKD", s or "") if not unicodedata.combining(c)
+    ).lower()
 
 RECENT_YEARS = 5
 _BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest"
@@ -78,6 +87,27 @@ def _total_citations(pmid: str) -> int:
     ).get("hitCount", 0))
 
 
+def _verify(pmid: str, surname: str, year: "int | None") -> "tuple[bool, str]":
+    """A PMID is trusted only if the paper it points to actually matches the
+    citation's author surname + year (±1).  Several registry PMIDs turned out
+    to reference unrelated papers; without this guard we'd publish citation
+    counts for the *wrong* article.  Returns (verified, referenced_title)."""
+    q = urllib.parse.urlencode(
+        {"query": f"EXT_ID:{pmid} AND SRC:MED", "format": "json",
+         "pageSize": "1", "resultType": "lite"}
+    )
+    res = _get_json(f"{_BASE}/search?{q}").get("resultList", {}).get("result", [])
+    if not res:
+        return False, ""
+    rec = res[0]
+    title = rec.get("title", "")
+    py = rec.get("pubYear")
+    ok = bool(surname) and _norm(surname) in _norm(rec.get("authorString") or "") and (
+        year is not None and py is not None and abs(int(py) - year) <= 1
+    )
+    return ok, title
+
+
 def _iter_tools():
     for p in sorted(_TOOLS_DIR.rglob("*.yaml")):
         text = p.read_text(encoding="utf-8")
@@ -85,12 +115,17 @@ def _iter_tools():
         name = re.search(r"^name:\s*(.+)", text, re.MULTILINE)
         cat = re.search(r"^category:\s*(\S+)", text, re.MULTILINE)
         cit = re.search(r"^citation:\s*(.+)", text, re.MULTILINE)
-        pmid = _PMID_RE.search(cit.group(1)) if cit else None
+        cit_s = cit.group(1) if cit else ""
+        pmid = _PMID_RE.search(cit_s)
+        yr = re.search(r"\b(19|20)\d{2}\b", cit_s)
+        au = re.match(r'\s*"?\s*([A-Za-z\-]+)', cit_s)
         yield {
             "id": tid.group(1).strip() if tid else p.stem,
             "name": name.group(1).strip().strip("\"'") if name else p.stem,
             "category": cat.group(1).strip() if cat else "",
             "pmid": pmid.group(1) if pmid else None,
+            "surname": au.group(1) if au else "",
+            "year": int(yr.group(0)) if yr else None,
         }
 
 
@@ -113,38 +148,51 @@ def main() -> int:
         tools = tools[: args.limit]
 
     out: dict = {}
-    n_pmid = n_ok = 0
+    n_pmid = n_ok = n_bad = 0
     for i, t in enumerate(tools, 1):
         tid, pmid = t["id"], t["pmid"]
-        rec = {"pmid": pmid, "total": None, "recent": None,
+        rec = {"pmid": pmid, "total": None, "recent": None, "verified": None,
                "name": t["name"], "category": t["category"]}
         if pmid:
             n_pmid += 1
             try:
-                rec["total"] = _total_citations(pmid)
+                ok, title = _verify(pmid, t["surname"], t["year"])
                 time.sleep(args.sleep)
-                rec["recent"] = _hit_count(
-                    f"CITES:{pmid}_MED AND (FIRST_PDATE:[{start}-01-01 TO {end}-12-31])"
-                )
-                time.sleep(args.sleep)
-                n_ok += 1
+                rec["verified"] = ok
+                if ok:
+                    rec["total"] = _total_citations(pmid)
+                    time.sleep(args.sleep)
+                    rec["recent"] = _hit_count(
+                        f"CITES:{pmid}_MED AND (FIRST_PDATE:[{start}-01-01 TO {end}-12-31])"
+                    )
+                    time.sleep(args.sleep)
+                    n_ok += 1
+                else:
+                    # PMID points to a paper that is NOT this tool's reference —
+                    # record it so the wrong article is easy to spot and fix.
+                    rec["ref_title"] = title[:80]
+                    n_bad += 1
             except Exception as exc:  # keep previous numbers on a flaky fetch
                 old = prev.get(tid, {})
                 rec["total"] = old.get("total")
                 rec["recent"] = old.get("recent")
+                rec["verified"] = old.get("verified")
                 sys.stderr.write(f"  ! {tid} (PMID {pmid}): {exc}\n")
         out[tid] = rec
+        flag = "" if rec["verified"] else ("  <-- PMID MISMATCH" if pmid else "")
         print(f"[{i}/{len(tools)}] {tid:22} PMID={pmid or '-':>9} "
-              f"total={rec['total']} recent={rec['recent']}")
+              f"total={rec['total']} recent={rec['recent']}{flag}")
 
     payload = {
         "source": "Europe PMC",
-        "metric": "citations of each tool's canonical reference (PMID)",
+        "metric": "citations of each tool's canonical reference (PMID), "
+                  "shown only when the PMID's author+year match the citation",
         "recent_window": {"start": start, "end": end, "years": RECENT_YEARS},
         "fetched_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
         "n_tools": len(tools),
         "n_with_pmid": n_pmid,
         "n_fetched": n_ok,
+        "n_pmid_mismatch": n_bad,
         "tools": dict(sorted(out.items())),
     }
     _OUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

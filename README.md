@@ -81,13 +81,13 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 | # | Tool | Category | Cites 2021–2025 | Total |
 |--:|---|---|--:|--:|
-| 1 | `deseq2` | deg | 52,514 | 72,129 |
-| 2 | `star` | rnaseq_align | 29,063 | 41,939 |
-| 3 | `starsolo` | single_cell | 29,063 | 41,939 |
-| 4 | `bowtie2` | alignment | 25,504 | 43,609 |
-| 5 | `mafft` | comparative_genomics | 19,244 | 31,029 |
+| 1 | `deseq2` | deg | 52,515 | 72,131 |
+| 2 | `star` | rnaseq_align | 29,063 | 41,941 |
+| 3 | `starsolo` | single_cell | 29,063 | 41,941 |
+| 4 | `bowtie2` | alignment | 25,504 | 43,610 |
+| 5 | `mafft` | comparative_genomics | 19,245 | 31,030 |
 | 6 | `edger` | deg | 19,167 | 33,192 |
-| 7 | `bwa` | alignment | 18,290 | 36,961 |
+| 7 | `bwa` | alignment | 18,290 | 36,962 |
 | 8 | `fastp` | qc | 17,349 | 19,888 |
 | 9 | `subread` | rnaseq_align | 15,586 | 21,308 |
 | 10 | `bedtools` | alignment | 13,551 | 22,787 |

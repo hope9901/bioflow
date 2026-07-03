@@ -25,6 +25,10 @@ ship bug fixes only.  Breaking changes to the documented public API
   commits them, so normal CI/PRs stay offline. Counts are a lower bound on real
   use and favour older tools; the recent-window column is the fairer signal, and
   tools without a PMID show `n/a`. Added the citation metadata (CITATION.cff).
+- The fetch **verifies** each PMID against the citation's author + year before
+  trusting it; a count is published only on a match. This surfaced that **34
+  registry citation PMIDs point to unrelated papers** (author/year mismatch) —
+  those show `n/a` and are flagged in tools.md pending a curated correction.
 
 ### Fixed — cache key now tracks module-level constants a stage references
 - A stage's cache key hashed only `inspect.getsource(func)`, so editing a

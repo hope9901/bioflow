@@ -148,6 +148,15 @@ def gen_tools() -> str:
     lb = _leaderboard(cites, window, top=15, level="##") if cites else ""
     if lb:
         lines += [lb]
+    n_bad = sum(1 for c in cites.values() if c.get("verified") is False)
+    if n_bad:
+        lines += [
+            f"> **Note:** {n_bad} tools show `n/a` because their registry PMID "
+            "points to an unrelated paper (author/year mismatch); those "
+            "references are pending correction. Counts are shown only for PMIDs "
+            "whose author + year match the cited work.",
+            "",
+        ]
     wlab = _window_label(window)
     for cat in sorted(by_cat):
         tools = sorted(by_cat[cat], key=lambda d: d["id"])
