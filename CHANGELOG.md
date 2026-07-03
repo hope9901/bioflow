@@ -14,6 +14,17 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — citation-integrity guard + tests for the new tooling
+- `tests/unit/test_citation_integrity.py` (offline, blocking): the committed
+  `tool_citations.json` may only carry unverified PMIDs from a tight
+  `KNOWN_UNVERIFIED` allowlist (the 5 tools with no MEDLINE record), and every
+  tool citing a PMID must be tracked — so a citation that points at the wrong
+  paper can never silently return.
+- New unit coverage for the session's fragile helpers: the GenoVi GenBank
+  `LOCUS` normaliser/filter (`_GENOME_PLOT_FILTER`, exec'd on a malformed
+  fixture), the gen_docs citation columns + leaderboard rendering, and the
+  fetch script's accent-insensitive author matching. 687 unit tests pass.
+
 ### Added — per-tool citation counts (literature adoption)
 - Each registered tool now carries how many papers cite its canonical reference
   — **total** and in the **last 5 full years** (current adoption) — fetched from
