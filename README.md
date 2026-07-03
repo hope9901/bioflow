@@ -398,6 +398,23 @@ docs/MAINTAINER.md    Scheduled-update workflow (read this only if you own the G
 
 ---
 
+## Citation
+
+If you use bioflow in your research, please cite it. GitHub shows a
+**"Cite this repository"** button (top-right of the repo) driven by
+[`CITATION.cff`](CITATION.cff), which exports BibTeX/APA on demand.
+
+Please **also cite the underlying tools** each run invokes — every recipe run
+records them, and the full catalog with references lives in
+[docs/reference/tools.md](docs/reference/tools.md). Reproducibility is only as
+citable as the tools it wraps.
+
+Once a release is archived on Zenodo it will have a DOI (see
+[docs/MAINTAINER.md](docs/MAINTAINER.md)); add it to `CITATION.cff` and cite the
+version you ran.
+
+---
+
 ## License
 
 MIT

@@ -390,3 +390,33 @@ primitive instead:
 bioflow stays a no-daemon Python SDK; only the OS scheduler (cron /
 Task Scheduler) and Cowork are long-running, and each lives in its
 own world.
+
+---
+
+## Archiving a release on Zenodo (DOI)
+
+A Zenodo DOI makes the software formally citable and archives each release.
+One-time connect, then automatic per release — no server, no compute.
+
+**One-time setup**
+
+1. Sign in at <https://zenodo.org> (GitHub login is fine).
+2. Open **Zenodo → account → GitHub** (`https://zenodo.org/account/settings/github/`).
+3. Toggle the **`hope9901/bioflow`** repository **On** — Zenodo now watches it
+   for new GitHub *Releases*.
+
+**Per release**
+
+4. Create a GitHub *Release* from the version tag (the tag push already does the
+   PyPI publish; this adds the Release that Zenodo reacts to).
+5. Zenodo archives the release and mints two DOIs:
+   - a **version DOI** (that exact release), and
+   - a **concept DOI** (always resolves to the latest release — cite this one in
+     papers for "the software" rather than a pinned version).
+6. Put the concept DOI in [`CITATION.cff`](../CITATION.cff) (`doi:` line) and add
+   the Zenodo badge to the README; bump `version:` / `date-released:`. Commit.
+
+Notes
+- The DOI is minted on a *Release*, not on a bare tag or a plain push.
+- Consider scripting the `CITATION.cff` `version` / `date-released` bump from the
+  tag inside the release workflow so it never drifts.
