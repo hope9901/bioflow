@@ -75,6 +75,24 @@ subset that fits *your* CPU / RAM / GPU / arch, run `bioflow tools`.
 | struct_annot | 5 | `augustus`, `bakta`, `braker3`, `liftoff`, … |
 | variant_calling | 4 | `bcftools`, `freebayes`, `gatk4`, `snpeff` |
 
+### Most-used tools · citations in 2021–2025
+
+Ranked by how many papers cited each tool's canonical reference in the last 5 full years — a rough proxy for *current* adoption. Counts are a lower bound on real use (not everyone cites), and older tools have had longer to accrue totals. Source: Europe PMC.
+
+| # | Tool | Category | Cites 2021–2025 | Total |
+|--:|---|---|--:|--:|
+| 1 | `deseq2` | deg | 52,514 | 72,129 |
+| 2 | `star` | rnaseq_align | 29,063 | 41,939 |
+| 3 | `starsolo` | single_cell | 29,063 | 41,939 |
+| 4 | `bowtie2` | alignment | 25,504 | 43,609 |
+| 5 | `mafft` | comparative_genomics | 19,244 | 31,029 |
+| 6 | `edger` | deg | 19,167 | 33,192 |
+| 7 | `bwa` | alignment | 18,290 | 36,961 |
+| 8 | `fastp` | qc | 17,349 | 19,888 |
+| 9 | `subread` | rnaseq_align | 15,586 | 21,308 |
+| 10 | `bedtools` | alignment | 13,551 | 22,787 |
+Full per-tool counts: [docs/reference/tools.md](docs/reference/tools.md).
+
 <!-- TOOLS-TABLE:END -->
 
 ---

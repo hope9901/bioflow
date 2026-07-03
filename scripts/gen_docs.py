@@ -11,6 +11,7 @@ keeps the docs in sync with the registry without hand-editing.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -19,10 +20,59 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 TOOLS_DIR = REPO_ROOT / "registry" / "tools"
 OUT_DIR = REPO_ROOT / "docs" / "reference"
 README = REPO_ROOT / "README.md"
+CITES_JSON = REPO_ROOT / "registry" / "tool_citations.json"
 
 # README section regenerated in place between these markers.
 README_START = "<!-- TOOLS-TABLE:START -->"
 README_END = "<!-- TOOLS-TABLE:END -->"
+
+
+def _load_citations() -> "tuple[dict, dict | None]":
+    """Return (tool_id → {total, recent, category, pmid}, recent_window) from the
+    cached ``registry/tool_citations.json``, or ({}, None) if it isn't there —
+    the citation columns are additive, so docs still generate without it."""
+    if not CITES_JSON.exists():
+        return {}, None
+    data = json.loads(CITES_JSON.read_text(encoding="utf-8"))
+    return data.get("tools", {}), data.get("recent_window")
+
+
+def _fmt_cites(n: object) -> str:
+    return f"{n:,}" if isinstance(n, int) else "n/a"
+
+
+def _window_label(window: "dict | None") -> str:
+    return f"{window['start']}–{window['end']}" if window else "recent"
+
+
+def _leaderboard(cites: dict, window: "dict | None", *, top: int, level: str) -> str:
+    """Markdown 'most-used tools' table, ranked by recent citations."""
+    ranked = sorted(
+        ((tid, c) for tid, c in cites.items() if isinstance(c.get("recent"), int)),
+        key=lambda kv: kv[1]["recent"], reverse=True,
+    )[:top]
+    if not ranked:
+        return ""
+    w = _window_label(window)
+    yrs = window["years"] if window else 5
+    lines = [
+        f"{level} Most-used tools · citations in {w}",
+        "",
+        "Ranked by how many papers cited each tool's canonical reference in the "
+        f"last {yrs} full years — a rough proxy for *current* adoption. Counts "
+        "are a lower bound on real use (not everyone cites), and older tools have "
+        "had longer to accrue totals. Source: Europe PMC.",
+        "",
+        f"| # | Tool | Category | Cites {w} | Total |",
+        "|--:|---|---|--:|--:|",
+    ]
+    for i, (tid, c) in enumerate(ranked, 1):
+        lines.append(
+            f"| {i} | `{tid}` | {c.get('category', '')} | "
+            f"{_fmt_cites(c.get('recent'))} | {_fmt_cites(c.get('total'))} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def _load_by_cat() -> "dict[str, list[dict]]":
@@ -55,6 +105,12 @@ def gen_readme_block() -> str:
         if len(tools) > 4:
             ex += ", …"
         lines.append(f"| {cat} | {len(tools)} | {ex} |")
+    cites, window = _load_citations()
+    lb = _leaderboard(cites, window, top=10, level="###") if cites else ""
+    if lb:
+        lines += ["", lb.rstrip(),
+                  "Full per-tool counts: "
+                  "[docs/reference/tools.md](docs/reference/tools.md)."]
     lines += ["", README_END]
     return "\n".join(lines)
 
@@ -79,6 +135,7 @@ def update_readme() -> bool:
 
 def gen_tools() -> str:
     by_cat = _load_by_cat()
+    cites, window = _load_citations()
     total = sum(len(v) for v in by_cat.values())
     lines = [
         "# Tools",
@@ -88,20 +145,32 @@ def gen_tools() -> str:
         "auto-generated from `registry/tools/` by `scripts/gen_docs.py`.",
         "",
     ]
+    lb = _leaderboard(cites, window, top=15, level="##") if cites else ""
+    if lb:
+        lines += [lb]
+    wlab = _window_label(window)
     for cat in sorted(by_cat):
         tools = sorted(by_cat[cat], key=lambda d: d["id"])
         lines.append(f"## {cat}  ({len(tools)})")
         lines.append("")
-        lines.append("| Tool | Version | Image | Citation |")
-        lines.append("|---|---|---|---|")
+        if cites:
+            lines.append(f"| Tool | Version | Image | Citation | Total cites | Cites {wlab} |")
+            lines.append("|---|---|---|---|--:|--:|")
+        else:
+            lines.append("| Tool | Version | Image | Citation |")
+            lines.append("|---|---|---|---|")
         for d in tools:
             dep = " ⚠️ deprecated" if d.get("deprecated") else ""
             img = d.get("container", {}).get("image", "")
             cit = d.get("citation", "").replace("|", "/")
-            lines.append(
+            row = (
                 f"| `{d['id']}`{dep} | {d.get('version','')} | "
                 f"`{img}` | {cit} |"
             )
+            if cites:
+                c = cites.get(d["id"], {})
+                row += f" {_fmt_cites(c.get('total'))} | {_fmt_cites(c.get('recent'))} |"
+            lines.append(row)
         lines.append("")
     return "\n".join(lines) + "\n"
 

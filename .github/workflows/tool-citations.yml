@@ -1,0 +1,48 @@
+name: Tool citations
+
+# Monthly refresh of per-tool citation counts from Europe PMC.  The network
+# call lives ONLY here: it writes registry/tool_citations.json and regenerates
+# the reference docs + README leaderboard, then commits.  Normal CI / PRs read
+# the committed JSON, so they stay offline and deterministic.
+
+on:
+  schedule:
+    - cron: "17 4 1 * *"   # 04:17 UTC on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bioflow (gen_docs needs the recipe registry)
+        run: pip install -e . pyyaml
+
+      - name: Fetch citation counts (Europe PMC)
+        run: python scripts/fetch_tool_citations.py
+
+      - name: Regenerate reference docs + README leaderboard
+        run: python scripts/gen_docs.py
+
+      - name: Commit refreshed counts (if any changed)
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add registry/tool_citations.json docs/reference/tools.md README.md
+            git commit -m "chore(cite): monthly refresh of tool citation counts"
+            git push
+          else
+            echo "no citation changes this month"
+          fi

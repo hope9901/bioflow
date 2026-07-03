@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — per-tool citation counts (literature adoption)
+- Each registered tool now carries how many papers cite its canonical reference
+  — **total** and in the **last 5 full years** (current adoption) — fetched from
+  Europe PMC via each tool's registry PMID (unambiguous, unlike name search).
+  `scripts/fetch_tool_citations.py` caches the numbers to
+  `registry/tool_citations.json`; `gen_docs.py` surfaces them as (a) two columns
+  in `docs/reference/tools.md` and (b) a "Most-used tools" leaderboard in
+  tools.md + the README. A monthly `tool-citations` workflow refreshes and
+  commits them, so normal CI/PRs stay offline. Counts are a lower bound on real
+  use and favour older tools; the recent-window column is the fairer signal, and
+  tools without a PMID show `n/a`. Added the citation metadata (CITATION.cff).
+
 ### Fixed — cache key now tracks module-level constants a stage references
 - A stage's cache key hashed only `inspect.getsource(func)`, so editing a
   module-level constant/helper the builder *splices into its command* (e.g. a
