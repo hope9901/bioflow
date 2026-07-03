@@ -22,7 +22,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | 12 | `samtools` | alignment | 10,490 | 11,740 |
 | 13 | `minimap2` | alignment | 10,212 | 12,256 |
 | 14 | `iqtree` | comparative_genomics | 9,794 | 11,088 |
-| 15 | `prokka` | struct_annot | 9,716 | 14,429 |
+| 15 | `prokka` | struct_annot | 9,716 | 14,430 |
 
 ## alignment  (6)
 
@@ -206,7 +206,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bakta` | 1.9.4 | `quay.io/biocontainers/bakta:1.9.4--pyhdfd78af_0` | Schwengers 2021, PMID 34739369 | 917 | 792 |
 | `braker3` | 3.0.8 | `teambraker/braker3:v3.0.8` | Gabriel 2024, PMID 37739920 | 6 | 5 |
 | `liftoff` | 1.6.3 | `quay.io/biocontainers/liftoff:1.6.3--pyhdfd78af_0` | Shumate & Salzberg 2021, PMID 33320174 | 733 | 669 |
-| `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,429 | 9,716 |
+| `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,430 | 9,716 |
 
 ## variant_calling  (4)
 

@@ -6,7 +6,7 @@
     "end": 2025,
     "years": 5
   },
-  "fetched_at": "2026-07-03T02:37:03+00:00",
+  "fetched_at": "2026-07-03T02:43:43+00:00",
   "n_tools": 113,
   "n_with_pmid": 103,
   "n_fetched": 103,
@@ -601,7 +601,7 @@
     },
     "prokka": {
       "pmid": "24642063",
-      "total": 14429,
+      "total": 14430,
       "recent": 9716,
       "name": "Prokka",
       "category": "struct_annot"
