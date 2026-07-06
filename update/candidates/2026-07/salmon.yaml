@@ -1,0 +1,54 @@
+id: salmon
+name: Salmon
+version: 2.3.1
+category: rnaseq_align
+stage:
+- rnaseq_deg.step2
+input_types:
+- fastq_short_paired_clean
+- reference_genome
+- annotation_gtf
+output_types:
+- count_matrix
+applicable:
+  species:
+  - prokaryote
+  - eukaryote
+  - eukaryote_small
+  read_type:
+  - short
+  mode:
+  - any
+container:
+  image: quay.io/biocontainers/salmon:2.3.1
+  pull_policy: if_not_present
+  image_digest: sha256:3938cc6dfaca6f7ee14eac0cdc0f305fdff8faa7f14541c72e684feb1b443a74
+resources:
+  min:
+    cpu: 4
+    ram_gb: 8
+    disk_gb: 10
+  recommended:
+    cpu: 16
+    ram_gb: 32
+    disk_gb: 30
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "salmon index -t {reference_genome} -i {out_dir}/salmon_index --threads\
+  \ {cpu} &&\nsalmon quant -i {out_dir}/salmon_index -l A\n             -1 {r1} -2\
+  \ {r2}\n             --threads {cpu} --validateMappings\n             -o {out_dir}\n"
+citation: Patro 2017, PMID 28263959
+added: '2026-04-16'
+last_reviewed: '2026-07-06'
+source_repo: COMBINE-lab/salmon
+update_meta:
+  month: 2026-07
+  source: release_watch
+  previous_version: 1.10.3
+  previous_image: quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

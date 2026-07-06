@@ -1,0 +1,51 @@
+id: panaroo
+name: Panaroo
+version: 1.8.0
+category: comparative_genomics
+stage:
+- comparative_genomics.step3
+input_types:
+- annotation_gff
+output_types:
+- gene_presence_absence_csv
+- core_alignment
+applicable:
+  species:
+  - prokaryote
+  read_type:
+  - any
+  mode:
+  - comparative
+container:
+  image: quay.io/biocontainers/panaroo:1.8.0
+  pull_policy: if_not_present
+  image_digest: sha256:f0a005e178530481ed53434f4b3bf27326c90a725481ce395ea5e1de1e6c42b2
+resources:
+  min:
+    cpu: 4
+    ram_gb: 16
+    disk_gb: 50
+  recommended:
+    cpu: 16
+    ram_gb: 64
+    disk_gb: 200
+  gpu: false
+  arch:
+  - x86_64
+  - amd64
+command_template: "panaroo -i {gff_paths} -o {out_dir} --clean-mode strict\n     \
+  \   -t {cpu} -a core --aligner mafft\n"
+references: []
+citation: Tonkin-Hill 2020, PMID 32698896
+added: '2026-05-15'
+last_reviewed: '2026-07-06'
+source_repo: gtonkinhill/panaroo
+update_meta:
+  month: 2026-07
+  source: release_watch
+  previous_version: 1.5.0
+  previous_image: quay.io/biocontainers/panaroo:1.5.0--pyhdfd78af_0
+  note: Auto-filed by update/release_watch.py. Confirm the BioContainers tag exists
+    before benchmark; the bumped tag is a best-effort guess.
+  risks:
+  - unverified image tag

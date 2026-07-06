@@ -105,7 +105,7 @@ def _verify(pmid: str, surname: str, year: "int | None") -> "tuple[bool, str]":
     ok = bool(surname) and _norm(surname) in _norm(rec.get("authorString") or "") and (
         year is not None and py is not None and abs(int(py) - year) <= 1
     )
-    return ok, title
+    return ok, title, (rec.get("doi") or None)
 
 
 def _iter_tools():
@@ -151,15 +151,16 @@ def main() -> int:
     n_pmid = n_ok = n_bad = 0
     for i, t in enumerate(tools, 1):
         tid, pmid = t["id"], t["pmid"]
-        rec = {"pmid": pmid, "total": None, "recent": None, "verified": None,
-               "name": t["name"], "category": t["category"]}
+        rec = {"pmid": pmid, "doi": None, "total": None, "recent": None,
+               "verified": None, "name": t["name"], "category": t["category"]}
         if pmid:
             n_pmid += 1
             try:
-                ok, title = _verify(pmid, t["surname"], t["year"])
+                ok, title, doi = _verify(pmid, t["surname"], t["year"])
                 time.sleep(args.sleep)
                 rec["verified"] = ok
                 if ok:
+                    rec["doi"] = doi
                     rec["total"] = _total_citations(pmid)
                     time.sleep(args.sleep)
                     rec["recent"] = _hit_count(

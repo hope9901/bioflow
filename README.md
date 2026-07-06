@@ -81,16 +81,16 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 | # | Tool | Category | Cites 2021–2025 | Total |
 |--:|---|---|--:|--:|
-| 1 | `deseq2` | deg | 52,515 | 72,133 |
-| 2 | `star` | rnaseq_align | 29,063 | 41,943 |
-| 3 | `starsolo` | single_cell | 29,063 | 41,943 |
-| 4 | `bowtie2` | alignment | 25,505 | 43,614 |
-| 5 | `mafft` | comparative_genomics | 19,246 | 31,032 |
-| 6 | `edger` | deg | 19,167 | 33,192 |
-| 7 | `bwa` | alignment | 18,291 | 36,964 |
-| 8 | `fastp` | qc | 17,350 | 19,891 |
-| 9 | `subread` | rnaseq_align | 15,586 | 21,308 |
-| 10 | `bedtools` | alignment | 13,552 | 22,790 |
+| 1 | `deseq2` | deg | 52,540 | 72,197 |
+| 2 | `star` | rnaseq_align | 29,078 | 41,990 |
+| 3 | `starsolo` | single_cell | 29,078 | 41,990 |
+| 4 | `bowtie2` | alignment | 25,521 | 43,646 |
+| 5 | `mafft` | comparative_genomics | 19,262 | 31,071 |
+| 6 | `edger` | deg | 19,177 | 33,219 |
+| 7 | `bwa` | alignment | 18,313 | 36,991 |
+| 8 | `fastp` | qc | 17,361 | 19,916 |
+| 9 | `subread` | rnaseq_align | 15,592 | 21,327 |
+| 10 | `bedtools` | alignment | 13,559 | 22,804 |
 Full per-tool counts: [docs/reference/tools.md](docs/reference/tools.md).
 
 <!-- TOOLS-TABLE:END -->
@@ -416,20 +416,20 @@ docs/MAINTAINER.md    Scheduled-update workflow (read this only if you own the G
 
 ---
 
-## Citation
+## Citing the tools you used
 
-If you use bioflow in your research, please cite it. GitHub shows a
-**"Cite this repository"** button (top-right of the repo) driven by
-[`CITATION.cff`](CITATION.cff), which exports BibTeX/APA on demand.
+bioflow is plumbing — the results come from the underlying tools, so **cite
+those** in your methods. bioflow makes that one command:
 
-Please **also cite the underlying tools** each run invokes — every recipe run
-records them, and the full catalog with references lives in
-[docs/reference/tools.md](docs/reference/tools.md). Reproducibility is only as
-citable as the tools it wraps.
+```bash
+bioflow cite prokaryote_assembly     # every tool the recipe runs, with DOIs
+bioflow cite spades prokka           # or specific tools
+bioflow cite prokaryote_assembly --format bibtex > refs.bib
+```
 
-Once a release is archived on Zenodo it will have a DOI (see
-[docs/MAINTAINER.md](docs/MAINTAINER.md)); add it to `CITATION.cff` and cite the
-version you ran.
+Each entry gives the tool, version, reference and a DOI link you can paste
+straight into a manuscript. The full catalog with references also lives in
+[docs/reference/tools.md](docs/reference/tools.md).
 
 ---
 

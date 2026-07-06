@@ -14,13 +14,22 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
-### Added — results overview for germline_variants + JOSS paper draft
+### Added — `bioflow cite`: citations + DOIs for the tools you used
+- New `bioflow cite <recipe>` / `bioflow cite <tool…>` prints a ready-to-paste
+  reference list (or `--format bibtex`) for the tools a recipe runs — mapped
+  from each stage's image to the registry citation + a DOI. DOIs are captured
+  by the citation fetch (`tool_citations.json`) and verified against the cited
+  author/year, so `cite` works offline. (`bioflow.core.citations`.)
+- Removed the mis-scoped software-publication artifacts (JOSS `paper/`, the
+  paper-build workflow, `CITATION.cff`, the Zenodo maintainer section): bioflow
+  is plumbing, so the citation story is about the underlying tools, surfaced by
+  `bioflow cite`.
+
+### Added — results overview for germline_variants
 - `germline_variants` now has a results harvester (the 3rd recipe wired into the
   overview system): a tidy per-sample table (variant + affected-gene counts from
   the annotated VCF) plus a link to snpEff's own `snpEff_summary.html` report —
   surfaced, not redrawn. Unit-tested with synthetic fixtures.
-- Draft JOSS paper (`paper/paper.md` + `paper.bib`) and a non-blocking workflow
-  that compiles it to a PDF, for a citable software publication.
 - Housekeeping: the landing tool count is corrected (113), and the README test
   badge is now a live CI-status badge instead of a hard-coded, drift-prone count.
 
@@ -45,7 +54,7 @@ ship bug fixes only.  Breaking changes to the documented public API
   tools.md + the README. A monthly `tool-citations` workflow refreshes and
   commits them, so normal CI/PRs stay offline. Counts are a lower bound on real
   use and favour older tools; the recent-window column is the fairer signal, and
-  tools without a PMID show `n/a`. Added the citation metadata (CITATION.cff).
+  tools without a PMID show `n/a`.
 - The fetch **verifies** each PMID against the citation's author + year before
   trusting it; a count is published only on a match. This surfaced that **34
   registry citation PMIDs pointed to unrelated papers** (e.g. `flye` → a
