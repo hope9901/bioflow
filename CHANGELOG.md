@@ -14,6 +14,18 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — a path to modern scanpy (self-built, digest-pinned conda-forge image)
+- Bioconda froze `scanpy` at 1.7.2, so there's no newer BioContainer.  Added
+  `docker/scanpy/Dockerfile` (conda-forge `scanpy=1.12.2` + leidenalg/igraph;
+  verified end-to-end on the `scrna_seq` analyze.py — filter → normalize → HVG →
+  PCA → neighbors → UMAP → leiden → rank_genes_groups) and a `scanpy-image`
+  workflow that builds it, pushes to GHCR, and **repins the registry + recipe to
+  the pushed digest** so a modern scanpy stays digest-pinned like any other tool.
+  Run the workflow once (then make the GHCR package public) to adopt it.
+- New reusable `scripts/repin_tool.py`: re-point a tool to a new image + digest
+  across the registry **and** every recipe that pins it, keeping the alignment
+  invariant intact in one command.
+
 ### Changed — reviewed the 2026-07 update candidates; promoted Panaroo
 - The monthly `release_watch` filed four auto-guessed version bumps.  Verified
   each against quay.io (real build-suffixed tag + true digest + the image ships

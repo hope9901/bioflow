@@ -1,0 +1,74 @@
+name: scanpy image
+
+# Build the conda-forge scanpy image (docker/scanpy/Dockerfile), push it to
+# GHCR, and repin the registry entry + scrna_seq recipe to the pushed digest —
+# so a modern scanpy stays digest-pinned like any BioContainer.
+#
+# Run it once to adopt scanpy, and again whenever you bump the scanpy version in
+# the Dockerfile.  ONE-TIME: after the first run, make the GHCR package
+# `bioflow-scanpy` **public** (repo → Packages → package → settings) so the
+# nightly image guard and end users can pull it without auth.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'docker/scanpy/Dockerfile'
+      - '.github/workflows/scanpy-image.yml'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/bioflow-scanpy
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-and-pin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read scanpy version from the Dockerfile
+        id: ver
+        run: echo "v=$(grep -oP 'scanpy=\"?\K[0-9.]+' docker/scanpy/Dockerfile)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build + push to GHCR
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/scanpy
+          push: true
+          tags: ${{ env.IMAGE }}:${{ steps.ver.outputs.v }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Repin the registry + recipe to the pushed digest
+        run: |
+          pip install -e . pyyaml
+          python scripts/repin_tool.py scanpy \
+            "${IMAGE}:${{ steps.ver.outputs.v }}" \
+            "${{ steps.build.outputs.digest }}" \
+            "${{ steps.ver.outputs.v }}"
+          python scripts/gen_docs.py
+
+      - name: Commit the repin
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add registry/tools bioflow/recipes docs/reference README.md
+            git commit -m "chore(scanpy): publish + pin scanpy ${{ steps.ver.outputs.v }} (GHCR, conda-forge)"
+            git push
+          else
+            echo "nothing to repin"
+          fi
