@@ -1,6 +1,6 @@
 id: macs3
 name: macs3
-version: "3.0.1"
+version: "3.0.4"
 category: epigenomics
 stage: [chip_seq.step3, atac_seq.step3]
 input_types: [bam]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, differential]
 container:
-  image: quay.io/biocontainers/macs3:3.0.1--py312he57d009_3
+  image: quay.io/biocontainers/macs3:3.0.4--py310h5a5e57a_0
   pull_policy: if_not_present
-  image_digest: sha256:27518d25b581f0a9d2144aa4109c5f0e90bd3cb5b6eea14912ef0fcfe5ab8311
+  image_digest: sha256:62cb429b4016fc24ee8fb192a2b7f41651b4aae2380cc918aa931083fcc154d5
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Zhang et al. 2008, PMID 18798982"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"
 source_repo: macs3-project/MACS

@@ -1,6 +1,6 @@
 id: metabat2
 name: MetaBAT 2
-version: "2.17"
+version: "2.18"
 category: metagenomics
 stage: [metagenomics.step3]
 input_types: [assembly_fasta, bam]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short, long_ont]
   mode: [profiling, de_novo]
 container:
-  image: quay.io/biocontainers/metabat2:2.17--h6f16272_1
+  image: quay.io/biocontainers/metabat2:2.18--h38e344b_2
   pull_policy: if_not_present
-  image_digest: sha256:6b4a83a76903d4344c1213208433975582a9a6503e5edfebf806fa2d66f330b2
+  image_digest: sha256:76728c892cfb5f1e8a8704f271ade1664109e37494d9eba3fb27467b7730a9f2
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Kang 2019, PMID 31388474"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: bioboxes/metabat

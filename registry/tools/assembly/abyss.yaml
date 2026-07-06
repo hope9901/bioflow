@@ -1,6 +1,6 @@
 id: abyss
 name: ABySS
-version: "2.3.7"
+version: "2.3.10"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_short_paired_clean]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/abyss:2.3.7--h103dbdd_4
+  image: quay.io/biocontainers/abyss:2.3.10--h4a2768f_3
   pull_policy: if_not_present
-  image_digest: sha256:4835f67c19770380934e926f46773ec55eaa796e47b6c627d9f6a8176afd6682
+  image_digest: sha256:839621b791c86927407c5ca4229d4101fca8313678abf0c44fd8717e7e91a743
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 64, ram_gb: 256, disk_gb: 1000}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Jackman 2017, PMID 28232478"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: bcgsc/abyss

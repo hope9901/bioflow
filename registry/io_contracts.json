@@ -3,7 +3,7 @@
   "generated": "2026-07-06",
   "tools": {
     "abricate": {
-      "version": "1.2.0",
+      "version": "1.4.0",
       "inputs": [
         "assembly_fasta"
       ],
@@ -13,7 +13,7 @@
       ]
     },
     "abyss": {
-      "version": "2.3.7",
+      "version": "2.3.10",
       "inputs": [
         "fastq_short_paired_clean"
       ],
@@ -22,7 +22,7 @@
       ]
     },
     "antismash": {
-      "version": "7.1.0",
+      "version": "8.0.4",
       "inputs": [
         "assembly_fasta",
         "structural_gff"
@@ -43,7 +43,7 @@
       ]
     },
     "bakta": {
-      "version": "1.9.4",
+      "version": "1.12.0",
       "inputs": [
         "assembly_fasta"
       ],
@@ -54,7 +54,7 @@
       ]
     },
     "bandage": {
-      "version": "0.8.1",
+      "version": "0.9.0",
       "inputs": [
         "assembly_graph"
       ],
@@ -63,7 +63,7 @@
       ]
     },
     "bcftools": {
-      "version": "1.21",
+      "version": "1.23.1",
       "inputs": [
         "bam",
         "reference_fasta",
@@ -88,7 +88,7 @@
       ]
     },
     "bismark": {
-      "version": "0.24.2",
+      "version": "0.25.1",
       "inputs": [
         "clean_fastq"
       ],
@@ -98,7 +98,7 @@
       ]
     },
     "bowtie2": {
-      "version": "2.5.4",
+      "version": "2.5.5",
       "inputs": [
         "short_paired"
       ],
@@ -116,7 +116,7 @@
       ]
     },
     "braker3": {
-      "version": "3.0.8",
+      "version": "3.1.1",
       "inputs": [
         "masked_assembly_fasta",
         "rnaseq_bam"
@@ -127,7 +127,7 @@
       ]
     },
     "busco": {
-      "version": "5.7.1",
+      "version": "6.1.0",
       "inputs": [
         "assembly_fasta"
       ],
@@ -136,7 +136,7 @@
       ]
     },
     "bustools": {
-      "version": "0.43.2",
+      "version": "0.45.1",
       "inputs": [
         "bus_file"
       ],
@@ -145,7 +145,7 @@
       ]
     },
     "bwa": {
-      "version": "0.7.18",
+      "version": "0.7.19",
       "inputs": [
         "fastq_short_paired_clean"
       ],
@@ -155,7 +155,7 @@
       ]
     },
     "bwa_mem2": {
-      "version": "2.2.1",
+      "version": "2.3",
       "inputs": [
         "fastq_short_paired_clean",
         "reference_genome"
@@ -177,7 +177,7 @@
       ]
     },
     "canu": {
-      "version": "2.2",
+      "version": "2.3",
       "inputs": [
         "fastq_long_hifi",
         "fastq_long_ont",
@@ -189,7 +189,7 @@
       ]
     },
     "cellranger": {
-      "version": "7.2.0",
+      "version": "9.0.1",
       "inputs": [
         "short_paired"
       ],
@@ -198,7 +198,7 @@
       ]
     },
     "checkm2": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "inputs": [
         "assembly_fasta"
       ],
@@ -230,7 +230,7 @@
       ]
     },
     "compleasm": {
-      "version": "0.2.6",
+      "version": "0.2.8",
       "inputs": [
         "assembly_fasta"
       ],
@@ -240,7 +240,7 @@
       ]
     },
     "cutadapt": {
-      "version": "4.9",
+      "version": "5.2",
       "inputs": [
         "fastq_short_paired",
         "fastq_short_single"
@@ -250,7 +250,7 @@
       ]
     },
     "dbcan": {
-      "version": "4.1.4",
+      "version": "5.2.9",
       "inputs": [
         "protein_faa"
       ],
@@ -260,7 +260,7 @@
       ]
     },
     "deeptools": {
-      "version": "3.5.5",
+      "version": "3.5.6",
       "inputs": [
         "bam"
       ],
@@ -281,7 +281,7 @@
       ]
     },
     "diamond": {
-      "version": "2.1.8",
+      "version": "2.2.2",
       "inputs": [
         "diamond_db",
         "protein_faa"
@@ -291,7 +291,7 @@
       ]
     },
     "earlgrey": {
-      "version": "4.5.0",
+      "version": "7.2.6",
       "inputs": [
         "assembly_fasta"
       ],
@@ -312,7 +312,7 @@
       ]
     },
     "eggnog_mapper": {
-      "version": "2.1.12",
+      "version": "2.1.15",
       "inputs": [
         "protein_faa",
         "structural_gff"
@@ -324,7 +324,7 @@
       ]
     },
     "enrichr": {
-      "version": "1.1.3",
+      "version": "1.3.0",
       "inputs": [
         "gene_list"
       ],
@@ -364,7 +364,7 @@
       ]
     },
     "filtlong": {
-      "version": "0.2.1",
+      "version": "0.3.1",
       "inputs": [
         "fastq_long"
       ],
@@ -373,7 +373,7 @@
       ]
     },
     "flye": {
-      "version": "2.9.5",
+      "version": "2.9.6",
       "inputs": [
         "fastq_long"
       ],
@@ -392,7 +392,7 @@
       ]
     },
     "freebayes": {
-      "version": "1.3.7",
+      "version": "1.3.10",
       "inputs": [
         "bam",
         "reference_fasta"
@@ -402,7 +402,7 @@
       ]
     },
     "gatk4": {
-      "version": "4.6.1.0",
+      "version": "4.6.2.0",
       "inputs": [
         "bam",
         "reference_fasta"
@@ -422,7 +422,7 @@
       ]
     },
     "gfastats": {
-      "version": "1.3.7",
+      "version": "1.3.11",
       "inputs": [
         "assembly_fasta",
         "assembly_graph"
@@ -432,7 +432,7 @@
       ]
     },
     "gseapy": {
-      "version": "1.1.3",
+      "version": "1.3.0",
       "inputs": [
         "deg_table",
         "gene_set_gmt"
@@ -443,7 +443,7 @@
       ]
     },
     "gtdbtk": {
-      "version": "2.4.0",
+      "version": "2.7.2",
       "inputs": [
         "assembly_fasta"
       ],
@@ -453,7 +453,7 @@
       ]
     },
     "harmony": {
-      "version": "1.2.1",
+      "version": "2.0.0",
       "inputs": [
         "embedding_matrix",
         "metadata"
@@ -463,7 +463,7 @@
       ]
     },
     "hifiasm": {
-      "version": "0.19.9",
+      "version": "0.25.0",
       "inputs": [
         "fastq_long_hifi"
       ],
@@ -473,7 +473,7 @@
       ]
     },
     "hisat2": {
-      "version": "2.2.1",
+      "version": "2.2.2",
       "inputs": [
         "annotation_gtf",
         "fastq_short_paired_clean",
@@ -514,7 +514,7 @@
       ]
     },
     "iqtree": {
-      "version": "2.2.2.7",
+      "version": "2.4.0",
       "inputs": [
         "core_alignment"
       ],
@@ -523,7 +523,7 @@
       ]
     },
     "kallisto": {
-      "version": "0.51.1",
+      "version": "0.52.0",
       "inputs": [
         "fastq_short_paired_clean",
         "reference_genome"
@@ -533,7 +533,7 @@
       ]
     },
     "kneaddata": {
-      "version": "0.12.0",
+      "version": "0.12.4",
       "inputs": [
         "short_paired"
       ],
@@ -542,7 +542,7 @@
       ]
     },
     "kraken2": {
-      "version": "2.1.3",
+      "version": "2.1.6",
       "inputs": [
         "clean_fastq"
       ],
@@ -590,7 +590,7 @@
       ]
     },
     "macs3": {
-      "version": "3.0.1",
+      "version": "3.0.4",
       "inputs": [
         "bam"
       ],
@@ -599,7 +599,7 @@
       ]
     },
     "mafft": {
-      "version": "7.520",
+      "version": "7.526",
       "inputs": [
         "nucleotide_fasta",
         "protein_faa"
@@ -619,7 +619,7 @@
       ]
     },
     "masurca": {
-      "version": "4.1.0",
+      "version": "4.1.4",
       "inputs": [
         "fastq_long_hifi",
         "fastq_long_ont",
@@ -678,7 +678,7 @@
       ]
     },
     "metabat2": {
-      "version": "2.17",
+      "version": "2.18",
       "inputs": [
         "assembly_fasta",
         "bam"
@@ -688,7 +688,7 @@
       ]
     },
     "metaphlan4": {
-      "version": "4.1.0",
+      "version": "4.2.4",
       "inputs": [
         "clean_fastq"
       ],
@@ -716,7 +716,7 @@
       ]
     },
     "minimap2": {
-      "version": "2.28",
+      "version": "2.31",
       "inputs": [
         "fasta",
         "fastq_long_hifi",
@@ -757,7 +757,7 @@
       ]
     },
     "multiqc": {
-      "version": "1.25.1",
+      "version": "1.35",
       "inputs": [
         "log",
         "qc_html",
@@ -768,7 +768,7 @@
       ]
     },
     "nanoplot": {
-      "version": "1.43.0",
+      "version": "1.47.1",
       "inputs": [
         "fastq_long"
       ],
@@ -800,7 +800,7 @@
       ]
     },
     "openms": {
-      "version": "3.2.0",
+      "version": "3.5.0",
       "inputs": [
         "idxml",
         "mzml"
@@ -822,7 +822,7 @@
       ]
     },
     "percolator": {
-      "version": "3.7.1",
+      "version": "3.9",
       "inputs": [
         "psm_tsv"
       ],
@@ -831,7 +831,7 @@
       ]
     },
     "picard": {
-      "version": "3.2.0",
+      "version": "3.4.0",
       "inputs": [
         "bam"
       ],
@@ -851,7 +851,7 @@
       ]
     },
     "prokka": {
-      "version": "1.14.6",
+      "version": "1.15.6",
       "inputs": [
         "assembly_fasta"
       ],
@@ -862,7 +862,7 @@
       ]
     },
     "quast": {
-      "version": "5.2.0",
+      "version": "5.3.0",
       "inputs": [
         "assembly_fasta"
       ],
@@ -885,7 +885,7 @@
       ]
     },
     "raven": {
-      "version": "1.8.1",
+      "version": "1.8.3",
       "inputs": [
         "fastq_long_ont",
         "fastq_long_pacbio"
@@ -946,7 +946,7 @@
       ]
     },
     "samtools": {
-      "version": "1.20",
+      "version": "1.23.1",
       "inputs": [
         "bam",
         "sam"
@@ -986,7 +986,7 @@
       ]
     },
     "seqkit": {
-      "version": "2.8.2",
+      "version": "2.13.0",
       "inputs": [
         "fasta",
         "fastq"
@@ -998,7 +998,7 @@
       ]
     },
     "seurat": {
-      "version": "5.0.0",
+      "version": "5.5.1",
       "inputs": [
         "count_matrix"
       ],
@@ -1007,7 +1007,7 @@
       ]
     },
     "shasta": {
-      "version": "0.11.1",
+      "version": "0.14.0",
       "inputs": [
         "fastq_long_ont"
       ],
@@ -1017,7 +1017,7 @@
       ]
     },
     "skani": {
-      "version": "0.2.2",
+      "version": "0.3.2",
       "inputs": [
         "assembly_fasta"
       ],
@@ -1026,7 +1026,7 @@
       ]
     },
     "snpeff": {
-      "version": "5.2",
+      "version": "5.4.0c",
       "inputs": [
         "vcf"
       ],
@@ -1036,7 +1036,7 @@
       ]
     },
     "spades": {
-      "version": "4.0.0",
+      "version": "4.2.0",
       "inputs": [
         "fastq_short_paired_clean"
       ],
@@ -1067,7 +1067,7 @@
       ]
     },
     "stringtie": {
-      "version": "2.2.3",
+      "version": "3.0.3",
       "inputs": [
         "annotation_gtf",
         "bam"
@@ -1078,7 +1078,7 @@
       ]
     },
     "subread": {
-      "version": "2.0.6",
+      "version": "2.1.1",
       "inputs": [
         "annotation_gtf",
         "bam"
@@ -1088,7 +1088,7 @@
       ]
     },
     "tobias": {
-      "version": "0.16.1",
+      "version": "0.17.3",
       "inputs": [
         "bam",
         "peaks_bed"
@@ -1109,7 +1109,7 @@
       ]
     },
     "trimgalore": {
-      "version": "0.6.10",
+      "version": "0.6.11",
       "inputs": [
         "short_paired"
       ],
@@ -1129,7 +1129,7 @@
       ]
     },
     "verkko": {
-      "version": "2.2.1",
+      "version": "2.3.2",
       "inputs": [
         "fastq_long_hifi",
         "fastq_long_ont"

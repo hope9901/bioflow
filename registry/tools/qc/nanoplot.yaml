@@ -1,6 +1,6 @@
 id: nanoplot
 name: NanoPlot
-version: "1.43.0"
+version: "1.47.1"
 category: qc
 stage: [genome_assembly.step1]
 input_types: [fastq_long]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_hifi, long_ont]
   mode: [any]
 container:
-  image: quay.io/biocontainers/nanoplot:1.43.0--pyhdfd78af_0
+  image: quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:036530f64f3699b35ec640c7884debc7af1dbe4de5f1f4324a5c2f26115924ec
+  image_digest: sha256:e6884d92d007214f7f3dd302c4555710fad02977e7fbf52f5a79cdcc802c06ee
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 2}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 5}
@@ -23,4 +23,4 @@ command_template: |
             --N50 --title {sample_id}
 citation: "De Coster 2023, PMID 37171891"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

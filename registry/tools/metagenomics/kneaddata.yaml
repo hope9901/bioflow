@@ -1,6 +1,6 @@
 id: kneaddata
 name: kneaddata
-version: "0.12.0"
+version: "0.12.4"
 category: metagenomics
 stage: [metagenomics.step2]
 input_types: [short_paired]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [profiling]
 container:
-  image: quay.io/biocontainers/kneaddata:0.12.0--pyhdfd78af_0
+  image: quay.io/biocontainers/kneaddata:0.12.4--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:bd990e3d0f22d21a3322c3808a866d4a52b8b8d04129dfb7b1e3cd087a5ed732
+  image_digest: sha256:1be0e0706e46a831965ceb9b0c7f6bb4936a8884236e661dd1fde34fa6830937
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}
@@ -24,4 +24,4 @@ command_template: |
 references: []
 citation: "McIver et al. 2018, PMID 31616210"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

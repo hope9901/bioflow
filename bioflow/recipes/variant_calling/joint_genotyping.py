@@ -103,7 +103,7 @@ def align_one(sample_id: str, clean, reference: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0",
+@stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
        cpu=8, ram_gb=32, depends_on=align_one,
        retry=2, retry_with={"ram_gb": "2x"})
 def call_gvcf(sample_id: str, aln, reference: Path, *, out_dir):
@@ -129,7 +129,7 @@ def call_gvcf(sample_id: str, aln, reference: Path, *, out_dir):
 
 # ── Cohort stages (converge) ─────────────────────────────────────────────────
 
-@stage(image="quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0",
+@stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
        cpu=4, ram_gb=16, depends_on=call_gvcf)
 def combine_gvcfs(gvcfs, reference: Path, *, out_dir):
     """CombineGVCFs across every per-sample GVCF into one cohort GVCF."""
@@ -140,7 +140,7 @@ def combine_gvcfs(gvcfs, reference: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0",
+@stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
        cpu=4, ram_gb=16, depends_on=combine_gvcfs)
 def genotype_cohort(combined, reference: Path, *, out_dir):
     """GenotypeGVCFs → a single joint-genotyped multi-sample VCF."""
@@ -151,7 +151,7 @@ def genotype_cohort(combined, reference: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0",
+@stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
        cpu=4, ram_gb=16, depends_on=genotype_cohort)
 def hard_filter(cohort, reference: Path, *, out_dir):
     """GATK best-practice hard filtering — SNPs and INDELs separately.
@@ -188,7 +188,7 @@ def hard_filter(cohort, reference: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/snpeff:5.2--hdfd78af_1",
+@stage(image="quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0",
        cpu=4, ram_gb=16, depends_on=hard_filter)
 def annotate_cohort(filtered, snpeff_db: str, *, out_dir):
     """SnpEff functional annotation of the filtered cohort VCF."""

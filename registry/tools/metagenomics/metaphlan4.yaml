@@ -1,6 +1,6 @@
 id: metaphlan4
 name: metaphlan4
-version: "4.1.0"
+version: "4.2.4"
 category: metagenomics
 stage: [metagenomics.step3]
 input_types: [clean_fastq]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [profiling]
 container:
-  image: quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0
+  image: quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:2aefc5d5897d9f6400541767714ee15389f89e7a8beca0b13ccab916ab58dc31
+  image_digest: sha256:3ca183ac2b56c773e9d81d0c960bdbd23710a090cdd389f43ee306dfec5cd60a
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
@@ -25,4 +25,4 @@ command_template: |
 references: []
 citation: "Blanco-Miguez et al. 2023, PMID 36823356"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

@@ -109,7 +109,7 @@ def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gseapy:1.1.3--py311h5e00ca1_1",
+@stage(image="quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0",
        cpu=2, ram_gb=4, depends_on=deseq2_diff)
 def enrich_go(deg, *, out_dir, gene_set: str = "GO_Biological_Process_2021",
               padj_cutoff: float = 0.05):
@@ -135,7 +135,7 @@ def enrich_go(deg, *, out_dir, gene_set: str = "GO_Biological_Process_2021",
     )
 
 
-@stage(image="quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0",
+@stage(image="quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1",
        cpu=2, ram_gb=4)
 def multiqc_report(qc_results, quant_results, *, out_dir):
     """Aggregate every per-sample fastp + Salmon report into one MultiQC HTML."""

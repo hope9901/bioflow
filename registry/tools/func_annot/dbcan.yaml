@@ -1,6 +1,6 @@
 id: dbcan
 name: dbCAN
-version: "4.1.4"
+version: "5.2.9"
 category: func_annot
 stage: [genome_assembly.step6]
 input_types: [protein_faa]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/dbcan:4.1.4--pyhdfd78af_0
+  image: quay.io/biocontainers/dbcan:5.2.9--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:e63ca5e302c63b24245d4c5a6a8ff81a9d405255c7fac8f3dd8196fe5ff9c48b
+  image_digest: sha256:7513c805219907ff092ba65efce8ee17ea962d6a05c99765e9081c15348dcd8c
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
@@ -24,5 +24,5 @@ command_template: |
 references: ["/refs/dbs/dbcan"]
 citation: "Zhang 2018, PMID 29771380"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: linnabrown/run_dbcan

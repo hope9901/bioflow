@@ -44,7 +44,7 @@ def qc_trim(r1: Path, r2: Path, *, out_dir, min_qual: int = 15):
     )
 
 
-@stage(image="staphb/spades:4.0.0", cpu=8, ram_gb=16, depends_on=qc_trim,
+@stage(image="staphb/spades:4.2.0", cpu=8, ram_gb=16, depends_on=qc_trim,
        retry=2, retry_with={"ram_gb": "2x"})
 def assemble(clean, *, out_dir, kmer: str = "auto"):
     """SPAdes de novo assembly from QC-cleaned reads.
@@ -61,7 +61,7 @@ def assemble(clean, *, out_dir, kmer: str = "auto"):
     )
 
 
-@stage(image="staphb/quast:5.2.0", cpu=2, ram_gb=4, depends_on=assemble)
+@stage(image="staphb/quast:5.3.0", cpu=2, ram_gb=4, depends_on=assemble)
 def assembly_qc(asm, *, out_dir):
     """QUAST: assembly contiguity & completeness metrics.
 
@@ -77,7 +77,7 @@ def assembly_qc(asm, *, out_dir):
     )
 
 
-@stage(image="staphb/prokka:1.14.6", cpu=4, ram_gb=8, depends_on=assemble)
+@stage(image="staphb/prokka:1.15.6", cpu=4, ram_gb=8, depends_on=assemble)
 def annotate(asm, *, out_dir, sample_id: str = "sample"):
     """Prokka: structural annotation (CDS, rRNA, tRNA) on the assembly.
 
@@ -92,7 +92,7 @@ def annotate(asm, *, out_dir, sample_id: str = "sample"):
     )
 
 
-@stage(image="staphb/bandage:0.8.1", cpu=2, ram_gb=4, depends_on=assemble)
+@stage(image="staphb/bandage:0.9.0", cpu=2, ram_gb=4, depends_on=assemble)
 def graph_image(asm, *, out_dir):
     """Bandage: render the SPAdes assembly graph to a PNG.
 

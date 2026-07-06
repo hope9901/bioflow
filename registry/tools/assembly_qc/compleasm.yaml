@@ -1,6 +1,6 @@
 id: compleasm
 name: compleasm
-version: "0.2.6"
+version: "0.2.8"
 category: assembly_qc
 stage: [genome_assembly.step3]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0
+  image: quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0
   pull_policy: if_not_present
-  image_digest: sha256:9c1aa77517468dcd5a3bfca9a22c653ca76993305cdb04e3e09db5829fc7fb6b
+  image_digest: sha256:47eb19702983cf216fd123044e9986d6b419d728ba677a9f7db45874ebdc8be4
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 32, ram_gb: 32, disk_gb: 100}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Huang & Li 2023, PMID 37758247"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: huangnengCSU/compleasm

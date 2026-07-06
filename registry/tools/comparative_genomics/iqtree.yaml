@@ -1,6 +1,6 @@
 id: iqtree
 name: IQ-TREE
-version: "2.2.2.7"
+version: "2.4.0"
 category: comparative_genomics
 stage: [comparative_genomics.step4]
 input_types: [core_alignment]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [comparative]
 container:
-  image: staphb/iqtree2:2.2.2.7
+  image: staphb/iqtree2:2.4.0
   pull_policy: if_not_present
-  image_digest: sha256:61c06874bbf40d91361f9b0deeb372cd8a32b38553f5b24e16a5a766220e968c
+  image_digest: sha256:522623e15151c71081306f1b2f10592032cb034cca8c001cb9c531f5d948161c
 resources:
   min: {cpu: 4, ram_gb: 4, disk_gb: 2}
   recommended: {cpu: 16, ram_gb: 16, disk_gb: 5}
@@ -23,5 +23,5 @@ command_template: |
 references: []
 citation: "Minh et al. 2020, PMID 32011700"
 added: "2026-04-27"
-last_reviewed: "2026-04-27"
+last_reviewed: "2026-07-06"
 source_repo: iqtree/iqtree2

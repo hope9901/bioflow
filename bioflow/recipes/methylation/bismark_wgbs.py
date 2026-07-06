@@ -36,7 +36,7 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0",
+@stage(image="quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0",
        cpu=4, ram_gb=8)
 def trim(r1: Path, r2: Path, *, out_dir):
     """TrimGalore with --rrbs / standard adapter for bisulfite reads.
@@ -48,7 +48,7 @@ def trim(r1: Path, r2: Path, *, out_dir):
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="quay.io/biocontainers/bismark:0.24.2--hdfd78af_0",
+@stage(image="quay.io/biocontainers/bismark:0.25.1--hdfd78af_0",
        cpu=4, ram_gb=8)
 def bismark_prep(genome: Path, *, out_dir):
     """``bismark_genome_preparation`` — bisulfite-convert the reference.
@@ -66,7 +66,7 @@ def bismark_prep(genome: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bismark:0.24.2--hdfd78af_0",
+@stage(image="quay.io/biocontainers/bismark:0.25.1--hdfd78af_0",
        cpu=8, ram_gb=32, depends_on=(trim, bismark_prep),
        retry=2, retry_with={"ram_gb": "2x"})
 def bismark_align(clean, bismark_genome: Path, sample_id: str, *, out_dir):

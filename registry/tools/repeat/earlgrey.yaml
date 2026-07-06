@@ -1,6 +1,6 @@
 id: earlgrey
 name: Earl Grey
-version: "4.5.0"
+version: "7.2.6"
 category: repeat
 stage: [genome_assembly.step4]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/earlgrey:4.5.0--h4ac6f70_2
+  image: quay.io/biocontainers/earlgrey:7.2.6--hc52dbad_0
   pull_policy: if_not_present
-  image_digest: sha256:64365e81dd286950213042c25fb84c2ac760c10ef07460c3f40669bedbe9a8b4
+  image_digest: sha256:c9c723a552c458d9c1cda101714ac93c1bb4fe3144b7d4b5fdd199be01c8330c
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 64, disk_gb: 200}
@@ -23,4 +23,4 @@ command_template: |
            -r {repeat_species}
 citation: "Baril 2024, PMID 38577785"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

@@ -1,6 +1,6 @@
 id: deeptools
 name: deeptools
-version: "3.5.5"
+version: "3.5.6"
 category: epigenomics
 stage: [chip_seq.step4, atac_seq.step4]
 input_types: [bam]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, differential]
 container:
-  image: quay.io/biocontainers/deeptools:3.5.5--pyhdfd78af_0
+  image: quay.io/biocontainers/deeptools:3.5.6--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:fab4182e0f1338745d9fe8315477e05a6484e717aac1430403dbc8d7e789ecf9
+  image_digest: sha256:db11ae232d88820ac1942e7f3fe2a6bc9eade7d199a5d45a9e23a13cccd134dc
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
@@ -27,4 +27,4 @@ command_template: |
 references: []
 citation: "Ramirez et al. 2016, PMID 27079975"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

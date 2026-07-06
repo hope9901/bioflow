@@ -1,6 +1,6 @@
 id: hisat2
 name: HISAT2
-version: "2.2.1"
+version: "2.2.2"
 category: rnaseq_align
 stage: [rnaseq_deg.step2]
 input_types: [fastq_short_paired_clean, reference_genome, annotation_gtf]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/hisat2:2.2.1--h87f3376_4
+  image: quay.io/biocontainers/hisat2:2.2.2--h503566f_0
   pull_policy: if_not_present
-  image_digest: sha256:21be9c91bf66404e677bc2c70e986e39ce9a40e7950d5034e3561bb992e82ec6
+  image_digest: sha256:8170709af57fd3fb89eed560e6cddd3827cd97a5385565c0598d4a16c4a9a83f
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
@@ -28,4 +28,4 @@ command_template: |
                 {out_dir}/aligned.bam
 citation: "Kim 2019, PMID 31375807"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

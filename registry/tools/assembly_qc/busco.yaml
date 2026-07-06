@@ -1,6 +1,6 @@
 id: busco
 name: BUSCO
-version: "5.7.1"
+version: "6.1.0"
 category: assembly_qc
 stage: [genome_assembly.step3]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/busco:5.7.1--pyhdfd78af_0
+  image: quay.io/biocontainers/busco:6.1.0--pyhdfd78af_1
   pull_policy: if_not_present
-  image_digest: sha256:dfdd6716b6ef376bb215fac3de664b4112bd212ef45cfb65a468e4067d4aec5e
+  image_digest: sha256:d55ad622a5cafcd63c42fc309108688ab255bb9586ee756a5149e249d418c8bd
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 30}
@@ -24,4 +24,4 @@ command_template: |
 references: ["/refs/dbs/busco_lineages"]
 citation: "Manni 2021, PMID 34320186"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

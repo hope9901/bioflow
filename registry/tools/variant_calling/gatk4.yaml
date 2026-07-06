@@ -1,6 +1,6 @@
 id: gatk4
 name: GATK4
-version: "4.6.1.0"
+version: "4.6.2.0"
 category: variant_calling
 stage: [variant_calling.step2]
 input_types: [bam, reference_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [resequencing]
 container:
-  image: quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0
+  image: quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1
   pull_policy: if_not_present
-  image_digest: sha256:42a736f8ce06092f50b77a2614318b52324e8862aa7517542ee95e8238b5105b
+  image_digest: sha256:7311332e4d565d2356bbc0540cf582b505d1969a5f088a2c065302b13b10f5ee
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "McKenna 2010, PMID 20644199"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: broadinstitute/gatk

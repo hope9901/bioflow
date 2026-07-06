@@ -1,6 +1,6 @@
 id: percolator
 name: percolator
-version: "3.7.1"
+version: "3.9"
 category: proteomics
 stage: [proteomics.step3]
 input_types: [psm_tsv]
@@ -10,9 +10,9 @@ applicable:
   read_type: [ms_dda, ms_dia]
   mode: [dda, dia]
 container:
-  image: quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2
+  image: quay.io/biocontainers/percolator:3.9--h0f90025_0
   pull_policy: if_not_present
-  image_digest: sha256:4a1adac966b750d456068c44aac31dfcacf644460701d2345e18a6093060c2a3
+  image_digest: sha256:86d589e5d264c78716fb5b2b99d36023bda361db4ebf18dc3ea31697d6b4f447
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 5}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 10}
@@ -25,4 +25,4 @@ command_template: |
 references: []
 citation: "Kall et al. 2007, PMID 17952086"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

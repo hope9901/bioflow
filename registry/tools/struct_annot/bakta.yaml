@@ -1,6 +1,6 @@
 id: bakta
 name: Bakta
-version: "1.9.4"
+version: "1.12.0"
 category: struct_annot
 stage: [genome_assembly.step5]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/bakta:1.9.4--pyhdfd78af_0
+  image: quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:cafa190d7e228b1ac8673ebcea4e86326aeef21517a7e3f4ff20661a58c961b3
+  image_digest: sha256:865c4fdb60831e7f78a8f318c0f05aa3de6f3a7d1d8846aa53ea52a2b558423d
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
@@ -24,4 +24,4 @@ command_template: |
 references: ["/refs/dbs/bakta"]
 citation: "Schwengers 2021, PMID 34739369"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

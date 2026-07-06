@@ -1,6 +1,6 @@
 id: verkko
 name: Verkko
-version: "2.2.1"
+version: "2.3.2"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_long_hifi, fastq_long_ont]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_hifi, hybrid]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/verkko:2.2.1--h45dadce_0
+  image: quay.io/biocontainers/verkko:2.3.2--hb0edd9e_0
   pull_policy: if_not_present
-  image_digest: sha256:1d17089c1a4faeb415944ffefaca7d2d780e2732f1a60a337b20a026b9168a6f
+  image_digest: sha256:57fd92c85aae14703cadb97392d0218bb8323dbfbe1394e7ba149e9f897b0200
 resources:
   min: {cpu: 16, ram_gb: 64, disk_gb: 200}
   recommended: {cpu: 64, ram_gb: 512, disk_gb: 2000}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Rautiainen 2023, PMID 36797493"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: marbl/verkko

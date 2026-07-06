@@ -14,7 +14,7 @@ from bioflow import stage, pipeline
 from bioflow.recipes import register
 
 
-@stage(image="staphb/abricate:1.2.0", cpu=1, ram_gb=1)
+@stage(image="staphb/abricate:1.4.0", cpu=1, ram_gb=1)
 def abricate_one(genome_fna: Path, db: str, *, out_dir):
     """Run ABRicate on one genome against one database."""
     return (

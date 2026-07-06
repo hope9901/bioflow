@@ -1,6 +1,6 @@
 id: canu
 name: Canu
-version: "2.2"
+version: "2.3"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_long_pacbio, fastq_long_ont, fastq_long_hifi]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_ont, long_hifi]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/canu:2.2--ha47f30e_0
+  image: quay.io/biocontainers/canu:2.3--h3fb4750_2
   pull_policy: if_not_present
-  image_digest: sha256:0149e37fd2d15cd60cfe5e3e228604a024d52a62ddd55aee775af7e82a1f4196
+  image_digest: sha256:14eb4203590d8661a17cd23be34e48c1665cf329b060d4b7403c15c6e7b76dbd
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Koren 2017, PMID 28298431"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: marbl/canu

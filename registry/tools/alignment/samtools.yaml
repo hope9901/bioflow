@@ -1,6 +1,6 @@
 id: samtools
 name: samtools
-version: "1.20"
+version: "1.23.1"
 category: alignment
 stage:
   # NOTE: plain single-tool aligner BioContainers (bwa, bowtie2,
@@ -17,9 +17,9 @@ applicable:
   read_type: [short, long_hifi, long_ont, hybrid, any]
   mode: [any, de_novo, resequencing, peak_calling, wgbs, rrbs, differential, profiling]
 container:
-  image: quay.io/biocontainers/samtools:1.20--h50ea8bc_0
+  image: quay.io/biocontainers/samtools:1.23.1--ha83d96e_0
   pull_policy: if_not_present
-  image_digest: sha256:d0ebd10e887e3ddd02d071f1ca7b649dc90dc6fb99a5ffd0f5ebf8611a1f92cc
+  image_digest: sha256:23cda33a3a42125872766df9aaf1d2db67cdb8c85314b793465188435af31ba6
 resources:
   min: {cpu: 2, ram_gb: 2, disk_gb: 5}
   recommended: {cpu: 8, ram_gb: 8, disk_gb: 50}
@@ -30,4 +30,4 @@ command_template: |
   samtools index -@ {cpu} {out_dir}/sorted.bam
 citation: "Danecek 2021, PMID 33590861"
 added: "2026-05-12"
-last_reviewed: "2026-05-12"
+last_reviewed: "2026-07-06"

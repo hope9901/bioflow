@@ -1,6 +1,6 @@
 id: subread
 name: Subread / featureCounts
-version: "2.0.6"
+version: "2.1.1"
 category: rnaseq_align
 stage: [rnaseq_deg.step2]
 input_types: [bam, annotation_gtf]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/subread:2.0.6--he4a0461_2
+  image: quay.io/biocontainers/subread:2.1.1--h577a1d6_0
   pull_policy: if_not_present
-  image_digest: sha256:114390a783c77f7739d86e474bedfa5a4e65309a2f71d4db430803fb04601f5d
+  image_digest: sha256:a0f7ea960dd0f55240b330b5c4515388a493e266a7b427d6a59a39164bc14865
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 16, disk_gb: 50}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Liao 2014, PMID 24227677"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: ShiLab-Bioinformatics/subread

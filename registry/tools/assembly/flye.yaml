@@ -1,6 +1,6 @@
 id: flye
 name: Flye
-version: "2.9.5"
+version: "2.9.6"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_long]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_ont, long_hifi]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/flye:2.9.5--py310h275bdba_2
+  image: quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1
   pull_policy: if_not_present
-  image_digest: sha256:961ee8afc44267dfafd63e5f945ab7333f7a1ce7d290d7e8bdae76a84f2b5fbe
+  image_digest: sha256:2a75bea2cb11b7b05fbaefe0cbeb5227fa6e8606a86bd07c9e313c187411e5ad
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 50}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 300}
@@ -23,4 +23,4 @@ command_template: |
        --genome-size {genome_size}
 citation: "Kolmogorov 2019, PMID 30936562"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

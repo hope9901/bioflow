@@ -89,7 +89,7 @@ def align(clean, reference: Path, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0",
+@stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
        cpu=8, ram_gb=32, depends_on=align,
        retry=2, retry_with={"ram_gb": "2x"})
 def call_variants(aln, reference: Path, sample_id: str, *, out_dir):
@@ -112,7 +112,7 @@ def call_variants(aln, reference: Path, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bcftools:1.21--h8b25389_0",
+@stage(image="quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0",
        cpu=4, ram_gb=8, depends_on=call_variants)
 def filter_variants(vcf, sample_id: str, *, out_dir,
                     min_qual: int = 30, min_depth: int = 10):
@@ -126,7 +126,7 @@ def filter_variants(vcf, sample_id: str, *, out_dir,
     )
 
 
-@stage(image="quay.io/biocontainers/snpeff:5.2--hdfd78af_1",
+@stage(image="quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0",
        cpu=4, ram_gb=16, depends_on=filter_variants)
 def annotate_variants(filtered, snpeff_db: str, sample_id: str, *, out_dir):
     """SnpEff functional annotation of the filtered VCF."""

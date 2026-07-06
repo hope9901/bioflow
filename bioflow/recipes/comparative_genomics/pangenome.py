@@ -27,7 +27,7 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="staphb/prokka:1.14.6", cpu=2, ram_gb=4)
+@stage(image="staphb/prokka:1.15.6", cpu=2, ram_gb=4)
 def annotate(genome_fna: Path, *, out_dir):
     """Re-annotate one genome with Prokka.  One container per genome."""
     return (

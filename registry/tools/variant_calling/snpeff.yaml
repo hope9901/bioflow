@@ -1,6 +1,6 @@
 id: snpeff
 name: SnpEff
-version: "5.2"
+version: "5.4.0c"
 category: variant_calling
 stage: [variant_calling.step4]
 input_types: [vcf]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [resequencing]
 container:
-  image: quay.io/biocontainers/snpeff:5.2--hdfd78af_1
+  image: quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:e61e0025946651ce1715c5c343f974a53e3ec44cc5ac08c75b30b4de361e3286
+  image_digest: sha256:832e86061ab3c1ef4339ec42f10fb98c4eaaecd498cd37d2bbe747e6bcc14de7
 resources:
   min: {cpu: 2, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 4, ram_gb: 16, disk_gb: 50}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Cingolani 2012, PMID 22728672"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: pcingola/SnpEff

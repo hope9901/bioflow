@@ -69,7 +69,7 @@ def map_back(asm, clean, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/metabat2:2.17--h6f16272_1",
+@stage(image="quay.io/biocontainers/metabat2:2.18--h38e344b_2",
        cpu=8, ram_gb=32, depends_on=map_back)
 def bin_genomes(mapped, asm, *, out_dir):
     """MetaBAT2 genome binning from contig coverage."""
@@ -83,7 +83,7 @@ def bin_genomes(mapped, asm, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0",
+@stage(image="quay.io/biocontainers/checkm2:1.1.0--pyh7e72e81_1",
        cpu=8, ram_gb=32, depends_on=bin_genomes)
 def assess_bins(bins, *, out_dir, checkm2_db: Path = Path("/refs/checkm2")):
     """CheckM2 completeness + contamination per bin."""

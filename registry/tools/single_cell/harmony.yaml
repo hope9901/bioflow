@@ -1,6 +1,6 @@
 id: harmony
 name: Harmony
-version: "1.2.1"
+version: "2.0.0"
 category: single_cell
 stage: [scrna_seq.step3]
 input_types: [embedding_matrix, metadata]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/harmonypy:0.0.10--pyhdfd78af_0
+  image: quay.io/biocontainers/harmonypy:2.0.0--py310hd766df8_1
   pull_policy: if_not_present
-  image_digest: sha256:ce1e87ee697dc2bc03242b7486a74c25235164f61bb4034b9449eb8c6c239fbb
+  image_digest: sha256:e52909ca14e3e7ddcd2e97192d3243bebf2afb8735096ba47d65b912148a9b17
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 50}
@@ -27,5 +27,5 @@ command_template: |
 references: []
 citation: "Korsunsky 2019, PMID 31740819"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: immunogenomics/harmony

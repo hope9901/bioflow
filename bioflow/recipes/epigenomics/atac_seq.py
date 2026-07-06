@@ -29,14 +29,14 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0",
+@stage(image="quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0",
        cpu=4, ram_gb=8)
 def trim(r1: Path, r2: Path, *, out_dir):
     """TrimGalore: adapter trim + Q20 filter."""
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="staphb/bowtie2:2.5.4",
+@stage(image="staphb/bowtie2:2.5.5",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     """Bowtie2 align with -X 2000 (ATAC-seq fragment max), sort + index.
@@ -60,7 +60,7 @@ def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/picard:3.2.0--hdfd78af_0",
+@stage(image="quay.io/biocontainers/picard:3.4.0--hdfd78af_0",
        cpu=4, ram_gb=16, depends_on=align)
 def dedup(aln, sample_id: str, *, out_dir):
     """Picard MarkDuplicates: drop PCR / optical duplicates.
@@ -78,7 +78,7 @@ def dedup(aln, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/macs3:3.0.1--py312he57d009_3",
+@stage(image="quay.io/biocontainers/macs3:3.0.4--py310h5a5e57a_0",
        cpu=4, ram_gb=8, depends_on=dedup)
 def call_peaks(dd, sample_id: str, genome_size: str = "hs", *, out_dir):
     """MACS3 callpeak in ATAC mode (open-chromatin signal)."""
@@ -90,7 +90,7 @@ def call_peaks(dd, sample_id: str, genome_size: str = "hs", *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/tobias:0.16.1--py312h1f1cfbb_1",
+@stage(image="quay.io/biocontainers/tobias:0.17.3--py39hff726c5_1",
        cpu=8, ram_gb=16, depends_on=call_peaks)
 def footprint(peaks, dd, reference: Path, sample_id: str, *, out_dir):
     """TOBIAS ATACorrect + ScoreBigwig: TF footprint bigwig."""

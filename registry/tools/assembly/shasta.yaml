@@ -1,6 +1,6 @@
 id: shasta
 name: Shasta
-version: "0.11.1"
+version: "0.14.0"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_long_ont]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_ont]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/shasta:0.11.1--h4ac6f70_2
+  image: quay.io/biocontainers/shasta:0.14.0--h9948957_0
   pull_policy: if_not_present
-  image_digest: sha256:687879ecbac3447ed54b458343fa77ae1a2ec6cc12a2dd013db6979526e7007b
+  image_digest: sha256:6050673c4d9314a843956fe51f5609f37a0c55d5a644732b9dd5e807a562ca0e
 resources:
   min: {cpu: 16, ram_gb: 64, disk_gb: 200}
   recommended: {cpu: 64, ram_gb: 512, disk_gb: 2000}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Shafin 2020, PMID 32686750"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: paoloshasta/shasta

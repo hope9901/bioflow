@@ -1,6 +1,6 @@
 id: braker3
 name: BRAKER3
-version: "3.0.8"
+version: "3.1.1"
 category: struct_annot
 stage: [genome_assembly.step5]
 input_types: [masked_assembly_fasta, rnaseq_bam]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: teambraker/braker3:v3.0.8
+  image: teambraker/braker3:v3.1.1
   pull_policy: if_not_present
-  image_digest: sha256:9cc53f0990f87c026c17a09893a3e8fb076f67504ac659ee8c5708318f451660
+  image_digest: sha256:b85b1358f2f2f5003a60ee897c77f5db251f4d66bdb531b78581b060fe7e4c74
 resources:
   min: {cpu: 8, ram_gb: 16, disk_gb: 30}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 100}
@@ -25,4 +25,4 @@ command_template: |
 references: ["/refs/dbs/OrthoDB"]
 citation: "Gabriel 2024, PMID 38866550"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

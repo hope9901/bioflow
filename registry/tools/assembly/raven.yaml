@@ -1,6 +1,6 @@
 id: raven
 name: Raven
-version: "1.8.1"
+version: "1.8.3"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_long_ont, fastq_long_pacbio]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_ont, long_hifi]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/raven-assembler:1.8.1--h43eeafb_3
+  image: quay.io/biocontainers/raven-assembler:1.8.3--h5ca1c30_3
   pull_policy: if_not_present
-  image_digest: sha256:f4fb9dce3e189cdc0e74e5c3fa0d043e532c507e20e96f44a394a89c94438312
+  image_digest: sha256:feaca54ec7f07906eb3a97e8f84028163683040793f3df8fb30db8567f56348b
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 30}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 100}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Vaser & Sikic 2021, PMID 38217213"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: lbcb-sci/raven

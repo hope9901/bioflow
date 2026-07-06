@@ -1,6 +1,6 @@
 id: trimgalore
 name: trimgalore
-version: "0.6.10"
+version: "0.6.11"
 # Read trimmer (Cutadapt wrapper).  Used at the QC step of several
 # pipelines; not itself an aligner.  (Misclassified as `alignment`
 # until v0.1.1.)
@@ -13,9 +13,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, wgbs, rrbs, differential]
 container:
-  image: quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0
+  image: quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:cd377b728016f5dce52b7a07da5d38cdb0f3d5487ea9b3fa49b8b76f3114befd
+  image_digest: sha256:a02bb87b8ce02d86efd0ffd65e2cce1559b52689faab42faad1df145657390cf
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 50}
@@ -26,4 +26,4 @@ command_template: |
 references: []
 citation: "Krueger 2015, https://github.com/FelixKrueger/TrimGalore"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

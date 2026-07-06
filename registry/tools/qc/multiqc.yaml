@@ -1,6 +1,6 @@
 id: multiqc
 name: MultiQC
-version: "1.25.1"
+version: "1.35"
 category: qc
 stage: [genome_assembly.step1, rnaseq_deg.step1, chip_seq.step4, methylation.step1]
 input_types: [qc_html, qc_json, log]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0
+  image: quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1
   pull_policy: if_not_present
-  image_digest: sha256:64fa8caa046020780a7df765cdd27b459f20665578e6f1f240a12d415527adaa
+  image_digest: sha256:b65e3fe879df27b92334dda0fd987a6e21bdee09a2848551d4f287099a93b7ac
 resources:
   min: {cpu: 1, ram_gb: 2, disk_gb: 5}
   recommended: {cpu: 4, ram_gb: 8, disk_gb: 20}
@@ -23,5 +23,5 @@ command_template: |
 references: []
 citation: "Ewels 2016, PMID 27312411"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: MultiQC/MultiQC

@@ -1,6 +1,6 @@
 id: filtlong
 name: Filtlong
-version: "0.2.1"
+version: "0.3.1"
 category: qc
 stage: [genome_assembly.step1]
 input_types: [fastq_long]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_hifi, long_ont]
   mode: [any]
 container:
-  image: quay.io/biocontainers/filtlong:0.2.1--hdcf5f25_4
+  image: quay.io/biocontainers/filtlong:0.3.1--h077b44d_0
   pull_policy: if_not_present
-  image_digest: sha256:e6038605a5d350d0c20e798aa20e4de27018dd5b4db9d9cd3586393d805ea782
+  image_digest: sha256:ed64034ef0c7b474d56aecfce1ad77ec01b740b5a5bc38a637bad45ec9974d82
 resources:
   min: {cpu: 1, ram_gb: 4, disk_gb: 5}
   recommended: {cpu: 4, ram_gb: 16, disk_gb: 20}
@@ -23,4 +23,4 @@ command_template: |
   gzip > {out_dir}/filtered.fastq.gz
 citation: "Wick 2021 (github.com/rrwick/Filtlong)"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

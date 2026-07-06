@@ -30,7 +30,7 @@ from bioflow.recipes import register
 # ── Stages ───────────────────────────────────────────────────────────────────
 
 @stage(
-    image="quay.io/biocontainers/diamond:2.1.8--h43eeafb_0",
+    image="quay.io/biocontainers/diamond:2.2.2--he361c42_0",
     cpu=4, ram_gb=4,
 )
 def diamond_makedb(reference_faa: Path, *, out_dir):
@@ -42,7 +42,7 @@ def diamond_makedb(reference_faa: Path, *, out_dir):
 
 
 @stage(
-    image="quay.io/biocontainers/diamond:2.1.8--h43eeafb_0",
+    image="quay.io/biocontainers/diamond:2.2.2--he361c42_0",
     cpu=8, ram_gb=8,
     depends_on=diamond_makedb,
 )

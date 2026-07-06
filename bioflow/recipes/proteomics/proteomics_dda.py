@@ -83,7 +83,7 @@ def comet_search(mzml, comet_params: Path, fasta_db: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2",
+@stage(image="quay.io/biocontainers/percolator:3.9--h0f90025_0",
        cpu=4, ram_gb=16, depends_on=comet_search)
 def percolator_fdr(search, *, out_dir, fdr_threshold: float = 0.01):
     """Percolator: machine-learned FDR control on Comet pep.xml outputs.

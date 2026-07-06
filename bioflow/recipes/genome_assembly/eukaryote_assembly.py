@@ -26,14 +26,14 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="quay.io/biocontainers/nanoplot:1.43.0--pyhdfd78af_0",
+@stage(image="quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0",
        cpu=4, ram_gb=8)
 def read_qc(long_reads: Path, *, out_dir):
     """NanoPlot: long-read length / quality distribution."""
     return f"NanoPlot --fastq {long_reads} -o {out_dir} -t 4"
 
 
-@stage(image="quay.io/biocontainers/flye:2.9.5--py310h275bdba_2",
+@stage(image="quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1",
        cpu=16, ram_gb=64, depends_on=read_qc,
        retry=2, retry_with={"ram_gb": "2x"})
 def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
@@ -55,7 +55,7 @@ def polish_consensus(asm, long_reads: Path, *, out_dir, medaka_model: str = "r10
     )
 
 
-@stage(image="quay.io/biocontainers/compleasm:0.2.6--pyh7cba7a3_0",
+@stage(image="quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0",
        cpu=8, ram_gb=16, depends_on=polish_consensus)
 def assess(polished, *, out_dir, busco_lineage: str = "eukaryota_odb10",
            busco_db: Path = Path("/refs/busco")):

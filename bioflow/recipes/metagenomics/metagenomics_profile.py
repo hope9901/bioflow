@@ -41,7 +41,7 @@ def qc_trim(r1: Path, r2: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0",
+@stage(image="quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0",
        cpu=8, ram_gb=32, depends_on=qc_trim,
        retry=2, retry_with={"ram_gb": "2x"})
 def kraken2_classify(clean, kraken2_db: Path, sample_id: str, *, out_dir):

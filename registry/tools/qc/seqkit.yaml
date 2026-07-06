@@ -1,6 +1,6 @@
 id: seqkit
 name: SeqKit
-version: "2.8.2"
+version: "2.13.0"
 category: qc
 stage: [utility.sequence_ops]
 input_types: [fasta, fastq]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/seqkit:2.8.2--h9ee0642_0
+  image: quay.io/biocontainers/seqkit:2.13.0--he881be0_0
   pull_policy: if_not_present
-  image_digest: sha256:a087c482d265d4209f2e2bd8f44550b0c79616c24f0f64d1f0f08d354bccd101
+  image_digest: sha256:0e14f53b486c6b6e199e525f3f1e7494b59b580f835f7835e497b46f99267b6a
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 5}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 50}
@@ -23,5 +23,5 @@ command_template: |
 references: []
 citation: "Shen 2016, PMID 27706213"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: shenwei356/seqkit

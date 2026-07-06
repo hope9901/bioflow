@@ -1,6 +1,6 @@
 id: cellranger
 name: cellranger
-version: "7.2.0"
+version: "9.0.1"
 category: single_cell
 stage: [scrna_seq.step1]
 input_types: [short_paired]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: litd/docker-cellranger:v7.2.0
+  image: litd/docker-cellranger:v9.0.1
   pull_policy: if_not_present
-  image_digest: sha256:910709794f2b21348ba9f3b001d1fbbe1486dc880e1b03155c285b1311de9f87
+  image_digest: sha256:eacffbbcf36bc80db9691d80628e0a0b410da1b1293c3465b80c9917fe4ec0f3
 resources:
   min: {cpu: 16, ram_gb: 64, disk_gb: 100}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}
@@ -25,4 +25,4 @@ command_template: |
 references: []
 citation: "Zheng et al. 2017, PMID 28091601"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

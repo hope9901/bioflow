@@ -1,6 +1,6 @@
 id: picard
 name: Picard MarkDuplicates
-version: "3.2.0"
+version: "3.4.0"
 category: epigenomics
 stage:
   # MarkDuplicates is the post-alignment dedup step in chip_seq and
@@ -15,9 +15,9 @@ applicable:
   read_type: [short]
   mode: [peak_calling, differential, wgbs, rrbs]
 container:
-  image: quay.io/biocontainers/picard:3.2.0--hdfd78af_0
+  image: quay.io/biocontainers/picard:3.4.0--hdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:0ba3a90a242cfa06362da145df868e92401c1cc8cd85cc08e85c4a5c9e55ed23
+  image_digest: sha256:96b49340dea0ef5bc402d865a2b02032949f13ee57151909328d4eb1b3bcecbc
 resources:
   min: {cpu: 2, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 4, ram_gb: 16, disk_gb: 30}
@@ -29,4 +29,4 @@ command_template: |
 references: []
 citation: "Broad Institute, https://broadinstitute.github.io/picard/"
 added: "2026-05-12"
-last_reviewed: "2026-05-12"
+last_reviewed: "2026-07-06"

@@ -1,6 +1,6 @@
 id: bwa_mem2
 name: BWA-MEM2
-version: "2.2.1"
+version: "2.3"
 category: alignment
 stage: [genome_assembly.step2]
 # BWA-MEM2 is a short-read → reference aligner, not an assembler.
@@ -15,9 +15,9 @@ applicable:
   read_type: [short]
   mode: [resequencing]
 container:
-  image: quay.io/biocontainers/bwa-mem2:2.2.1--he513fc3_0
+  image: quay.io/biocontainers/bwa-mem2:2.3--he70b90d_0
   pull_policy: if_not_present
-  image_digest: sha256:8489086047b16f49a01a077065c88258c28027c49c35281f77df353bcc370970
+  image_digest: sha256:374f4b910b4b04d32772fccd4cab1cdcd0758356856a960cfa8b1edebfd38c9f
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 100}
@@ -31,4 +31,4 @@ command_template: |
   samtools consensus -@ {cpu} -o {out_dir}/consensus.fasta {out_dir}/aligned.bam
 citation: "Vasimuddin 2019, PMID 31355760"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

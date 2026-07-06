@@ -1,6 +1,6 @@
 id: skani
 name: skani
-version: "0.2.2"
+version: "0.3.2"
 category: comparative_genomics
 stage: [comparative_genomics.step2]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [comparative]
 container:
-  image: quay.io/biocontainers/skani:0.2.2--ha6fb395_2
+  image: quay.io/biocontainers/skani:0.3.2--h79ce301_0
   pull_policy: if_not_present
-  image_digest: sha256:1a7fbf7d8ed55cb1d3c7d71a1279c3fac3e31649615a6fbf4f9c2efb8bd7d61a
+  image_digest: sha256:386d52fd7994b4cc26dd7b0fef39c182bc9e113f35a9e949627213f20beeb60e
 resources:
   min: {cpu: 2, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 32, ram_gb: 32, disk_gb: 100}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Shaw & Yu 2023, PMID 37735570"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: bluenote-1577/skani

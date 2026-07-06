@@ -1,6 +1,6 @@
 id: bwa
 name: BWA
-version: "0.7.18"
+version: "0.7.19"
 category: alignment
 stage: [genome_assembly.step2, chip_seq.step2, atac_seq.step2]
 input_types: [fastq_short_paired_clean]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/bwa:0.7.18--he4a0461_0
+  image: quay.io/biocontainers/bwa:0.7.19--h577a1d6_1
   pull_policy: if_not_present
-  image_digest: sha256:a8ea7d74457b55395e35f1e4200e3ac4a44e3f7c4b361d7628da86cec2133e03
+  image_digest: sha256:99a35e5ee4e9c329e8746c4689890b97a3ac5620cb36d374cba69ba52016e72a
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 200}
@@ -23,5 +23,5 @@ command_template: |
 references: []
 citation: "Li & Durbin 2009, PMID 19451168"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: lh3/bwa

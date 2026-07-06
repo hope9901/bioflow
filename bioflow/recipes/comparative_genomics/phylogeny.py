@@ -36,7 +36,7 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="staphb/mafft:7.520", cpu=1, ram_gb=2)
+@stage(image="staphb/mafft:7.526", cpu=1, ram_gb=2)
 def mafft_one(gene_fasta: Path, *, out_dir):
     """Align one gene's per-strain CDS file with MAFFT --auto."""
     return (
@@ -46,7 +46,7 @@ def mafft_one(gene_fasta: Path, *, out_dir):
 
 
 @stage(
-    image="staphb/iqtree2:2.2.2.7",
+    image="staphb/iqtree2:2.4.0",
     cpu=4, ram_gb=8,
     depends_on=mafft_one,
     retry=1, retry_with={"ram_gb": "2x"},

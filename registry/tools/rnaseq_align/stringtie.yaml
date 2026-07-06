@@ -1,6 +1,6 @@
 id: stringtie
 name: StringTie
-version: "2.2.3"
+version: "3.0.3"
 category: rnaseq_align
 stage: [rnaseq_deg.step2]
 input_types: [bam, annotation_gtf]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short, long_ont, long_hifi]
   mode: [any]
 container:
-  image: quay.io/biocontainers/stringtie:2.2.3--h29c0135_1
+  image: quay.io/biocontainers/stringtie:3.0.3--h29c0135_0
   pull_policy: if_not_present
-  image_digest: sha256:84207eb013dbcff90928d8ddc75902580d3885ce8edaa36b8fab7665a3dc2e3c
+  image_digest: sha256:221523fd04f7ffaf76e78617cbb6069e002ee0f16b0068c3033e4bb0869014ee
 resources:
   min: {cpu: 2, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Pertea 2015, PMID 25690850"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: gpertea/stringtie

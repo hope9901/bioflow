@@ -14,6 +14,38 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — I/O contract drift guard across version bumps
+- Every tool declares the data formats it consumes/produces (`input_types` /
+  `output_types`).  A version bump that also changes those formats can break a
+  downstream recipe stage, so `registry/io_contracts.json` now snapshots every
+  tool's `(version, inputs, outputs)` and a new blocking CI job (`io-contracts`)
+  fails until the snapshot is regenerated — the same freshness contract as
+  docs-fresh.  When the I/O contract changes on a bump, the report names the
+  **recipes that pin the tool** so they get re-verified before shipping.
+  `scripts/io_contracts.py {check,update}`; see `docs/MAINTAINER.md`.
+- New reusable `scripts/bump_tools.py`: batch-bump tools to a target version by
+  resolving the **real newest build tag** from the image's own registry (quay
+  biocontainers / Docker Hub) — filtering out numeric-sort artifact tags
+  (kraken2 "2.17", trim-galore "2.3.0" are not real releases) and preferring
+  immutable `--<hash>` build tags — then rewriting the YAML + every recipe that
+  pins it in lockstep.
+
+### Changed — registry-wide freshness sweep (64 tools bumped to latest)
+- Corrected **12 version labels** that disagreed with the pinned image (same
+  class as the scanpy 1.10.1-vs-1.7.2 bug: deseq2 1.44→1.50.2, edger, limma,
+  clusterProfiler, topGO, methylKit, HOMER, percolator, monocle3, iqtree,
+  seurat, InterProScan — bundle images left as-is).
+- Bumped **64 tools** to their real newest upstream build (digest-resolved,
+  recipes updated in lockstep, I/O contracts re-blessed): e.g. bcftools
+  1.21→1.23.1, samtools 1.20→1.23.1, minimap2 2.28→2.31, gatk4 4.6.1→4.6.2,
+  spades 4.0→4.2, prokka 1.14.6→1.15.6, quast 5.2→5.3, cutadapt 4.9→5.2,
+  bakta 1.9.4→1.12.0, busco 5.7.1→6.1.0, seurat 5.0→5.5.1, harmony (harmonypy
+  0.0.10→2.0.0), stringtie 2.2.3→3.0.3, multiqc 1.25.1→1.35, and more.
+- **Deferred for individual e2e verification** (genuine behaviour-changing
+  majors on recipe-used tools): Bracken 2.9→3.1 and medaka 1.11.3→2.2.2 stay
+  pinned until their recipe commands are re-validated on real data.  msconvert
+  is unbumped (its upstream tag carries no resolvable version).
+
 ### Added — a path to modern scanpy (self-built, digest-pinned conda-forge image)
 - Bioconda froze `scanpy` at 1.7.2, so there's no newer BioContainer.  Added
   `docker/scanpy/Dockerfile` (conda-forge `scanpy=1.12.2` + leidenalg/igraph;

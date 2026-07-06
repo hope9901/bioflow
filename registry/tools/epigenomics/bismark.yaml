@@ -1,6 +1,6 @@
 id: bismark
 name: bismark
-version: "0.24.2"
+version: "0.25.1"
 category: epigenomics
 stage: [methylation.step2]
 input_types: [clean_fastq]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [wgbs, rrbs]
 container:
-  image: quay.io/biocontainers/bismark:0.24.2--hdfd78af_0
+  image: quay.io/biocontainers/bismark:0.25.1--hdfd78af_0
   pull_policy: if_not_present
-  image_digest: sha256:b06de320ad1ac9057e404105eac58587e2d5f076b62f146c11259dadfe07e20f
+  image_digest: sha256:554289828659f95d55d705351d7b5572832f7961d5d58beea8a45a077ba0a488
 resources:
   min: {cpu: 8, ram_gb: 32, disk_gb: 50}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
@@ -26,4 +26,4 @@ command_template: |
 references: []
 citation: "Krueger & Andrews 2011, PMID 21493656"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

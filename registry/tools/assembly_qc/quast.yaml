@@ -1,6 +1,6 @@
 id: quast
 name: QUAST
-version: "5.2.0"
+version: "5.3.0"
 category: assembly_qc
 stage: [genome_assembly.step3]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: staphb/quast:5.2.0
+  image: staphb/quast:5.3.0
   pull_policy: if_not_present
-  image_digest: sha256:83ea0fd6c28ca01508fd7a93c0942b19089e6de25c9b8a496a34e138d240e0e8
+  image_digest: sha256:e885c646124d099fe29ad05e223a0d7c9410c90dd70b4abadf63d34d158e5eeb
 resources:
   min: {cpu: 1, ram_gb: 2, disk_gb: 2}
   recommended: {cpu: 4, ram_gb: 8, disk_gb: 10}
@@ -22,4 +22,4 @@ command_template: |
   quast.py -o {out_dir} -t {cpu} {assembly_fasta}
 citation: "Mikheenko 2018, PMID 29949969"
 added: "2026-04-16"
-last_reviewed: "2026-04-16"
+last_reviewed: "2026-07-06"

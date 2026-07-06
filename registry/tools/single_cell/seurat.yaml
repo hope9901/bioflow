@@ -1,6 +1,6 @@
 id: seurat
 name: seurat
-version: "5.0.0"
+version: "5.5.1"
 category: single_cell
 stage: [scrna_seq.step2, scrna_seq.step3, scrna_seq.step4]
 input_types: [count_matrix]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: satijalab/seurat:5.0.0
+  image: satijalab/seurat:5.5.1
   pull_policy: if_not_present
-  image_digest: sha256:fd8a2dfda142f4da85e4112f734f97b889e0bb314593e2709e0563d4fd95e87c
+  image_digest: sha256:048d965487afc2961c450879692281a73e24f6de47360ed2f11b31112ebd844e
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 50}
@@ -36,4 +36,4 @@ command_template: |
 references: []
 citation: "Hao et al. 2024, PMID 37231261"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"

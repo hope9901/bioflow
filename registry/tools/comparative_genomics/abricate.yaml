@@ -1,6 +1,6 @@
 id: abricate
 name: ABRicate
-version: "1.2.0"
+version: "1.4.0"
 category: comparative_genomics
 stage: [comparative_genomics.step5]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [comparative]
 container:
-  image: staphb/abricate:1.2.0
+  image: staphb/abricate:1.4.0
   pull_policy: if_not_present
-  image_digest: sha256:c27bd61d507488669463d40447d7b3575f69e6b5f3d0435b1653b3cf28b6e38a
+  image_digest: sha256:a3bbb5fb4c546e9beec5d32c74714b0f175481c2207f2f2b3546567b46118c78
 resources:
   min: {cpu: 2, ram_gb: 2, disk_gb: 2}
   recommended: {cpu: 4, ram_gb: 4, disk_gb: 5}
@@ -23,4 +23,4 @@ command_template: |
 references: []
 citation: "Seemann T, ABRicate, https://github.com/tseemann/abricate"
 added: "2026-04-27"
-last_reviewed: "2026-04-27"
+last_reviewed: "2026-07-06"

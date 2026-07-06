@@ -1,6 +1,6 @@
 id: cutadapt
 name: Cutadapt
-version: "4.9"
+version: "5.2"
 category: qc
 stage: [genome_assembly.step1, rnaseq_deg.step1, chip_seq.step1, atac_seq.step1]
 input_types: [fastq_short_paired, fastq_short_single]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/cutadapt:4.9--py311haab0aaa_3
+  image: quay.io/biocontainers/cutadapt:5.2--py312hfabe715_2
   pull_policy: if_not_present
-  image_digest: sha256:1e2b72876d2bbd497c1e68267d34dcd67d7fcee8d83c3e2ea12f89030893f218
+  image_digest: sha256:741216fb9a56cdac2a61e93c64f857bc5b3e1f9f2c123cf7ae2c6ea5c97702d8
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 5}
   recommended: {cpu: 8, ram_gb: 8, disk_gb: 20}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Martin 2011, doi:10.14806/ej.17.1.200"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: marcelm/cutadapt
