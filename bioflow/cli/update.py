@@ -10,6 +10,36 @@ from rich import print as rprint
 from bioflow.cli._app import REGISTRY_DEFAULT, app
 
 
+def _regenerate_registry_artifacts(repo_root: Path) -> None:
+    """Regenerate registry-derived artifacts after an auto-approval bumped the
+    registry, so the freshness CI gates stay green when the auto-run pushes:
+
+      * ``registry/io_contracts.json`` — the per-tool I/O format contract
+        snapshot.  A version bump that changes a tool's input/output formats is
+        exactly the drift the ``io-contracts`` gate flags, so the snapshot must
+        be re-blessed in the same commit as the bump.
+      * ``README.md`` + ``docs/reference/*.md`` — the generated tool/recipe
+        tables (docs-fresh gate).
+
+    Best effort: a failure is surfaced but does not abort the run — the commit
+    then trips the CI gate, which is the intended safety net.
+    """
+    import subprocess as _sub  # noqa: PLC0415
+    import sys as _sys  # noqa: PLC0415
+
+    for script, arg in (("io_contracts.py", "update"), ("gen_docs.py", None)):
+        cmd = [_sys.executable, str(repo_root / "scripts" / script)]
+        if arg:
+            cmd.append(arg)
+        try:
+            _sub.run(cmd, cwd=str(repo_root), check=True,
+                     capture_output=True, text=True)
+            rprint(f"[green]✓ regenerated[/] via scripts/{script}")
+        except (_sub.CalledProcessError, FileNotFoundError) as exc:
+            rprint(f"[yellow]⚠ scripts/{script} failed[/] "
+                   f"(the CI freshness gate will catch it): {exc}")
+
+
 @app.command("update")
 def update_cmd(
     action: str = typer.Argument(..., help="approve | auto"),
@@ -252,6 +282,16 @@ def update_cmd(
                     rprint(f"  [yellow]⚠ skipped[/]  "
                            f"{Path(r['candidate']).name}: {exc}")
 
+        # Re-bless registry-derived artifacts (I/O contract snapshot + generated
+        # docs) so a scheduled auto-bump stays in lockstep with the freshness CI
+        # gates (io-contracts, docs-fresh) when it commits/pushes.  Only when an
+        # approval actually changed the registry, and only against the real
+        # project registry (tests use a tmp registry_dir and must not touch it).
+        _repo_root = Path(__file__).resolve().parents[2]
+        if (n_approved and not dry_run
+                and registry_dir.resolve() == (_repo_root / "registry")):
+            _regenerate_registry_artifacts(_repo_root)
+
         # ── Maintainer-only: commit + push to GitHub ────────────────────
         if (git_commit or git_push) and not dry_run:
             from datetime import date as _date  # noqa: PLC0415
@@ -264,11 +304,15 @@ def update_cmd(
                     capture_output=True, text=True, check=check,
                 )
 
-            # Stage everything relevant
+            # Stage everything relevant.  registry_dir already covers
+            # registry/io_contracts.json; README + docs/reference carry the
+            # regenerated tool/recipe tables.
             try:
                 _git("add",
                      str(registry_dir),
                      "update/CHANGELOG.md",
+                     "README.md",
+                     "docs/reference",
                      str(report_path or Path("update") / "last_run.json"))
             except (FileNotFoundError, _sub.CalledProcessError) as exc:
                 rprint(f"[red]git add failed:[/] {exc}")

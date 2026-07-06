@@ -207,6 +207,57 @@ class TestGitPushMaintainerMode:
         assert not any("commit" in a for a in called_with), called_with
 
 
+class TestRegistryArtifactRefresh:
+    """A scheduled auto-approval bumps registry versions, so the auto flow must
+    re-bless the I/O contract snapshot (+ generated docs) in the same run, or
+    the new io-contracts / docs-fresh CI gates would fail on the push."""
+
+    def test_regenerate_runs_io_contracts_and_docs(self, tmp_path):
+        from unittest.mock import patch, MagicMock
+        from bioflow.cli.update import _regenerate_registry_artifacts
+
+        with patch("subprocess.run", return_value=MagicMock(
+                returncode=0, stdout="", stderr="")) as fake_run:
+            _regenerate_registry_artifacts(tmp_path)
+
+        cmds = [c.args[0] for c in fake_run.call_args_list]
+        # Both derived-artifact scripts must be invoked.
+        assert any(str(a).endswith("io_contracts.py") for c in cmds for a in c), cmds
+        assert any("update" in c for c in cmds), cmds
+        assert any(str(a).endswith("gen_docs.py") for c in cmds for a in c), cmds
+
+    def test_auto_approve_triggers_refresh(self, tmp_path, monkeypatch):
+        """When --auto-approve actually promotes a candidate, the artifact
+        refresh is invoked (before any git commit)."""
+        from unittest.mock import patch
+        import bioflow.cli.update as upd
+        from update.benchmark import BenchmarkResult
+
+        cand_dir = tmp_path / "candidates"
+        cand_dir.mkdir()
+        (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
+
+        # Pretend the smoke test passes and approval succeeds — without touching
+        # Docker or the real registry.
+        passing = BenchmarkResult("x")
+        passing.passed = True
+        real_registry = Path(upd.__file__).resolve().parents[2] / "registry"
+
+        with patch("update.benchmark.smoke_test", return_value=passing), \
+             patch("bioflow.core.approve.approve_candidate",
+                   return_value=real_registry / "qc" / "x.yaml"), \
+             patch.object(upd, "_regenerate_registry_artifacts") as fake_regen:
+            _run([
+                "update", "auto",
+                "--candidates-dir", str(cand_dir),
+                "--registry", str(real_registry),
+                "--report", str(tmp_path / "r.json"),
+                "--auto-approve",
+            ])
+
+        fake_regen.assert_called_once()
+
+
 class TestUnknownAction:
 
     def test_unknown_action_rejected(self):

@@ -99,8 +99,16 @@ A JSON report lands at `update/last_run.json` after each run.
 3. Write `update/last_run.json` with per-candidate pass/fail.
 4. With `--auto-approve`: call `bioflow.core.approve.approve_candidate()`
    for each passing YAML → file lands under `registry/tools/<cat>/`.
-5. With `--git-push`:
-   - `git add registry/ update/CHANGELOG.md update/last_run.json`
+5. If any candidate was approved, **regenerate the registry-derived
+   artifacts** so the freshness CI gates stay green on the push:
+   `scripts/io_contracts.py update` (re-blesses the I/O contract snapshot —
+   a bump that changes a tool's input/output formats is the drift the
+   `io-contracts` gate flags) and `scripts/gen_docs.py` (the README + docs
+   tables).  Skipped when running against a non-default `--registry` (so tests
+   never touch the real snapshot).
+6. With `--git-push`:
+   - `git add registry/ update/CHANGELOG.md README.md docs/reference update/last_run.json`
+     (`registry/` already carries the refreshed `io_contracts.json`)
    - skip the commit cleanly if nothing was staged
    - `git commit -m "chore(registry): monthly auto-update YYYY-MM-DD — N new tool(s)"`
    - `git push origin <branch>`
