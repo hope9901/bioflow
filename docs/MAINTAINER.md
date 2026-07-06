@@ -244,6 +244,31 @@ bioflow update approve --candidate update/candidates/2026-06/mytool.yaml
 
 Bypasses both schedulers.  Useful for emergency additions.
 
+### I/O contract drift on a version bump
+
+Every tool declares the data formats it consumes/produces (`input_types` /
+`output_types`).  A version bump that also **changes those formats** can break a
+downstream recipe stage that fed on the old shape of the output.  To make that
+loud, `registry/io_contracts.json` snapshots every tool's
+`(version, inputs, outputs)`, and CI's `io-contracts` job fails whenever the
+snapshot is stale:
+
+```bash
+python scripts/io_contracts.py check    # what CI runs; lists any drift
+python scripts/io_contracts.py update   # regenerate after verifying recipes
+```
+
+When you bump a tool:
+
+- **I/O unchanged** (most bumps) — `check` reports it as *version-only*; just
+  run `update` and commit the refreshed snapshot.
+- **I/O changed** — `check` prints the format diff **and the recipes that pin
+  the tool**.  Re-run those recipes (or their e2e/smoke tests) to confirm the
+  new output still feeds the next stage, adjust the recipe command if not, then
+  run `update`.  This is the mechanism that keeps recipes and user-defined
+  pipelines working across upgrades — the bump can't ship until the contract is
+  re-blessed.
+
 ---
 
 ## Part 5 · Cutting a PyPI release

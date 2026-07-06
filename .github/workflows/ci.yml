@@ -162,3 +162,27 @@ jobs:
 
       - name: Require every active tool to be digest-pinned
         run: python scripts/pin_digests.py --audit
+
+  io-contracts:
+    # Each tool declares the data formats it consumes/produces (input_types /
+    # output_types).  registry/io_contracts.json snapshots every tool's
+    # (version, inputs, outputs).  A version bump that also changes a tool's I/O
+    # contract can break a downstream recipe stage, so this fails until the
+    # snapshot is regenerated — surfacing the drift + the affected recipes so a
+    # human re-verifies them before the bump ships.
+    name: I/O contract freshness
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Fail if the I/O contract snapshot is stale
+        run: python scripts/io_contracts.py check

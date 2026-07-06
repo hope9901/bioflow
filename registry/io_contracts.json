@@ -1,0 +1,1154 @@
+{
+  "_comment": "I/O format contract snapshot \u2014 regenerate with `python scripts/io_contracts.py update`.  See scripts/io_contracts.py.",
+  "generated": "2026-07-06",
+  "tools": {
+    "abricate": {
+      "version": "1.2.0",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "resistance_table",
+        "virulence_table"
+      ]
+    },
+    "abyss": {
+      "version": "2.3.7",
+      "inputs": [
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_fasta"
+      ]
+    },
+    "antismash": {
+      "version": "7.1.0",
+      "inputs": [
+        "assembly_fasta",
+        "structural_gff"
+      ],
+      "outputs": [
+        "bgc_genbank",
+        "bgc_html"
+      ]
+    },
+    "augustus": {
+      "version": "3.5.0",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gff"
+      ]
+    },
+    "bakta": {
+      "version": "1.9.4",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gbk",
+        "structural_gff"
+      ]
+    },
+    "bandage": {
+      "version": "0.8.1",
+      "inputs": [
+        "assembly_graph"
+      ],
+      "outputs": [
+        "assembly_graph_image"
+      ]
+    },
+    "bcftools": {
+      "version": "1.21",
+      "inputs": [
+        "bam",
+        "reference_fasta",
+        "vcf"
+      ],
+      "outputs": [
+        "vcf"
+      ]
+    },
+    "bedtools": {
+      "version": "2.31.1",
+      "inputs": [
+        "bam",
+        "bed",
+        "gff",
+        "vcf"
+      ],
+      "outputs": [
+        "bam",
+        "bed",
+        "coverage_tsv"
+      ]
+    },
+    "bismark": {
+      "version": "0.24.2",
+      "inputs": [
+        "clean_fastq"
+      ],
+      "outputs": [
+        "bam",
+        "methylation_report"
+      ]
+    },
+    "bowtie2": {
+      "version": "2.5.4",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "bam"
+      ]
+    },
+    "bracken": {
+      "version": "2.9",
+      "inputs": [
+        "kraken2_report"
+      ],
+      "outputs": [
+        "bracken_report"
+      ]
+    },
+    "braker3": {
+      "version": "3.0.8",
+      "inputs": [
+        "masked_assembly_fasta",
+        "rnaseq_bam"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gff"
+      ]
+    },
+    "busco": {
+      "version": "5.7.1",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "assembly_qc_report"
+      ]
+    },
+    "bustools": {
+      "version": "0.43.2",
+      "inputs": [
+        "bus_file"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "bwa": {
+      "version": "0.7.18",
+      "inputs": [
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "bam",
+        "sam"
+      ]
+    },
+    "bwa_mem2": {
+      "version": "2.2.1",
+      "inputs": [
+        "fastq_short_paired_clean",
+        "reference_genome"
+      ],
+      "outputs": [
+        "alignment_bam",
+        "consensus_fasta"
+      ]
+    },
+    "cafe5": {
+      "version": "5.1.0",
+      "inputs": [
+        "gene_count_matrix",
+        "ultrametric_tree"
+      ],
+      "outputs": [
+        "ancestral_states",
+        "gain_loss_table"
+      ]
+    },
+    "canu": {
+      "version": "2.2",
+      "inputs": [
+        "fastq_long_hifi",
+        "fastq_long_ont",
+        "fastq_long_pacbio"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ]
+    },
+    "cellranger": {
+      "version": "7.2.0",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "checkm2": {
+      "version": "1.0.2",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "assembly_qc_report"
+      ]
+    },
+    "clusterprofiler": {
+      "version": "4.18.4",
+      "inputs": [
+        "annotation_gtf",
+        "deg_table"
+      ],
+      "outputs": [
+        "enrichment_report",
+        "go_results_tsv",
+        "kegg_results_tsv"
+      ]
+    },
+    "comet": {
+      "version": "2024.02.0",
+      "inputs": [
+        "mzml",
+        "protein_fasta"
+      ],
+      "outputs": [
+        "pep_xml",
+        "psm_results"
+      ]
+    },
+    "compleasm": {
+      "version": "0.2.6",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "busco_report",
+        "completeness_summary"
+      ]
+    },
+    "cutadapt": {
+      "version": "4.9",
+      "inputs": [
+        "fastq_short_paired",
+        "fastq_short_single"
+      ],
+      "outputs": [
+        "fastq_short_paired_clean"
+      ]
+    },
+    "dbcan": {
+      "version": "4.1.4",
+      "inputs": [
+        "protein_faa"
+      ],
+      "outputs": [
+        "cazyme_tsv",
+        "substrate_predictions"
+      ]
+    },
+    "deeptools": {
+      "version": "3.5.5",
+      "inputs": [
+        "bam"
+      ],
+      "outputs": [
+        "bigwig",
+        "heatmap_pdf"
+      ]
+    },
+    "deseq2": {
+      "version": "1.50.2",
+      "inputs": [
+        "count_matrix",
+        "sample_sheet"
+      ],
+      "outputs": [
+        "deg_plots",
+        "deg_table"
+      ]
+    },
+    "diamond": {
+      "version": "2.1.8",
+      "inputs": [
+        "diamond_db",
+        "protein_faa"
+      ],
+      "outputs": [
+        "diamond_hits_tsv"
+      ]
+    },
+    "earlgrey": {
+      "version": "4.5.0",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "masked_assembly_fasta",
+        "repeat_library"
+      ]
+    },
+    "edger": {
+      "version": "4.8.2",
+      "inputs": [
+        "count_matrix",
+        "sample_sheet"
+      ],
+      "outputs": [
+        "deg_plots",
+        "deg_table"
+      ]
+    },
+    "eggnog_mapper": {
+      "version": "2.1.12",
+      "inputs": [
+        "protein_faa",
+        "structural_gff"
+      ],
+      "outputs": [
+        "functional_annotation_tsv",
+        "go_terms_tsv",
+        "kegg_tsv"
+      ]
+    },
+    "enrichr": {
+      "version": "1.1.3",
+      "inputs": [
+        "gene_list"
+      ],
+      "outputs": [
+        "enrichment_report"
+      ]
+    },
+    "fastani": {
+      "version": "1.34",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "ani_matrix"
+      ]
+    },
+    "fastp": {
+      "version": "1.3.6",
+      "inputs": [
+        "fastq_short_paired"
+      ],
+      "outputs": [
+        "fastq_short_paired_clean",
+        "qc_html",
+        "qc_json"
+      ]
+    },
+    "fastqc": {
+      "version": "0.12.1",
+      "inputs": [
+        "fastq_short_paired",
+        "fastq_short_single"
+      ],
+      "outputs": [
+        "qc_html",
+        "qc_zip"
+      ]
+    },
+    "filtlong": {
+      "version": "0.2.1",
+      "inputs": [
+        "fastq_long"
+      ],
+      "outputs": [
+        "fastq_long_filtered"
+      ]
+    },
+    "flye": {
+      "version": "2.9.5",
+      "inputs": [
+        "fastq_long"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ]
+    },
+    "fragpipe": {
+      "version": "22.0",
+      "inputs": [
+        "mzml"
+      ],
+      "outputs": [
+        "fragpipe_results"
+      ]
+    },
+    "freebayes": {
+      "version": "1.3.7",
+      "inputs": [
+        "bam",
+        "reference_fasta"
+      ],
+      "outputs": [
+        "vcf"
+      ]
+    },
+    "gatk4": {
+      "version": "4.6.1.0",
+      "inputs": [
+        "bam",
+        "reference_fasta"
+      ],
+      "outputs": [
+        "gvcf",
+        "vcf"
+      ]
+    },
+    "genovi": {
+      "version": "0.4.3",
+      "inputs": [
+        "genbank"
+      ],
+      "outputs": [
+        "genome_map_image"
+      ]
+    },
+    "gfastats": {
+      "version": "1.3.7",
+      "inputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ],
+      "outputs": [
+        "assembly_stats"
+      ]
+    },
+    "gseapy": {
+      "version": "1.1.3",
+      "inputs": [
+        "deg_table",
+        "gene_set_gmt"
+      ],
+      "outputs": [
+        "enrichment_report",
+        "gsea_plots"
+      ]
+    },
+    "gtdbtk": {
+      "version": "2.4.0",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "classification",
+        "taxonomy_tsv"
+      ]
+    },
+    "harmony": {
+      "version": "1.2.1",
+      "inputs": [
+        "embedding_matrix",
+        "metadata"
+      ],
+      "outputs": [
+        "batch_corrected_embedding"
+      ]
+    },
+    "hifiasm": {
+      "version": "0.19.9",
+      "inputs": [
+        "fastq_long_hifi"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_gfa"
+      ]
+    },
+    "hisat2": {
+      "version": "2.2.1",
+      "inputs": [
+        "annotation_gtf",
+        "fastq_short_paired_clean",
+        "reference_genome"
+      ],
+      "outputs": [
+        "alignment_bam",
+        "count_matrix"
+      ]
+    },
+    "homer": {
+      "version": "5.1",
+      "inputs": [
+        "peaks_bed"
+      ],
+      "outputs": [
+        "annotated_peaks",
+        "motif_results"
+      ]
+    },
+    "humann3": {
+      "version": "3.9",
+      "inputs": [
+        "clean_fastq"
+      ],
+      "outputs": [
+        "humann_pathways"
+      ]
+    },
+    "interproscan": {
+      "version": "5.59_91.0",
+      "inputs": [
+        "protein_faa"
+      ],
+      "outputs": [
+        "functional_annotation_tsv",
+        "go_terms_tsv"
+      ]
+    },
+    "iqtree": {
+      "version": "2.2.2.7",
+      "inputs": [
+        "core_alignment"
+      ],
+      "outputs": [
+        "phylogeny_newick"
+      ]
+    },
+    "kallisto": {
+      "version": "0.51.1",
+      "inputs": [
+        "fastq_short_paired_clean",
+        "reference_genome"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "kneaddata": {
+      "version": "0.12.0",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "clean_fastq"
+      ]
+    },
+    "kraken2": {
+      "version": "2.1.3",
+      "inputs": [
+        "clean_fastq"
+      ],
+      "outputs": [
+        "kraken2_report"
+      ]
+    },
+    "krona": {
+      "version": "2.8.1",
+      "inputs": [
+        "taxonomy_abundance"
+      ],
+      "outputs": [
+        "krona_html"
+      ]
+    },
+    "lefse": {
+      "version": "1.1.2",
+      "inputs": [
+        "taxonomy_table"
+      ],
+      "outputs": [
+        "lefse_results"
+      ]
+    },
+    "liftoff": {
+      "version": "1.6.3",
+      "inputs": [
+        "assembly_fasta",
+        "reference_annotation_gff"
+      ],
+      "outputs": [
+        "structural_gff"
+      ]
+    },
+    "limma_voom": {
+      "version": "3.66.0",
+      "inputs": [
+        "count_matrix",
+        "sample_sheet"
+      ],
+      "outputs": [
+        "deg_plots",
+        "deg_table"
+      ]
+    },
+    "macs3": {
+      "version": "3.0.1",
+      "inputs": [
+        "bam"
+      ],
+      "outputs": [
+        "peaks_bed"
+      ]
+    },
+    "mafft": {
+      "version": "7.520",
+      "inputs": [
+        "nucleotide_fasta",
+        "protein_faa"
+      ],
+      "outputs": [
+        "msa_fasta"
+      ]
+    },
+    "mash": {
+      "version": "2.3",
+      "inputs": [
+        "assembly_fasta",
+        "fastq"
+      ],
+      "outputs": [
+        "distance_matrix"
+      ]
+    },
+    "masurca": {
+      "version": "4.1.0",
+      "inputs": [
+        "fastq_long_hifi",
+        "fastq_long_ont",
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_fasta"
+      ]
+    },
+    "maxbin2": {
+      "version": "2.2.7",
+      "inputs": [
+        "assembly_fasta",
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "genome_bins"
+      ]
+    },
+    "maxquant": {
+      "version": "2.4.14.0",
+      "inputs": [
+        "ms_raw"
+      ],
+      "outputs": [
+        "maxquant_results"
+      ]
+    },
+    "medaka": {
+      "version": "1.11.3",
+      "inputs": [
+        "assembly_fasta",
+        "fastq_long_ont"
+      ],
+      "outputs": [
+        "polished_assembly_fasta"
+      ]
+    },
+    "megahit": {
+      "version": "1.2.9",
+      "inputs": [
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_fasta"
+      ]
+    },
+    "merqury": {
+      "version": "1.3",
+      "inputs": [
+        "assembly_fasta",
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_qc_report"
+      ]
+    },
+    "metabat2": {
+      "version": "2.17",
+      "inputs": [
+        "assembly_fasta",
+        "bam"
+      ],
+      "outputs": [
+        "genome_bins"
+      ]
+    },
+    "metaphlan4": {
+      "version": "4.1.0",
+      "inputs": [
+        "clean_fastq"
+      ],
+      "outputs": [
+        "metaphlan_profile"
+      ]
+    },
+    "methylkit": {
+      "version": "1.36.0",
+      "inputs": [
+        "methylation_report"
+      ],
+      "outputs": [
+        "dmr_results"
+      ]
+    },
+    "methylpy": {
+      "version": "1.4.7",
+      "inputs": [
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "dmr_results",
+        "methylation_report"
+      ]
+    },
+    "minimap2": {
+      "version": "2.28",
+      "inputs": [
+        "fasta",
+        "fastq_long_hifi",
+        "fastq_long_ont",
+        "fastq_long_pacbio"
+      ],
+      "outputs": [
+        "bam",
+        "paf",
+        "sam"
+      ]
+    },
+    "monocle3": {
+      "version": "1.4.26",
+      "inputs": [
+        "count_matrix"
+      ],
+      "outputs": [
+        "rds"
+      ]
+    },
+    "msconvert": {
+      "version": "3.0.24238",
+      "inputs": [
+        "ms_raw"
+      ],
+      "outputs": [
+        "mzml"
+      ]
+    },
+    "msfragger": {
+      "version": "4.1",
+      "inputs": [
+        "mzml"
+      ],
+      "outputs": [
+        "psm_tsv"
+      ]
+    },
+    "multiqc": {
+      "version": "1.25.1",
+      "inputs": [
+        "log",
+        "qc_html",
+        "qc_json"
+      ],
+      "outputs": [
+        "multiqc_report_html"
+      ]
+    },
+    "nanoplot": {
+      "version": "1.43.0",
+      "inputs": [
+        "fastq_long"
+      ],
+      "outputs": [
+        "qc_html",
+        "qc_txt"
+      ]
+    },
+    "nextdenovo": {
+      "version": "2.5.2",
+      "inputs": [
+        "fastq_long_ont",
+        "fastq_long_pacbio"
+      ],
+      "outputs": [
+        "assembly_fasta"
+      ]
+    },
+    "nextpolish": {
+      "version": "1.4.1",
+      "inputs": [
+        "assembly_fasta",
+        "fastq_long_hifi",
+        "fastq_long_ont",
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "polished_assembly_fasta"
+      ]
+    },
+    "openms": {
+      "version": "3.2.0",
+      "inputs": [
+        "idxml",
+        "mzml"
+      ],
+      "outputs": [
+        "featurexml",
+        "idxml",
+        "quant_results"
+      ]
+    },
+    "panaroo": {
+      "version": "1.8.0",
+      "inputs": [
+        "annotation_gff"
+      ],
+      "outputs": [
+        "core_alignment",
+        "gene_presence_absence_csv"
+      ]
+    },
+    "percolator": {
+      "version": "3.7.1",
+      "inputs": [
+        "psm_tsv"
+      ],
+      "outputs": [
+        "percolator_psms"
+      ]
+    },
+    "picard": {
+      "version": "3.2.0",
+      "inputs": [
+        "bam"
+      ],
+      "outputs": [
+        "bam",
+        "dedup_metrics"
+      ]
+    },
+    "pilon": {
+      "version": "1.24",
+      "inputs": [
+        "assembly_fasta",
+        "bam"
+      ],
+      "outputs": [
+        "polished_assembly_fasta"
+      ]
+    },
+    "prokka": {
+      "version": "1.14.6",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gbk",
+        "structural_gff"
+      ]
+    },
+    "quast": {
+      "version": "5.2.0",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "assembly_qc_report",
+        "assembly_qc_tsv"
+      ]
+    },
+    "racon": {
+      "version": "1.5.0",
+      "inputs": [
+        "assembly_fasta",
+        "fastq_long_ont",
+        "fastq_long_pacbio",
+        "paf",
+        "sam"
+      ],
+      "outputs": [
+        "polished_assembly_fasta"
+      ]
+    },
+    "raven": {
+      "version": "1.8.1",
+      "inputs": [
+        "fastq_long_ont",
+        "fastq_long_pacbio"
+      ],
+      "outputs": [
+        "assembly_fasta"
+      ]
+    },
+    "repeatmasker": {
+      "version": "4.1.7",
+      "inputs": [
+        "assembly_fasta",
+        "repeat_library"
+      ],
+      "outputs": [
+        "masked_assembly_fasta"
+      ]
+    },
+    "repeatmodeler": {
+      "version": "2.0.5",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "repeat_library"
+      ]
+    },
+    "roary": {
+      "version": "3.13.0",
+      "inputs": [
+        "annotation_gff"
+      ],
+      "outputs": [
+        "core_alignment",
+        "pangenome_table"
+      ]
+    },
+    "rsem": {
+      "version": "1.3.3",
+      "inputs": [
+        "bam",
+        "transcripts_fasta"
+      ],
+      "outputs": [
+        "count_matrix",
+        "transcript_abundance"
+      ]
+    },
+    "salmon": {
+      "version": "2.3.1",
+      "inputs": [
+        "annotation_gtf",
+        "fastq_short_paired_clean",
+        "reference_genome"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "samtools": {
+      "version": "1.20",
+      "inputs": [
+        "bam",
+        "sam"
+      ],
+      "outputs": [
+        "bai",
+        "bam"
+      ]
+    },
+    "scanpy": {
+      "version": "1.12.2",
+      "inputs": [
+        "count_matrix"
+      ],
+      "outputs": [
+        "h5ad"
+      ]
+    },
+    "scoary": {
+      "version": "1.6.16",
+      "inputs": [
+        "gene_presence_absence_csv",
+        "traits_csv"
+      ],
+      "outputs": [
+        "gwas_results_csv"
+      ]
+    },
+    "scrublet": {
+      "version": "0.2.3",
+      "inputs": [
+        "count_matrix"
+      ],
+      "outputs": [
+        "doublet_scores",
+        "filtered_matrix"
+      ]
+    },
+    "seqkit": {
+      "version": "2.8.2",
+      "inputs": [
+        "fasta",
+        "fastq"
+      ],
+      "outputs": [
+        "fasta",
+        "fastq",
+        "stats_tsv"
+      ]
+    },
+    "seurat": {
+      "version": "5.0.0",
+      "inputs": [
+        "count_matrix"
+      ],
+      "outputs": [
+        "rds"
+      ]
+    },
+    "shasta": {
+      "version": "0.11.1",
+      "inputs": [
+        "fastq_long_ont"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ]
+    },
+    "skani": {
+      "version": "0.2.2",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "ani_matrix"
+      ]
+    },
+    "snpeff": {
+      "version": "5.2",
+      "inputs": [
+        "vcf"
+      ],
+      "outputs": [
+        "annotated_vcf",
+        "variant_report"
+      ]
+    },
+    "spades": {
+      "version": "4.0.0",
+      "inputs": [
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ]
+    },
+    "star": {
+      "version": "2.7.11b",
+      "inputs": [
+        "annotation_gtf",
+        "fastq_short_paired_clean",
+        "reference_genome"
+      ],
+      "outputs": [
+        "alignment_bam",
+        "count_matrix"
+      ]
+    },
+    "starsolo": {
+      "version": "2.7.11b",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "stringtie": {
+      "version": "2.2.3",
+      "inputs": [
+        "annotation_gtf",
+        "bam"
+      ],
+      "outputs": [
+        "count_matrix",
+        "transcripts_gtf"
+      ]
+    },
+    "subread": {
+      "version": "2.0.6",
+      "inputs": [
+        "annotation_gtf",
+        "bam"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
+    "tobias": {
+      "version": "0.16.1",
+      "inputs": [
+        "bam",
+        "peaks_bed"
+      ],
+      "outputs": [
+        "footprints_bigwig"
+      ]
+    },
+    "topgo": {
+      "version": "2.62.0",
+      "inputs": [
+        "deg_table",
+        "gene_universe",
+        "go_annotation"
+      ],
+      "outputs": [
+        "enrichment_report"
+      ]
+    },
+    "trimgalore": {
+      "version": "0.6.10",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "clean_fastq"
+      ]
+    },
+    "unicycler": {
+      "version": "0.5.1",
+      "inputs": [
+        "fastq_long",
+        "fastq_short_paired_clean"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph"
+      ]
+    },
+    "verkko": {
+      "version": "2.2.1",
+      "inputs": [
+        "fastq_long_hifi",
+        "fastq_long_ont"
+      ],
+      "outputs": [
+        "assembly_fasta",
+        "assembly_graph",
+        "haplotype_fasta"
+      ]
+    },
+    "xtandem": {
+      "version": "15.12.15.2",
+      "inputs": [
+        "mzml",
+        "protein_fasta"
+      ],
+      "outputs": [
+        "pep_xml"
+      ]
+    }
+  }
+}
