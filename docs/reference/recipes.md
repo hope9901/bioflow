@@ -208,5 +208,5 @@ scRNA-seq (10x): STARsolo + Scanpy QC/cluster/UMAP
 *2 stage(s):*
 
 - **starsolo** — `quay.io/biocontainers/star:2.7.11b--h43eeafb_0`
-- **scanpy_analyze** — `quay.io/biocontainers/scanpy:1.7.2--pyhdfd78af_0`
+- **scanpy_analyze** — `ghcr.io/hope9901/bioflow-scanpy:1.12.2`
 

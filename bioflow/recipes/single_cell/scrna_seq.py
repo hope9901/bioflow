@@ -54,7 +54,7 @@ def starsolo(r1: Path, r2: Path, star_index: Path, whitelist: Path,
     )
 
 
-@stage(image="quay.io/biocontainers/scanpy:1.7.2--pyhdfd78af_0",
+@stage(image="ghcr.io/hope9901/bioflow-scanpy:1.12.2",
        cpu=8, ram_gb=32, depends_on=starsolo)
 def scanpy_analyze(solo, *, out_dir,
                    min_genes: int = 200, min_cells: int = 3):
