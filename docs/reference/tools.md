@@ -82,7 +82,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `iqtree` | 2.2.6 | `staphb/iqtree2:2.2.2.7` | Minh et al. 2020, PMID 32011700 | 11,112 | 9,802 |
 | `mafft` | 7.520 | `staphb/mafft:7.520` | Katoh & Standley 2013, PMID 23329690 | 31,071 | 19,262 |
 | `mash` | 2.3 | `quay.io/biocontainers/mash:2.3--hb105d93_10` | Ondov 2016, PMID 27323842 | 2,452 | 1,753 |
-| `panaroo` | 1.5.0 | `quay.io/biocontainers/panaroo:1.5.0--pyhdfd78af_0` | Tonkin-Hill 2020, PMID 32698896 | 980 | 857 |
+| `panaroo` | 1.8.0 | `quay.io/biocontainers/panaroo:1.8.0--pyhdfd78af_0` | Tonkin-Hill 2020, PMID 32698896 | 980 | 857 |
 | `roary` | 3.13.0 | `staphb/roary:3.13.0` | Page et al. 2015, PMID 26198102 | 4,460 | 3,099 |
 | `scoary` | 1.6.16 | `quay.io/biocontainers/scoary:1.6.16--py_2` | Brynildsrud 2016, PMID 27887642 | 564 | 405 |
 | `skani` | 0.2.2 | `quay.io/biocontainers/skani:0.2.2--ha6fb395_2` | Shaw & Yu 2023, PMID 37735570 | 134 | 111 |

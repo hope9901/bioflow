@@ -14,6 +14,22 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Changed — reviewed the 2026-07 update candidates; promoted Panaroo
+- The monthly `release_watch` filed four auto-guessed version bumps.  Verified
+  each against quay.io (real build-suffixed tag + true digest + the image ships
+  the tool):
+  - **Panaroo 1.5.0 → 1.8.0** — promoted (real tag `1.8.0--pyhdfd78af_0`, digest
+    corrected; not used by any recipe, so no benchmarking needed).
+  - **fastp 0.23.4 → 1.3.6** and **Salmon 1.10.3 → 2.3.1** — real images, but
+    they're pinned by 6 and 1 recipes respectively and a major-version bump
+    there needs a benchmark first (the "registry image == recipe image"
+    invariant), so left at the tested versions for now.
+  - **scanpy 1.12.2** — rejected: no such BioContainers tag exists (newest is
+    1.7.2, already in the registry).
+  The candidate files' `image_digest` were stale copies of the *old* version's
+  digest — promoting them verbatim would have broken the digest pin.  Candidate
+  files removed.
+
 ### Added — `bioflow cite`: citations + DOIs for the tools you used
 - New `bioflow cite <recipe>` / `bioflow cite <tool…>` prints a ready-to-paste
   reference list (or `--format bibtex`) for the tools a recipe runs — mapped
