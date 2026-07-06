@@ -28,8 +28,13 @@ ship bug fixes only.  Breaking changes to the documented public API
     verifying the exact `salmon index` + `salmon quant … -l A --validateMappings`
     commands on a synthetic transcriptome/reads under 2.3.1 (600/600 fragments
     mapped, valid `quant.sf`, exit 0; the `--validateMappings` flag still works).
-  - **scanpy 1.12.2** — rejected: no such BioContainers tag exists (newest is
-    1.7.2, already in the registry).
+  - **scanpy 1.12.2** — rejected: Bioconda froze `scanpy` at 1.7.2 (newer
+    releases moved to conda-forge), so no `biocontainers/scanpy` image exists
+    past 1.7.2 and the candidate tag is not buildable. Also corrected the
+    registry entry's stale `version` label (it claimed 1.10.1 while pinning the
+    1.7.2 image); the 1.7.2 image runs every scanpy op the `scrna_seq` recipe
+    uses. Upgrading scanpy would require stepping outside the digest-pinned
+    BioContainers convention (a conda-forge image), so it's left as-is.
   The candidate files' `image_digest` were stale copies of the *old* version's
   digest — promoting them verbatim would have broken the digest pin.  Candidate
   files removed.

@@ -1,6 +1,6 @@
 id: scanpy
 name: scanpy
-version: "1.10.1"
+version: "1.7.2"
 category: single_cell
 stage: [scrna_seq.step2, scrna_seq.step3, scrna_seq.step4]
 input_types: [count_matrix]
@@ -36,5 +36,5 @@ command_template: |
 references: []
 citation: "Wolf et al. 2018, PMID 29409532"
 added: "2026-04-20"
-last_reviewed: "2026-04-20"
+last_reviewed: "2026-07-06"
 source_repo: scverse/scanpy

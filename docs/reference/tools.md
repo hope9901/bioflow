@@ -195,7 +195,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `cellranger` | 7.2.0 | `litd/docker-cellranger:v7.2.0` | Zheng et al. 2017, PMID 28091601 | 5,666 | 4,102 |
 | `harmony` | 1.2.1 | `quay.io/biocontainers/harmonypy:0.0.10--pyhdfd78af_0` | Korsunsky 2019, PMID 31740819 | 7,697 | 6,723 |
 | `monocle3` | 1.3.7 | `quay.io/biocontainers/r-monocle3:1.4.26--r44h9948957_0` | Cao et al. 2019, PMID 30787392 | 426 | 371 |
-| `scanpy` | 1.10.1 | `quay.io/biocontainers/scanpy:1.7.2--pyhdfd78af_0` | Wolf et al. 2018, PMID 29409532 | 6,692 | 5,617 |
+| `scanpy` | 1.7.2 | `quay.io/biocontainers/scanpy:1.7.2--pyhdfd78af_0` | Wolf et al. 2018, PMID 29409532 | 6,692 | 5,617 |
 | `scrublet` | 0.2.3 | `quay.io/biocontainers/scrublet:0.2.3--pyh5e36f6f_1` | Wolock 2019, PMID 30954476 | 2,184 | 1,854 |
 | `seurat` | 5.0.1 | `satijalab/seurat:5.0.0` | Hao et al. 2024, PMID 37231261 | 3,602 | 2,821 |
 | `starsolo` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin et al. 2013, PMID 23104886 | 41,990 | 29,078 |
