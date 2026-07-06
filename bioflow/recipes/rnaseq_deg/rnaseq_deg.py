@@ -50,7 +50,7 @@ def qc_one(sample_id: str, r1: Path, r2: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5",
+@stage(image="quay.io/biocontainers/salmon:2.3.1--hfa8f182_0",
        cpu=8, ram_gb=16)
 def salmon_index(transcriptome: Path, *, out_dir):
     """Build a Salmon index from a reference transcriptome FASTA."""
@@ -60,7 +60,7 @@ def salmon_index(transcriptome: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5",
+@stage(image="quay.io/biocontainers/salmon:2.3.1--hfa8f182_0",
        cpu=8, ram_gb=16, depends_on=salmon_index)
 def salmon_quant(idx, sample_id: str, r1_clean: Path, r2_clean: Path,
                  *, out_dir):

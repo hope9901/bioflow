@@ -182,7 +182,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `hisat2` | 2.2.1 | `quay.io/biocontainers/hisat2:2.2.1--h87f3376_4` | Kim 2019, PMID 31375807 | 10,968 | 9,680 |
 | `kallisto` | 0.51.1 | `quay.io/biocontainers/kallisto:0.51.1--h2b92561_2` | Bray 2016, PMID 27043002 | 7,856 | 5,298 |
 | `rsem` | 1.3.3 | `quay.io/biocontainers/rsem:1.3.3--pl5321h077b44d_12` | Li & Dewey 2011, PMID 21816040 | 16,258 | 9,456 |
-| `salmon` | 1.10.3 | `quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5` | Patro 2017, PMID 28263959 | 9,687 | 7,499 |
+| `salmon` | 2.3.1 | `quay.io/biocontainers/salmon:2.3.1--hfa8f182_0` | Patro 2017, PMID 28263959 | 9,687 | 7,499 |
 | `star` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin 2013, PMID 23104886 | 41,990 | 29,078 |
 | `stringtie` | 2.2.3 | `quay.io/biocontainers/stringtie:2.2.3--h29c0135_1` | Pertea 2015, PMID 25690850 | 10,134 | 7,701 |
 | `subread` | 2.0.6 | `quay.io/biocontainers/subread:2.0.6--he4a0461_2` | Liao 2014, PMID 24227677 | 21,327 | 15,592 |

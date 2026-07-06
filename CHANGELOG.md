@@ -24,8 +24,10 @@ ship bug fixes only.  Breaking changes to the documented public API
     that pin it** (keeping the "registry image == recipe image" invariant),
     after verifying `fastp v1.3.6` runs the recipe's exact `qc_trim` command on
     real reads (clean FASTQs + JSON + HTML, exit 0).
-  - **Salmon 1.10.3 → 2.3.1** — real image, but a 1→2 major bump in `rnaseq_deg`
-    needs a benchmark first, so left at the tested version for now.
+  - **Salmon 1.10.3 → 2.3.1** — adopted in the registry + `rnaseq_deg` after
+    verifying the exact `salmon index` + `salmon quant … -l A --validateMappings`
+    commands on a synthetic transcriptome/reads under 2.3.1 (600/600 fragments
+    mapped, valid `quant.sf`, exit 0; the `--validateMappings` flag still works).
   - **scanpy 1.12.2** — rejected: no such BioContainers tag exists (newest is
     1.7.2, already in the registry).
   The candidate files' `image_digest` were stale copies of the *old* version's
