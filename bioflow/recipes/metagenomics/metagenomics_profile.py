@@ -54,7 +54,7 @@ def kraken2_classify(clean, kraken2_db: Path, sample_id: str, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bracken:2.9--py39h9e0f934_1",
+@stage(image="quay.io/biocontainers/bracken:3.1--h9948957_0",
        cpu=2, ram_gb=8, depends_on=kraken2_classify)
 def bracken_abundance(k2, kraken2_db: Path, sample_id: str,
                       *, out_dir, read_length: int = 150,

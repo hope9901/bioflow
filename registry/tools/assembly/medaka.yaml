@@ -1,6 +1,6 @@
 id: medaka
 name: Medaka
-version: "1.11.3"
+version: "2.2.2"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [assembly_fasta, fastq_long_ont]
@@ -10,9 +10,9 @@ applicable:
   read_type: [long_ont]
   mode: [de_novo]
 container:
-  image: quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0
+  image: quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0
   pull_policy: if_not_present
-  image_digest: sha256:ac4af46fe8046c60f78f72aad077e445319d1b8b985288e9460ae5fbe846c326
+  image_digest: sha256:18d5d73aa7f0aa70d0f623c4d34ce83ca791ba9c14c751bb3ed5d3452a8fb4c3
 resources:
   min: {cpu: 4, ram_gb: 16, disk_gb: 30}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
@@ -24,5 +24,5 @@ command_template: |
 references: []
 citation: "Oxford Nanopore Technologies, https://github.com/nanoporetech/medaka"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-06"
 source_repo: nanoporetech/medaka

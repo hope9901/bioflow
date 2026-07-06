@@ -46,7 +46,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `flye` | 2.9.6 | `quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1` | Kolmogorov 2019, PMID 30936562 | 4,601 | 3,951 |
 | `hifiasm` | 0.25.0 | `quay.io/biocontainers/hifiasm:0.25.0--h5ca1c30_0` | Cheng 2021, PMID 33526886 | 5,591 | 5,013 |
 | `masurca` | 4.1.4 | `quay.io/biocontainers/masurca:4.1.4--ha5bb246_1` | Zimin 2017, PMID 28130360 | 363 | 224 |
-| `medaka` | 1.11.3 | `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0` | Oxford Nanopore Technologies, https://github.com/nanoporetech/medaka | n/a | n/a |
+| `medaka` | 2.2.2 | `quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0` | Oxford Nanopore Technologies, https://github.com/nanoporetech/medaka | n/a | n/a |
 | `megahit` | 1.2.9 | `quay.io/biocontainers/megahit:1.2.9--h2e03b76_1` | Li 2015, PMID 25609793 | 6,572 | 5,226 |
 | `nextdenovo` | 2.5.2 | `quay.io/biocontainers/nextdenovo:2.5.2--py311hc29ee83_7` | Hu 2024, PMID 38671502 | 364 | 303 |
 | `nextpolish` | 1.4.1 | `quay.io/biocontainers/nextpolish:1.4.1--h3952c39_7` | Hu 2020, PMID 31778144 | 979 | 912 |
@@ -131,7 +131,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
-| `bracken` | 2.9 | `quay.io/biocontainers/bracken:2.9--py39h9e0f934_1` | Lu et al. 2017, PMID 28655956 | n/a | n/a |
+| `bracken` | 3.1 | `quay.io/biocontainers/bracken:3.1--h9948957_0` | Lu et al. 2017, PMID 28655956 | n/a | n/a |
 | `humann3` | 3.9 | `quay.io/biocontainers/humann:3.9--py312hdfd78af_0` | Beghini et al. 2021, PMID 33944776 | 1,715 | 1,553 |
 | `kneaddata` | 0.12.4 | `quay.io/biocontainers/kneaddata:0.12.4--pyhdfd78af_0` | McIver et al. 2018, PMID 31616210 | n/a | n/a |
 | `kraken2` | 2.1.6 | `quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0` | Wood et al. 2019, PMID 31779668 | 4,969 | 4,333 |

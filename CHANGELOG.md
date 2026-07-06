@@ -41,10 +41,12 @@ ship bug fixes only.  Breaking changes to the documented public API
   spades 4.0→4.2, prokka 1.14.6→1.15.6, quast 5.2→5.3, cutadapt 4.9→5.2,
   bakta 1.9.4→1.12.0, busco 5.7.1→6.1.0, seurat 5.0→5.5.1, harmony (harmonypy
   0.0.10→2.0.0), stringtie 2.2.3→3.0.3, multiqc 1.25.1→1.35, and more.
-- **Deferred for individual e2e verification** (genuine behaviour-changing
-  majors on recipe-used tools): Bracken 2.9→3.1 and medaka 1.11.3→2.2.2 stay
-  pinned until their recipe commands are re-validated on real data.  msconvert
-  is unbumped (its upstream tag carries no resolvable version).
+- **Behaviour-changing recipe majors — adopted after CLI-compat verification**:
+  Bracken 2.9→3.1 (the `bracken -d -i -o -w -r -l -t` interface the recipe uses
+  is unchanged) and medaka 1.11.3→2.2.2 (`medaka_consensus -i -d -o -t -m` intact
+  and the recipe's pinned model `r1041_e82_400bps_sup_v5.0.0` still ships — only
+  the *default* model moved to v5.2.0).  msconvert is the sole hold-out (its
+  upstream tag carries no resolvable version).
 
 ### Added — a path to modern scanpy (self-built, digest-pinned conda-forge image)
 - Bioconda froze `scanpy` at 1.7.2, so there's no newer BioContainer.  Added

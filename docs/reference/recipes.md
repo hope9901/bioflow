@@ -74,7 +74,7 @@ Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm
 
 - **read_qc** — `quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0`
 - **assemble** — `quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1`
-- **polish_consensus** — `quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0`
+- **polish_consensus** — `quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0`
 - **assess** — `quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0`
 
 ## `germline_variants`
@@ -133,7 +133,7 @@ Shotgun metagenomic profiling: fastp → Kraken2 → Bracken → Krona
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **kraken2_classify** — `quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0`
-- **bracken_abundance** — `quay.io/biocontainers/bracken:2.9--py39h9e0f934_1`
+- **bracken_abundance** — `quay.io/biocontainers/bracken:3.1--h9948957_0`
 - **krona_chart** — `staphb/krona:2.8.1`
 
 ## `methylation_wgbs`

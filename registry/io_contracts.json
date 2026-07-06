@@ -107,7 +107,7 @@
       ]
     },
     "bracken": {
-      "version": "2.9",
+      "version": "3.1",
       "inputs": [
         "kraken2_report"
       ],
@@ -649,7 +649,7 @@
       ]
     },
     "medaka": {
-      "version": "1.11.3",
+      "version": "2.2.2",
       "inputs": [
         "assembly_fasta",
         "fastq_long_ont"

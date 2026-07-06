@@ -44,7 +44,7 @@ def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
     )
 
 
-@stage(image="quay.io/biocontainers/medaka:1.11.3--py39h05d5c5e_0",
+@stage(image="quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0",
        cpu=8, ram_gb=32, depends_on=assemble)
 def polish_consensus(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400bps_sup_v5.0.0"):
     """Medaka ONT consensus polish of the Flye assembly."""
