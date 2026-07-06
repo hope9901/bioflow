@@ -27,7 +27,7 @@ from bioflow.recipes import register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
-@stage(image="quay.io/biocontainers/fastp:0.23.4--h5f740d0_0",
+@stage(image="quay.io/biocontainers/fastp:1.3.6--h43da1c4_0",
        cpu=4, ram_gb=4)
 def qc_trim(r1: Path, r2: Path, *, out_dir, min_qual: int = 15):
     """fastp: adapter trim + quality filter for paired-end short reads.

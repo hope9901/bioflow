@@ -159,7 +159,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `cutadapt` | 4.9 | `quay.io/biocontainers/cutadapt:4.9--py311haab0aaa_3` | Martin 2011, doi:10.14806/ej.17.1.200 | n/a | n/a |
-| `fastp` | 0.23.4 | `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0` | Chen 2018, PMID 30423086 | 19,916 | 17,361 |
+| `fastp` | 1.3.6 | `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0` | Chen 2018, PMID 30423086 | 19,916 | 17,361 |
 | `fastqc` | 0.12.1 | `quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0` | Andrews S, 2010 (Babraham Bioinformatics) | n/a | n/a |
 | `filtlong` | 0.2.1 | `quay.io/biocontainers/filtlong:0.2.1--hdcf5f25_4` | Wick 2021 (github.com/rrwick/Filtlong) | n/a | n/a |
 | `multiqc` | 1.25.1 | `quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0` | Ewels 2016, PMID 27312411 | 7,946 | 6,478 |

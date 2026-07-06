@@ -84,7 +84,7 @@ Germline variants: fastp → BWA → GATK → bcftools → SnpEff
 *6 stage(s):*
 
 - **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
-- **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **align** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_variants** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
 - **filter_variants** — `quay.io/biocontainers/bcftools:1.21--h8b25389_0`
@@ -105,7 +105,7 @@ Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs �
 *8 stage(s):*
 
 - **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
-- **qc_one** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **align_one** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_gvcf** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
 - **combine_gvcfs** — `quay.io/biocontainers/gatk4:4.6.1.0--py310hdfd78af_0`
@@ -119,7 +119,7 @@ Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → C
 
 *5 stage(s):*
 
-- **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **assemble** — `quay.io/biocontainers/megahit:1.2.9--h2e03b76_1`
 - **map_back** — `quay.io/biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:b411340b52d82a9c276d87c7a3dcffc880be762f-0`
 - **bin_genomes** — `quay.io/biocontainers/metabat2:2.17--h6f16272_1`
@@ -131,7 +131,7 @@ Shotgun metagenomic profiling: fastp → Kraken2 → Bracken → Krona
 
 *4 stage(s):*
 
-- **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **kraken2_classify** — `quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0`
 - **bracken_abundance** — `quay.io/biocontainers/bracken:2.9--py39h9e0f934_1`
 - **krona_chart** — `staphb/krona:2.8.1`
@@ -171,7 +171,7 @@ Prokaryote short-read de novo assembly + Prokka annotation
 
 *6 stage(s):*
 
-- **qc_trim** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **assemble** — `staphb/spades:4.0.0`
 - **annotate** — `staphb/prokka:1.14.6`
 - **assembly_qc** — `staphb/quast:5.2.0`
@@ -195,7 +195,7 @@ RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC
 *6 stage(s):*
 
 - **multiqc_report** — `quay.io/biocontainers/multiqc:1.25.1--pyhdfd78af_0`
-- **qc_one** — `quay.io/biocontainers/fastp:0.23.4--h5f740d0_0`
+- **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **salmon_index** — `quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5`
 - **salmon_quant** — `quay.io/biocontainers/salmon:1.10.3--h45fbf2d_5`
 - **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0`

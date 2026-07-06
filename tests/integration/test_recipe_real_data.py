@@ -55,7 +55,7 @@ def test_fastp_real_container_end_to_end(tmp_path):
     """A real fastp BioContainer trims real reads and emits valid JSON."""
     from bioflow import stage
 
-    @stage(image="quay.io/biocontainers/fastp:0.23.4--h5f740d0_0",
+    @stage(image="quay.io/biocontainers/fastp:1.3.6--h43da1c4_0",
            cpu=2, ram_gb=2, cache=False)
     def qc(r1, r2, *, out_dir):
         return (
