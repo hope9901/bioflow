@@ -1,6 +1,6 @@
 id: homer
 name: homer
-version: "4.11.1"
+version: "5.1"
 category: epigenomics
 stage: [chip_seq.step5, atac_seq.step5]
 input_types: [peaks_bed]

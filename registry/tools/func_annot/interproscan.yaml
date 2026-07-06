@@ -1,6 +1,6 @@
 id: interproscan
 name: InterProScan
-version: "5.67-99.0"
+version: "5.59_91.0"
 category: func_annot
 stage: [genome_assembly.step6]
 input_types: [protein_faa]

@@ -1,6 +1,6 @@
 id: percolator
 name: percolator
-version: "3.06.1"
+version: "3.7.1"
 category: proteomics
 stage: [proteomics.step3]
 input_types: [psm_tsv]

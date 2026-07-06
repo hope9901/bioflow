@@ -79,7 +79,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `cafe5` | 5.1.0 | `quay.io/biocontainers/cafe:5.1.0--h5ca1c30_1` | Mendes et al. 2021, PMID 33325497 | n/a | n/a |
 | `diamond` | 2.1.8 | `quay.io/biocontainers/diamond:2.1.8--h43eeafb_0` | Buchfink 2021, PMID 33828273 | 3,993 | 3,476 |
 | `fastani` | 1.34 | `staphb/fastani:1.34` | Jain et al. 2018, PMID 30504855 | 4,164 | 3,481 |
-| `iqtree` | 2.2.6 | `staphb/iqtree2:2.2.2.7` | Minh et al. 2020, PMID 32011700 | 11,112 | 9,802 |
+| `iqtree` | 2.2.2.7 | `staphb/iqtree2:2.2.2.7` | Minh et al. 2020, PMID 32011700 | 11,112 | 9,802 |
 | `mafft` | 7.520 | `staphb/mafft:7.520` | Katoh & Standley 2013, PMID 23329690 | 31,071 | 19,262 |
 | `mash` | 2.3 | `quay.io/biocontainers/mash:2.3--hb105d93_10` | Ondov 2016, PMID 27323842 | 2,452 | 1,753 |
 | `panaroo` | 1.8.0 | `quay.io/biocontainers/panaroo:1.8.0--pyhdfd78af_0` | Tonkin-Hill 2020, PMID 32698896 | 980 | 857 |
@@ -91,18 +91,18 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
-| `deseq2` | 1.44.0 | `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0` | Love 2014, PMID 25516281 | 72,197 | 52,540 |
-| `edger` | 4.2.0 | `quay.io/biocontainers/bioconductor-edger:4.8.2--r45h01b2380_0` | Robinson 2010, PMID 19910308 | 33,219 | 19,177 |
-| `limma_voom` | 3.60.0 | `quay.io/biocontainers/bioconductor-limma:3.66.0--r45h01b2380_0` | Law 2014, PMID 24485249 | 5,022 | 2,919 |
+| `deseq2` | 1.50.2 | `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0` | Love 2014, PMID 25516281 | 72,197 | 52,540 |
+| `edger` | 4.8.2 | `quay.io/biocontainers/bioconductor-edger:4.8.2--r45h01b2380_0` | Robinson 2010, PMID 19910308 | 33,219 | 19,177 |
+| `limma_voom` | 3.66.0 | `quay.io/biocontainers/bioconductor-limma:3.66.0--r45h01b2380_0` | Law 2014, PMID 24485249 | 5,022 | 2,919 |
 
 ## enrichment  (4)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
-| `clusterprofiler` | 4.12.0 | `quay.io/biocontainers/bioconductor-clusterprofiler:4.18.4--r45hdfd78af_0` | Wu 2021, PMID 34557778 | 9,455 | 8,823 |
+| `clusterprofiler` | 4.18.4 | `quay.io/biocontainers/bioconductor-clusterprofiler:4.18.4--r45hdfd78af_0` | Wu 2021, PMID 34557778 | 9,455 | 8,823 |
 | `enrichr` | 1.1.3 | `quay.io/biocontainers/gseapy:1.1.3--py311h5e00ca1_1` | Kuleshov 2016, PMID 27141961 | 8,495 | 6,133 |
 | `gseapy` | 1.1.3 | `quay.io/biocontainers/gseapy:1.1.3--py311h5e00ca1_1` | Fang 2023, PMID 36426870 | 786 | 678 |
-| `topgo` | 2.56.0 | `quay.io/biocontainers/bioconductor-topgo:2.62.0--r45hdfd78af_0` | Alexa & Rahnenfuhrer 2010, https://bioconductor.org/packages/topGO/ | n/a | n/a |
+| `topgo` | 2.62.0 | `quay.io/biocontainers/bioconductor-topgo:2.62.0--r45hdfd78af_0` | Alexa & Rahnenfuhrer 2010, https://bioconductor.org/packages/topGO/ | n/a | n/a |
 
 ## epigenomics  (8)
 
@@ -110,9 +110,9 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 |---|---|---|---|--:|--:|
 | `bismark` | 0.24.2 | `quay.io/biocontainers/bismark:0.24.2--hdfd78af_0` | Krueger & Andrews 2011, PMID 21493656 | 4,233 | 2,442 |
 | `deeptools` | 3.5.5 | `quay.io/biocontainers/deeptools:3.5.5--pyhdfd78af_0` | Ramirez et al. 2016, PMID 27079975 | 6,683 | 5,101 |
-| `homer` | 4.11.1 | `quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1` | Heinz et al. 2010, PMID 20513432 | 11,236 | 6,361 |
+| `homer` | 5.1 | `quay.io/biocontainers/homer:5.1--pl5321hc52dbad_1` | Heinz et al. 2010, PMID 20513432 | 11,236 | 6,361 |
 | `macs3` | 3.0.1 | `quay.io/biocontainers/macs3:3.0.1--py312he57d009_3` | Zhang et al. 2008, PMID 18798982 | 15,276 | 8,484 |
-| `methylkit` | 1.28.0 | `quay.io/biocontainers/bioconductor-methylkit:1.36.0--r45ha27e39d_0` | Akalin et al. 2012, PMID 23034086 | 1,664 | 1,012 |
+| `methylkit` | 1.36.0 | `quay.io/biocontainers/bioconductor-methylkit:1.36.0--r45ha27e39d_0` | Akalin et al. 2012, PMID 23034086 | 1,664 | 1,012 |
 | `methylpy` | 1.4.7 | `quay.io/biocontainers/methylpy:1.4.7--py39h0ae133c_0` | Schultz 2015, PMID 26030523 | 554 | 224 |
 | `picard` | 3.2.0 | `quay.io/biocontainers/picard:3.2.0--hdfd78af_0` | Broad Institute, https://broadinstitute.github.io/picard/ | n/a | n/a |
 | `tobias` | 0.16.1 | `quay.io/biocontainers/tobias:0.16.1--py312h1f1cfbb_1` | Bentsen et al. 2020, PMID 32848148 | 569 | 520 |
@@ -125,7 +125,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `dbcan` | 4.1.4 | `quay.io/biocontainers/dbcan:4.1.4--pyhdfd78af_0` | Zhang 2018, PMID 29771380 | 1,662 | 1,342 |
 | `eggnog_mapper` | 2.1.12 | `quay.io/biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0` | Cantalapiedra 2021, PMID 34597405 | 3,330 | 2,904 |
 | `gtdbtk` | 2.4.0 | `quay.io/biocontainers/gtdbtk:2.4.0--pyhdfd78af_1` | Chaumeil 2022, PMID 36218463 | 1,455 | 1,201 |
-| `interproscan` | 5.67-99.0 | `quay.io/biocontainers/interproscan:5.59_91.0--hec16e2b_1` | Blum 2021, PMID 33156333 | 1,736 | 1,643 |
+| `interproscan` | 5.59_91.0 | `quay.io/biocontainers/interproscan:5.59_91.0--hec16e2b_1` | Blum 2021, PMID 33156333 | 1,736 | 1,643 |
 
 ## metagenomics  (9)
 
@@ -151,7 +151,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `msconvert` | 3.0.24238 | `chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest` | Chambers et al. 2012, PMID 23051804 | 3,182 | 2,060 |
 | `msfragger` ⚠️ deprecated | 4.1 | `fcyu/msfragger:4.1` | Kong et al. 2017, PMID 28394336 | 1,964 | 1,617 |
 | `openms` | 3.2.0 | `quay.io/biocontainers/openms:3.2.0--haddbca4_5` | Rost 2016, PMID 27575624 | 501 | 317 |
-| `percolator` | 3.06.1 | `quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2` | Kall et al. 2007, PMID 17952086 | 1,951 | 924 |
+| `percolator` | 3.7.1 | `quay.io/biocontainers/percolator:3.7.1--h3b5f4bd_2` | Kall et al. 2007, PMID 17952086 | 1,951 | 924 |
 | `xtandem` | 15.12.15.2 | `quay.io/biocontainers/xtandem:15.12.15.2--h4464bbb_11` | Craig & Beavis 2004, PMID 14976030 | 1,931 | 322 |
 
 ## qc  (8)
@@ -194,10 +194,10 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bustools` | 0.43.2 | `quay.io/biocontainers/bustools:0.43.2--he1fd2f9_2` | Melsted 2019, PMID 31073610 | 122 | 108 |
 | `cellranger` | 7.2.0 | `litd/docker-cellranger:v7.2.0` | Zheng et al. 2017, PMID 28091601 | 5,666 | 4,102 |
 | `harmony` | 1.2.1 | `quay.io/biocontainers/harmonypy:0.0.10--pyhdfd78af_0` | Korsunsky 2019, PMID 31740819 | 7,697 | 6,723 |
-| `monocle3` | 1.3.7 | `quay.io/biocontainers/r-monocle3:1.4.26--r44h9948957_0` | Cao et al. 2019, PMID 30787392 | 426 | 371 |
+| `monocle3` | 1.4.26 | `quay.io/biocontainers/r-monocle3:1.4.26--r44h9948957_0` | Cao et al. 2019, PMID 30787392 | 426 | 371 |
 | `scanpy` | 1.12.2 | `ghcr.io/hope9901/bioflow-scanpy:1.12.2` | Wolf et al. 2018, PMID 29409532 | 6,692 | 5,617 |
 | `scrublet` | 0.2.3 | `quay.io/biocontainers/scrublet:0.2.3--pyh5e36f6f_1` | Wolock 2019, PMID 30954476 | 2,184 | 1,854 |
-| `seurat` | 5.0.1 | `satijalab/seurat:5.0.0` | Hao et al. 2024, PMID 37231261 | 3,602 | 2,821 |
+| `seurat` | 5.0.0 | `satijalab/seurat:5.0.0` | Hao et al. 2024, PMID 37231261 | 3,602 | 2,821 |
 | `starsolo` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin et al. 2013, PMID 23104886 | 41,990 | 29,078 |
 
 ## struct_annot  (5)

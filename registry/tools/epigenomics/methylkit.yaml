@@ -1,6 +1,6 @@
 id: methylkit
 name: methylkit
-version: "1.28.0"
+version: "1.36.0"
 category: epigenomics
 stage: [methylation.step4]
 input_types: [methylation_report]

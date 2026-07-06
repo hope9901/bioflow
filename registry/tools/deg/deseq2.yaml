@@ -1,6 +1,6 @@
 id: deseq2
 name: DESeq2
-version: "1.44.0"
+version: "1.50.2"
 category: deg
 stage: [rnaseq_deg.step3]
 input_types: [count_matrix, sample_sheet]

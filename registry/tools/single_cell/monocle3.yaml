@@ -1,6 +1,6 @@
 id: monocle3
 name: monocle3
-version: "1.3.7"
+version: "1.4.26"
 category: single_cell
 stage: [scrna_seq.step5]
 input_types: [count_matrix]

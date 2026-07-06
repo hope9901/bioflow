@@ -1,6 +1,6 @@
 id: edger
 name: edgeR
-version: "4.2.0"
+version: "4.8.2"
 category: deg
 stage: [rnaseq_deg.step3]
 input_types: [count_matrix, sample_sheet]

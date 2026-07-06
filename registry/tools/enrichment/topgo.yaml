@@ -1,6 +1,6 @@
 id: topgo
 name: topGO
-version: "2.56.0"
+version: "2.62.0"
 category: enrichment
 stage: [rnaseq_deg.step4]
 input_types: [deg_table, gene_universe, go_annotation]

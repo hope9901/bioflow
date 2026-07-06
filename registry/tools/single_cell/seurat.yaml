@@ -1,6 +1,6 @@
 id: seurat
 name: seurat
-version: "5.0.1"
+version: "5.0.0"
 category: single_cell
 stage: [scrna_seq.step2, scrna_seq.step3, scrna_seq.step4]
 input_types: [count_matrix]

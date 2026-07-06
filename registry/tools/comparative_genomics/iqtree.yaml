@@ -1,6 +1,6 @@
 id: iqtree
 name: IQ-TREE
-version: "2.2.6"
+version: "2.2.2.7"
 category: comparative_genomics
 stage: [comparative_genomics.step4]
 input_types: [core_alignment]

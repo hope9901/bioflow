@@ -1,6 +1,6 @@
 id: limma_voom
 name: limma-voom
-version: "3.60.0"
+version: "3.66.0"
 category: deg
 stage: [rnaseq_deg.step3]
 input_types: [count_matrix, sample_sheet]
