@@ -7,8 +7,8 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 113,
-  "n_with_pmid": 103,
+  "n_tools": 114,
+  "n_with_pmid": 104,
   "n_fetched": 98,
   "n_pmid_mismatch": 5,
   "tools": {
@@ -493,6 +493,15 @@
       "name": "kneaddata",
       "category": "metagenomics",
       "ref_title": "Principles of prophylactic and therapeutic management of skin toxicity during tr"
+    },
+    "kofamscan": {
+      "pmid": "31742321",
+      "doi": "10.1093/bioinformatics/btz859",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "KofamScan",
+      "category": "func_annot"
     },
     "kraken2": {
       "pmid": "31779668",

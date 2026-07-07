@@ -12,7 +12,7 @@ from bioflow.cli._app import app, console
 
 @app.command("db")
 def db_cmd(
-    action: str = typer.Argument(..., help="fetch | list | verify | manifest"),
+    action: str = typer.Argument(..., help="fetch | list | verify | manifest | status | update | provision"),
     name: Optional[str] = typer.Argument(None, help="Database key (see 'bioflow db list')."),
     dest: Path = typer.Option(
         Path("data/references"),
@@ -20,6 +20,15 @@ def db_cmd(
         help="Root directory for downloaded databases.",
     ),
     force: bool = typer.Option(False, "--force", "-f", help="Re-download even if file exists."),
+    check_latest: bool = typer.Option(
+        False, "--check-latest",
+        help="[status] Probe upstream for the newest DB version (small HTTP request).",
+    ),
+    run: bool = typer.Option(
+        False, "--run",
+        help="[provision] Actually pull the tool image + build the DB "
+             "(downloads GB). Default just prints the command.",
+    ),
 ) -> None:
     """Fetch / verify / list reference databases, or emit a refgenie manifest.
 
@@ -30,12 +39,70 @@ def db_cmd(
     manifest  Emit a refgenie-compatible asset manifest (JSON) mapping
               genome/asset → catalogued DB, so labs on refgenie can see
               which existing assets satisfy a bioflow requirement.
+    status    Installed vs catalog vs (with --check-latest) upstream version
+              for a DB, or all annotation DBs. Shows update-available.
+    update    Version-gated refresh: re-download only when upstream is newer.
+    provision Build/download a DB *inside its tool's container* (the image
+              ships the downloader). Prints the command; --run executes it.
     """
     import json  # noqa: PLC0415
 
     from bioflow.core.db import (  # noqa: PLC0415
-        fetch_db, list_dbs, refgenie_manifest, verify_db,
+        _DB_CATALOG, catalog_version, db_status, fetch_db, list_dbs,
+        provision_command, refgenie_manifest, update_db, verify_db,
     )
+
+    if action == "status":
+        keys = [name] if name else [k for k, e in _DB_CATALOG.items() if e.get("version")]
+        console.print("\n[bold]Reference-DB versions:[/]\n")
+        for k in keys:
+            try:
+                st = db_status(k, dest, check_latest=check_latest)
+            except KeyError as exc:
+                rprint(f"[red]Error:[/] {exc}")
+                raise typer.Exit(code=1) from exc
+            inst = st["installed"] or "[dim]not provisioned[/]"
+            latest = f"  latest={st['latest']}" if st["latest"] else ""
+            flag = "  [yellow]⬆ update available[/]" if st["update_available"] else ""
+            console.print(f"  [cyan]{k:<16}[/] installed={inst}  "
+                          f"catalog={st['catalog']}{latest}{flag}")
+        return
+
+    if action == "provision":
+        if not name:
+            rprint("[red]Error:[/] 'name' required for provision.")
+            raise typer.Exit(code=1)
+        cmd = provision_command(name, dest)
+        if cmd is None:
+            rprint(f"[yellow]{name}[/] is fetched via a plain URL — use "
+                   f"[cyan]bioflow db fetch {name}[/].")
+            raise typer.Exit(code=0)
+        tools = _DB_CATALOG[name].get("used_by", [])
+        rprint(f"[bold]Provision {name}[/] (v{catalog_version(name)}) "
+               f"inside the {', '.join(tools)} container:\n")
+        rprint(f"  [cyan]{cmd}[/]\n")
+        if not run:
+            rprint("[dim]Dry run — re-run with [bold]--run[/] to pull the image "
+                   "and download the DB (several GB).[/]")
+            return
+        rprint("[yellow]--run provisioning is not wired to a backend yet; "
+               "execute the printed command in the tool container.[/]")
+        return
+
+    if action == "update":
+        if not name:
+            rprint("[red]Error:[/] 'name' required for update.")
+            raise typer.Exit(code=1)
+        try:
+            res = update_db(name, dest)
+        except (KeyError, RuntimeError) as exc:
+            rprint(f"[red]Error:[/] {exc}")
+            raise typer.Exit(code=1) from exc
+        if res["updated"]:
+            rprint(f"[green]✓[/] {name} → {res['installed']}")
+        else:
+            rprint(f"[dim]{name} already current ({res['installed']}).[/]")
+        return
 
     if action == "list":
         rows = list_dbs()
@@ -83,5 +150,6 @@ def db_cmd(
             raise typer.Exit(code=1) from exc
 
     else:
-        rprint(f"[red]Unknown action '{action}'.[/] Use: fetch | list | verify")
+        rprint(f"[red]Unknown action '{action}'.[/] Use: "
+               "list | fetch | verify | manifest | status | update | provision")
         raise typer.Exit(code=1)

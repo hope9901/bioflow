@@ -14,6 +14,31 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — gene functional-annotation DBs with version-gated updates + DB-version citations
+- New tool **KofamScan** (`func_annot`, KEGG KO assignment via `exec_annotation`),
+  digest-pinned like every other tool.
+- The functional-annotation databases (eggNOG, Pfam, dbCAN, antiSMASH, GTDB-Tk,
+  KOfam) now carry a **version** and are managed lazily instead of re-downloaded
+  on every run:
+  - `bioflow db provision <db>` prints (or `--run` executes) the downloader that
+    builds the DB **inside the consuming tool's own container**, so the DB build
+    matches the pinned tool.  It does not download by default — the multi-GB fetch
+    is an explicit opt-in.
+  - `bioflow db status [--check-latest]` shows installed-vs-catalog-vs-upstream
+    versions and an *update-available* flag.  A tiny version marker
+    (`.bioflow_db_version`) records what's on disk.
+  - `bioflow db update <db>` is **version-gated**: it re-downloads only when
+    upstream is newer than the marker (a no-op otherwise), so it is safe on a
+    schedule.  At run time `db.ensure_db_current(tool)` checks the version first
+    and, by default, only *flags* that a newer DB exists (never a surprise
+    download); `auto_update=True` is opt-in for unattended pipelines.
+  - `latest_db_version()` probes a small index/relnotes URL (never the payload)
+    to learn the newest version; offline it stays silent (treated as "no update").
+- **`bioflow cite` now includes the database version** next to the tool version,
+  e.g. `eggNOG-mapper v2.1.15 (databases: eggNOG v5.0.2)` / `KofamScan v1.3.0
+  (databases: KOfam v2024-01-01)` — so a methods section can cite both, which
+  move on independent release cadences.
+
 ### Added — I/O contract drift guard across version bumps
 - Every tool declares the data formats it consumes/produces (`input_types` /
   `output_types`).  A version bump that also changes those formats can break a

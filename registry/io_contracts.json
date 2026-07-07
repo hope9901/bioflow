@@ -541,6 +541,15 @@
         "clean_fastq"
       ]
     },
+    "kofamscan": {
+      "version": "1.3.0",
+      "inputs": [
+        "protein_faa"
+      ],
+      "outputs": [
+        "kegg_ko_tsv"
+      ]
+    },
     "kraken2": {
       "version": "2.1.6",
       "inputs": [

@@ -20,6 +20,7 @@ Append an entry to ``_DB_CATALOG`` — the dict key is the name used on the CLI.
 from __future__ import annotations
 
 import hashlib
+import re
 import urllib.request
 from pathlib import Path
 
@@ -42,6 +43,15 @@ _DB_CATALOG: dict[str, dict] = {
         "dest_file": "eggnog/eggnog.db.gz",
         "used_by": ["eggnog_mapper"],
         "notes": "Run emapper-download-data after fetching.",
+        # ── functional-annotation DB versioning ──
+        "version": "5.0.2",
+        # Provisioned *inside* the eggnog-mapper container so the DB matches the
+        # tool build; {dir} is bind-mounted from the refs root.
+        "provision": "download_eggnog_data.py -y --data_dir {dir}",
+        # Cheap version probe (no multi-GB download): the emapperdb dir is
+        # named emapperdb-<ver>; scrape the download index for the newest.
+        "latest": {"url": "http://eggnog5.embl.de/download/",
+                   "regex": r"emapperdb-([0-9][0-9.]*)"},
     },
     "pfam": {
         "name": "Pfam-A 36.0 — protein family HMMs",
@@ -54,6 +64,12 @@ _DB_CATALOG: dict[str, dict] = {
         "dest_file": "pfam/Pfam-A.hmm.gz",
         "used_by": ["interproscan"],
         "notes": "Decompress and run hmmpress before use.",
+        "version": "36.0",
+        "provision": "sh -c 'cd {dir} && wget -q "
+                     "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz "
+                     "&& gunzip -f Pfam-A.hmm.gz && hmmpress -f Pfam-A.hmm'",
+        "latest": {"url": "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/relnotes.txt",
+                   "regex": r"RELEASE\s+([0-9]+\.[0-9]+)"},
     },
     "dfam_curated": {
         "name": "Dfam 3.8 — curated repeat library",
@@ -228,6 +244,68 @@ _DB_CATALOG: dict[str, dict] = {
             "Pair with the matching GRCh38 primary-assembly FASTA."
         ),
     },
+    # ── Gene functional-annotation databases ───────────────────────────────
+    # These are provisioned *inside* the annotating tool's own container (the
+    # BioContainer ships the downloader but not the multi-GB data), so the DB
+    # build always matches the pinned tool.  `bioflow db provision <name>`
+    # pulls the tool image + runs `provision`; `bioflow db update <name>` only
+    # re-downloads when `latest` reports a newer version than the marker.
+    "dbcan": {
+        "name": "dbCAN — CAZyme annotation database",
+        "url": "",                       # provisioned via the container downloader
+        "size_gb": 7.0,
+        "md5": None,
+        "dest_file": "dbcan",
+        "used_by": ["dbcan"],
+        "version": "12",
+        "provision": "dbcan_build --cpus 4 --db-dir {dir} --clean",
+        "latest": {"url": "https://bcb.unl.edu/dbCAN2/download/Databases/",
+                   "regex": r"dbCAN-HMMdb-V([0-9]+)"},
+        "notes": "CAZy HMMs + CGC/substrate data for run_dbCAN.",
+    },
+    "antismash_db": {
+        "name": "antiSMASH — BGC detection databases",
+        "url": "",
+        "size_gb": 9.0,
+        "md5": None,
+        "dest_file": "antismash",
+        "used_by": ["antismash"],
+        "version": "8.0",
+        "provision": "download-antismash-databases --database-dir {dir}",
+        "latest": None,                  # tied to the antiSMASH release
+        "notes": "PFAM/ClusterBlast/Resfams data for antiSMASH.",
+    },
+    "gtdbtk_r220": {
+        "name": "GTDB-Tk reference data — release R220",
+        "url": (
+            "https://data.gtdb.ecogenomic.org/releases/release220/220.0/"
+            "auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz"
+        ),
+        "size_gb": 110.0,
+        "md5": None,
+        "dest_file": "gtdbtk/gtdbtk_r220_data.tar.gz",
+        "used_by": ["gtdbtk"],
+        "version": "r220",
+        "provision": "sh -c 'tar xzf {dir}/gtdbtk_r220_data.tar.gz -C {dir}'",
+        "latest": {"url": "https://data.gtdb.ecogenomic.org/releases/latest/VERSION.txt",
+                   "regex": r"(r?\d+(?:\.\d+)?)"},
+        "notes": "Set GTDBTK_DATA_PATH to the extracted release_* directory.",
+    },
+    "kofam": {
+        "name": "KOfam — KEGG Orthology HMM profiles + ko_list (KofamScan)",
+        "url": "https://www.genome.jp/ftp/db/kofam/profiles.tar.gz",
+        "size_gb": 3.0,
+        "md5": None,
+        "dest_file": "kofam/profiles.tar.gz",
+        "used_by": ["kofamscan"],
+        "version": "2024-01-01",
+        "provision": "sh -c 'cd {dir} && wget -q https://www.genome.jp/ftp/db/kofam/ko_list.gz "
+                     "https://www.genome.jp/ftp/db/kofam/profiles.tar.gz "
+                     "&& gunzip -f ko_list.gz && tar xzf profiles.tar.gz'",
+        "latest": {"url": "https://www.genome.jp/ftp/db/kofam/",
+                   "regex": r"README\.md.*?(\d{4}-\d{2}-\d{2})"},
+        "notes": "KEGG KO assignment via exec_annotation (KofamScan).",
+    },
 }
 
 
@@ -397,6 +475,10 @@ def fetch_db(
             )
         log.info(f"MD5 verified for '{name}'")
 
+    # Stamp the installed version so version-gated updates can compare later.
+    if catalog_version(name):
+        write_db_version(name, dest_root)
+
     log.info(f"'{name}' downloaded to {dest}")
     return dest
 
@@ -427,6 +509,173 @@ def verify_db(name: str, dest_root: Path) -> bool:
 
     log.warning(f"DB '{name}' checksum MISMATCH: expected {expected_md5}, got {actual}")
     return False
+
+
+# ---------------------------------------------------------------------------
+# DB versioning + version-gated updates (functional-annotation databases)
+# ---------------------------------------------------------------------------
+#
+# The annotation DBs are too large to bundle and change on their own release
+# cadence, so we track a *version* per DB and only re-download when upstream is
+# newer than the copy on disk.  The installed version is recorded in a tiny
+# marker file next to the data; the "latest" version is a cheap HTTP probe
+# (never the multi-GB payload).
+
+_VERSION_MARKER = ".bioflow_db_version"
+
+
+def _db_top_dir(name: str) -> str:
+    """First path component of the DB's dest_file (its on-disk root)."""
+    return Path(_DB_CATALOG[name]["dest_file"]).parts[0]
+
+
+def catalog_version(name: str) -> "str | None":
+    """The DB version pinned in the catalog, or None if unversioned."""
+    return _DB_CATALOG.get(name, {}).get("version")
+
+
+def dbs_for_tool(tool_id: str) -> "list[str]":
+    """Catalog keys of every *versioned* DB a tool consumes (in catalog order)."""
+    return [k for k, e in _DB_CATALOG.items()
+            if tool_id in e.get("used_by", []) and e.get("version")]
+
+
+def installed_db_version(name: str, dest_root: Path) -> "str | None":
+    """Read the version marker written at fetch/provision time, or None."""
+    if name not in _DB_CATALOG:
+        raise KeyError(f"Unknown database '{name}'.")
+    marker = dest_root / _db_top_dir(name) / _VERSION_MARKER
+    if marker.exists():
+        return marker.read_text(encoding="utf-8").strip() or None
+    return None
+
+
+def write_db_version(name: str, dest_root: Path, version: "str | None" = None) -> Path:
+    """Stamp the installed DB version (defaults to the catalog version)."""
+    version = version or catalog_version(name) or ""
+    marker = dest_root / _db_top_dir(name) / _VERSION_MARKER
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.write_text(version + "\n", encoding="utf-8")
+    return marker
+
+
+def _vt(s: str) -> tuple:
+    return tuple(int(x) for x in re.findall(r"\d+", s or ""))
+
+
+def latest_db_version(name: str, *, _fetch=None) -> "str | None":
+    """Best-effort probe of the newest available version for *name*.
+
+    Fetches the DB's ``latest`` spec (a small index/relnotes URL, never the
+    data) and returns the highest version matched by its regex.  Returns None
+    when the DB has no probe or the network is unavailable — callers treat an
+    unknown latest as "no update" rather than forcing a download.
+    """
+    spec = _DB_CATALOG.get(name, {}).get("latest")
+    if not spec:
+        return None
+    fetch = _fetch or (lambda u: urllib.request.urlopen(u, timeout=15)
+                       .read().decode("utf-8", "replace"))
+    try:
+        body = fetch(spec["url"])
+    except Exception as exc:            # offline / server hiccup — stay silent
+        log.debug(f"latest_db_version({name}) probe failed: {exc}")
+        return None
+    matches = re.findall(spec["regex"], body, re.S)
+    if not matches:
+        return None
+    return max(matches, key=_vt)
+
+
+def db_status(name: str, dest_root: Path, *, check_latest: bool = False,
+              _fetch=None) -> dict:
+    """Installed vs catalog vs (optionally) upstream-latest for one DB.
+
+    ``update_available`` is True only when a *newer* version than the one on
+    disk is known — so a routine run never re-downloads an up-to-date DB.
+    """
+    if name not in _DB_CATALOG:
+        raise KeyError(f"Unknown database '{name}'.")
+    installed = installed_db_version(name, dest_root)
+    pinned = catalog_version(name)
+    latest = latest_db_version(name, _fetch=_fetch) if check_latest else None
+    reference = latest or pinned
+    update = bool(installed and reference and _vt(reference) > _vt(installed))
+    return {
+        "db": name,
+        "installed": installed,
+        "catalog": pinned,
+        "latest": latest,
+        "present": installed is not None,
+        "update_available": update,
+    }
+
+
+def provision_command(name: str, dest_root: Path) -> "str | None":
+    """The shell command that builds/downloads DB *name* into ``dest_root``.
+
+    Runs *inside the consuming tool's container* (the BioContainer ships the
+    downloader, not the data), with ``{dir}`` bound to the DB's on-disk root.
+    Returns None for DBs fetched via a plain URL (use ``fetch_db``).
+    """
+    entry = _DB_CATALOG.get(name)
+    if not entry or not entry.get("provision"):
+        return None
+    target = (dest_root / _db_top_dir(name)).resolve()
+    return entry["provision"].format(dir=target)
+
+
+def ensure_db_current(tool_id: str, dest_root: Path, *, auto_update: bool = False,
+                      check_latest: bool = True, _fetch=None) -> "list[dict]":
+    """Run-time gate: for every DB *tool_id* uses, check the version and only
+    act when a newer one exists (never on every run).
+
+    Returns a status dict per DB.  With ``auto_update=False`` (default) it just
+    flags that a newer DB is available — the actual multi-GB fetch stays an
+    explicit ``bioflow db update`` so a run is never silently blocked on a
+    download.  ``auto_update=True`` is opt-in for unattended pipelines.
+    """
+    statuses = []
+    for name in dbs_for_tool(tool_id):
+        st = db_status(name, dest_root, check_latest=check_latest, _fetch=_fetch)
+        if not st["present"]:
+            log.warning(
+                f"DB '{name}' for {tool_id} is not provisioned — run "
+                f"`bioflow db provision {name} --dest {dest_root}`."
+            )
+        elif st["update_available"]:
+            newer = st["latest"] or st["catalog"]
+            if auto_update:
+                log.info(f"DB '{name}': {st['installed']} -> {newer}; updating.")
+                update_db(name, dest_root, _fetch=_fetch)
+            else:
+                log.warning(
+                    f"DB '{name}' for {tool_id}: newer version {newer} available "
+                    f"(installed {st['installed']}). Run "
+                    f"`bioflow db update {name}` to refresh."
+                )
+        statuses.append(st)
+    return statuses
+
+
+def update_db(name: str, dest_root: Path, *, _fetch=None) -> dict:
+    """Version-gated refresh: fetch + re-stamp only when upstream is newer.
+
+    A no-op (with ``updated=False``) when the on-disk DB is already current, so
+    it is safe to call on a schedule.
+    """
+    st = db_status(name, dest_root, check_latest=True, _fetch=_fetch)
+    if st["present"] and not st["update_available"]:
+        log.info(f"DB '{name}' already current ({st['installed']}).")
+        return {**st, "updated": False}
+    # A URL-backed DB can be fetched here; a provision-only DB must be rebuilt
+    # in its tool container via `bioflow db provision`.
+    if _DB_CATALOG[name].get("url"):
+        fetch_db(name, dest_root, skip_if_exists=False)
+    target_version = st["latest"] or st["catalog"]
+    write_db_version(name, dest_root, target_version)
+    log.info(f"DB '{name}' updated to {target_version}.")
+    return {**st, "installed": target_version, "updated": True}
 
 
 # ---------------------------------------------------------------------------

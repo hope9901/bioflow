@@ -48,10 +48,29 @@ def _dois() -> "dict[str, str | None]":
     return {tid: c.get("doi") for tid, c in data.get("tools", {}).items()}
 
 
+def _tool_dbs(tool_id: str) -> "list[dict]":
+    """[{name, version}] for the versioned reference DBs a tool annotates with.
+
+    So a methods section can cite not just eggNOG-mapper's *version* but the
+    eggNOG *database version* it ran against — the two move independently.
+    """
+    try:
+        from bioflow.core import db as _db  # noqa: PLC0415
+    except Exception:
+        return []
+    out = []
+    for key in _db.dbs_for_tool(tool_id):
+        out.append({"name": _db._DB_CATALOG[key]["name"],
+                    "key": key,
+                    "version": _db.catalog_version(key)})
+    return out
+
+
 def _entry(tool: dict, doi: "str | None") -> dict:
     return {
         "id": tool["id"], "name": tool["name"], "version": tool["version"],
         "citation": tool["citation"], "doi": doi,
+        "databases": _tool_dbs(tool["id"]),
     }
 
 
@@ -92,13 +111,20 @@ def _author_year(citation: str) -> "tuple[str, str]":
     return (m.group(1), m.group(2)) if m else ("", "")
 
 
+def _db_suffix(entry: dict) -> str:
+    dbs = entry.get("databases") or []
+    parts = [f"{d['name'].split(' —')[0].split(' v')[0].strip()} "
+             f"v{d['version']}" for d in dbs if d.get("version")]
+    return f" (databases: {'; '.join(parts)})" if parts else ""
+
+
 def format_text(entries: "list[dict]") -> str:
     lines = []
     for e in entries:
         ver = f" v{e['version']}" if e["version"] else ""
         ref = re.sub(r",?\s*PMID\s*\d+", "", e["citation"]).strip() or e["name"]
         doi = f"  https://doi.org/{e['doi']}" if e.get("doi") else "  (no DOI on record)"
-        lines.append(f"- {e['name']}{ver} — {ref}.{doi}")
+        lines.append(f"- {e['name']}{ver}{_db_suffix(e)} — {ref}.{doi}")
     return "\n".join(lines)
 
 
@@ -114,6 +140,10 @@ def format_bibtex(entries: "list[dict]") -> str:
             fields.append(f"  year = {{{year}}}")
         if e.get("doi"):
             fields.append(f"  doi = {{{e['doi']}}}")
-        fields.append(f"  note = {{{e['citation']}}}")
+        note = e["citation"]
+        dbnote = _db_suffix(e).strip()
+        if dbnote:
+            note = f"{note}. {dbnote[1:-1]}" if note else dbnote[1:-1]
+        fields.append(f"  note = {{{note}}}")
         blocks.append(f"@software{{{key},\n" + ",\n".join(fields) + "\n}")
     return "\n\n".join(blocks)
