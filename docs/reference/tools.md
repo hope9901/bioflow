@@ -208,7 +208,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bakta` | 1.12.0 | `quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0` | Schwengers 2021, PMID 34739369 | 919 | 792 |
 | `braker3` | 3.1.1 | `teambraker/braker3:v3.1.1` | Gabriel 2024, PMID 38866550 | 487 | 370 |
 | `liftoff` | 1.6.3 | `quay.io/biocontainers/liftoff:1.6.3--pyhdfd78af_0` | Shumate & Salzberg 2021, PMID 33320174 | 733 | 669 |
-| `prokka` | 1.15.6 | `staphb/prokka:1.15.6` | Seemann 2014, PMID 24642063 | 14,442 | 9,722 |
+| `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,442 | 9,722 |
 
 ## variant_calling  (4)
 

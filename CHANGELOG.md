@@ -38,7 +38,7 @@ ship bug fixes only.  Breaking changes to the documented public API
 - Bumped **64 tools** to their real newest upstream build (digest-resolved,
   recipes updated in lockstep, I/O contracts re-blessed): e.g. bcftools
   1.21→1.23.1, samtools 1.20→1.23.1, minimap2 2.28→2.31, gatk4 4.6.1→4.6.2,
-  spades 4.0→4.2, prokka 1.14.6→1.15.6, quast 5.2→5.3, cutadapt 4.9→5.2,
+  spades 4.0→4.2, quast 5.2→5.3, cutadapt 4.9→5.2,
   bakta 1.9.4→1.12.0, busco 5.7.1→6.1.0, seurat 5.0→5.5.1, harmony (harmonypy
   0.0.10→2.0.0), stringtie 2.2.3→3.0.3, multiqc 1.25.1→1.35, and more.
 - **Behaviour-changing recipe majors — adopted after CLI-compat verification**:
@@ -47,6 +47,14 @@ ship bug fixes only.  Breaking changes to the documented public API
   and the recipe's pinned model `r1041_e82_400bps_sup_v5.0.0` still ships — only
   the *default* model moved to v5.2.0).  msconvert is the sole hold-out (its
   upstream tag carries no resolvable version).
+- **Prokka held at 1.14.6 (reverted a bad bump).**  The freshness list offered
+  `staphb/prokka:1.15.6`, but Prokka has no official release past 1.14.6 (upstream
+  is dormant) and that staphb repackage's gene-caller silently emits **0 CDS** —
+  the nightly full-pipeline e2e caught it (prokaryote_assembly + pangenome both
+  red).  Reverted to 1.14.6 and added a `pin_reason` so the release-watch won't
+  re-propose it.  (Exactly the recipe-breaking-bump case the I/O guard is meant
+  to flank — here the *nightly e2e* was the backstop, since the break was a
+  behaviour change, not an I/O-format change.)
 
 ### Added — a path to modern scanpy (self-built, digest-pinned conda-forge image)
 - Bioconda froze `scanpy` at 1.7.2, so there's no newer BioContainer.  Added

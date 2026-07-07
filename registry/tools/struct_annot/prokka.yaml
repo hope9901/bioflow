@@ -1,6 +1,6 @@
 id: prokka
 name: Prokka
-version: "1.15.6"
+version: "1.14.6"
 category: struct_annot
 stage: [genome_assembly.step5]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: staphb/prokka:1.15.6
+  image: staphb/prokka:1.14.6
   pull_policy: if_not_present
-  image_digest: sha256:0140f1255b7fae5e3c96a96757ef393656544d85637122219e0ef7d3282f0afe
+  image_digest: sha256:6bb2522e077ef08a8be7a3856fe80372ede3b832becba0728e1ddbe83d89a042
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 5}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 20}
@@ -23,4 +23,5 @@ command_template: |
          --force --fast {assembly_fasta}
 citation: "Seemann 2014, PMID 24642063"
 added: "2026-04-16"
-last_reviewed: "2026-07-06"
+last_reviewed: "2026-07-07"
+pin_reason: "Prokka has no official release past 1.14.6 (upstream is dormant); the staphb 1.15.6 tag is a repackage whose gene-caller silently emits 0 CDS, breaking prokaryote_assembly + pangenome (nightly e2e). Stay on 1.14.6."

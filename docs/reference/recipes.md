@@ -153,7 +153,7 @@ Pangenome from a taxon: NCBI fetch → parallel Prokka → Roary
 
 *2 stage(s):*
 
-- **annotate** — `staphb/prokka:1.15.6`
+- **annotate** — `staphb/prokka:1.14.6`
 - **run_roary** — `staphb/roary:3.13.0`
 
 ## `phylogeny`
@@ -173,7 +173,7 @@ Prokaryote short-read de novo assembly + Prokka annotation
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **assemble** — `staphb/spades:4.2.0`
-- **annotate** — `staphb/prokka:1.15.6`
+- **annotate** — `staphb/prokka:1.14.6`
 - **assembly_qc** — `staphb/quast:5.3.0`
 - **genome_plot** — `staphb/genovi:0.4.3`
 - **graph_image** — `staphb/bandage:0.9.0`

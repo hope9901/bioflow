@@ -1,6 +1,6 @@
 {
   "_comment": "I/O format contract snapshot \u2014 regenerate with `python scripts/io_contracts.py update`.  See scripts/io_contracts.py.",
-  "generated": "2026-07-06",
+  "generated": "2026-07-07",
   "tools": {
     "abricate": {
       "version": "1.4.0",
@@ -851,7 +851,7 @@
       ]
     },
     "prokka": {
-      "version": "1.15.6",
+      "version": "1.14.6",
       "inputs": [
         "assembly_fasta"
       ],

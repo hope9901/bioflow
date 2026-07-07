@@ -42,7 +42,7 @@ TARGETS: dict[str, str] = {
     "compleasm": "0.2.8", "diamond": "2.2.2", "enrichr": "1.3.0",
     "gseapy": "1.3.0", "flye": "2.9.6", "gatk4": "4.6.2.0",
     "iqtree": "2.4.0", "macs3": "3.0.4", "metabat2": "2.18",
-    "percolator": "3.9", "picard": "3.4.0", "prokka": "1.15.6",
+    "percolator": "3.9", "picard": "3.4.0",
     "quast": "5.3.0", "snpeff": "5.4", "spades": "4.2.0",
     "tobias": "0.17.3", "kraken2": "2.1.6", "trimgalore": "0.6.11",
     "mafft": "7.526", "multiqc": "1.35", "nanoplot": "1.47.1",

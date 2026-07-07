@@ -77,7 +77,7 @@ def assembly_qc(asm, *, out_dir):
     )
 
 
-@stage(image="staphb/prokka:1.15.6", cpu=4, ram_gb=8, depends_on=assemble)
+@stage(image="staphb/prokka:1.14.6", cpu=4, ram_gb=8, depends_on=assemble)
 def annotate(asm, *, out_dir, sample_id: str = "sample"):
     """Prokka: structural annotation (CDS, rRNA, tRNA) on the assembly.
 
