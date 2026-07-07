@@ -30,6 +30,19 @@ ship bug fixes only.  Breaking changes to the documented public API
   immutable `--<hash>` build tags — then rewriting the YAML + every recipe that
   pins it in lockstep.
 
+### Added — `verify_bump.py`: behaviour-check a bump before it can email you
+- The prokka break only surfaced in the *scheduled nightly* (a 3am failure
+  email), because the `command -v` capability guard confirms a binary exists but
+  not that it *works*.  New `scripts/verify_bump.py` closes that gap: for every
+  bumped tool (auto-detected vs `origin/main`, or named) it launches the pinned
+  image and runs the tool's **real operation on a tiny generated input**, and for
+  any tool used by an e2e-covered recipe it also runs that recipe's full e2e —
+  so a prokka-0-CDS-style silent break fails **locally, before you push**.  Wired
+  into `bump_tools.py`'s next-steps and documented in `docs/MAINTAINER.md`.
+- Verified the current sweep with it: all 29 bumped recipe-used tools behave in
+  their pinned images (7 real-op smokes + the rest via the green e2e-9 / liveness
+  for DB-gated tools).
+
 ### Changed — registry-wide freshness sweep (64 tools bumped to latest)
 - Corrected **12 version labels** that disagreed with the pinned image (same
   class as the scanpy 1.10.1-vs-1.7.2 bug: deseq2 1.44→1.50.2, edger, limma,

@@ -183,6 +183,8 @@ def main(argv: list[str]) -> int:
     print("\nnext:")
     print("  python scripts/pin_digests.py --force " + " ".join(bumped_ids))
     print("  python scripts/io_contracts.py update && python scripts/gen_docs.py")
+    print("  python scripts/verify_bump.py " + " ".join(bumped_ids)
+          + "   # behaviour-check in real containers BEFORE you push")
     return 0
 
 

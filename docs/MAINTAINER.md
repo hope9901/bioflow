@@ -277,6 +277,29 @@ When you bump a tool:
   pipelines working across upgrades — the bump can't ship until the contract is
   re-blessed.
 
+### Behaviour-check a bump BEFORE you push
+
+A version bump can keep the same I/O contract yet silently break a tool — e.g.
+the staphb `prokka:1.15.6` repackage ran fine but emitted **0 CDS**, so
+`prokaryote_assembly` + `pangenome` only went red in the *scheduled nightly*
+(an after-the-fact failure email).  The `command -v` capability guard can't
+catch this — the binary exists; it just misbehaves.
+
+So after any bump, and **before you commit/push**, run:
+
+```bash
+python scripts/verify_bump.py                 # auto-detects tools changed vs origin/main
+python scripts/verify_bump.py prokka bcftools # or name them explicitly
+```
+
+It launches each bumped tool's **pinned image** and runs its real operation on
+a tiny generated input (`[real]`), failing if the output is missing/empty —
+exactly the prokka-0-CDS class of break.  Tools whose real op needs a large
+runtime database the recipe supplies (kraken2 / snpEff / CheckM2 / …) fall back
+to a `[live]` responds-probe and still need the recipe's own e2e for a full
+check.  Exit non-zero ⇒ do not push.  `scripts/bump_tools.py` prints this
+command in its "next" steps.
+
 ---
 
 ## Part 5 · Cutting a PyPI release
