@@ -277,6 +277,23 @@ When you bump a tool:
   pipelines working across upgrades — the bump can't ship until the contract is
   re-blessed.
 
+### Keep generated artifacts fresh automatically (git hook)
+
+The README tools table, `docs/reference/*.md`, and `registry/io_contracts.json`
+are generated from the registry; editing a tool without regenerating them trips
+the `docs-fresh` / `io-contracts` CI gates.  A committed pre-commit hook removes
+that footgun — enable it once per clone:
+
+```bash
+sh scripts/install-hooks.sh      # sets core.hooksPath=hooks
+```
+
+From then on every commit runs `scripts/io_contracts.py update` +
+`scripts/gen_docs.py` and **stages the regenerated files automatically**, so a
+registry/image edit can never ship a stale table or snapshot.  It is
+best-effort (warns and lets the commit through if the package isn't installed),
+with CI as the backstop.
+
 ### Behaviour-check a bump BEFORE you push
 
 A version bump can keep the same I/O contract yet silently break a tool — e.g.
