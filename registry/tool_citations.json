@@ -7,8 +7,8 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 118,
-  "n_with_pmid": 106,
+  "n_tools": 129,
+  "n_with_pmid": 115,
   "n_fetched": 98,
   "n_pmid_mismatch": 5,
   "tools": {
@@ -249,6 +249,24 @@
       "name": "deeptools",
       "category": "epigenomics"
     },
+    "deepvariant": {
+      "pmid": "30247488",
+      "doi": "10.1038/nbt.4235",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "DeepVariant",
+      "category": "variant_calling"
+    },
+    "delly": {
+      "pmid": "22962449",
+      "doi": "10.1093/bioinformatics/bts378",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "Delly",
+      "category": "variant_calling"
+    },
     "deseq2": {
       "pmid": "25516281",
       "doi": "10.1186/s13059-014-0550-8",
@@ -312,6 +330,15 @@
       "name": "Enrichr (via gseapy)",
       "category": "enrichment"
     },
+    "ensembl_vep": {
+      "pmid": "27268795",
+      "doi": "10.1186/s13059-016-0974-4",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "Ensembl VEP",
+      "category": "variant_calling"
+    },
     "fastani": {
       "pmid": "30504855",
       "doi": "10.1038/s41467-018-07641-9",
@@ -338,6 +365,15 @@
       "verified": null,
       "name": "FastQC",
       "category": "qc"
+    },
+    "fasttree": {
+      "pmid": "20224823",
+      "doi": "10.1371/journal.pone.0009490",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "FastTree",
+      "category": "comparative_genomics"
     },
     "filtlong": {
       "pmid": null,
@@ -474,6 +510,15 @@
       "verified": true,
       "name": "homer",
       "category": "epigenomics"
+    },
+    "htseq": {
+      "pmid": "25260700",
+      "doi": "10.1093/bioinformatics/btu638",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "HTSeq",
+      "category": "rnaseq_align"
     },
     "humann3": {
       "pmid": "33944776",
@@ -737,6 +782,15 @@
       "name": "MultiQC",
       "category": "qc"
     },
+    "muscle": {
+      "pmid": "36379955",
+      "doi": "10.1038/s41467-022-34630-w",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "MUSCLE",
+      "category": "comparative_genomics"
+    },
     "nanoplot": {
       "pmid": "37171891",
       "doi": "10.1093/bioinformatics/btad311",
@@ -944,6 +998,15 @@
       "name": "SeqKit",
       "category": "qc"
     },
+    "seqtk": {
+      "pmid": null,
+      "doi": null,
+      "total": null,
+      "recent": null,
+      "verified": false,
+      "name": "seqtk",
+      "category": "qc"
+    },
     "seurat": {
       "pmid": "37231261",
       "doi": "10.1038/s41587-023-01767-y",
@@ -979,6 +1042,15 @@
       "verified": true,
       "name": "SnpEff",
       "category": "variant_calling"
+    },
+    "sourmash": {
+      "pmid": null,
+      "doi": "10.21105/joss.00027",
+      "total": null,
+      "recent": null,
+      "verified": false,
+      "name": "sourmash",
+      "category": "metagenomics"
     },
     "spades": {
       "pmid": "32559359",
@@ -1043,6 +1115,15 @@
       "name": "topGO",
       "category": "enrichment"
     },
+    "trimal": {
+      "pmid": "19505945",
+      "doi": "10.1093/bioinformatics/btp348",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "trimAl",
+      "category": "comparative_genomics"
+    },
     "trimgalore": {
       "pmid": null,
       "doi": null,
@@ -1052,6 +1133,15 @@
       "name": "trimgalore",
       "category": "qc"
     },
+    "trnascan_se": {
+      "pmid": "34417604",
+      "doi": "10.1093/nar/gkab688",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "tRNAscan-SE",
+      "category": "struct_annot"
+    },
     "unicycler": {
       "pmid": "28594827",
       "doi": "10.1371/journal.pcbi.1005595",
@@ -1060,6 +1150,15 @@
       "verified": true,
       "name": "Unicycler",
       "category": "assembly"
+    },
+    "vcftools": {
+      "pmid": "21653522",
+      "doi": "10.1093/bioinformatics/btr330",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "VCFtools",
+      "category": "variant_calling"
     },
     "verkko": {
       "pmid": "36797493",

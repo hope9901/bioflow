@@ -1,0 +1,26 @@
+id: delly
+name: Delly
+version: "2.3.0"
+category: variant_calling
+stage: [variant_calling.sv]
+input_types: [alignment_bam, reference_fasta]
+output_types: [vcf]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/delly:2.3.0--h3752d28_0
+  pull_policy: if_not_present
+  image_digest: sha256:284cf8b941883d4517bc884876876ae9259ec284fa9e42616ad3e4736f9afe8f
+resources:
+  min: {cpu: 2, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  delly call -g {reference_fasta} -o {out_dir}/delly.bcf {alignment_bam}
+citation: "Rausch 2012, PMID 22962449"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: dellytools/delly

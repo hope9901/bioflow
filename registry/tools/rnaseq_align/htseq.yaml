@@ -1,0 +1,26 @@
+id: htseq
+name: HTSeq
+version: "2.1.2"
+category: rnaseq_align
+stage: [rnaseq.count]
+input_types: [rnaseq_bam, annotation_gtf]
+output_types: [count_matrix]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/htseq:2.1.2--py311h483b626_2
+  pull_policy: if_not_present
+  image_digest: sha256:dd36dbd865d03eb89d7c9d51360bba76f69ad4f1e7a55e341de0f0997b091895
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 10}
+  recommended: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  htseq-count -f bam -r pos -s no {rnaseq_bam} {annotation_gtf} > {out_dir}/counts.tsv
+citation: "Anders 2015, PMID 25260700"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: htseq/htseq

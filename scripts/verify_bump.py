@@ -186,7 +186,7 @@ def main(argv: list[str]) -> int:
 
     print()
     if failed:
-        print(f"::error::verify_bump FAILED for: {', '.join(failed)} — do NOT push.")
+        print(f"::error::verify_bump FAILED for: {', '.join(failed)} - do NOT push.")
         return 1
     print(f"verify_bump OK - {len(ids)} tool(s) behave"
           + (f"; e2e green for {', '.join(sorted(affected_e2e))}" if affected_e2e else "")

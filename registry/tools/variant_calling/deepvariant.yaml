@@ -1,0 +1,26 @@
+id: deepvariant
+name: DeepVariant
+version: "1.10.0"
+category: variant_calling
+stage: [variant_calling.call]
+input_types: [alignment_bam, reference_fasta]
+output_types: [vcf, gvcf]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: google/deepvariant:1.10.0
+  pull_policy: if_not_present
+  image_digest: sha256:962e5a83b1d76aae6990625d47102785f791603f2138aa1fa9aa4fb6a2eecbe6
+resources:
+  min: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  recommended: {cpu: 32, ram_gb: 64, disk_gb: 80}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  run_deepvariant --model_type=WGS --ref={reference_fasta} --reads={alignment_bam} --output_vcf={out_dir}/dv.vcf.gz --num_shards={cpu}
+citation: "Poplin 2018, PMID 30247488"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: google/deepvariant

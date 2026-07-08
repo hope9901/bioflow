@@ -1,0 +1,27 @@
+id: ensembl_vep
+name: Ensembl VEP
+version: "116.0"
+category: variant_calling
+stage: [variant_calling.annotate]
+input_types: [vcf]
+output_types: [annotated_vcf]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/ensembl-vep:116.0--pl5321h2a3209d_0
+  pull_policy: if_not_present
+  image_digest: sha256:695b3721aab793a1529f3490b75edec76b48af000056b75565143602c849a406
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 40}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  vep -i {vcf} -o {out_dir}/vep.vcf --vcf --cache --dir_cache {vep_cache} --fork {cpu}
+references: ["/refs/dbs/vep"]
+citation: "McLaren 2016, PMID 27268795"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: Ensembl/ensembl-vep

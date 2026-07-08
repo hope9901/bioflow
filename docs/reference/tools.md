@@ -1,6 +1,6 @@
 # Tools
 
-**118 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**129 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -24,7 +24,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | 14 | `iqtree` | comparative_genomics | 9,802 | 11,112 |
 | 15 | `prokka` | struct_annot | 9,722 | 14,442 |
 
-> **Note:** 7 tools show `n/a` because their registry PMID points to an unrelated paper (author/year mismatch); those references are pending correction. Counts are shown only for PMIDs whose author + year match the cited work.
+> **Note:** 9 tools show `n/a` because their registry PMID points to an unrelated paper (author/year mismatch); those references are pending correction. Counts are shown only for PMIDs whose author + year match the cited work.
 
 ## alignment  (6)
 
@@ -71,7 +71,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `merqury` | 1.3 | `quay.io/biocontainers/merqury:1.3--hdfd78af_1` | Rhie 2020, PMID 32928274 | 3,771 | 3,358 |
 | `quast` | 5.3.0 | `staphb/quast:5.3.0` | Mikheenko 2018, PMID 29949969 | 1,175 | 969 |
 
-## comparative_genomics  (11)
+## comparative_genomics  (14)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -79,13 +79,16 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `cafe5` | 5.1.0 | `quay.io/biocontainers/cafe:5.1.0--h5ca1c30_1` | Mendes et al. 2021, PMID 33325497 | n/a | n/a |
 | `diamond` | 2.2.2 | `quay.io/biocontainers/diamond:2.2.2--he361c42_0` | Buchfink 2021, PMID 33828273 | 3,993 | 3,476 |
 | `fastani` | 1.34 | `staphb/fastani:1.34` | Jain et al. 2018, PMID 30504855 | 4,164 | 3,481 |
+| `fasttree` | 2.2.0 | `quay.io/biocontainers/fasttree:2.2.0--h7b50bb2_1` | Price 2010, PMID 20224823 | n/a | n/a |
 | `iqtree` | 2.4.0 | `staphb/iqtree2:2.4.0` | Minh et al. 2020, PMID 32011700 | 11,112 | 9,802 |
 | `mafft` | 7.526 | `staphb/mafft:7.526` | Katoh & Standley 2013, PMID 23329690 | 31,071 | 19,262 |
 | `mash` | 2.3 | `quay.io/biocontainers/mash:2.3--hb105d93_10` | Ondov 2016, PMID 27323842 | 2,452 | 1,753 |
+| `muscle` | 5.3 | `quay.io/biocontainers/muscle:5.3--h9948957_3` | Edgar 2022, PMID 36379955 | n/a | n/a |
 | `panaroo` | 1.8.0 | `quay.io/biocontainers/panaroo:1.8.0--pyhdfd78af_0` | Tonkin-Hill 2020, PMID 32698896 | 980 | 857 |
 | `roary` | 3.13.0 | `staphb/roary:3.13.0` | Page et al. 2015, PMID 26198102 | 4,460 | 3,099 |
 | `scoary` | 1.6.16 | `quay.io/biocontainers/scoary:1.6.16--py_2` | Brynildsrud 2016, PMID 27887642 | 564 | 405 |
 | `skani` | 0.3.2 | `quay.io/biocontainers/skani:0.3.2--h79ce301_0` | Shaw & Yu 2023, PMID 37735570 | 134 | 111 |
+| `trimal` | 1.5.1 | `quay.io/biocontainers/trimal:1.5.1--h9948957_0` | Capella-Gutierrez 2009, PMID 19505945 | n/a | n/a |
 
 ## deg  (3)
 
@@ -132,7 +135,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `kofamscan` | 1.3.0 | `quay.io/biocontainers/kofamscan:1.3.0--hdfd78af_2` | Aramaki 2020, PMID 31742321 | n/a | n/a |
 | `pfam_scan` | 1.6 | `quay.io/biocontainers/pfam_scan:1.6--hdfd78af_5` | Mistry 2021, PMID 33125078 | n/a | n/a |
 
-## metagenomics  (9)
+## metagenomics  (10)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -145,6 +148,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `maxbin2` | 2.2.7 | `quay.io/biocontainers/maxbin2:2.2.7--h503566f_8` | Wu 2016, PMID 26515820 | 2,059 | 1,583 |
 | `metabat2` | 2.18 | `quay.io/biocontainers/metabat2:2.18--h38e344b_2` | Kang 2019, PMID 31388474 | 2,893 | 2,505 |
 | `metaphlan4` | 4.2.4 | `quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0` | Blanco-Miguez et al. 2023, PMID 36823356 | 1,019 | 840 |
+| `sourmash` | 4.9.4 | `quay.io/biocontainers/sourmash:4.9.4--hdfd78af_0` | Brown & Irber 2016, sourmash (JOSS 10.21105/joss.00027) | n/a | n/a |
 
 ## proteomics  (8)
 
@@ -159,7 +163,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `percolator` | 3.9 | `quay.io/biocontainers/percolator:3.9--h0f90025_0` | Kall et al. 2007, PMID 17952086 | 1,951 | 924 |
 | `xtandem` | 15.12.15.2 | `quay.io/biocontainers/xtandem:15.12.15.2--h4464bbb_11` | Craig & Beavis 2004, PMID 14976030 | 1,931 | 322 |
 
-## qc  (8)
+## qc  (9)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -170,6 +174,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `multiqc` | 1.35 | `quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1` | Ewels 2016, PMID 27312411 | 7,946 | 6,478 |
 | `nanoplot` | 1.47.1 | `quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0` | De Coster 2023, PMID 37171891 | 575 | 456 |
 | `seqkit` | 2.13.0 | `quay.io/biocontainers/seqkit:2.13.0--he881be0_0` | Shen 2016, PMID 27706213 | 2,560 | 2,194 |
+| `seqtk` | r93 | `quay.io/biocontainers/seqtk:r93--0` | Li, seqtk (github.com/lh3/seqtk) | n/a | n/a |
 | `trimgalore` | 0.6.11 | `quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0` | Krueger 2015, https://github.com/FelixKrueger/TrimGalore | n/a | n/a |
 
 ## repeat  (3)
@@ -180,11 +185,12 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `repeatmasker` | 4.1.7 | `dfam/tetools:1.89` | Smit 2015 (repeatmasker.org) | n/a | n/a |
 | `repeatmodeler` | 2.0.5 | `dfam/tetools:1.89` | Flynn 2020, PMID 32300014 | 3,090 | 2,788 |
 
-## rnaseq_align  (7)
+## rnaseq_align  (8)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `hisat2` | 2.2.2 | `quay.io/biocontainers/hisat2:2.2.2--h503566f_0` | Kim 2019, PMID 31375807 | 10,968 | 9,680 |
+| `htseq` | 2.1.2 | `quay.io/biocontainers/htseq:2.1.2--py311h483b626_2` | Anders 2015, PMID 25260700 | n/a | n/a |
 | `kallisto` | 0.52.0 | `quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0` | Bray 2016, PMID 27043002 | 7,856 | 5,298 |
 | `rsem` | 1.3.3 | `quay.io/biocontainers/rsem:1.3.3--pl5321h077b44d_12` | Li & Dewey 2011, PMID 21816040 | 16,258 | 9,456 |
 | `salmon` | 2.3.1 | `quay.io/biocontainers/salmon:2.3.1--hfa8f182_0` | Patro 2017, PMID 28263959 | 9,687 | 7,499 |
@@ -205,7 +211,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `seurat` | 5.5.1 | `satijalab/seurat:5.5.1` | Hao et al. 2024, PMID 37231261 | 3,602 | 2,821 |
 | `starsolo` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin et al. 2013, PMID 23104886 | 41,990 | 29,078 |
 
-## struct_annot  (5)
+## struct_annot  (6)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -214,13 +220,18 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `braker3` | 3.1.1 | `teambraker/braker3:v3.1.1` | Gabriel 2024, PMID 38866550 | 487 | 370 |
 | `liftoff` | 1.6.3 | `quay.io/biocontainers/liftoff:1.6.3--pyhdfd78af_0` | Shumate & Salzberg 2021, PMID 33320174 | 733 | 669 |
 | `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,442 | 9,722 |
+| `trnascan_se` | 2.0.12 | `quay.io/biocontainers/trnascan-se:2.0.12--pl5321h7b50bb2_2` | Chan 2021, PMID 34417604 | n/a | n/a |
 
-## variant_calling  (4)
+## variant_calling  (8)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `bcftools` | 1.23.1 | `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0` | Danecek 2021, PMID 33590861 | 11,759 | 10,492 |
+| `deepvariant` | 1.10.0 | `quay.io/biocontainers/deepvariant:1.10.0--pyh697b589_0` | Poplin 2018, PMID 30247488 | n/a | n/a |
+| `delly` | 2.3.0 | `quay.io/biocontainers/delly:2.3.0--h3752d28_0` | Rausch 2012, PMID 22962449 | n/a | n/a |
+| `ensembl_vep` | 116.0 | `quay.io/biocontainers/ensembl-vep:116.0--pl5321h2a3209d_0` | McLaren 2016, PMID 27268795 | n/a | n/a |
 | `freebayes` | 1.3.10 | `quay.io/biocontainers/freebayes:1.3.10--hbefcdb2_0` | Garrison & Marth 2012, arXiv:1207.3907 | n/a | n/a |
 | `gatk4` | 4.6.2.0 | `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1` | McKenna 2010, PMID 20644199 | 16,785 | 7,994 |
 | `snpeff` | 5.4.0c | `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0` | Cingolani 2012, PMID 22728672 | 9,399 | 5,402 |
+| `vcftools` | 0.1.17 | `quay.io/biocontainers/vcftools:0.1.17--pl5321h077b44d_0` | Danecek 2011, PMID 21653522 | n/a | n/a |
 

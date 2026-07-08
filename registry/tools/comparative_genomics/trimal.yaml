@@ -1,0 +1,26 @@
+id: trimal
+name: trimAl
+version: "1.5.1"
+category: comparative_genomics
+stage: [phylogeny.trim]
+input_types: [msa_fasta]
+output_types: [msa_fasta]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/trimal:1.5.1--h9948957_0
+  pull_policy: if_not_present
+  image_digest: sha256:2ddc872b92ac2634961cdd1f234d2d7779fccbd03b8c717e0bbbfe74dc7fb4dd
+resources:
+  min: {cpu: 1, ram_gb: 2, disk_gb: 2}
+  recommended: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  trimal -in {msa_fasta} -out {out_dir}/trimmed.fasta -automated1
+citation: "Capella-Gutierrez 2009, PMID 19505945"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: inab/trimal

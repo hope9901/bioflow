@@ -269,6 +269,27 @@
         "heatmap_pdf"
       ]
     },
+    "deepvariant": {
+      "version": "1.10.0",
+      "inputs": [
+        "alignment_bam",
+        "reference_fasta"
+      ],
+      "outputs": [
+        "gvcf",
+        "vcf"
+      ]
+    },
+    "delly": {
+      "version": "2.3.0",
+      "inputs": [
+        "alignment_bam",
+        "reference_fasta"
+      ],
+      "outputs": [
+        "vcf"
+      ]
+    },
     "deseq2": {
       "version": "1.50.2",
       "inputs": [
@@ -343,6 +364,15 @@
         "enrichment_report"
       ]
     },
+    "ensembl_vep": {
+      "version": "116.0",
+      "inputs": [
+        "vcf"
+      ],
+      "outputs": [
+        "annotated_vcf"
+      ]
+    },
     "fastani": {
       "version": "1.34",
       "inputs": [
@@ -372,6 +402,15 @@
       "outputs": [
         "qc_html",
         "qc_zip"
+      ]
+    },
+    "fasttree": {
+      "version": "2.2.0",
+      "inputs": [
+        "msa_fasta"
+      ],
+      "outputs": [
+        "phylogeny_newick"
       ]
     },
     "filtlong": {
@@ -525,6 +564,16 @@
       "outputs": [
         "annotated_peaks",
         "motif_results"
+      ]
+    },
+    "htseq": {
+      "version": "2.1.2",
+      "inputs": [
+        "annotation_gtf",
+        "rnaseq_bam"
+      ],
+      "outputs": [
+        "count_matrix"
       ]
     },
     "humann3": {
@@ -809,6 +858,15 @@
         "multiqc_report_html"
       ]
     },
+    "muscle": {
+      "version": "5.3",
+      "inputs": [
+        "nucleotide_fasta"
+      ],
+      "outputs": [
+        "msa_fasta"
+      ]
+    },
     "nanoplot": {
       "version": "1.47.1",
       "inputs": [
@@ -1048,6 +1106,16 @@
         "stats_tsv"
       ]
     },
+    "seqtk": {
+      "version": "r93",
+      "inputs": [
+        "fastq"
+      ],
+      "outputs": [
+        "fasta",
+        "fastq"
+      ]
+    },
     "seurat": {
       "version": "5.5.1",
       "inputs": [
@@ -1084,6 +1152,16 @@
       "outputs": [
         "annotated_vcf",
         "variant_report"
+      ]
+    },
+    "sourmash": {
+      "version": "4.9.4",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "signature",
+        "taxonomy_tsv"
       ]
     },
     "spades": {
@@ -1159,6 +1237,15 @@
         "enrichment_report"
       ]
     },
+    "trimal": {
+      "version": "1.5.1",
+      "inputs": [
+        "msa_fasta"
+      ],
+      "outputs": [
+        "msa_fasta"
+      ]
+    },
     "trimgalore": {
       "version": "0.6.11",
       "inputs": [
@@ -1166,6 +1253,15 @@
       ],
       "outputs": [
         "clean_fastq"
+      ]
+    },
+    "trnascan_se": {
+      "version": "2.0.12",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "trna_gff"
       ]
     },
     "unicycler": {
@@ -1177,6 +1273,16 @@
       "outputs": [
         "assembly_fasta",
         "assembly_graph"
+      ]
+    },
+    "vcftools": {
+      "version": "0.1.17",
+      "inputs": [
+        "vcf"
+      ],
+      "outputs": [
+        "stats_tsv",
+        "vcf"
       ]
     },
     "verkko": {

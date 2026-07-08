@@ -334,6 +334,20 @@ _DB_CATALOG: dict[str, dict] = {
         "latest": None,
         "notes": "InterPro/Pfam/dbCAN/MEROPS/UniProt data for `funannotate annotate`.",
     },
+    "vep_cache": {
+        "name": "Ensembl VEP cache — GRCh38 (release 116)",
+        "url": "",
+        "size_gb": 25.0,
+        "md5": None,
+        "dest_file": "vep",
+        "used_by": ["ensembl_vep"],
+        "version": "116",
+        "provision": "vep_install --AUTO cf --SPECIES homo_sapiens "
+                     "--ASSEMBLY GRCh38 --CACHEDIR {dir} --NO_HTSLIB",
+        "latest": {"url": "https://ftp.ensembl.org/pub/",
+                   "regex": r"release-(\d+)"},
+        "notes": "Offline annotation cache for `vep --cache --dir_cache`.",
+    },
 }
 
 

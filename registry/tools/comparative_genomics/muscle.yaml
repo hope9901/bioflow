@@ -1,0 +1,26 @@
+id: muscle
+name: MUSCLE
+version: "5.3"
+category: comparative_genomics
+stage: [phylogeny.align]
+input_types: [nucleotide_fasta]
+output_types: [msa_fasta]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/muscle:5.3--h9948957_3
+  pull_policy: if_not_present
+  image_digest: sha256:d8a60b266ec5ff7c3be76e2ed3ffb8d42cb4ecc882d5d6e0af6d5c54a428bcdb
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 10}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  muscle -align {nucleotide_fasta} -output {out_dir}/aln.fasta -threads {cpu}
+citation: "Edgar 2022, PMID 36379955"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: rcedgar/muscle

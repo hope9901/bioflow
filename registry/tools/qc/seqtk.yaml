@@ -1,0 +1,26 @@
+id: seqtk
+name: seqtk
+version: "r93"
+category: qc
+stage: [qc.convert]
+input_types: [fastq]
+output_types: [fasta, fastq]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/seqtk:r93--0
+  pull_policy: if_not_present
+  image_digest: sha256:27341afe2cde846258a76378b1fce7a0177a2865375c6f5014731c883cea95e7
+resources:
+  min: {cpu: 1, ram_gb: 1, disk_gb: 2}
+  recommended: {cpu: 2, ram_gb: 2, disk_gb: 5}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  seqtk seq -a {fastq} > {out_dir}/out.fasta
+citation: "Li, seqtk (github.com/lh3/seqtk)"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: lh3/seqtk

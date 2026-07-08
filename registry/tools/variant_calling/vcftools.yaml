@@ -1,0 +1,26 @@
+id: vcftools
+name: VCFtools
+version: "0.1.17"
+category: variant_calling
+stage: [variant_calling.filter]
+input_types: [vcf]
+output_types: [vcf, stats_tsv]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/vcftools:0.1.17--pl5321h077b44d_0
+  pull_policy: if_not_present
+  image_digest: sha256:a6ef07658eb0f678ded605d7108700bbf15381a877f8effa88b15b80d9de0f03
+resources:
+  min: {cpu: 1, ram_gb: 2, disk_gb: 5}
+  recommended: {cpu: 2, ram_gb: 4, disk_gb: 10}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  vcftools --vcf {vcf} --out {out_dir}/out --recode
+citation: "Danecek 2011, PMID 21653522"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: vcftools/vcftools

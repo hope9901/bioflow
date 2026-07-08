@@ -14,6 +14,20 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — 11 more commonly-used tools across categories
+Digest-pinned, citations verified (9 via MEDLINE PMID; seqtk/sourmash are
+DOI-only), and behaviour-checked with `verify_bump`:
+- **variant_calling**: Ensembl VEP 116 (annotation), DeepVariant 1.10 (DL
+  calling), Delly 2.3 (structural variants), VCFtools 0.1.17 (VCF utilities).
+- **rnaseq_align**: HTSeq 2.1.2 (read counting).
+- **qc**: seqtk r93 (sequence toolkit).
+- **comparative_genomics**: FastTree 2.2, MUSCLE 5.3, trimAl 1.5.1
+  (phylogenetics / MSA / alignment trimming).
+- **struct_annot**: tRNAscan-SE 2.0.12 (tRNA detection).
+- **metagenomics**: sourmash 4.9.4 (MinHash sketching / taxonomy).
+VEP's cache is registered as a versioned reference DB, so it participates in
+the `bioflow db` version-gated management + DB-version citations.
+
 ### Added — gene functional-annotation DBs with version-gated updates + DB-version citations
 - New `func_annot` tools, digest-pinned, spanning kingdoms:
   **KofamScan** (KEGG KO), **DRAM** (bacteria/archaea/MAG metabolic annotation),
