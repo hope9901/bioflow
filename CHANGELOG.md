@@ -29,9 +29,11 @@ ship bug fixes only.  Breaking changes to the documented public API
     (`.bioflow_db_version`) records what's on disk.
   - `bioflow db update <db>` is **version-gated**: it re-downloads only when
     upstream is newer than the marker (a no-op otherwise), so it is safe on a
-    schedule.  At run time `db.ensure_db_current(tool)` checks the version first
-    and, by default, only *flags* that a newer DB exists (never a surprise
-    download); `auto_update=True` is opt-in for unattended pipelines.
+    schedule.  At run time `bioflow db ensure <tool>` / `db.ensure_db_current`
+    checks each DB's version first and, **by default, auto-updates only the
+    stale ones** before the tool runs (an up-to-date DB is a no-op — the cheap
+    version check runs every time, the multi-GB download does not).  Pass
+    `--no-update` / `auto_update=False` to only *flag* a newer DB instead.
   - `latest_db_version()` probes a small index/relnotes URL (never the payload)
     to learn the newest version; offline it stays silent (treated as "no update").
 - **`bioflow cite` now includes the database version** next to the tool version,

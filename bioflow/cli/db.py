@@ -29,6 +29,10 @@ def db_cmd(
         help="[provision] Actually pull the tool image + build the DB "
              "(downloads GB). Default just prints the command.",
     ),
+    no_update: bool = typer.Option(
+        False, "--no-update",
+        help="[ensure] Only flag a newer DB; don't auto-download it.",
+    ),
 ) -> None:
     """Fetch / verify / list reference databases, or emit a refgenie manifest.
 
@@ -44,13 +48,37 @@ def db_cmd(
     update    Version-gated refresh: re-download only when upstream is newer.
     provision Build/download a DB *inside its tool's container* (the image
               ships the downloader). Prints the command; --run executes it.
+    ensure    Run-time gate for a TOOL: check each DB's version and auto-update
+              only the stale ones (--no-update to just flag).
     """
     import json  # noqa: PLC0415
 
     from bioflow.core.db import (  # noqa: PLC0415
-        _DB_CATALOG, catalog_version, db_status, fetch_db, list_dbs,
-        provision_command, refgenie_manifest, update_db, verify_db,
+        _DB_CATALOG, catalog_version, db_status, ensure_db_current, fetch_db,
+        list_dbs, provision_command, refgenie_manifest, update_db, verify_db,
     )
+
+    if action == "ensure":
+        if not name:
+            rprint("[red]Error:[/] a TOOL id is required for ensure "
+                   "(e.g. 'bioflow db ensure eggnog_mapper').")
+            raise typer.Exit(code=1)
+        stats = ensure_db_current(name, dest, auto_update=not no_update,
+                                  check_latest=True)
+        if not stats:
+            rprint(f"[dim]{name} uses no versioned reference DB.[/]")
+            return
+        for st in stats:
+            if not st["present"]:
+                rprint(f"[yellow]○[/] {st['db']} — not provisioned "
+                       f"(bioflow db provision {st['db']})")
+            elif st["update_available"]:
+                verb = "flagged (newer available)" if no_update else "updated"
+                rprint(f"[green]✓[/] {st['db']} — {verb} "
+                       f"→ {st['latest'] or st['catalog']}")
+            else:
+                rprint(f"[green]✓[/] {st['db']} — current ({st['installed']})")
+        return
 
     if action == "status":
         keys = [name] if name else [k for k, e in _DB_CATALOG.items() if e.get("version")]

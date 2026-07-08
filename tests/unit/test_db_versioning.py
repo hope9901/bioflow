@@ -57,13 +57,23 @@ def test_provision_command_targets_refs_dir(tmp_path: Path):
     assert db.provision_command("dbsnp_grch38", tmp_path) is None
 
 
-def test_ensure_db_current_flags_but_does_not_download(tmp_path: Path):
-    db.write_db_version("eggnog", tmp_path, "5.0.1")
-    sts = db.ensure_db_current("eggnog_mapper", tmp_path, check_latest=False)
-    egg = next(s for s in sts if s["db"] == "eggnog")
-    assert egg["update_available"] is True
-    # the eggnog file was never fetched — ensure only *flags* by default
-    assert not (tmp_path / "eggnog" / "eggnog.db.gz").exists()
+def test_ensure_db_current_auto_updates_stale_by_default(tmp_path: Path):
+    # dbCAN is provision-only (no download URL) so an auto-update just re-stamps.
+    db.write_db_version("dbcan", tmp_path, "11")            # older than upstream
+    sts = db.ensure_db_current("dbcan", tmp_path,           # default auto_update=True
+                               _fetch=lambda u: "dbCAN-HMMdb-V13")
+    st = next(s for s in sts if s["db"] == "dbcan")
+    assert st["update_available"] is True
+    assert db.installed_db_version("dbcan", tmp_path) == "13"   # refreshed in place
+
+
+def test_ensure_db_current_no_update_only_flags(tmp_path: Path):
+    db.write_db_version("dbcan", tmp_path, "11")
+    sts = db.ensure_db_current("dbcan", tmp_path, auto_update=False,
+                               _fetch=lambda u: "dbCAN-HMMdb-V13")
+    st = next(s for s in sts if s["db"] == "dbcan")
+    assert st["update_available"] is True
+    assert db.installed_db_version("dbcan", tmp_path) == "11"   # left untouched
 
 
 def test_cite_includes_db_version():

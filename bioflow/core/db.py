@@ -625,15 +625,16 @@ def provision_command(name: str, dest_root: Path) -> "str | None":
     return entry["provision"].format(dir=target)
 
 
-def ensure_db_current(tool_id: str, dest_root: Path, *, auto_update: bool = False,
+def ensure_db_current(tool_id: str, dest_root: Path, *, auto_update: bool = True,
                       check_latest: bool = True, _fetch=None) -> "list[dict]":
-    """Run-time gate: for every DB *tool_id* uses, check the version and only
-    act when a newer one exists (never on every run).
+    """Run-time gate: for every DB *tool_id* uses, check the version first and
+    update **only when a newer one exists** — the check is cheap and runs each
+    time, the download does not (an up-to-date DB is a no-op).
 
-    Returns a status dict per DB.  With ``auto_update=False`` (default) it just
-    flags that a newer DB is available — the actual multi-GB fetch stays an
-    explicit ``bioflow db update`` so a run is never silently blocked on a
-    download.  ``auto_update=True`` is opt-in for unattended pipelines.
+    Returns a status dict per DB.  ``auto_update=True`` (default) refreshes a
+    stale DB in place before the tool runs; pass ``auto_update=False`` to only
+    *flag* that a newer DB is available and leave the fetch to an explicit
+    ``bioflow db update``.
     """
     statuses = []
     for name in dbs_for_tool(tool_id):
