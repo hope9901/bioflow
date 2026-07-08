@@ -227,7 +227,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `bcftools` | 1.23.1 | `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0` | Danecek 2021, PMID 33590861 | 11,759 | 10,492 |
-| `deepvariant` | 1.10.0 | `quay.io/biocontainers/deepvariant:1.10.0--pyh697b589_0` | Poplin 2018, PMID 30247488 | n/a | n/a |
+| `deepvariant` | 1.10.0 | `google/deepvariant:1.10.0` | Poplin 2018, PMID 30247488 | n/a | n/a |
 | `delly` | 2.3.0 | `quay.io/biocontainers/delly:2.3.0--h3752d28_0` | Rausch 2012, PMID 22962449 | n/a | n/a |
 | `ensembl_vep` | 116.0 | `quay.io/biocontainers/ensembl-vep:116.0--pl5321h2a3209d_0` | McLaren 2016, PMID 27268795 | n/a | n/a |
 | `freebayes` | 1.3.10 | `quay.io/biocontainers/freebayes:1.3.10--hbefcdb2_0` | Garrison & Marth 2012, arXiv:1207.3907 | n/a | n/a |
