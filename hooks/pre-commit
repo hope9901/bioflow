@@ -1,0 +1,38 @@
+#!/bin/sh
+# Auto-freshen registry-derived artifacts so a commit can never ship a stale
+# docs table or I/O-contract snapshot — the two CI gates (docs-fresh,
+# io-contracts) that have bitten us after registry/image edits.
+#
+# It regenerates and *stages* the generated files as part of the commit, so
+# there is nothing to remember.  Best-effort: if the scripts can't run (e.g.
+# the package isn't installed in this clone) it warns and lets the commit
+# through — CI stays the backstop.
+#
+# Enable once per clone:  git config core.hooksPath hooks
+#                    (or:  sh scripts/install-hooks.sh)
+
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+
+py=$(command -v python 2>/dev/null || command -v python3 2>/dev/null)
+if [ -z "$py" ]; then
+    echo "pre-commit: no python on PATH — skipping docs/io_contracts refresh." >&2
+    exit 0
+fi
+
+"$py" scripts/io_contracts.py update >/dev/null 2>&1 \
+    || echo "pre-commit: io_contracts.py update failed (package installed?)." >&2
+"$py" scripts/gen_docs.py >/dev/null 2>&1 \
+    || echo "pre-commit: gen_docs.py failed (package installed?)." >&2
+
+staged=0
+for f in README.md docs/reference registry/io_contracts.json; do
+    if [ -e "$f" ] && ! git diff --quiet -- "$f" 2>/dev/null; then
+        git add "$f"
+        staged=1
+    fi
+done
+[ "$staged" = 1 ] && \
+    echo "pre-commit: refreshed generated docs / io_contracts snapshot and staged them."
+
+exit 0
