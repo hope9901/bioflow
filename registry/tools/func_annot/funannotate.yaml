@@ -1,0 +1,28 @@
+id: funannotate
+name: funannotate
+version: "1.8.17"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [assembly_fasta]
+output_types: [structural_gff, functional_annotation_tsv, protein_faa]
+applicable:
+  species: [eukaryote, eukaryote_small, any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/funannotate:1.8.17--pyhdfd78af_5
+  pull_policy: if_not_present
+  image_digest: sha256:f07b02375a844e921e75bc1269be5e6aaf0847f13af4a62c5f69e7ba72266af4
+resources:
+  min: {cpu: 8, ram_gb: 24, disk_gb: 30}
+  recommended: {cpu: 24, ram_gb: 64, disk_gb: 100}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  funannotate annotate --fasta {assembly_fasta} --out {out_dir}
+              --species "{species}" --cpus {cpu}
+references: ["/refs/dbs/funannotate"]
+citation: "Palmer & Stajich 2020, funannotate (Zenodo)"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: nextgenusfs/funannotate

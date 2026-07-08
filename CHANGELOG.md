@@ -15,8 +15,15 @@ ship bug fixes only.  Breaking changes to the documented public API
 ## [Unreleased]
 
 ### Added — gene functional-annotation DBs with version-gated updates + DB-version citations
-- New tool **KofamScan** (`func_annot`, KEGG KO assignment via `exec_annotation`),
-  digest-pinned like every other tool.
+- New `func_annot` tools, digest-pinned, spanning kingdoms:
+  **KofamScan** (KEGG KO), **DRAM** (bacteria/archaea/MAG metabolic annotation),
+  **funannotate** (fungal annotation), **PfamScan** (Pfam domains, cross-kingdom,
+  reuses the Pfam DB), and **GECCO** (ML biosynthetic-gene-cluster detection).
+- **Run-time DB hook**: the stage runner now calls `ensure_dbs_for_image` just
+  before an annotation container runs — checking each DB's version and
+  auto-updating only the stale ones.  Opt-in via `$BIOFLOW_REFS` (the refs
+  root); a no-op otherwise, and best-effort (a DB error never breaks the run),
+  so ordinary/offline runs are unaffected.
 - The functional-annotation databases (eggNOG, Pfam, dbCAN, antiSMASH, GTDB-Tk,
   KOfam) now carry a **version** and are managed lazily instead of re-downloaded
   on every run:

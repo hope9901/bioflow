@@ -1,0 +1,28 @@
+id: dram
+name: DRAM
+version: "1.5.0"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [assembly_fasta]
+output_types: [functional_annotation_tsv, kegg_tsv, cazyme_tsv]
+applicable:
+  species: [prokaryote, any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/dram:1.5.0--pyhdfd78af_0
+  pull_policy: if_not_present
+  image_digest: sha256:f6cf5a9b725cfe10beee5eda19d45efbe9ad8f44fc218feb97b80f75641d23f9
+resources:
+  min: {cpu: 8, ram_gb: 32, disk_gb: 50}
+  recommended: {cpu: 20, ram_gb: 220, disk_gb: 300}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  DRAM.py annotate -i {assembly_fasta} -o {out_dir}
+          --threads {cpu}
+references: ["/refs/dbs/dram"]
+citation: "Shaffer 2020, PMID 32766782"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: WrightonLabCSU/DRAM

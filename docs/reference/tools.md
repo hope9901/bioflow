@@ -1,6 +1,6 @@
 # Tools
 
-**114 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**118 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -24,7 +24,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | 14 | `iqtree` | comparative_genomics | 9,802 | 11,112 |
 | 15 | `prokka` | struct_annot | 9,722 | 14,442 |
 
-> **Note:** 5 tools show `n/a` because their registry PMID points to an unrelated paper (author/year mismatch); those references are pending correction. Counts are shown only for PMIDs whose author + year match the cited work.
+> **Note:** 7 tools show `n/a` because their registry PMID points to an unrelated paper (author/year mismatch); those references are pending correction. Counts are shown only for PMIDs whose author + year match the cited work.
 
 ## alignment  (6)
 
@@ -117,16 +117,20 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `picard` | 3.4.0 | `quay.io/biocontainers/picard:3.4.0--hdfd78af_0` | Broad Institute, https://broadinstitute.github.io/picard/ | n/a | n/a |
 | `tobias` | 0.17.3 | `quay.io/biocontainers/tobias:0.17.3--py39hff726c5_1` | Bentsen et al. 2020, PMID 32848148 | 569 | 520 |
 
-## func_annot  (6)
+## func_annot  (10)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `antismash` | 8.0.4 | `antismash/standalone:8.0.4` | Blin 2023, PMID 37140036 | 1,591 | 1,399 |
 | `dbcan` | 5.2.9 | `quay.io/biocontainers/dbcan:5.2.9--pyhdfd78af_0` | Zhang 2018, PMID 29771380 | 1,662 | 1,342 |
+| `dram` | 1.5.0 | `quay.io/biocontainers/dram:1.5.0--pyhdfd78af_0` | Shaffer 2020, PMID 32766782 | n/a | n/a |
 | `eggnog_mapper` | 2.1.15 | `quay.io/biocontainers/eggnog-mapper:2.1.15--pyhdfd78af_0` | Cantalapiedra 2021, PMID 34597405 | 3,330 | 2,904 |
+| `funannotate` | 1.8.17 | `quay.io/biocontainers/funannotate:1.8.17--pyhdfd78af_5` | Palmer & Stajich 2020, funannotate (Zenodo) | n/a | n/a |
+| `gecco` | 0.10.3 | `quay.io/biocontainers/gecco:0.10.3--pyhdfd78af_1` | Larralde 2021, GECCO (bioRxiv 10.1101/2021.05.03.442509) | n/a | n/a |
 | `gtdbtk` | 2.7.2 | `quay.io/biocontainers/gtdbtk:2.7.2--pyhdfd78af_0` | Chaumeil 2022, PMID 36218463 | 1,455 | 1,201 |
 | `interproscan` | 5.59_91.0 | `quay.io/biocontainers/interproscan:5.59_91.0--hec16e2b_1` | Blum 2021, PMID 33156333 | 1,736 | 1,643 |
 | `kofamscan` | 1.3.0 | `quay.io/biocontainers/kofamscan:1.3.0--hdfd78af_2` | Aramaki 2020, PMID 31742321 | n/a | n/a |
+| `pfam_scan` | 1.6 | `quay.io/biocontainers/pfam_scan:1.6--hdfd78af_5` | Mistry 2021, PMID 33125078 | n/a | n/a |
 
 ## metagenomics  (9)
 

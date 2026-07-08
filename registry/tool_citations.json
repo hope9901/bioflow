@@ -7,8 +7,8 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 114,
-  "n_with_pmid": 104,
+  "n_tools": 118,
+  "n_with_pmid": 106,
   "n_fetched": 98,
   "n_pmid_mismatch": 5,
   "tools": {
@@ -267,6 +267,15 @@
       "name": "DIAMOND",
       "category": "comparative_genomics"
     },
+    "dram": {
+      "pmid": "32766782",
+      "doi": "10.1093/nar/gkaa621",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "DRAM",
+      "category": "func_annot"
+    },
     "earlgrey": {
       "pmid": "38577785",
       "doi": "10.1093/molbev/msae068",
@@ -367,6 +376,15 @@
       "name": "FreeBayes",
       "category": "variant_calling"
     },
+    "funannotate": {
+      "pmid": null,
+      "doi": "10.5281/zenodo.1134477",
+      "total": null,
+      "recent": null,
+      "verified": false,
+      "name": "funannotate",
+      "category": "func_annot"
+    },
     "gatk4": {
       "pmid": "20644199",
       "doi": "10.1101/gr.107524.110",
@@ -375,6 +393,15 @@
       "verified": true,
       "name": "GATK4",
       "category": "variant_calling"
+    },
+    "gecco": {
+      "pmid": null,
+      "doi": "10.1101/2021.05.03.442509",
+      "total": null,
+      "recent": null,
+      "verified": false,
+      "name": "GECCO",
+      "category": "func_annot"
     },
     "genovi": {
       "pmid": "37014908",
@@ -763,6 +790,15 @@
       "verified": true,
       "name": "percolator",
       "category": "proteomics"
+    },
+    "pfam_scan": {
+      "pmid": "33125078",
+      "doi": "10.1093/nar/gkaa913",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "PfamScan",
+      "category": "func_annot"
     },
     "picard": {
       "pmid": null,

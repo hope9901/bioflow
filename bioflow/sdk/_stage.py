@@ -197,6 +197,16 @@ class Stage:
         translated = _translate_command(command, workspace)
 
         backend = _get_backend()
+
+        # Version-gated DB refresh for annotation tools: check each DB's version
+        # first and auto-update only the stale ones before the container runs.
+        # Opt-in via $BIOFLOW_REFS (no-op otherwise); best-effort, never fatal.
+        try:
+            from bioflow.core.db import ensure_dbs_for_image  # noqa: PLC0415
+            ensure_dbs_for_image(self.image)
+        except Exception:  # pragma: no cover - defensive
+            pass
+
         max_attempts = 1 + max(0, int(self.retry))
 
         # Resource bumping per attempt — each retry can multiply or

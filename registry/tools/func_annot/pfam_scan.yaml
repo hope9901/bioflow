@@ -1,0 +1,27 @@
+id: pfam_scan
+name: PfamScan
+version: "1.6"
+category: func_annot
+stage: [genome_assembly.step6]
+input_types: [protein_faa]
+output_types: [pfam_domains_tsv]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/pfam_scan:1.6--hdfd78af_5
+  pull_policy: if_not_present
+  image_digest: sha256:ca6caadcb3b3fb47fc0ee09a0141f86162f24281d5093909271498a34ac00d93
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 8, disk_gb: 10}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  pfam_scan.pl -fasta {protein_faa} -dir {pfam_db}
+               -outfile {out_dir}/pfam.tsv -cpu {cpu}
+references: ["/refs/dbs/pfam"]
+citation: "Mistry 2021, PMID 33125078"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"

@@ -19,7 +19,9 @@ Append an entry to ``_DB_CATALOG`` — the dict key is the name used on the CLI.
 
 from __future__ import annotations
 
+import functools
 import hashlib
+import os
 import re
 import urllib.request
 from pathlib import Path
@@ -62,7 +64,7 @@ _DB_CATALOG: dict[str, dict] = {
         "size_gb": 0.5,
         "md5": None,
         "dest_file": "pfam/Pfam-A.hmm.gz",
-        "used_by": ["interproscan"],
+        "used_by": ["interproscan", "pfam_scan"],
         "notes": "Decompress and run hmmpress before use.",
         "version": "36.0",
         "provision": "sh -c 'cd {dir} && wget -q "
@@ -305,6 +307,32 @@ _DB_CATALOG: dict[str, dict] = {
         "latest": {"url": "https://www.genome.jp/ftp/db/kofam/",
                    "regex": r"README\.md.*?(\d{4}-\d{2}-\d{2})"},
         "notes": "KEGG KO assignment via exec_annotation (KofamScan).",
+    },
+    "dram": {
+        "name": "DRAM — metabolism databases (KEGG/UniRef/Pfam/dbCAN/MEROPS/VOGDB)",
+        "url": "",
+        "size_gb": 30.0,
+        "md5": None,
+        "dest_file": "dram",
+        "used_by": ["dram"],
+        "version": "1.5",
+        "provision": "DRAM-setup.py prepare_databases --output_dir {dir} "
+                     "--skip_uniref --threads 8",
+        "latest": None,
+        "notes": "MAG/genome metabolic annotation.  Add --uniref for the full "
+                 "(~500 GB) build; omit it for the lean profile.",
+    },
+    "funannotate_db": {
+        "name": "funannotate — fungal annotation databases",
+        "url": "",
+        "size_gb": 20.0,
+        "md5": None,
+        "dest_file": "funannotate",
+        "used_by": ["funannotate"],
+        "version": "2024-01",
+        "provision": "funannotate setup -d {dir} -b all",
+        "latest": None,
+        "notes": "InterPro/Pfam/dbCAN/MEROPS/UniProt data for `funannotate annotate`.",
     },
 }
 
@@ -677,6 +705,62 @@ def update_db(name: str, dest_root: Path, *, _fetch=None) -> dict:
     write_db_version(name, dest_root, target_version)
     log.info(f"DB '{name}' updated to {target_version}.")
     return {**st, "installed": target_version, "updated": True}
+
+
+# ---------------------------------------------------------------------------
+# Run-time hook: keep a stage's DBs current just before it runs
+# ---------------------------------------------------------------------------
+
+REFS_ENV = "BIOFLOW_REFS"
+
+
+@functools.lru_cache(maxsize=1)
+def _image_to_tool() -> "dict[str, str]":
+    """{container image -> tool id} from the registry (built once)."""
+    tools_dir = Path(__file__).resolve().parents[2] / "registry" / "tools"
+    out: "dict[str, str]" = {}
+    for p in tools_dir.rglob("*.yaml"):
+        text = p.read_text(encoding="utf-8")
+        gid = re.search(r"^id:\s*(\S+)", text, re.M)
+        img = re.search(r"^\s*image:\s*(\S+)", text, re.M)
+        if gid and img:
+            out[img.group(1)] = gid.group(1)
+    return out
+
+
+def refs_root() -> "Path | None":
+    """The references root DB management writes to, from ``$BIOFLOW_REFS``.
+
+    Returns None when unset — DB auto-management is opt-in: without a refs
+    location bioflow has nowhere to put databases, so the run-time hook is a
+    no-op (and tests / offline runs are unaffected).
+    """
+    root = os.environ.get(REFS_ENV)
+    return Path(root) if root else None
+
+
+def ensure_dbs_for_image(image: str, dest_root: "Path | None" = None, *,
+                         auto_update: bool = True, _fetch=None) -> "list[dict]":
+    """Version-gate the DBs of whatever tool *image* is, just before it runs.
+
+    Called by the stage runner.  Resolves the refs root from ``$BIOFLOW_REFS``
+    (unless *dest_root* is given); if that is unset, or the image is not an
+    annotation tool with versioned DBs, it is a no-op.  Best-effort: any DB
+    error is logged, never raised, so it can never break a pipeline run.
+    """
+    if dest_root is None:
+        dest_root = refs_root()
+        if dest_root is None:
+            return []
+    tool_id = _image_to_tool().get(image)
+    if not tool_id or not dbs_for_tool(tool_id):
+        return []
+    try:
+        return ensure_db_current(tool_id, dest_root, auto_update=auto_update,
+                                 _fetch=_fetch)
+    except Exception as exc:                       # never break the run
+        log.warning(f"DB ensure for {tool_id} skipped: {exc}")
+        return []
 
 
 # ---------------------------------------------------------------------------

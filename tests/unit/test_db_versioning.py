@@ -89,3 +89,34 @@ def test_cite_no_db_for_non_annotation_tool():
     entries, _ = citations.citations_for_tools(["spades"])
     assert entries[0]["databases"] == []
     assert "databases:" not in citations.format_text(entries)
+
+
+def test_new_annotation_tools_have_versioned_dbs():
+    # DRAM + funannotate ship their own DBs; pfam_scan reuses the Pfam DB.
+    assert db.catalog_version("dram") and db.catalog_version("funannotate_db")
+    assert "pfam" in db.dbs_for_tool("pfam_scan")
+    assert "dram" in db.dbs_for_tool("dram")
+
+
+def _image_of(tool_id: str) -> str:
+    return next(i for i, t in db._image_to_tool().items() if t == tool_id)
+
+
+def test_run_hook_noop_without_refs(monkeypatch):
+    """The stage-run hook does nothing unless $BIOFLOW_REFS points somewhere —
+    so ordinary runs (and tests) never touch the network or download a DB."""
+    monkeypatch.delenv("BIOFLOW_REFS", raising=False)
+    assert db.ensure_dbs_for_image(_image_of("eggnog_mapper")) == []
+
+
+def test_run_hook_uses_refs_env(monkeypatch, tmp_path):
+    monkeypatch.setenv("BIOFLOW_REFS", str(tmp_path))
+    db.write_db_version("eggnog", tmp_path, "5.0.1")            # stale on disk
+    sts = db.ensure_dbs_for_image(_image_of("eggnog_mapper"),
+                                  auto_update=False, _fetch=lambda u: "")
+    assert any(s["db"] == "eggnog" and s["update_available"] for s in sts)
+
+
+def test_run_hook_noop_for_non_annotation_image(monkeypatch, tmp_path):
+    monkeypatch.setenv("BIOFLOW_REFS", str(tmp_path))
+    assert db.ensure_dbs_for_image(_image_of("spades")) == []
