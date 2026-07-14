@@ -1,6 +1,6 @@
 id: salmon
 name: Salmon
-version: "2.3.1"
+version: "2.3.3"
 category: rnaseq_align
 stage: [rnaseq_deg.step2]
 input_types: [fastq_short_paired_clean, reference_genome, annotation_gtf]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [any]
 container:
-  image: quay.io/biocontainers/salmon:2.3.1--hfa8f182_0
+  image: quay.io/biocontainers/salmon:2.3.3--hfa8f182_0
   pull_policy: if_not_present
-  image_digest: sha256:54ff24b92f5f99576b49cf2c15e303589f7306ace502f9874f27e1ff6a470d29
+  image_digest: sha256:5942663cf6bf5dfe6db86d66cc5d0913a621b74f5a0a522a951c744b96e10d67
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 16, ram_gb: 32, disk_gb: 30}
@@ -26,5 +26,5 @@ command_template: |
                -o {out_dir}
 citation: "Patro 2017, PMID 28263959"
 added: "2026-04-16"
-last_reviewed: "2026-07-06"
+last_reviewed: "2026-07-14"
 source_repo: COMBINE-lab/salmon

@@ -196,8 +196,8 @@ RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC
 
 - **multiqc_report** — `quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1`
 - **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
-- **salmon_index** — `quay.io/biocontainers/salmon:2.3.1--hfa8f182_0`
-- **salmon_quant** — `quay.io/biocontainers/salmon:2.3.1--hfa8f182_0`
+- **salmon_index** — `quay.io/biocontainers/salmon:2.3.3--hfa8f182_0`
+- **salmon_quant** — `quay.io/biocontainers/salmon:2.3.3--hfa8f182_0`
 - **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0`
 - **enrich_go** — `quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0`
 

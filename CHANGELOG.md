@@ -14,6 +14,15 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Changed — Salmon 2.3.1 → 2.3.3 (2026-07 release_watch candidate, processed)
+- `release_watch` filed a Salmon 2.3.3 candidate.  As usual its auto-guessed
+  image tag had no build suffix (`salmon:2.3.3`) and its digest was copied from
+  the previous release — the candidate flags this itself as an "unverified image
+  tag" risk.  Resolved the real tag (`2.3.3--hfa8f182_0`) + real digest, bumped
+  the registry and `rnaseq_deg` in lockstep, and verified with `verify_bump`:
+  container smoke green **and the full `rnaseq_deg` e2e green**.  The consumed
+  candidate under `update/candidates/2026-07/` is removed.
+
 ### Added — 11 more commonly-used tools across categories
 Digest-pinned, citations verified (9 via MEDLINE PMID; seqtk/sourmash are
 DOI-only), and behaviour-checked with `verify_bump`:
