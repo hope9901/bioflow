@@ -1,0 +1,27 @@
+id: dfast
+name: DFAST
+version: "1.4.1"
+category: struct_annot
+stage: [genome_assembly.step5]
+input_types: [assembly_fasta]
+output_types: [structural_gff, protein_faa, structural_gbk]
+applicable:
+  species: [prokaryote]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/dfast:1.4.1--h7f5d12c_0
+  pull_policy: if_not_present
+  image_digest: sha256:e32860ae3bd6ec524bb5cbd831a7b95495898fadf6edf33b0e14f57deccf75e9
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 20}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  dfast -g {assembly_fasta} -o {out_dir} --cpu {cpu} --force
+references: ["/refs/dbs/dfast"]
+citation: "Tanizawa 2018, PMID 29106469"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: nigyta/dfast_core

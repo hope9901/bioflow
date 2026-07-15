@@ -34,6 +34,7 @@ from bioflow.cli import (  # noqa: F401,E402
     db,
     doctor,
     hw,
+    lineage,
     llm,
     ncbi,
     overview,

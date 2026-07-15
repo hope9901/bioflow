@@ -1,6 +1,6 @@
 # Tools
 
-**129 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**133 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -211,15 +211,19 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `seurat` | 5.5.1 | `satijalab/seurat:5.5.1` | Hao et al. 2024, PMID 37231261 | 3,602 | 2,821 |
 | `starsolo` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin et al. 2013, PMID 23104886 | 41,990 | 29,078 |
 
-## struct_annot  (6)
+## struct_annot  (10)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `augustus` | 3.5.0 | `quay.io/biocontainers/augustus:3.5.0--pl5321h9716f88_9` | Stanke 2008, PMID 18218656 | 1,990 | 1,263 |
 | `bakta` | 1.12.0 | `quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0` | Schwengers 2021, PMID 34739369 | 919 | 792 |
 | `braker3` | 3.1.1 | `teambraker/braker3:v3.1.1` | Gabriel 2024, PMID 38866550 | 487 | 370 |
+| `dfast` | 1.4.1 | `quay.io/biocontainers/dfast:1.4.1--h7f5d12c_0` | Tanizawa 2018, PMID 29106469 | n/a | n/a |
+| `glimmerhmm` | 3.0.4 | `quay.io/biocontainers/glimmerhmm:3.0.4--pl5321h503566f_10` | Majoros 2004, PMID 15145805 | n/a | n/a |
 | `liftoff` | 1.6.3 | `quay.io/biocontainers/liftoff:1.6.3--pyhdfd78af_0` | Shumate & Salzberg 2021, PMID 33320174 | 733 | 669 |
+| `prodigal` | 2.6.3 | `quay.io/biocontainers/prodigal:2.6.3--h577a1d6_11` | Hyatt 2010, PMID 20211023 | n/a | n/a |
 | `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,442 | 9,722 |
+| `snap` | 2017-03-01 | `quay.io/biocontainers/snap:2017_03_01--h7b50bb2_0` | Korf 2004, PMID 15144565 | n/a | n/a |
 | `trnascan_se` | 2.0.12 | `quay.io/biocontainers/trnascan-se:2.0.12--pl5321h7b50bb2_2` | Chan 2021, PMID 34417604 | n/a | n/a |
 
 ## variant_calling  (8)

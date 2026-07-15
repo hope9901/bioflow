@@ -1,0 +1,26 @@
+id: snap
+name: SNAP
+version: "2017-03-01"
+category: struct_annot
+stage: [genome_assembly.step5]
+input_types: [assembly_fasta]
+output_types: [structural_gff]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [any]
+  mode: [any]
+container:
+  image: quay.io/biocontainers/snap:2017_03_01--h7b50bb2_0
+  pull_policy: if_not_present
+  image_digest: sha256:996999d2c4bf4899977b23a18fe0805fc5469baae2ffbaf2f9872905ca8d7bd7
+resources:
+  min: {cpu: 2, ram_gb: 4, disk_gb: 5}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 20}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  snap {snap_hmm} {assembly_fasta} > {out_dir}/genes.gff
+citation: "Korf 2004, PMID 15144565"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: KorfLab/SNAP

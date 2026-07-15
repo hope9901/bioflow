@@ -373,6 +373,18 @@ _DB_CATALOG: dict[str, dict] = {
         "notes": "AMRFinderPlus/PSC/UniRef data for `bakta`; use --type light "
                  "for the ~1.5 GB profile.",
     },
+    "dfast_db": {
+        "name": "DFAST — reference protein databases",
+        "url": "",
+        "size_gb": 2.0,
+        "md5": None,
+        "dest_file": "dfast",
+        "used_by": ["dfast"],
+        "version": "1.4",
+        "provision": "dfast_file_downloader.py --protein dfast --dbroot {dir}",
+        "latest": None,
+        "notes": "Reference proteins/HMMs for `dfast` structural+functional annotation.",
+    },
 }
 
 

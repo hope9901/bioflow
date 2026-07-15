@@ -92,6 +92,24 @@ def annotate(asm, *, out_dir, sample_id: str = "sample"):
     )
 
 
+@stage(image="quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0",
+       cpu=4, ram_gb=16, depends_on=assemble)
+def annotate_bakta(asm, *, out_dir, sample_id: str = "sample", bakta_db: str = ""):
+    """Bakta: the alternative structural annotator (``--annotator bakta``).
+
+    Needs a Bakta DB (``bioflow db provision bakta_db``); pass its path with
+    ``--set annotate_bakta.bakta_db=/refs/dbs/bakta``.  Writes ``{sample_id}.gbff``,
+    which ``genome_plot`` picks up in place of Prokka's ``.gbk``.
+    """
+    return (
+        f"bash -c '"
+        f"ASM={asm.out_dir}/scaffolds.fasta; "
+        f"[ -f \"$ASM\" ] || ASM={asm.out_dir}/contigs.fasta; "
+        f"bakta --db {bakta_db} --output {out_dir} --prefix {sample_id} "
+        f"--force --skip-plot \"$ASM\"'"
+    )
+
+
 @stage(image="staphb/bandage:0.9.0", cpu=2, ram_gb=4, depends_on=assemble)
 def graph_image(asm, *, out_dir):
     """Bandage: render the SPAdes assembly graph to a PNG.
@@ -221,10 +239,14 @@ def genome_plot(ann, *, out_dir, sample_id: str = "sample", min_contig: int = 50
     render never fails the pipeline (the run's QUAST / Prokka / fastp outputs
     are unaffected).
     """
-    gbk = f"{ann.out_dir}/prokka/{sample_id}.gbk"
+    # Prokka writes prokka/<id>.gbk; Bakta writes <id>.gbff — accept either so
+    # the plot works whichever annotator the pipeline ran.
+    gbk_prokka = f"{ann.out_dir}/prokka/{sample_id}.gbk"
+    gbk_bakta = f"{ann.out_dir}/{sample_id}.gbff"
     return (
         f"cd {out_dir}\n"
-        f'python - "{gbk}" "{min_contig}" filtered.gbk <<\'PY\'\n'
+        f'GBK="{gbk_prokka}"; [ -f "$GBK" ] || GBK="{gbk_bakta}"\n'
+        f'python - "$GBK" "{min_contig}" filtered.gbk <<\'PY\'\n'
         f"{_GENOME_PLOT_FILTER}"
         "PY\n"
         # White background, a colour-blind-safe scheme (Okabe-Ito "autumn"),
@@ -246,8 +268,9 @@ def genome_plot(ann, *, out_dir, sample_id: str = "sample", min_contig: int = 50
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, assemble, assembly_qc, graph_image, annotate, genome_plot],
-    description="Prokaryote short-read de novo assembly + Prokka annotation",
+    stages=[qc_trim, assemble, assembly_qc, graph_image,
+            annotate, annotate_bakta, genome_plot],
+    description="Prokaryote short-read de novo assembly + structural annotation",
 )
 def prokaryote_assembly(
     r1: Path,
@@ -255,8 +278,16 @@ def prokaryote_assembly(
     *,
     out_dir: Path,
     sample_id: str = "sample",
+    annotator: str = "prokka",
+    bakta_db: str = "",
 ):
-    """fastp → SPAdes → QUAST + Bandage graph + Prokka + GenoVi genome map."""
+    """fastp → SPAdes → QUAST + Bandage graph → annotation → GenoVi genome map.
+
+    ``annotator`` selects the structural annotation tool: ``"prokka"`` (default,
+    self-contained) or ``"bakta"`` (needs a Bakta DB — see ``bioflow db provision
+    bakta_db`` — passed via ``bakta_db``).  The GenoVi genome map is drawn from
+    whichever annotator ran.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -264,7 +295,10 @@ def prokaryote_assembly(
     asm = assemble(clean)
     assembly_qc(asm)                # QUAST report lands in its own out_dir
     graph_image(asm)                # Bandage assembly-graph PNG
-    ann = annotate(asm, sample_id=sample_id)
+    if annotator == "bakta":
+        ann = annotate_bakta(asm, sample_id=sample_id, bakta_db=bakta_db)
+    else:
+        ann = annotate(asm, sample_id=sample_id)
     genome_plot(ann, sample_id=sample_id)   # GenoVi circular genome map
     return ann
 

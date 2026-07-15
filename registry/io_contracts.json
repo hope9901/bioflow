@@ -301,6 +301,17 @@
         "deg_table"
       ]
     },
+    "dfast": {
+      "version": "1.4.1",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gbk",
+        "structural_gff"
+      ]
+    },
     "diamond": {
       "version": "2.2.2",
       "inputs": [
@@ -501,6 +512,15 @@
       ],
       "outputs": [
         "assembly_stats"
+      ]
+    },
+    "glimmerhmm": {
+      "version": "3.0.4",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "structural_gff"
       ]
     },
     "gseapy": {
@@ -959,6 +979,16 @@
         "polished_assembly_fasta"
       ]
     },
+    "prodigal": {
+      "version": "2.6.3",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "protein_faa",
+        "structural_gff"
+      ]
+    },
     "prokka": {
       "version": "1.14.6",
       "inputs": [
@@ -1142,6 +1172,15 @@
       ],
       "outputs": [
         "ani_matrix"
+      ]
+    },
+    "snap": {
+      "version": "2017-03-01",
+      "inputs": [
+        "assembly_fasta"
+      ],
+      "outputs": [
+        "structural_gff"
       ]
     },
     "snpeff": {

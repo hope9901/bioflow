@@ -167,13 +167,14 @@ Single-copy core gene supermatrix → MAFFT × N → IQ-TREE ML
 
 ## `prokaryote_assembly`
 
-Prokaryote short-read de novo assembly + Prokka annotation
+Prokaryote short-read de novo assembly + structural annotation
 
-*6 stage(s):*
+*7 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **assemble** — `staphb/spades:4.2.0`
 - **annotate** — `staphb/prokka:1.14.6`
+- **annotate_bakta** — `quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0`
 - **assembly_qc** — `staphb/quast:5.3.0`
 - **genome_plot** — `staphb/genovi:0.4.3`
 - **graph_image** — `staphb/bandage:0.9.0`

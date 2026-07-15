@@ -14,6 +14,27 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — more structural annotators, swappable annotation, BUSCO lineage advice
+- **BUSCO / compleasm lineage recommender**: `bioflow lineage <taxon>` maps a
+  species class + free-text hint (`fungus`, `insect`, `human`, `zebrafish`, …)
+  to the right odb10 dataset (`fungi_odb10`, `insecta_odb10`, `primates_odb10`,
+  `actinopterygii_odb10`) and says whether bioflow catalogues it (`bioflow db
+  fetch`) or it needs `busco --download`.  `bioflow custom` now pre-fills a
+  species-appropriate lineage at the `busco_lineage` prompt.
+- **Four more structural-annotation tools** (digest-pinned, citations verified),
+  spanning kingdoms and integrated-vs-standalone:
+  - bacteria — **Prodigal** (ab-initio gene caller) alongside the integrated
+    Prokka/Bakta, plus **DFAST** (another integrated pipeline);
+  - eukaryotes — **GlimmerHMM** and **SNAP** ab-initio predictors alongside
+    integrated BRAKER3 / AUGUSTUS.
+  They're wired into the planner's Structural Annotation step, so `bioflow
+  custom genome_assembly` offers whichever is applicable to the chosen species.
+- **`prokaryote_assembly` recipe now takes `--set …annotator`**: `prokka`
+  (default) or `bakta` (`--set annotator=bakta`, with a Bakta DB).  The GenoVi
+  genome map reads whichever annotator's GenBank was produced (Prokka `.gbk` /
+  Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
+  (`dfast_db`).
+
 ### Fixed — DB-management gaps + a per-run network probe (project audit)
 - **CheckM2 and Bakta** reference `/refs/dbs/checkm2` / `/refs/dbs/bakta` but had
   no entry in the version-managed DB catalog, so `bioflow db provision` and the

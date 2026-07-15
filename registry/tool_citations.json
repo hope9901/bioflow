@@ -7,8 +7,8 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 129,
-  "n_with_pmid": 115,
+  "n_tools": 133,
+  "n_with_pmid": 119,
   "n_fetched": 98,
   "n_pmid_mismatch": 5,
   "tools": {
@@ -276,6 +276,15 @@
       "name": "DESeq2",
       "category": "deg"
     },
+    "dfast": {
+      "pmid": "29106469",
+      "doi": "10.1093/bioinformatics/btx713",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "DFAST",
+      "category": "struct_annot"
+    },
     "diamond": {
       "pmid": "33828273",
       "doi": "10.1038/s41592-021-01101-x",
@@ -456,6 +465,15 @@
       "verified": true,
       "name": "gfastats",
       "category": "assembly_qc"
+    },
+    "glimmerhmm": {
+      "pmid": "15145805",
+      "doi": "10.1093/bioinformatics/bth315",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "GlimmerHMM",
+      "category": "struct_annot"
     },
     "gseapy": {
       "pmid": "36426870",
@@ -872,6 +890,15 @@
       "name": "Pilon",
       "category": "assembly"
     },
+    "prodigal": {
+      "pmid": "20211023",
+      "doi": "10.1186/1471-2105-11-119",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "Prodigal",
+      "category": "struct_annot"
+    },
     "prokka": {
       "pmid": "24642063",
       "doi": "10.1093/bioinformatics/btu153",
@@ -1033,6 +1060,15 @@
       "verified": true,
       "name": "skani",
       "category": "comparative_genomics"
+    },
+    "snap": {
+      "pmid": "15144565",
+      "doi": "10.1186/1471-2105-5-59",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "SNAP",
+      "category": "struct_annot"
     },
     "snpeff": {
       "pmid": "22728672",

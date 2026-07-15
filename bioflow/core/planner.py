@@ -128,12 +128,22 @@ _ARTIFACT_FILENAMES: dict[tuple[str, Optional[str]], dict[str, str]] = {
     ("genome_assembly.step4", "repeatmodeler"):   {"repeat_library": "consensi.fa.classified"},
 
     # step5: structural annotation → GFF + protein FASTA
+    #   Integrated pipelines (prokka/bakta/dfast for bacteria, braker3 for
+    #   eukaryotes) and ab-initio gene predictors (prodigal for bacteria,
+    #   glimmerhmm/snap for eukaryotes) are interchangeable here — `bioflow
+    #   custom` offers whichever is applicable to the chosen species.
     ("genome_assembly.step5", "prokka"):     {"structural_gff": "{sample_id}.gff",
                                               "protein_faa":    "{sample_id}.faa"},
     ("genome_assembly.step5", "bakta"):      {"structural_gff": "{sample_id}.gff",
                                               "protein_faa":    "{sample_id}.faa"},
+    ("genome_assembly.step5", "dfast"):      {"structural_gff": "genome.gff",
+                                              "protein_faa":    "protein.faa"},
+    ("genome_assembly.step5", "prodigal"):   {"structural_gff": "genes.gff",
+                                              "protein_faa":    "proteins.faa"},
     ("genome_assembly.step5", "braker3"):    {"structural_gff": "braker.gff3",
                                               "protein_faa":    "braker.aa"},
+    ("genome_assembly.step5", "glimmerhmm"): {"structural_gff": "genes.gff"},
+    ("genome_assembly.step5", "snap"):       {"structural_gff": "genes.gff"},
 
     # step6: functional annotation
     ("genome_assembly.step6", "eggnog_mapper"):   {"func_annotation_tsv": "annotations.tsv"},
@@ -1008,7 +1018,17 @@ def interactive_build(pipeline: str, out: Path, *, registry_dir: Path = Path("re
     console.print("\n[bold]Required inputs:[/]")
     inputs: dict[str, str] = {}
     for key, description in _required_inputs_for(pipeline, read_type):
-        val = questionary.text(f"  {description} [{key}]:").ask()
+        # For a BUSCO lineage, pre-fill a species-appropriate recommendation the
+        # user can accept or override (bioflow lineage <taxon> for a finer pick).
+        default = ""
+        if key == "busco_lineage":
+            from bioflow.core.lineage import recommend_lineage  # noqa: PLC0415
+            rec = recommend_lineage(species=species)
+            default = rec["lineage"]
+            console.print(f"  [dim]recommended lineage for {species}: "
+                          f"{rec['lineage']} — run `bioflow lineage <taxon>` "
+                          f"for a more specific pick[/]")
+        val = questionary.text(f"  {description} [{key}]:", default=default).ask()
         if val is None:
             raise KeyboardInterrupt
         if val:
