@@ -68,52 +68,91 @@ def bracken_abundance(k2, kraken2_db: Path, sample_id: str,
     )
 
 
-@stage(image="staphb/krona:2.8.1", cpu=2, ram_gb=4, depends_on=bracken_abundance)
-def krona_chart(bk, sample_id: str, *, out_dir):
-    """Krona: interactive taxonomic sunburst from the Bracken abundance table.
+@stage(image="quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0",
+       cpu=8, ram_gb=32, depends_on=qc_trim)
+def metaphlan_profile(clean, sample_id: str, *, out_dir, metaphlan_db: str = ""):
+    """MetaPhlAn4 marker-gene taxonomic profile (``--set profiler=metaphlan``).
 
-    Reshapes the Bracken TSV (``new_est_reads`` = col 6, taxon name = col 1)
-    into Krona's ``<value>\\t<label>`` text with cut/paste (no taxonomy DB
-    needed), then ``ktImportText`` writes a self-contained ``krona.html``.
+    A single-step alternative to Kraken2+Bracken.  Needs the MetaPhlAn DB
+    (``--set metaphlan_profile.metaphlan_db=/refs/metaphlan``).  Writes
+    ``{sample_id}.metaphlan.tsv``, which ``krona_chart`` reshapes in place of
+    the Bracken table.
     """
+    db = f"--bowtie2db {metaphlan_db}" if metaphlan_db else ""
     return (
-        f"bash -c 'B={bk.out_dir}/{sample_id}.bracken.tsv; "
+        f"metaphlan {clean.out_dir}/clean_R1.fq.gz,{clean.out_dir}/clean_R2.fq.gz "
+        f"--input_type fastq --nproc 8 {db} "
+        f"-o {out_dir}/{sample_id}.metaphlan.tsv "
+        f"--bowtie2out {out_dir}/{sample_id}.bowtie2.bz2"
+    )
+
+
+@stage(image="staphb/krona:2.8.1", cpu=2, ram_gb=4, depends_on=bracken_abundance)
+def krona_chart(prof, sample_id: str, *, out_dir):
+    """Krona: interactive taxonomic sunburst from whichever profiler ran.
+
+    Reshapes into Krona's ``<value>\\t<label>`` text: Bracken's TSV
+    (``new_est_reads`` col 6, taxon col 1) when present, else MetaPhlAn's
+    species rows (relative abundance col 3, the ``s__`` clade name).  No
+    taxonomy DB needed; ``ktImportText`` writes a self-contained HTML.
+    """
+    bracken = f"{prof.out_dir}/{sample_id}.bracken.tsv"
+    metaphlan = f"{prof.out_dir}/{sample_id}.metaphlan.tsv"
+    return (
+        f"bash -c 'B={bracken}; M={metaphlan}; K={out_dir}/krona.txt; "
+        f"if [ -f \"$B\" ]; then "
         f"tail -n +2 \"$B\" | cut -f6 > {out_dir}/val.tmp; "
         f"tail -n +2 \"$B\" | cut -f1 > {out_dir}/name.tmp; "
-        f"paste {out_dir}/val.tmp {out_dir}/name.tmp > {out_dir}/krona.txt; "
-        f"ktImportText {out_dir}/krona.txt -o {out_dir}/krona.html'"
+        f"paste {out_dir}/val.tmp {out_dir}/name.tmp > \"$K\"; "
+        f"else "
+        f"grep \"s__\" \"$M\" | grep -v \"t__\" | "
+        f"awk -F\"\\t\" \"{{c=\\$1; sub(/.*[|]/, \\\"\\\", c); print \\$3 \\\"\\t\\\" c}}\" > \"$K\"; "
+        f"fi; "
+        f"ktImportText \"$K\" -o {out_dir}/krona.html'"
     )
 
 
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, kraken2_classify, bracken_abundance, krona_chart],
-    description="Shotgun metagenomic profiling: fastp → Kraken2 → Bracken → Krona",
+    stages=[qc_trim, kraken2_classify, bracken_abundance,
+            metaphlan_profile, krona_chart],
+    description="Shotgun metagenomic profiling: fastp → Kraken2+Bracken|MetaPhlAn → Krona",
 )
 def metagenomics_profile(
     r1: Path,
     r2: Path,
-    kraken2_db: Path,
+    kraken2_db: Path = Path(""),
     *,
     out_dir: Path,
     sample_id: str = "sample",
+    profiler: str = "kraken2",
+    metaphlan_db: str = "",
     read_length: int = 150,
     level: str = "S",
     threshold: int = 10,
 ):
-    """fastp → Kraken2 → Bracken → Krona end-to-end taxonomic profile."""
+    """fastp → taxonomic profiler → Krona end-to-end taxonomic profile.
+
+    ``profiler`` selects the classifier: ``"kraken2"`` (default; Kraken2 + Bracken,
+    needs ``kraken2_db``) or ``"metaphlan"`` (``--set profiler=metaphlan``, a
+    single-step marker-gene profiler needing ``metaphlan_db``).  Krona reads
+    whichever ran.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = qc_trim(Path(r1), Path(r2))
-    k2 = kraken2_classify(clean, Path(kraken2_db), sample_id)
-    bk = bracken_abundance(
-        k2, Path(kraken2_db), sample_id,
-        read_length=read_length, level=level, threshold=threshold,
-    )
-    krona_chart(bk, sample_id)      # interactive Krona sunburst
-    return bk
+    if profiler == "metaphlan":
+        prof = metaphlan_profile(clean, sample_id, metaphlan_db=metaphlan_db)
+    else:
+        k2 = kraken2_classify(clean, Path(kraken2_db), sample_id)
+        prof = bracken_abundance(
+            k2, Path(kraken2_db), sample_id,
+            read_length=read_length, level=level, threshold=threshold,
+        )
+    krona_chart(prof, sample_id)      # interactive Krona sunburst
+    return prof
 
 
 register("metagenomics_profile", metagenomics_profile)

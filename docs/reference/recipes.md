@@ -128,14 +128,15 @@ Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → C
 
 ## `metagenomics_profile`
 
-Shotgun metagenomic profiling: fastp → Kraken2 → Bracken → Krona
+Shotgun metagenomic profiling: fastp → Kraken2+Bracken|MetaPhlAn → Krona
 
-*4 stage(s):*
+*5 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **kraken2_classify** — `quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0`
 - **bracken_abundance** — `quay.io/biocontainers/bracken:3.1--h9948957_0`
 - **krona_chart** — `staphb/krona:2.8.1`
+- **metaphlan_profile** — `quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0`
 
 ## `methylation_wgbs`
 

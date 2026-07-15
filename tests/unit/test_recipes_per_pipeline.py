@@ -16,7 +16,7 @@ EXPECTED_RECIPES = {
     "prokaryote_assembly":  7,   # fastp → spades → quast → bandage → prokka|bakta → genovi
     "eukaryote_assembly":   5,   # nanoplot → flye|hifiasm → medaka → compleasm
     "rnaseq_deg":           8,   # fastp → salmon|kallisto (index+quant) → deseq2 → enrich → multiqc
-    "metagenomics_profile": 4,   # fastp → kraken2 → bracken → krona
+    "metagenomics_profile": 5,   # fastp → kraken2 → bracken → krona
     "metagenome_assembly":  5,   # fastp → megahit → minimap2 → metabat2 → checkm2
     "scrna_seq":            2,   # starsolo → scanpy
     "chip_seq":             5,   # trim → align → dedup → peaks → annotate

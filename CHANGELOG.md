@@ -24,6 +24,13 @@ registry tool per stage.)
 - `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
   `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
   Verified: hifiasm image behaviour-checked with `verify_bump`.
+- `metagenomics_profile`: `--set profiler=kraken2|metaphlan` — MetaPhlAn4 is a
+  single-step marker-gene alternative to Kraken2+Bracken; Krona reshapes
+  whichever profiler's table was written (Bracken `new_est_reads`, else the
+  MetaPhlAn `s__` species rows).  Kraken2 default path unchanged (Krona checks
+  the Bracken table first).  Rendered command shell-validated (`bash -n`);
+  metaphlan image liveness-checked.  (This recipe has no committed e2e fixture —
+  the Kraken2 path is byte-identical, the MetaPhlAn path is render/liveness-only.)
 - `rnaseq_deg`: `--set quantifier=salmon|kallisto` — DESeq2 now reads whichever
   the quantifier wrote (Salmon `quant.sf` `NumReads`, else kallisto
   `abundance.tsv` `est_counts`), so the Salmon default path is unchanged.
