@@ -13,6 +13,8 @@ from pathlib import Path
 
 from bioflow.core import citations, db
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def test_annotation_dbs_are_versioned():
     for key in ("eggnog", "dbcan", "kofam", "antismash_db", "gtdbtk_r220", "pfam"):
@@ -96,6 +98,27 @@ def test_new_annotation_tools_have_versioned_dbs():
     assert db.catalog_version("dram") and db.catalog_version("funannotate_db")
     assert "pfam" in db.dbs_for_tool("pfam_scan")
     assert "dram" in db.dbs_for_tool("dram")
+
+
+def test_db_dependent_tools_all_have_a_catalog_entry():
+    """Every tool that pins a /refs/dbs/<x> path must have a managed DB entry,
+    so `bioflow db provision <tool's DB>` and the run-time hook actually work."""
+    import yaml
+    covered = set()
+    for e in db._DB_CATALOG.values():
+        covered |= set(e.get("used_by", []))
+    gaps = []
+    for p in (REPO_ROOT / "registry" / "tools").rglob("*.yaml"):
+        d = yaml.safe_load(p.read_text(encoding="utf-8"))
+        if d and d.get("references") and d["id"] not in covered:
+            gaps.append(d["id"])
+    assert not gaps, f"tools reference a DB path but have no _DB_CATALOG entry: {gaps}"
+
+
+def test_latest_probe_injected_fetch_bypasses_cache():
+    db._LATEST_CACHE.clear()
+    assert db.latest_db_version("vep_cache", _fetch=lambda u: "release-120") == "120"
+    assert "vep_cache" not in db._LATEST_CACHE  # test path is never cached
 
 
 def _image_of(tool_id: str) -> str:

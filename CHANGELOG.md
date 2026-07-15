@@ -14,6 +14,19 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — DB-management gaps + a per-run network probe (project audit)
+- **CheckM2 and Bakta** reference `/refs/dbs/checkm2` / `/refs/dbs/bakta` but had
+  no entry in the version-managed DB catalog, so `bioflow db provision` and the
+  run-time auto-update hook silently skipped them.  Added `checkm2_db` +
+  `bakta_db` (version + provision command).  A new test asserts every tool that
+  pins a `/refs/dbs/<x>` path has a managed DB entry, so this can't regress.
+- **BUSCO**'s reference hint (`/refs/dbs/busco_lineages`) didn't match where the
+  catalog actually writes the lineages (`<refs>/busco/…`); aligned it to
+  `/refs/dbs/busco`.
+- **`latest_db_version` now caches its upstream probe per process**, so a
+  fan-out pipeline that runs the same annotation tool many times (the run-time
+  hook fires per stage) hits the network once instead of on every invocation.
+
 ### Changed — Salmon 2.3.1 → 2.3.3 (2026-07 release_watch candidate, processed)
 - `release_watch` filed a Salmon 2.3.3 candidate.  As usual its auto-guessed
   image tag had no build suffix (`salmon:2.3.3`) and its digest was copied from

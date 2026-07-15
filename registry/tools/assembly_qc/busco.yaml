@@ -21,7 +21,7 @@ resources:
 command_template: |
   busco -i {assembly_fasta} -o {sample_id} --out_path {out_dir}
         -l {busco_lineage} -m genome -c {cpu} --force
-references: ["/refs/dbs/busco_lineages"]
+references: ["/refs/dbs/busco"]
 citation: "Manni 2021, PMID 34320186"
 added: "2026-04-16"
 last_reviewed: "2026-07-06"

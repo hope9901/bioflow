@@ -348,7 +348,38 @@ _DB_CATALOG: dict[str, dict] = {
                    "regex": r"release-(\d+)"},
         "notes": "Offline annotation cache for `vep --cache --dir_cache`.",
     },
+    "checkm2_db": {
+        "name": "CheckM2 — DIAMOND reference database (UniRef100/KO)",
+        "url": "",
+        "size_gb": 3.0,
+        "md5": None,
+        "dest_file": "checkm2",
+        "used_by": ["checkm2"],
+        "version": "1.0.1",
+        "provision": "checkm2 database --download --path {dir}",
+        "latest": None,
+        "notes": "Completeness/contamination model DB for `checkm2 predict`.",
+    },
+    "bakta_db": {
+        "name": "Bakta — bacterial annotation database (full)",
+        "url": "",
+        "size_gb": 75.0,
+        "md5": None,
+        "dest_file": "bakta",
+        "used_by": ["bakta"],
+        "version": "5.1",
+        "provision": "bakta_db download --output {dir} --type full",
+        "latest": None,
+        "notes": "AMRFinderPlus/PSC/UniRef data for `bakta`; use --type light "
+                 "for the ~1.5 GB profile.",
+    },
 }
+
+
+# Cache the upstream "latest version" probe per DB for the life of the process,
+# so a fan-out pipeline that runs the same annotation tool many times only hits
+# the network once (the run-time hook calls this on every stage).
+_LATEST_CACHE: "dict[str, str | None]" = {}
 
 
 # ---------------------------------------------------------------------------
@@ -616,17 +647,23 @@ def latest_db_version(name: str, *, _fetch=None) -> "str | None":
     spec = _DB_CATALOG.get(name, {}).get("latest")
     if not spec:
         return None
+    # Real-network probes are cached process-wide; injected _fetch (tests)
+    # bypasses the cache so it stays deterministic.
+    if _fetch is None and name in _LATEST_CACHE:
+        return _LATEST_CACHE[name]
     fetch = _fetch or (lambda u: urllib.request.urlopen(u, timeout=15)
                        .read().decode("utf-8", "replace"))
     try:
         body = fetch(spec["url"])
     except Exception as exc:            # offline / server hiccup — stay silent
         log.debug(f"latest_db_version({name}) probe failed: {exc}")
-        return None
-    matches = re.findall(spec["regex"], body, re.S)
-    if not matches:
-        return None
-    return max(matches, key=_vt)
+        result = None
+    else:
+        matches = re.findall(spec["regex"], body, re.S)
+        result = max(matches, key=_vt) if matches else None
+    if _fetch is None:
+        _LATEST_CACHE[name] = result
+    return result
 
 
 def db_status(name: str, dest_root: Path, *, check_latest: bool = False,
