@@ -73,29 +73,54 @@ def salmon_quant(idx, sample_id: str, r1_clean: Path, r2_clean: Path,
     )
 
 
+@stage(image="quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0",
+       cpu=8, ram_gb=16)
+def kallisto_index(transcriptome: Path, *, out_dir):
+    """Build a kallisto index (``--set quantifier=kallisto``)."""
+    return f"kallisto index -i {out_dir}/kallisto.idx {transcriptome}"
+
+
+@stage(image="quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0",
+       cpu=8, ram_gb=16, depends_on=kallisto_index)
+def kallisto_quant(idx, sample_id: str, r1_clean: Path, r2_clean: Path,
+                   *, out_dir):
+    """kallisto quant for one sample — writes ``<sample_id>/abundance.tsv``,
+    which ``deseq2_diff`` reads in place of Salmon's ``quant.sf``."""
+    return (
+        f"kallisto quant -i {idx.out_dir}/kallisto.idx "
+        f"-o {out_dir}/{sample_id} -t 8 {r1_clean} {r2_clean}"
+    )
+
+
 @stage(image="quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0",
        cpu=4, ram_gb=16, depends_on=salmon_quant)
 def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
-    """Transcript-level DESeq2 differential expression from Salmon quants.
+    """Transcript-level DESeq2 differential expression from the quantifier.
 
     The ``bioconductor-deseq2`` BioContainer ships DESeq2 but **not**
-    tximport, so the count matrix is assembled in base R directly from
-    each sample's ``quant.sf`` (the ``NumReads`` column, rounded) and fed
-    to ``DESeqDataSetFromMatrix`` — no tximport dependency.  This is
-    transcript-level (no tx2gene collapse), which is what's available
-    without an external gene map.
+    tximport, so the count matrix is assembled in base R directly from each
+    sample's per-transcript counts and fed to ``DESeqDataSetFromMatrix`` — no
+    tximport dependency.  It reads whichever quantifier ran: Salmon's
+    ``quant.sf`` (``Name`` / ``NumReads``) or, when absent, kallisto's
+    ``abundance.tsv`` (``target_id`` / ``est_counts``).  Transcript-level (no
+    tx2gene collapse), which is what's available without an external gene map.
     """
-    # Each salmon_quant stage wrote <out_dir>/<sample_id>/quant.sf.
+    # Each quant stage wrote <out_dir>/<sample_id>/{quant.sf|abundance.tsv}.
     quant_dirs = ",".join(str(q.out_dir) for q in quants)
     return (
         f"Rscript -e \""
         f"library(DESeq2); "
         f"samples <- read.csv('{sample_sheet}'); "
         f"quant_dirs <- strsplit('{quant_dirs}', ',')[[1]]; "
-        f"files <- file.path(quant_dirs, samples\\$sample_id, 'quant.sf'); "
-        f"tabs <- lapply(files, function(f) read.delim(f, stringsAsFactors=FALSE)); "
-        f"genes <- tabs[[1]]\\$Name; "
-        f"mat <- sapply(tabs, function(t) round(t\\$NumReads[match(genes, t\\$Name)])); "
+        # Per sample, prefer Salmon's quant.sf, else kallisto's abundance.tsv,
+        # returning a uniform (id, count) frame so the rest is quantifier-blind.
+        f"readq <- function(d, s) {{"
+        f"  sf <- file.path(d, s, 'quant.sf'); ab <- file.path(d, s, 'abundance.tsv'); "
+        f"  if (file.exists(sf)) {{ t <- read.delim(sf); data.frame(id=t\\$Name, cnt=t\\$NumReads) }} "
+        f"  else {{ t <- read.delim(ab); data.frame(id=t\\$target_id, cnt=t\\$est_counts) }} }}; "
+        f"tabs <- Map(readq, quant_dirs, samples\\$sample_id); "
+        f"genes <- tabs[[1]]\\$id; "
+        f"mat <- sapply(tabs, function(t) round(t\\$cnt[match(genes, t\\$id)])); "
         f"mat[is.na(mat)] <- 0; "
         f"rownames(mat) <- genes; colnames(mat) <- samples\\$sample_id; "
         f"storage.mode(mat) <- 'integer'; "
@@ -169,17 +194,23 @@ def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path, str]]:
 
 
 @pipeline(
-    stages=[qc_one, salmon_index, salmon_quant, deseq2_diff,
-            enrich_go, multiqc_report],
-    description="RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC",
+    stages=[qc_one, salmon_index, salmon_quant, kallisto_index, kallisto_quant,
+            deseq2_diff, enrich_go, multiqc_report],
+    description="RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC",
 )
 def rnaseq_deg(
     sample_sheet: Path,
     transcriptome: Path,
     *,
     out_dir: Path,
+    quantifier: str = "salmon",
 ):
-    """End-to-end RNA-seq differential-expression analysis."""
+    """End-to-end RNA-seq differential-expression analysis.
+
+    ``quantifier`` selects the alignment-free quantifier: ``"salmon"`` (default)
+    or ``"kallisto"`` (``--set quantifier=kallisto``).  DESeq2 reads whichever
+    one ran, so the rest of the pipeline is unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -192,10 +223,6 @@ def rnaseq_deg(
         parallel="auto", progress=True,
     )
 
-    # 2. Build the Salmon index once
-    idx = salmon_index(Path(transcriptome))
-
-    # 3. Quant each sample against the index, in parallel
     clean_inputs = []
     for (s_id, _, _, _), qc in zip(samples, qc_results):
         clean_inputs.append((
@@ -203,10 +230,21 @@ def rnaseq_deg(
             Path(qc.out_dir) / f"{s_id}_R1.clean.fq.gz",
             Path(qc.out_dir) / f"{s_id}_R2.clean.fq.gz",
         ))
-    quant_results = salmon_quant.starmap(
-        [(idx, s, r1, r2) for s, r1, r2 in clean_inputs],
-        parallel="auto", progress=True,
-    )
+
+    # 2-3. Build the index once, then quant each sample against it (parallel),
+    #      using the chosen quantifier.
+    if quantifier == "kallisto":
+        idx = kallisto_index(Path(transcriptome))
+        quant_results = kallisto_quant.starmap(
+            [(idx, s, r1, r2) for s, r1, r2 in clean_inputs],
+            parallel="auto", progress=True,
+        )
+    else:
+        idx = salmon_index(Path(transcriptome))
+        quant_results = salmon_quant.starmap(
+            [(idx, s, r1, r2) for s, r1, r2 in clean_inputs],
+            parallel="auto", progress=True,
+        )
 
     # 4. DESeq2 on the assembled quants.  Fail fast — the downstream
     #    enrichment tolerates an empty gene list (Enrichr may be offline),

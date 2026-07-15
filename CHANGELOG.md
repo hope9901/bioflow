@@ -24,6 +24,10 @@ registry tool per stage.)
 - `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
   `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
   Verified: hifiasm image behaviour-checked with `verify_bump`.
+- `rnaseq_deg`: `--set quantifier=salmon|kallisto` — DESeq2 now reads whichever
+  the quantifier wrote (Salmon `quant.sf` `NumReads`, else kallisto
+  `abundance.tsv` `est_counts`), so the Salmon default path is unchanged.
+  Verified: the full `rnaseq_deg` e2e stays green on the Salmon path.
 - Fungal **structural** annotation at the Structural-Annotation step is covered
   by BRAKER3 (integrated) plus AUGUSTUS / GlimmerHMM / SNAP (ab-initio);
   funannotate stays the fungal **functional** option at the next step.

@@ -192,10 +192,12 @@ LC-MS/MS DDA proteomics: msconvert → Comet → Percolator
 
 ## `rnaseq_deg`
 
-RNA-seq DEG: fastp → Salmon → DESeq2 → GO enrichment + MultiQC
+RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC
 
-*6 stage(s):*
+*8 stage(s):*
 
+- **kallisto_index** — `quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0`
+- **kallisto_quant** — `quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0`
 - **multiqc_report** — `quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1`
 - **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **salmon_index** — `quay.io/biocontainers/salmon:2.3.3--hfa8f182_0`
