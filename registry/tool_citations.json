@@ -7,8 +7,8 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 133,
-  "n_with_pmid": 119,
+  "n_tools": 134,
+  "n_with_pmid": 120,
   "n_fetched": 98,
   "n_pmid_mismatch": 5,
   "tools": {
@@ -157,6 +157,15 @@
       "name": "BWA-MEM2",
       "category": "alignment",
       "ref_title": "Use of virtual reality as a learning environment in dentistry."
+    },
+    "bwa_samtools": {
+      "pmid": "19451168",
+      "doi": "10.1093/bioinformatics/btp324",
+      "total": null,
+      "recent": null,
+      "verified": true,
+      "name": "BWA-MEM",
+      "category": "alignment"
     },
     "cafe5": {
       "pmid": "33325497",

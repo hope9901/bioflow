@@ -62,6 +62,26 @@ def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     )
 
 
+@stage(image="quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0",
+       cpu=8, ram_gb=16, depends_on=trim)
+def align_bwa(clean, bwa_index: Path, sample_id: str, *, out_dir):
+    """BWA-MEM alignment → sorted, indexed BAM (``--set aligner=bwa``).
+
+    Uses the bwa+samtools mulled BioContainer (plain ``bwa`` has no samtools).
+    Writes the same ``{sample_id}.bam`` filename as the Bowtie2 stage, so
+    Picard/MACS3 downstream are unchanged.  ``bwa_index`` is the reference
+    FASTA prefix produced by ``bwa index``.
+    """
+    return (
+        f"bash -c '"
+        f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
+        f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
+        f"bwa mem -t 8 {bwa_index} \"$R1\" \"$R2\" 2>{out_dir}/bwa.log "
+        f"| samtools sort -@ 8 -o {out_dir}/{sample_id}.bam - && "
+        f"samtools index {out_dir}/{sample_id}.bam'"
+    )
+
+
 @stage(image="quay.io/biocontainers/picard:3.4.0--hdfd78af_0",
        cpu=4, ram_gb=16, depends_on=align)
 def dedup(aln, sample_id: str, *, out_dir):
@@ -110,8 +130,8 @@ def annotate_peaks(peaks, reference: Path, annotation: Path, sample_id: str,
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[trim, align, dedup, call_peaks, annotate_peaks],
-    description="ChIP-seq: TrimGalore → Bowtie2 → Picard → MACS3 → HOMER",
+    stages=[trim, align, align_bwa, dedup, call_peaks, annotate_peaks],
+    description="ChIP-seq: TrimGalore → Bowtie2/BWA → Picard → MACS3 → HOMER",
 )
 def chip_seq(
     r1: Path,
@@ -123,14 +143,24 @@ def chip_seq(
     out_dir: Path,
     sample_id: str = "sample",
     genome_size: str = "hs",
+    aligner: str = "bowtie2",
     ctrl_bam: Optional[Path] = None,
 ):
-    """End-to-end ChIP-seq narrow peak calling + motif annotation."""
+    """End-to-end ChIP-seq narrow peak calling + motif annotation.
+
+    ``aligner`` selects the read aligner: ``"bowtie2"`` (default, uses
+    ``bowtie2_index``) or ``"bwa"`` (``--set aligner=bwa``, uses ``bowtie2_index``
+    as the BWA reference-FASTA prefix — build it with ``bwa index``).  Both emit
+    ``{sample_id}.bam`` so Picard/MACS3 downstream are unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = trim(Path(r1), Path(r2))
-    aln = align(clean, Path(bowtie2_index), sample_id)
+    if aligner == "bwa":
+        aln = align_bwa(clean, Path(bowtie2_index), sample_id)
+    else:
+        aln = align(clean, Path(bowtie2_index), sample_id)
     dd = dedup(aln, sample_id)
     peaks = call_peaks(dd, sample_id, genome_size,
                        ctrl_bam=Path(ctrl_bam) if ctrl_bam else None)

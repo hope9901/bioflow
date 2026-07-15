@@ -24,6 +24,10 @@ registry tool per stage.)
 - `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
   `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
   Verified: hifiasm image behaviour-checked with `verify_bump`.
+- `chip_seq` / `atac_seq`: `--set aligner=bowtie2|bwa` — BWA-MEM via a new
+  registry-backed bwa+samtools mulled image (`bwa_samtools`, digest-pinned);
+  both aligners emit `{sample_id}.bam` so Picard/MACS3/TOBIAS downstream are
+  unchanged.  bwa_samtools behaviour-checked with `verify_bump`.
 - `metagenomics_profile`: `--set profiler=kraken2|metaphlan` — MetaPhlAn4 is a
   single-step marker-gene alternative to Kraken2+Bracken; Krona reshapes
   whichever profiler's table was written (Bracken `new_est_reads`, else the

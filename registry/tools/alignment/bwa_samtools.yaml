@@ -1,0 +1,27 @@
+id: bwa_samtools
+name: BWA-MEM
+version: "0.7.19"
+category: alignment
+stage: [chip_seq.step2, atac_seq.step2]
+input_types: [fastq_short_paired_clean, reference_genome]
+output_types: [alignment_bam]
+applicable:
+  species: [any]
+  read_type: [short]
+  mode: [peak_calling, differential, any]
+container:
+  image: quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0
+  pull_policy: if_not_present
+  image_digest: sha256:be6c03d4184f1665f6581698a76ac4d3b040c8ce79de302633089030a9066077
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  bwa mem -t {cpu} {bwa_index} {r1} {r2}
+  | samtools sort -o {out_dir}/aligned.bam - && samtools index {out_dir}/aligned.bam
+citation: "Li & Durbin 2009, PMID 19451168"
+added: "2026-07-07"
+last_reviewed: "2026-07-07"
+source_repo: lh3/bwa

@@ -19,8 +19,8 @@ EXPECTED_RECIPES = {
     "metagenomics_profile": 5,   # fastp → kraken2 → bracken → krona
     "metagenome_assembly":  5,   # fastp → megahit → minimap2 → metabat2 → checkm2
     "scrna_seq":            2,   # starsolo → scanpy
-    "chip_seq":             5,   # trim → align → dedup → peaks → annotate
-    "atac_seq":             5,   # trim → align → dedup → peaks → footprint
+    "chip_seq":             6,   # trim → align → dedup → peaks → annotate
+    "atac_seq":             6,   # trim → align → dedup → peaks → footprint
     "methylation_wgbs":     4,   # trim → bismark_prep → bismark → methylkit
     "proteomics_dda":       3,   # msconvert → comet → percolator
     "germline_variants":    6,   # fastp → prep_ref → bwa → gatk → bcftools → snpeff

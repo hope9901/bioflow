@@ -1,6 +1,6 @@
 # Tools
 
-**133 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**134 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -26,7 +26,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 > **Note:** 9 tools show `n/a` because their registry PMID points to an unrelated paper (author/year mismatch); those references are pending correction. Counts are shown only for PMIDs whose author + year match the cited work.
 
-## alignment  (6)
+## alignment  (7)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -34,6 +34,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bowtie2` | 2.5.5 | `staphb/bowtie2:2.5.5` | Langmead & Salzberg 2012, PMID 22388286 | 43,646 | 25,521 |
 | `bwa` | 0.7.19 | `quay.io/biocontainers/bwa:0.7.19--h577a1d6_1` | Li & Durbin 2009, PMID 19451168 | 36,991 | 18,313 |
 | `bwa_mem2` | 2.3 | `quay.io/biocontainers/bwa-mem2:2.3--he70b90d_0` | Vasimuddin 2019, PMID 31355760 | n/a | n/a |
+| `bwa_samtools` | 0.7.19 | `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0` | Li & Durbin 2009, PMID 19451168 | n/a | n/a |
 | `minimap2` | 2.31 | `quay.io/biocontainers/minimap2:2.31--h118bc1c_0` | Li 2018, PMID 29750242 | 12,265 | 10,215 |
 | `samtools` | 1.23.1 | `quay.io/biocontainers/samtools:1.23.1--ha83d96e_0` | Danecek 2021, PMID 33590861 | 11,759 | 10,492 |
 
