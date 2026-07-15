@@ -68,12 +68,13 @@ Download every RefSeq assembly for a taxon (no Docker)
 
 ## `eukaryote_assembly`
 
-Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm
+Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm
 
-*4 stage(s):*
+*5 stage(s):*
 
 - **read_qc** — `quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0`
 - **assemble** — `quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1`
+- **assemble_hifiasm** — `quay.io/biocontainers/hifiasm:0.25.0--h5ca1c30_0`
 - **polish_consensus** — `quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0`
 - **assess** — `quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0`
 

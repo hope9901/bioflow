@@ -44,6 +44,22 @@ def assemble(qc, long_reads: Path, *, out_dir, read_mode: str = "--nano-hq"):
     )
 
 
+@stage(image="quay.io/biocontainers/hifiasm:0.25.0--h5ca1c30_0",
+       cpu=16, ram_gb=64, depends_on=read_qc,
+       retry=2, retry_with={"ram_gb": "2x"})
+def assemble_hifiasm(qc, long_reads: Path, *, out_dir):
+    """hifiasm HiFi assembly (``--set assembler=hifiasm``).
+
+    Writes the primary contigs to ``assembly.fasta`` — the same filename Flye
+    produces — so Medaka/compleasm downstream need no changes.
+    """
+    return (
+        f"hifiasm -o {out_dir}/asm -t 16 {long_reads}\n"
+        f"awk '/^S/{{print \">\"$2\"\\n\"$3}}' "
+        f"{out_dir}/asm.bp.p_ctg.gfa > {out_dir}/assembly.fasta"
+    )
+
+
 @stage(image="quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0",
        cpu=8, ram_gb=32, depends_on=assemble)
 def polish_consensus(asm, long_reads: Path, *, out_dir, medaka_model: str = "r1041_e82_400bps_sup_v5.0.0"):
@@ -72,32 +88,37 @@ def assess(polished, *, out_dir, busco_lineage: str = "eukaryota_odb10",
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[read_qc, assemble, polish_consensus, assess],
-    description="Eukaryote long-read assembly: NanoPlot → Flye → Medaka → compleasm",
+    stages=[read_qc, assemble, assemble_hifiasm, polish_consensus, assess],
+    description="Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm",
 )
 def eukaryote_assembly(
     long_reads: Path,
     *,
     out_dir: Path,
+    assembler: str = "flye",
     read_mode: str = "--nano-hq",
     polish: bool = True,
     medaka_model: str = "r1041_e82_400bps_sup_v5.0.0",
     busco_lineage: str = "eukaryota_odb10",
     busco_db: Path = Path("/refs/busco"),
 ):
-    """NanoPlot → Flye → Medaka → compleasm end-to-end.
+    """NanoPlot → assembler → Medaka → compleasm end-to-end.
 
-    ``polish=False`` skips the Medaka step — appropriate for HiFi reads,
+    ``assembler`` selects the long-read assembler: ``"flye"`` (default; ONT or
+    HiFi via ``read_mode``) or ``"hifiasm"`` (``--set assembler=hifiasm``, for
+    HiFi reads).  Both emit ``assembly.fasta`` so the rest of the pipeline is
+    unchanged.  ``polish=False`` skips Medaka — appropriate for HiFi reads,
     whose per-base accuracy makes ONT consensus polishing unnecessary.
-    ``assess`` then reads Flye's ``assembly.fasta`` directly (it already
-    falls back from ``consensus.fasta``).
     """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     lr = Path(long_reads)
     qc = read_qc(lr)
-    asm = assemble(qc, lr, read_mode=read_mode)
+    if assembler == "hifiasm":
+        asm = assemble_hifiasm(qc, lr)
+    else:
+        asm = assemble(qc, lr, read_mode=read_mode)
     polished = polish_consensus(asm, lr, medaka_model=medaka_model) if polish else asm
     return assess(polished, busco_lineage=busco_lineage, busco_db=Path(busco_db))
 

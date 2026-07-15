@@ -14,6 +14,20 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Changed — recipes run recommended defaults but let you swap the tool per stage
+The convenience `@pipeline` recipes now follow a consistent rule: each stage
+runs a sensible default tool, overridable with `--set <param>=<tool>`.  (For
+full per-stage tool choice, `bioflow custom <pipeline>` remains the general
+path — its presets are the recommended defaults, and it offers every applicable
+registry tool per stage.)
+- `prokaryote_assembly`: `--set annotator=prokka|bakta` (added earlier).
+- `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
+  `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
+  Verified: hifiasm image behaviour-checked with `verify_bump`.
+- Fungal **structural** annotation at the Structural-Annotation step is covered
+  by BRAKER3 (integrated) plus AUGUSTUS / GlimmerHMM / SNAP (ab-initio);
+  funannotate stays the fungal **functional** option at the next step.
+
 ### Added — more structural annotators, swappable annotation, BUSCO lineage advice
 - **BUSCO / compleasm lineage recommender**: `bioflow lineage <taxon>` maps a
   species class + free-text hint (`fungus`, `insect`, `human`, `zebrafish`, …)
