@@ -138,12 +138,21 @@ def call_variants_deepvariant(aln, reference: Path, sample_id: str, *, out_dir,
        cpu=4, ram_gb=8, depends_on=call_variants)
 def filter_variants(vcf, sample_id: str, *, out_dir,
                     min_qual: int = 30, min_depth: int = 10):
-    """bcftools quality / depth filtering."""
+    """bcftools quality / depth filtering, whichever caller produced the VCF.
+
+    GATK HaplotypeCaller records depth in ``INFO/DP``; DeepVariant only emits a
+    per-sample ``FORMAT/DP``.  Referencing a tag the VCF lacks makes bcftools
+    abort ("No such INFO field: DP"), so pick the field from the header instead
+    of hard-coding one caller's layout.
+    """
+    raw = f"{vcf.out_dir}/{sample_id}.raw.vcf.gz"
     return (
         f"bash -c '"
-        f"bcftools filter -e \"QUAL<{min_qual} || INFO/DP<{min_depth}\" "
-        f"-Oz -o {out_dir}/{sample_id}.filtered.vcf.gz "
-        f"{vcf.out_dir}/{sample_id}.raw.vcf.gz && "
+        f"RAW={raw}; "
+        f"if bcftools view -h \"$RAW\" | grep -q \"^##INFO=<ID=DP,\"; "
+        f"then DPF=INFO/DP; else DPF=FORMAT/DP; fi; "
+        f"bcftools filter -e \"QUAL<{min_qual} || $DPF<{min_depth}\" "
+        f"-Oz -o {out_dir}/{sample_id}.filtered.vcf.gz \"$RAW\" && "
         f"bcftools index {out_dir}/{sample_id}.filtered.vcf.gz'"
     )
 

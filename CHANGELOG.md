@@ -77,6 +77,18 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Fixed — the DeepVariant caller swap actually broke bcftools (caught by a real run)
+- Running `caller=deepvariant` end-to-end on the phiX fixture exposed a real
+  incompatibility the render/liveness checks could not see: matching the output
+  *filename* was not enough, because the VCF **schema** differs.  GATK
+  HaplotypeCaller records depth in `INFO/DP`; DeepVariant emits only a
+  per-sample `FORMAT/DP`, so `filter_variants`' hard-coded `INFO/DP` made
+  bcftools abort with *"No such INFO field: DP"* — the swap was broken as
+  shipped.  `filter_variants` now picks the depth field from the VCF header,
+  so it works for either caller.  Verified both branches on real files:
+  DeepVariant's VCF → `FORMAT/DP`, a GATK-style VCF → `INFO/DP` (and the
+  filter still drops the low-QUAL/low-DP record).
+
 ### Fixed — Bakta DB catalog corrected against a real provisioning run
 - Provisioned the Bakta DB for real and ran the `annotator=bakta` swap on the
   phiX fixture end-to-end (18 s, 6 CDS annotated).  Two catalog entries were
