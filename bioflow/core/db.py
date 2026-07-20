@@ -361,17 +361,23 @@ _DB_CATALOG: dict[str, dict] = {
         "notes": "Completeness/contamination model DB for `checkm2 predict`.",
     },
     "bakta_db": {
-        "name": "Bakta — bacterial annotation database (full)",
+        "name": "Bakta — bacterial annotation database (light)",
         "url": "",
-        "size_gb": 75.0,
+        "size_gb": 4.0,
         "md5": None,
         "dest_file": "bakta",
         "used_by": ["bakta"],
-        "version": "5.1",
-        "provision": "bakta_db download --output {dir} --type full",
+        # Schema/release confirmed from the downloaded db-light/version.json:
+        # {"major": 6, "minor": 0, "date": "2025-02-24", "type": "light"}.
+        "version": "6.0",
+        # `light` (~4 GB on disk) is the default here: the `full` profile is
+        # ~75 GB, which is more than most workstations can spare just to
+        # annotate a genome.  Swap in `--type full` for the deeper PSC/UniRef
+        # hits when you have the space.
+        "provision": "bakta_db download --output {dir} --type light",
         "latest": None,
-        "notes": "AMRFinderPlus/PSC/UniRef data for `bakta`; use --type light "
-                 "for the ~1.5 GB profile.",
+        "notes": "AMRFinderPlus/PSC/UniRef data for `bakta`.  Downloads into "
+                 "<dir>/db-light — point the recipe's bakta_db at that path.",
     },
     "dfast_db": {
         "name": "DFAST — reference protein databases",

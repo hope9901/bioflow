@@ -77,6 +77,17 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Fixed — Bakta DB catalog corrected against a real provisioning run
+- Provisioned the Bakta DB for real and ran the `annotator=bakta` swap on the
+  phiX fixture end-to-end (18 s, 6 CDS annotated).  Two catalog entries were
+  wrong and are now corrected from the downloaded `version.json`:
+  **version 5.1 → 6.0** (schema 6, released 2025-02-24) and **size 75 GB → 4 GB**,
+  since the entry now provisions the `light` profile — `full` is ~75 GB, more
+  than most workstations can spare to annotate one genome.  Also documented
+  that the download lands in `<dir>/db-light`.
+- Confirmed the swap's downstream wiring: `genome_plot`'s GenBank auto-detect
+  correctly falls through Prokka's missing `.gbk` to Bakta's `phix.gbff`.
+
 ### Fixed — DB-management gaps + a per-run network probe (project audit)
 - **CheckM2 and Bakta** reference `/refs/dbs/checkm2` / `/refs/dbs/bakta` but had
   no entry in the version-managed DB catalog, so `bioflow db provision` and the
