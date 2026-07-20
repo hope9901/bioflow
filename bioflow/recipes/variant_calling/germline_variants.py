@@ -28,14 +28,12 @@ from pathlib import Path
 from bioflow import stage, pipeline
 from bioflow.recipes import register
 
-# A BioContainer that bundles **both** bwa and samtools.  The plain
-# ``quay.io/biocontainers/bwa`` image carries bwa only (no samtools), so
-# any ``bwa mem | samtools sort`` chain fails there — this mulled image
-# (bwa 0.7.19 + samtools 1.22.1) is the one that actually works.
-_BWA_SAMTOOLS = (
-    "quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:"
-    "f45ad9036aa41bb10f875a330fa877d8869018a1-0"
-)
+# The bwa+samtools mulled BioContainer (bwa 0.7.19 + samtools 1.22.1).  The
+# plain ``quay.io/biocontainers/bwa`` image carries bwa only, so any
+# ``bwa mem | samtools sort`` chain fails there.  Spelled out as a literal in
+# each ``@stage`` below (not via this constant) so the recipe↔registry
+# alignment guard — which only sees literal image strings — actually checks it
+# against the ``bwa_samtools`` registry entry.
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -51,7 +49,8 @@ def qc_trim(r1: Path, r2: Path, *, out_dir):
     )
 
 
-@stage(image=_BWA_SAMTOOLS, cpu=4, ram_gb=8)
+@stage(image="quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0",
+       cpu=4, ram_gb=8)
 def prepare_reference(reference: Path, *, out_dir):
     """Build the BWA index + ``.fai`` + sequence ``.dict``, once.
 
@@ -72,7 +71,8 @@ def prepare_reference(reference: Path, *, out_dir):
     )
 
 
-@stage(image=_BWA_SAMTOOLS, cpu=8, ram_gb=16, depends_on=(qc_trim, prepare_reference))
+@stage(image="quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0",
+       cpu=8, ram_gb=16, depends_on=(qc_trim, prepare_reference))
 def align(clean, reference: Path, sample_id: str, *, out_dir):
     """BWA-MEM alignment → sorted, indexed BAM with read-group.
 
@@ -112,6 +112,28 @@ def call_variants(aln, reference: Path, sample_id: str, *, out_dir):
     )
 
 
+@stage(image="google/deepvariant:1.10.0",
+       cpu=8, ram_gb=32, depends_on=align,
+       retry=2, retry_with={"ram_gb": "2x"})
+def call_variants_deepvariant(aln, reference: Path, sample_id: str, *, out_dir,
+                              model_type: str = "WGS"):
+    """DeepVariant calling (``--set caller=deepvariant``).
+
+    Writes the same ``{sample_id}.raw.vcf.gz`` the GATK stage produces, so
+    bcftools/SnpEff downstream are unchanged.  Unlike the GATK path this does
+    not MarkDuplicates first — DeepVariant's model is trained on
+    duplicate-containing reads; pre-mark them yourself if your protocol needs
+    it.  ``model_type`` is WGS / WES / PACBIO / ONT_R104.
+    """
+    return (
+        f"/opt/deepvariant/bin/run_deepvariant "
+        f"--model_type={model_type} --ref={reference} "
+        f"--reads={aln.out_dir}/{sample_id}.bam "
+        f"--output_vcf={out_dir}/{sample_id}.raw.vcf.gz "
+        f"--num_shards=8"
+    )
+
+
 @stage(image="quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0",
        cpu=4, ram_gb=8, depends_on=call_variants)
 def filter_variants(vcf, sample_id: str, *, out_dir,
@@ -143,8 +165,8 @@ def annotate_variants(filtered, snpeff_db: str, sample_id: str, *, out_dir):
 
 @pipeline(
     stages=[qc_trim, prepare_reference, align, call_variants,
-            filter_variants, annotate_variants],
-    description="Germline variants: fastp → BWA → GATK → bcftools → SnpEff",
+            call_variants_deepvariant, filter_variants, annotate_variants],
+    description="Germline variants: fastp → BWA → GATK/DeepVariant → bcftools → SnpEff",
 )
 def germline_variants(
     r1: Path,
@@ -154,10 +176,16 @@ def germline_variants(
     *,
     out_dir: Path,
     sample_id: str = "sample",
+    caller: str = "gatk4",
     min_qual: int = 30,
     min_depth: int = 10,
 ):
-    """End-to-end germline SNP/indel calling + annotation."""
+    """End-to-end germline SNP/indel calling + annotation.
+
+    ``caller`` selects the variant caller: ``"gatk4"`` (default; MarkDuplicates
+    + HaplotypeCaller) or ``"deepvariant"`` (``--set caller=deepvariant``).
+    Both write ``{sample_id}.raw.vcf.gz``, so bcftools/SnpEff are unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     reference = Path(reference)
@@ -165,7 +193,10 @@ def germline_variants(
     clean = qc_trim(Path(r1), Path(r2))
     prepare_reference(reference)            # index + .fai + .dict, once
     aln = align(clean, reference, sample_id)
-    raw = call_variants(aln, reference, sample_id)
+    if caller == "deepvariant":
+        raw = call_variants_deepvariant(aln, reference, sample_id)
+    else:
+        raw = call_variants(aln, reference, sample_id)
     filt = filter_variants(raw, sample_id, min_qual=min_qual, min_depth=min_depth)
     return annotate_variants(filt, snpeff_db, sample_id)
 

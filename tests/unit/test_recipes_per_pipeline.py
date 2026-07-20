@@ -23,7 +23,7 @@ EXPECTED_RECIPES = {
     "atac_seq":             6,   # trim → align → dedup → peaks → footprint
     "methylation_wgbs":     4,   # trim → bismark_prep → bismark → methylkit
     "proteomics_dda":       3,   # msconvert → comet → percolator
-    "germline_variants":    6,   # fastp → prep_ref → bwa → gatk → bcftools → snpeff
+    "germline_variants":    7,   # fastp → prep_ref → bwa → gatk → bcftools → snpeff
     "joint_genotyping":     8,   # cohort: prep_ref → qc → align → gvcf → combine → genotype → filter → snpeff
 }
 

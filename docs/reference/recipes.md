@@ -82,14 +82,15 @@ Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm
 
 ## `germline_variants`
 
-Germline variants: fastp → BWA → GATK → bcftools → SnpEff
+Germline variants: fastp → BWA → GATK/DeepVariant → bcftools → SnpEff
 
-*6 stage(s):*
+*7 stage(s):*
 
 - **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **align** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_variants** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
+- **call_variants_deepvariant** — `google/deepvariant:1.10.0`
 - **filter_variants** — `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0`
 - **annotate_variants** — `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0`
 

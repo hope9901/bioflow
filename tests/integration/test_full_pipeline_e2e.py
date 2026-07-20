@@ -307,6 +307,46 @@ def test_rnaseq_deg_full_chain(_runtime):
     assert _find_one(ws, "multiqc_report.html") is not None, "no MultiQC report"
 
 
+def test_rnaseq_deg_kallisto_swap_full_chain(_runtime):
+    """The `--set quantifier=kallisto` swap path, end-to-end.
+
+    The e2e suite otherwise only exercises each recipe's *default* tool, so a
+    swap alternative could rot unnoticed.  This runs the same fixtures through
+    kallisto instead of Salmon, which also proves DESeq2's dual-format reader
+    handles kallisto's ``abundance.tsv`` (``target_id`` / ``est_counts``) the
+    way it handles Salmon's ``quant.sf``.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    sheet = ws / "samples.csv"
+    rows = ["sample_id,fastq_r1,fastq_r2,condition"]
+    for s, cond in [("ctl1", "control"), ("ctl2", "control"),
+                    ("trt1", "treated"), ("trt2", "treated")]:
+        r1 = (RNASEQ / f"{s}_R1.fastq.gz").resolve()
+        r2 = (RNASEQ / f"{s}_R2.fastq.gz").resolve()
+        rows.append(f"{s},{r1},{r2},{cond}")
+    sheet.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    result = get("rnaseq_deg")(
+        sample_sheet=sheet, transcriptome=RNASEQ_TX.resolve(),
+        out_dir=ws / "out", quantifier="kallisto",
+    )
+    assert result.ok, f"rnaseq_deg[kallisto] failed: {(result.stderr or '')[:500]}"
+
+    # kallisto's own output, proving the swap actually ran.
+    assert _find_one(ws, "abundance.tsv") is not None, "no kallisto abundance.tsv"
+
+    deg = _find_one(ws, "deg_results.csv")
+    assert deg is not None, "no DESeq2 deg_results.csv from the kallisto path"
+    lines = deg.read_text().splitlines()
+    assert "log2FoldChange" in lines[0], "missing DESeq2 columns"
+    tx1 = [r for r in lines if r.startswith("tx0001,")]
+    assert tx1, "tx0001 missing from results"
+    log2fc = float(tx1[0].split(",")[2])
+    assert log2fc > 1.0, f"planted DE transcript should be up, got log2FC={log2fc}"
+
+
 @pytest.mark.skipif(not METHYL_GENOME.exists(), reason="methyl_small fixture missing")
 def test_methylation_wgbs_full_chain(_runtime):
     """TrimGalore → bismark_prep → Bismark → methylKit end-to-end.

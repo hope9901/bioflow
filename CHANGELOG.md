@@ -24,6 +24,19 @@ registry tool per stage.)
 - `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
   `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
   Verified: hifiasm image behaviour-checked with `verify_bump`.
+- `germline_variants`: `--set caller=gatk4|deepvariant` — DeepVariant writes the
+  same `{sample_id}.raw.vcf.gz` GATK does, so bcftools/SnpEff downstream are
+  unchanged.  (DeepVariant does not MarkDuplicates first, unlike the GATK path.)
+- **Swap paths are now e2e-tested, not just the defaults.**  The nightly suite
+  gained `rnaseq_deg[quantifier=kallisto]`, which runs the same fixtures through
+  kallisto and proves DESeq2's dual-format reader handles `abundance.tsv`.
+  (Other recipes' swaps stay render/liveness-verified: their e2e needs large
+  reference DBs — snpEff, kraken2, CheckM2, HOMER genomes — which is exactly
+  why those recipes aren't in the fixture-based e2e suite.)
+- **`germline_variants` no longer hides its image from the alignment guard.**
+  Its bwa+samtools stages referenced the mulled image through a module constant,
+  which the recipe↔registry guard (literal strings only) could not see.  Now
+  spelled out literally and checked against the `bwa_samtools` registry entry.
 - `chip_seq` / `atac_seq`: `--set aligner=bowtie2|bwa` — BWA-MEM via a new
   registry-backed bwa+samtools mulled image (`bwa_samtools`, digest-pinned);
   both aligners emit `{sample_id}.bam` so Picard/MACS3/TOBIAS downstream are
