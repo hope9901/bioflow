@@ -1084,7 +1084,7 @@
       ]
     },
     "salmon": {
-      "version": "2.3.3",
+      "version": "2.3.4",
       "inputs": [
         "annotation_gtf",
         "fastq_short_paired_clean",

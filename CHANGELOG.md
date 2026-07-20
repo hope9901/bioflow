@@ -90,6 +90,16 @@ registry tool per stage.)
   fan-out pipeline that runs the same annotation tool many times (the run-time
   hook fires per stage) hits the network once instead of on every invocation.
 
+### Changed — Salmon → 2.3.4 (2026-07 release_watch candidates, processed)
+- A second `release_watch` candidate (2.3.4) arrived with the same two defects
+  as the first: an auto-guessed tag with no build suffix (`salmon:2.3.4`) and a
+  digest **copied verbatim from the previous release**.  The real digest differs
+  (`b30009a5…` vs the copied `5942663c…`), so approving the candidate as-filed
+  would have pinned the wrong image.  Resolved the real tag
+  (`2.3.4--hfa8f182_0`) + digest, bumped registry + `rnaseq_deg` in lockstep,
+  and verified with `verify_bump`: container smoke green and **both**
+  `rnaseq_deg` e2e paths (Salmon default + kallisto swap) green.
+
 ### Changed — Salmon 2.3.1 → 2.3.3 (2026-07 release_watch candidate, processed)
 - `release_watch` filed a Salmon 2.3.3 candidate.  As usual its auto-guessed
   image tag had no build suffix (`salmon:2.3.3`) and its digest was copied from
