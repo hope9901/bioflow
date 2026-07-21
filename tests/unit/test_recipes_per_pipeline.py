@@ -17,7 +17,7 @@ EXPECTED_RECIPES = {
     "eukaryote_assembly":   5,   # nanoplot → flye|hifiasm → medaka → compleasm
     "rnaseq_deg":           8,   # fastp → salmon|kallisto (index+quant) → deseq2 → enrich → multiqc
     "metagenomics_profile": 5,   # fastp → kraken2 → bracken → krona
-    "metagenome_assembly":  5,   # fastp → megahit → minimap2 → metabat2 → checkm2
+    "metagenome_assembly":  6,   # fastp → megahit → minimap2 → metabat2 → checkm2
     "scrna_seq":            2,   # starsolo → scanpy
     "chip_seq":             6,   # trim → align → dedup → peaks → annotate
     "atac_seq":             6,   # trim → align → dedup → peaks → footprint

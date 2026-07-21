@@ -119,12 +119,13 @@ Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs �
 
 ## `metagenome_assembly`
 
-Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → CheckM2
+Metagenome assembly + binning: fastp → MEGAHIT → MetaBAT2/MaxBin2 → CheckM2
 
-*5 stage(s):*
+*6 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **assemble** — `quay.io/biocontainers/megahit:1.2.9--h2e03b76_1`
+- **bin_genomes_maxbin2** — `quay.io/biocontainers/maxbin2:2.2.7--h503566f_8`
 - **map_back** — `quay.io/biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:b411340b52d82a9c276d87c7a3dcffc880be762f-0`
 - **bin_genomes** — `quay.io/biocontainers/metabat2:2.18--h38e344b_2`
 - **assess_bins** — `quay.io/biocontainers/checkm2:1.1.0--pyh7e72e81_1`

@@ -83,6 +83,30 @@ def bin_genomes(mapped, asm, *, out_dir):
     )
 
 
+@stage(image="quay.io/biocontainers/maxbin2:2.2.7--h503566f_8",
+       cpu=8, ram_gb=32, depends_on=assemble)
+def bin_genomes_maxbin2(asm, clean, *, out_dir):
+    """MaxBin2 genome binning (``--set binner=maxbin2``).
+
+    MaxBin2 does its own read mapping from the clean FASTQs (``-reads``), so it
+    needs neither MetaBAT2's depth table nor samtools.  It names bins
+    ``maxbin.NNN.fasta``; we copy those into the ``bins/*.fa`` layout the CheckM2
+    stage expects (``-x fa``, ``--input .../bins``), so downstream is identical
+    to the MetaBAT2 path.
+    """
+    contigs = f"{asm.out_dir}/megahit/final.contigs.fa"
+    return (
+        f"bash -c '"
+        f"mkdir -p {out_dir}/bins && "
+        f"run_MaxBin.pl -contig {contigs} "
+        f"-reads {clean.out_dir}/clean_R1.fq.gz "
+        f"-reads2 {clean.out_dir}/clean_R2.fq.gz "
+        f"-out {out_dir}/maxbin -thread 8 && "
+        f"i=0; for f in {out_dir}/maxbin.*.fasta; do "
+        f"[ -e \"$f\" ] || continue; i=$((i+1)); cp \"$f\" {out_dir}/bins/bin.$i.fa; done'"
+    )
+
+
 @stage(image="quay.io/biocontainers/checkm2:1.1.0--pyh7e72e81_1",
        cpu=8, ram_gb=32, depends_on=bin_genomes)
 def assess_bins(bins, *, out_dir, checkm2_db: Path = Path("/refs/checkm2")):
@@ -97,8 +121,9 @@ def assess_bins(bins, *, out_dir, checkm2_db: Path = Path("/refs/checkm2")):
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[qc_trim, assemble, map_back, bin_genomes, assess_bins],
-    description="Metagenome assembly + binning: fastp → MEGAHIT → minimap2 → MetaBAT2 → CheckM2",
+    stages=[qc_trim, assemble, map_back, bin_genomes, bin_genomes_maxbin2,
+            assess_bins],
+    description="Metagenome assembly + binning: fastp → MEGAHIT → MetaBAT2/MaxBin2 → CheckM2",
 )
 def metagenome_assembly(
     r1: Path,
@@ -106,16 +131,26 @@ def metagenome_assembly(
     *,
     out_dir: Path,
     sample_id: str = "sample",
+    binner: str = "metabat2",
     checkm2_db: Path = Path("/refs/checkm2"),
 ):
-    """fastp → MEGAHIT → minimap2 → MetaBAT2 → CheckM2 end-to-end."""
+    """fastp → MEGAHIT → binning → CheckM2 end-to-end.
+
+    ``binner`` selects the genome binner: ``"metabat2"`` (default; needs the
+    minimap2 coverage BAM) or ``"maxbin2"`` (``--set binner=maxbin2``, which maps
+    the reads itself).  Both emit ``bins/*.fa`` so CheckM2 downstream is
+    unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = qc_trim(Path(r1), Path(r2))
     asm = assemble(clean)
-    mapped = map_back(asm, clean)
-    bins = bin_genomes(mapped, asm)
+    if binner == "maxbin2":
+        bins = bin_genomes_maxbin2(asm, clean)
+    else:
+        mapped = map_back(asm, clean)
+        bins = bin_genomes(mapped, asm)
     return assess_bins(bins, checkm2_db=Path(checkm2_db))
 
 

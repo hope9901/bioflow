@@ -52,6 +52,13 @@ registry tool per stage.)
   the quantifier wrote (Salmon `quant.sf` `NumReads`, else kallisto
   `abundance.tsv` `est_counts`), so the Salmon default path is unchanged.
   Verified: the full `rnaseq_deg` e2e stays green on the Salmon path.
+- `metagenome_assembly`: `--set binner=metabat2|maxbin2` — MaxBin2 maps the
+  clean reads itself (`-reads/-reads2`), so its branch skips the minimap2 +
+  samtools coverage BAM (`map_back`) that MetaBAT2's depth table needs.  Both
+  branches normalise their bins into `bins/*.fa`, so CheckM2 downstream is
+  unchanged.  Verified on a real E. coli run: MaxBin2 accepts the recipe's exact
+  command (Bowtie2 self-mapping → abundance → marker-gene seeding) and the
+  `maxbin.NNN.fasta → bins/bin.N.fa` normalisation is confirmed.
 - Fungal **structural** annotation at the Structural-Annotation step is covered
   by BRAKER3 (integrated) plus AUGUSTUS / GlimmerHMM / SNAP (ab-initio);
   funannotate stays the fungal **functional** option at the next step.
