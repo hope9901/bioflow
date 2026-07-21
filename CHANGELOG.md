@@ -77,6 +77,15 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Verified — eukaryote_assembly hifiasm swap works as shipped (no fix needed)
+- Completing the DB-verification cycle, exercised the `assembler=hifiasm` swap on
+  simulated HiFi reads (~297× of phiX).  hifiasm produced `asm.bp.p_ctg.gfa`, the
+  recipe's GFA→FASTA awk turned it into a valid `assembly.fasta` (2 contigs,
+  29.7 kb), and medaka indexed that draft with pysam — so the downstream chain
+  (Medaka/compleasm read the same `assembly.fasta` Flye writes) holds.  Unlike
+  the other four swaps this one needed no change; recording the check so the
+  render-only path is now known-good.
+
 ### Fixed — chip_seq/atac_seq produced read-group-less BAMs (Picard crashed)
 - Running the `aligner=bwa` swap through to Picard MarkDuplicates on real reads
   crashed with `NullPointerException: SAMRecord.getReadGroup() is null`.  The
