@@ -77,6 +77,16 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Fixed — chip_seq/atac_seq produced read-group-less BAMs (Picard crashed)
+- Running the `aligner=bwa` swap through to Picard MarkDuplicates on real reads
+  crashed with `NullPointerException: SAMRecord.getReadGroup() is null`.  The
+  root cause was **not** the swap: neither the default Bowtie2 stage nor the new
+  BWA stage tagged reads with an `@RG`, and Picard requires one.  Since chip_seq
+  and atac_seq have no fixture-based e2e, this had never been exercised end to
+  end.  Both aligners in both recipes now add a read group (`bowtie2 --rg-id/--rg`,
+  `bwa mem -R`).  Verified the whole bwa chain on phiX: align (@RG present) →
+  Picard dedup (OK) → MACS3 callpeak (narrowPeak produced).
+
 ### Fixed — MetaPhlAn profiler swap used a renamed flag + had no managed DB
 - Provisioning MetaPhlAn 4.2.4 for real showed the `profiler=metaphlan` swap
   would fail: MetaPhlAn 4.2 **renamed `--bowtie2db` to `--db_dir`**, and 4.2.4

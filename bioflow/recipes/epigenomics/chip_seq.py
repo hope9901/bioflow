@@ -54,6 +54,7 @@ def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
         f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
         f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
         f"bowtie2 -x {bowtie2_index} -1 \"$R1\" -2 \"$R2\" "
+        f"--rg-id {sample_id} --rg SM:{sample_id} --rg PL:ILLUMINA "
         f"-S {out_dir}/{sample_id}.sam -p 8 2>{out_dir}/bowtie2.log && "
         f"samtools sort -@ 8 -o {out_dir}/{sample_id}.bam "
         f"{out_dir}/{sample_id}.sam && "
@@ -76,7 +77,8 @@ def align_bwa(clean, bwa_index: Path, sample_id: str, *, out_dir):
         f"bash -c '"
         f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
         f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
-        f"bwa mem -t 8 {bwa_index} \"$R1\" \"$R2\" 2>{out_dir}/bwa.log "
+        f"bwa mem -t 8 -R \"@RG\\tID:{sample_id}\\tSM:{sample_id}\\tPL:ILLUMINA\" "
+        f"{bwa_index} \"$R1\" \"$R2\" 2>{out_dir}/bwa.log "
         f"| samtools sort -@ 8 -o {out_dir}/{sample_id}.bam - && "
         f"samtools index {out_dir}/{sample_id}.bam'"
     )
