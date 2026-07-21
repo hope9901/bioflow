@@ -77,6 +77,18 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Fixed — two more DB catalog versions were wrong (checked against the real sources)
+- Continuing the bakta/metaphlan audit, checked the remaining guessed DB
+  versions against each tool's real downloader / release source:
+  - **CheckM2 DB 1.0.1 → 2** — the DIAMOND reference DB is Zenodo release "2"
+    (record 5571251), not the tool's 1.x version.
+  - **GTDB-Tk r220 → r232** — gtdbtk 2.7.2's own `download-db.sh` fetches
+    `release232` / `gtdbtk_r232_data`, so the DB must match the tool.  Updated
+    the key, version, and provision URL; the r232 tarball was HEAD-verified to
+    exist (60.8 GB, HTTP 200) rather than guessed.
+  - DFAST's DB tracks the tool version (no separate DB release), so `1.4` is
+    correct as-is.
+
 ### Verified — eukaryote_assembly hifiasm swap works as shipped (no fix needed)
 - Completing the DB-verification cycle, exercised the `assembler=hifiasm` swap on
   simulated HiFi reads (~297× of phiX).  hifiasm produced `asm.bp.p_ctg.gfa`, the

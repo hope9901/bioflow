@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_annotation_dbs_are_versioned():
-    for key in ("eggnog", "dbcan", "kofam", "antismash_db", "gtdbtk_r220", "pfam"):
+    for key in ("eggnog", "dbcan", "kofam", "antismash_db", "gtdbtk_r232", "pfam"):
         assert db.catalog_version(key), f"{key} must carry a version"
         assert key in db._DB_CATALOG
 

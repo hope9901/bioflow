@@ -277,18 +277,21 @@ _DB_CATALOG: dict[str, dict] = {
         "latest": None,                  # tied to the antiSMASH release
         "notes": "PFAM/ClusterBlast/Resfams data for antiSMASH.",
     },
-    "gtdbtk_r220": {
-        "name": "GTDB-Tk reference data — release R220",
+    "gtdbtk_r232": {
+        "name": "GTDB-Tk reference data — release R232",
+        # GTDB-Tk pins the release its own download-db.sh fetches: gtdbtk 2.7.2
+        # requires r232 (confirmed from the tool's download-db.sh: release232 /
+        # gtdbtk_r232_data), so the DB must match the tool, not just "latest".
         "url": (
-            "https://data.gtdb.ecogenomic.org/releases/release220/220.0/"
-            "auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz"
+            "https://data.gtdb.ecogenomic.org/releases/release232/232.0/"
+            "auxillary_files/gtdbtk_package/full_package/gtdbtk_r232_data.tar.gz"
         ),
         "size_gb": 110.0,
         "md5": None,
-        "dest_file": "gtdbtk/gtdbtk_r220_data.tar.gz",
+        "dest_file": "gtdbtk/gtdbtk_r232_data.tar.gz",
         "used_by": ["gtdbtk"],
-        "version": "r220",
-        "provision": "sh -c 'tar xzf {dir}/gtdbtk_r220_data.tar.gz -C {dir}'",
+        "version": "r232",
+        "provision": "sh -c 'tar xzf {dir}/gtdbtk_r232_data.tar.gz -C {dir}'",
         "latest": {"url": "https://data.gtdb.ecogenomic.org/releases/latest/VERSION.txt",
                    "regex": r"(r?\d+(?:\.\d+)?)"},
         "notes": "Set GTDBTK_DATA_PATH to the extracted release_* directory.",
@@ -355,7 +358,9 @@ _DB_CATALOG: dict[str, dict] = {
         "md5": None,
         "dest_file": "checkm2",
         "used_by": ["checkm2"],
-        "version": "1.0.1",
+        # Confirmed from the pinned Zenodo record (5571251): the CheckM2
+        # reference DB is release "2", not the tool's own 1.x version.
+        "version": "2",
         "provision": "checkm2 database --download --path {dir}",
         "latest": None,
         "notes": "Completeness/contamination model DB for `checkm2 predict`.",
