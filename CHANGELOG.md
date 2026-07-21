@@ -77,6 +77,23 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
+### Fixed — MetaPhlAn profiler swap used a renamed flag + had no managed DB
+- Provisioning MetaPhlAn 4.2.4 for real showed the `profiler=metaphlan` swap
+  would fail: MetaPhlAn 4.2 **renamed `--bowtie2db` to `--db_dir`**, and 4.2.4
+  now rejects the old flag outright (*"unrecognized arguments: --bowtie2db"*).
+  Fixed the flag in both the recipe stage and the `metaphlan4` registry
+  command_template.
+- Registered the MetaPhlAn marker DB in the version-managed catalog
+  (`metaphlan`, used_by metaphlan4) — it was referenced but unmanaged.  Version
+  + size taken from the live biobakery mirror: index
+  `vJan26_CHOCOPhlAnSGB_202605`, ~48 GB download / ~90 GB unpacked (marker tar
+  6 GB + Bowtie2 index 42 GB), provisioned via `metaphlan --install`.  The
+  `latest_db_version` probe was confirmed against the mirror.  (The full DB is
+  too large to fetch here, so the swap's *command* + Krona reshaping were
+  verified instead: Krona correctly turns a MetaPhlAn profile into its
+  value/label text — relative-abundance col 3, `s__` species, `t__` SGB rows
+  excluded — and ktImportText renders the HTML.)
+
 ### Fixed — the DeepVariant caller swap actually broke bcftools (caught by a real run)
 - Running `caller=deepvariant` end-to-end on the phiX fixture exposed a real
   incompatibility the render/liveness checks could not see: matching the output

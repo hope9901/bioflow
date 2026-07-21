@@ -379,6 +379,26 @@ _DB_CATALOG: dict[str, dict] = {
         "notes": "AMRFinderPlus/PSC/UniRef data for `bakta`.  Downloads into "
                  "<dir>/db-light — point the recipe's bakta_db at that path.",
     },
+    "metaphlan": {
+        "name": "MetaPhlAn — CHOCOPhlAnSGB marker database + Bowtie2 index",
+        "url": "",
+        "size_gb": 48.0,
+        "md5": None,
+        "dest_file": "metaphlan",
+        "used_by": ["metaphlan4"],
+        # Confirmed from the biobakery mirror's mpa_latest pointer.
+        "version": "vJan26_CHOCOPhlAnSGB_202605",
+        # `metaphlan --install` pulls the marker tar (~6 GB) + the prebuilt
+        # Bowtie2 index (~42 GB) into {dir}; ~90 GB unpacked, so provision it on
+        # a roomy volume.  --db_dir points the profiler at it (the 4.2 rename of
+        # --bowtie2db).
+        "provision": "metaphlan --install --db_dir {dir}",
+        "latest": {"url": "http://cmprod1.cibio.unitn.it/biobakery4/"
+                          "metaphlan_databases/mpa_latest",
+                   "regex": r"(v\w+_CHOCOPhlAnSGB_\d+)"},
+        "notes": "Marker-gene DB for `metaphlan --db_dir`.  Large: ~48 GB "
+                 "download, ~90 GB unpacked.",
+    },
     "dfast_db": {
         "name": "DFAST — reference protein databases",
         "url": "",

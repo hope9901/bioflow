@@ -20,9 +20,9 @@ resources:
   arch: [x86_64]
 command_template: |
   metaphlan {r1_clean},{r2_clean} --input_type fastq --nproc {cpu}
-  --bowtie2db {metaphlan_db} -o {out_dir}/metaphlan_profile.tsv
+  --db_dir {metaphlan_db} -o {out_dir}/metaphlan_profile.tsv
   --bowtie2out {out_dir}/metaphlan.bowtie2.bz2
-references: []
+references: ["/refs/dbs/metaphlan"]
 citation: "Blanco-Miguez et al. 2023, PMID 36823356"
 added: "2026-04-20"
 last_reviewed: "2026-07-06"

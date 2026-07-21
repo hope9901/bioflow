@@ -78,7 +78,9 @@ def metaphlan_profile(clean, sample_id: str, *, out_dir, metaphlan_db: str = "")
     ``{sample_id}.metaphlan.tsv``, which ``krona_chart`` reshapes in place of
     the Bracken table.
     """
-    db = f"--bowtie2db {metaphlan_db}" if metaphlan_db else ""
+    # MetaPhlAn 4.2 renamed --bowtie2db to --db_dir (the old flag is now
+    # rejected as an unrecognized argument).
+    db = f"--db_dir {metaphlan_db}" if metaphlan_db else ""
     return (
         f"metaphlan {clean.out_dir}/clean_R1.fq.gz,{clean.out_dir}/clean_R2.fq.gz "
         f"--input_type fastq --nproc 8 {db} "
