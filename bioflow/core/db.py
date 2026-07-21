@@ -56,7 +56,7 @@ _DB_CATALOG: dict[str, dict] = {
                    "regex": r"emapperdb-([0-9][0-9.]*)"},
     },
     "pfam": {
-        "name": "Pfam-A 36.0 — protein family HMMs",
+        "name": "Pfam-A 38.2 — protein family HMMs",
         "url": (
             "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/"
             "Pfam-A.hmm.gz"
@@ -66,7 +66,7 @@ _DB_CATALOG: dict[str, dict] = {
         "dest_file": "pfam/Pfam-A.hmm.gz",
         "used_by": ["interproscan", "pfam_scan"],
         "notes": "Decompress and run hmmpress before use.",
-        "version": "36.0",
+        "version": "38.2",
         "provision": "sh -c 'cd {dir} && wget -q "
                      "https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz "
                      "&& gunzip -f Pfam-A.hmm.gz && hmmpress -f Pfam-A.hmm'",
@@ -259,10 +259,12 @@ _DB_CATALOG: dict[str, dict] = {
         "md5": None,
         "dest_file": "dbcan",
         "used_by": ["dbcan"],
-        "version": "12",
+        "version": "14",
         "provision": "dbcan_build --cpus 4 --db-dir {dir} --clean",
+        # The download page now phrases releases as "HMMdb v14"; the old
+        # "dbCAN-HMMdb-V<n>" file-listing format is matched too (kept lenient).
         "latest": {"url": "https://bcb.unl.edu/dbCAN2/download/Databases/",
-                   "regex": r"dbCAN-HMMdb-V([0-9]+)"},
+                   "regex": r"HMMdb[- ]?[vV]([0-9]+)"},
         "notes": "CAZy HMMs + CGC/substrate data for run_dbCAN.",
     },
     "antismash_db": {
@@ -303,12 +305,14 @@ _DB_CATALOG: dict[str, dict] = {
         "md5": None,
         "dest_file": "kofam/profiles.tar.gz",
         "used_by": ["kofamscan"],
-        "version": "2024-01-01",
+        "version": "2026-06-30",
         "provision": "sh -c 'cd {dir} && wget -q https://www.genome.jp/ftp/db/kofam/ko_list.gz "
                      "https://www.genome.jp/ftp/db/kofam/profiles.tar.gz "
                      "&& gunzip -f ko_list.gz && tar xzf profiles.tar.gz'",
+        # The version is the date the ``profiles.tar.gz`` the URL serves was last
+        # published (README itself is a stale 2019 file, so don't scrape that).
         "latest": {"url": "https://www.genome.jp/ftp/db/kofam/",
-                   "regex": r"README\.md.*?(\d{4}-\d{2}-\d{2})"},
+                   "regex": r"profiles\.tar\.gz.*?(\d{4}-\d{2}-\d{2})"},
         "notes": "KEGG KO assignment via exec_annotation (KofamScan).",
     },
     "dram": {

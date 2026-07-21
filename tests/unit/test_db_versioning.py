@@ -46,7 +46,7 @@ def test_latest_probe_picks_highest(monkeypatch):
 
 
 def test_update_db_is_noop_when_current(tmp_path: Path):
-    db.write_db_version("dbcan", tmp_path, "12")   # == catalog version
+    db.write_db_version("dbcan", tmp_path, "14")   # == catalog version
     res = db.update_db("dbcan", tmp_path, _fetch=lambda u: "")
     assert res["updated"] is False
 
@@ -84,7 +84,7 @@ def test_cite_includes_db_version():
     assert any(d["key"] == "eggnog" and d["version"] == "5.0.2"
                for d in egg["databases"])
     text = citations.format_text(entries)
-    assert "eggNOG v5.0.2" in text and "KOfam v2024-01-01" in text
+    assert "eggNOG v5.0.2" in text and "KOfam v2026-06-30" in text
 
 
 def test_cite_no_db_for_non_annotation_tool():

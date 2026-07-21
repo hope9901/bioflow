@@ -84,7 +84,7 @@ registry tool per stage.)
   Bakta `.gbff`).  DFAST's reference DB joins the version-managed catalog
   (`dfast_db`).
 
-### Fixed — two more DB catalog versions were wrong (checked against the real sources)
+### Fixed — remaining DB catalog versions were wrong (checked against the real sources)
 - Continuing the bakta/metaphlan audit, checked the remaining guessed DB
   versions against each tool's real downloader / release source:
   - **CheckM2 DB 1.0.1 → 2** — the DIAMOND reference DB is Zenodo release "2"
@@ -95,6 +95,23 @@ registry tool per stage.)
     exist (60.8 GB, HTTP 200) rather than guessed.
   - DFAST's DB tracks the tool version (no separate DB release), so `1.4` is
     correct as-is.
+- Finished the audit on the last guessed versions.  Three were stale in a way
+  that actually mislabels what gets provisioned — their URLs serve *current*
+  (not the pinned version), so a fresh install downloaded the newest data but
+  stamped it with the old version, defeating the update gate:
+  - **Pfam 36.0 → 38.2** — `current_release/Pfam-A.hmm.gz` serves 38.2 (`relnotes.txt`
+    RELEASE 38.2), so the pin now matches what the URL hands you.
+  - **KOfam 2024-01-01 → 2026-06-30** — `profiles.tar.gz` `Last-Modified` is
+    2026-06-30; the `latest` probe was also scraping a `README.md` that does not
+    exist (the real file is a stale-2019 `README`), so it now reads the
+    `profiles.tar.gz` row instead and actually detects drift.
+  - **dbCAN 12 → 14** — the `dbcan:5.2.9` image's `dbcan_build` fetches the
+    latest CAZyDB (HMMdb v14, CAZyDB 2025-07-10); the probe regex was updated to
+    the site's new "HMMdb v14" phrasing (still matches the old
+    `dbCAN-HMMdb-V<n>` form).
+  - eggNOG (5.0.2, URL is version-pinned), DRAM (1.5 = image `dram:1.5.0`),
+    antiSMASH (8.0 = image `antismash:8.0.4`), and funannotate (date-stamped by
+    `funannotate setup`) were checked and are correct as-is.
 
 ### Verified — eukaryote_assembly hifiasm swap works as shipped (no fix needed)
 - Completing the DB-verification cycle, exercised the `assembler=hifiasm` swap on
