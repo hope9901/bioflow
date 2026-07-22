@@ -1,6 +1,6 @@
 {
   "_comment": "I/O format contract snapshot \u2014 regenerate with `python scripts/io_contracts.py update`.  See scripts/io_contracts.py.",
-  "generated": "2026-07-21",
+  "generated": "2026-07-22",
   "tools": {
     "abricate": {
       "version": "1.4.0",

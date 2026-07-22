@@ -276,7 +276,10 @@ _DB_CATALOG: dict[str, dict] = {
         "used_by": ["antismash"],
         "version": "8.0",
         "provision": "download-antismash-databases --database-dir {dir}",
-        "latest": None,                  # tied to the antiSMASH release
+        # The DB series tracks the antiSMASH major.minor release; probe the
+        # official release index for the newest one.
+        "latest": {"url": "https://dl.secondarymetabolites.org/releases/",
+                   "regex": r"([0-9]+\.[0-9]+)\.[0-9]+/"},
         "notes": "PFAM/ClusterBlast/Resfams data for antiSMASH.",
     },
     "gtdbtk_r232": {
@@ -325,7 +328,9 @@ _DB_CATALOG: dict[str, dict] = {
         "version": "1.5",
         "provision": "DRAM-setup.py prepare_databases --output_dir {dir} "
                      "--skip_uniref --threads 8",
-        "latest": None,
+        # DRAM's DBs are built by the tool; track its major.minor on PyPI.
+        "latest": {"url": "https://pypi.org/pypi/DRAM-bio/json",
+                   "regex": r'"([0-9]+\.[0-9]+)\.[0-9]+"'},
         "notes": "MAG/genome metabolic annotation.  Add --uniref for the full "
                  "(~500 GB) build; omit it for the lean profile.",
     },
@@ -338,6 +343,9 @@ _DB_CATALOG: dict[str, dict] = {
         "used_by": ["funannotate"],
         "version": "2024-01",
         "provision": "funannotate setup -d {dir} -b all",
+        # No probe: `funannotate setup` date-stamps the DB (e.g. 2024-01), which
+        # has no clean upstream index to scrape (the tool's own semver on PyPI is
+        # a different versioning scheme, so it can't stand in for the DB date).
         "latest": None,
         "notes": "InterPro/Pfam/dbCAN/MEROPS/UniProt data for `funannotate annotate`.",
     },

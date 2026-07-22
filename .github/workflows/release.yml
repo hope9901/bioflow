@@ -32,11 +32,11 @@ jobs:
     name: Build sdist + wheel
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0     # for setuptools_scm-style version lookups (future)
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -148,7 +148,7 @@ jobs:
     permissions:
       contents: write          # required to create a release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download dist artifact
         uses: actions/download-artifact@v4

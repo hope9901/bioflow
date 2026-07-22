@@ -112,6 +112,14 @@ registry tool per stage.)
   - eggNOG (5.0.2, URL is version-pinned), DRAM (1.5 = image `dram:1.5.0`),
     antiSMASH (8.0 = image `antismash:8.0.4`), and funannotate (date-stamped by
     `funannotate setup`) were checked and are correct as-is.
+- Added drift `latest`-probes for two tool-tracked DBs that had none: **DRAM**
+  (PyPI `DRAM-bio`) and **antiSMASH** (the official release index) — both
+  verified to return the pinned major.minor.  funannotate stays probe-less on
+  purpose: its DB is date-stamped and the tool's semver can't stand in for it.
+
+### Changed — CI runners off the deprecated Node 20
+- Bumped `actions/checkout@v4 → v5` and `actions/setup-python@v5 → v6` across all
+  workflows so jobs stop being force-run on the deprecated Node 20 runtime.
 
 ### Verified — eukaryote_assembly hifiasm swap works as shipped (no fix needed)
 - Completing the DB-verification cycle, exercised the `assembler=hifiasm` swap on
