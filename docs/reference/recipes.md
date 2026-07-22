@@ -17,6 +17,7 @@ Each recipe runs a recommended **default** tool per stage (shown in bold), overr
 | `metagenomics_profile` | `--set profiler=…` | **kraken2** \| metaphlan |
 | `methylation_wgbs` | `--set aligner=…` | **bowtie2** \| hisat2 |
 | `prokaryote_assembly` | `--set annotator=…` | bakta \| **prokka** |
+| `proteomics_dda` | `--set search=…` | **comet** \| msgf |
 | `rnaseq_deg` | `--set quantifier=…` | kallisto \| **salmon** |
 | `scrna_seq` | `--set counter=…` | kb \| **starsolo** |
 
@@ -226,12 +227,16 @@ Prokaryote short-read de novo assembly + structural annotation
 
 ## `proteomics_dda`
 
-LC-MS/MS DDA proteomics: msconvert → Comet → Percolator
+LC-MS/MS DDA proteomics: msconvert → Comet/MS-GF+ → FDR
 
-*3 stage(s):*
+*Swappable:* `--set search=comet | msgf` (default `comet`).
+
+*5 stage(s):*
 
 - **msconvert** — `chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest`
 - **comet_search** — `quay.io/biocontainers/comet-ms:2026011--h9ee0642_0`
+- **msgf_search** — `quay.io/biocontainers/msgf_plus:2024.03.26--hdfd78af_0`
+- **msgf_fdr** — `quay.io/biocontainers/msgf_plus:2024.03.26--hdfd78af_0`
 - **percolator_fdr** — `quay.io/biocontainers/percolator:3.9--h0f90025_0`
 
 ## `rnaseq_deg`

@@ -1,6 +1,6 @@
 # Tools
 
-**136 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**137 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -151,7 +151,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `metaphlan4` | 4.2.4 | `quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0` | Blanco-Miguez et al. 2023, PMID 36823356 | 1,019 | 840 |
 | `sourmash` | 4.9.4 | `quay.io/biocontainers/sourmash:4.9.4--hdfd78af_0` | Brown & Irber 2016, sourmash (JOSS 10.21105/joss.00027) | n/a | n/a |
 
-## proteomics  (8)
+## proteomics  (9)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -160,6 +160,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `maxquant` ⚠️ deprecated | 2.4.14.0 | `quay.io/biocontainers/maxquant:2.4.14.0--hdfd78af_0` | Cox & Mann 2008, PMID 19029910 | 12,649 | 5,648 |
 | `msconvert` | 3.0.24238 | `chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:latest` | Chambers et al. 2012, PMID 23051804 | 3,182 | 2,060 |
 | `msfragger` ⚠️ deprecated | 4.1 | `fcyu/msfragger:4.1` | Kong et al. 2017, PMID 28394336 | 1,964 | 1,617 |
+| `msgf_plus` | 2024.03.26 | `quay.io/biocontainers/msgf_plus:2024.03.26--hdfd78af_0` | Kim 2014, PMID 25358478 | 905 | 449 |
 | `openms` | 3.5.0 | `quay.io/biocontainers/openms:3.5.0--h78fb946_0` | Rost 2016, PMID 27575624 | 501 | 317 |
 | `percolator` | 3.9 | `quay.io/biocontainers/percolator:3.9--h0f90025_0` | Kall et al. 2007, PMID 17952086 | 1,951 | 924 |
 | `xtandem` | 15.12.15.2 | `quay.io/biocontainers/xtandem:15.12.15.2--h4464bbb_11` | Craig & Beavis 2004, PMID 14976030 | 1,931 | 322 |

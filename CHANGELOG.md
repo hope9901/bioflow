@@ -78,6 +78,20 @@ registry tool per stage.)
   each gVCF's *filename*, so naming every sample's gVCF `sample.g.vcf.gz` (as the
   GATK path safely does — GATK uses the header `SM`) made GLnexus abort on a
   collision.  Fixed by naming the DeepVariant gVCF `{sample_id}.g.vcf.gz`.
+- `proteomics_dda`: `--set search=comet|msgf` — a **multi-stage** swap of the
+  search engine *and* its FDR.  Comet → Percolator needs a `.pin`; the mzid→pin
+  bridge (`msgf2pin`) isn't packaged in any BioContainer, so the MS-GF+ branch
+  uses MS-GF+'s own target-decoy FDR (`-tda 1` → `MzIDToTsv` → QValue filter)
+  instead of Percolator.  Both write the same `passing_psms.tsv`; `fasta_db` is
+  target-only and each engine makes its own decoys.  Adds a digest-pinned MS-GF+
+  registry entry (Kim 2014, PMID 25358478 — verified) + a 17 KB synthetic MS
+  fixture (`data/test/proteomics_small`, 3 theoretical peptide spectra).
+  Verified on it: Comet identifies all three peptides (e-values 1e-9…1e-16) and
+  MS-GF+ gives QValue 0.0, whose filter yields a 3-PSM `passing_psms.tsv`.
+  **Real-verification caught a pre-existing bug in the Comet default:** it fed
+  Percolator a `.pep.xml`, which Percolator rejects ("not tab delimited") — the
+  recipe now forces `output_percolatorfile=1` and Percolator reads the `.pin`
+  (confirmed: it parses the pin and starts training).
 - `scrna_seq`: `--set counter=starsolo|kb` — a **multi-stage** swap with a
   counter-specific reference.  STARsolo (default) needs a prebuilt multi-GB STAR
   index; the kb-python branch instead builds a kallisto index in-recipe from a

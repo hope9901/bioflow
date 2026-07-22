@@ -7,9 +7,9 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 136,
-  "n_with_pmid": 122,
-  "n_fetched": 100,
+  "n_tools": 137,
+  "n_with_pmid": 123,
+  "n_fetched": 101,
   "n_pmid_mismatch": 5,
   "tools": {
     "abricate": {
@@ -816,6 +816,15 @@
       "recent": 1617,
       "verified": true,
       "name": "msfragger",
+      "category": "proteomics"
+    },
+    "msgf_plus": {
+      "pmid": "25358478",
+      "doi": "10.1038/ncomms6277",
+      "total": 905,
+      "recent": 449,
+      "verified": true,
+      "name": "MS-GF+",
       "category": "proteomics"
     },
     "multiqc": {

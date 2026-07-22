@@ -1,0 +1,29 @@
+id: msgf_plus
+name: MS-GF+
+version: "2024.03.26"
+category: proteomics
+stage: [proteomics.step2]
+input_types: [mzml, protein_fasta]
+output_types: [mzid, psm_results]
+applicable:
+  species: [any]
+  read_type: [ms_dda, ms_dia]
+  mode: [dda]
+container:
+  image: quay.io/biocontainers/msgf_plus:2024.03.26--hdfd78af_0
+  pull_policy: if_not_present
+  image_digest: sha256:81bd23d0bc52f9d14cd77d34d54d882532944d51df3183440a2965d72d252425
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 10}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 50}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  msgf_plus -s {mzml_files} -d {fasta_db} -tda 1 -inst 0 -t 20ppm
+  -o {out_dir}/msgf.mzid &&
+  msgf_plus edu.ucsd.msjava.ui.MzIDToTsv -i {out_dir}/msgf.mzid -o {out_dir}/msgf.tsv
+references: []
+citation: "Kim 2014, PMID 25358478"
+added: "2026-07-22"
+last_reviewed: "2026-07-22"
+source_repo: MSGFPlus/msgfplus

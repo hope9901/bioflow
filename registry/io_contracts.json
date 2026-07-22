@@ -896,6 +896,17 @@
         "psm_tsv"
       ]
     },
+    "msgf_plus": {
+      "version": "2024.03.26",
+      "inputs": [
+        "mzml",
+        "protein_fasta"
+      ],
+      "outputs": [
+        "mzid",
+        "psm_results"
+      ]
+    },
     "multiqc": {
       "version": "1.35",
       "inputs": [
