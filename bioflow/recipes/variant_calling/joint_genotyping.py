@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from bioflow import pipeline, stage
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 # Mulled BioContainer carrying both bwa and samtools (the plain bwa
 # image has no samtools, so a ``bwa mem | samtools sort`` chain fails on
@@ -309,6 +309,7 @@ def joint_genotyping(
     call + converge sub-graph for GLnexus.  Both branches emit the same
     ``cohort.vcf.gz``, so hard-filter → SnpEff downstream is unchanged.
     """
+    caller = choice("caller", caller, "gatk4", "deepvariant")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     reference = Path(reference)

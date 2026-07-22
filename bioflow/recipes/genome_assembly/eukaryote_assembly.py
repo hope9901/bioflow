@@ -21,7 +21,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -110,6 +110,7 @@ def eukaryote_assembly(
     unchanged.  ``polish=False`` skips Medaka — appropriate for HiFi reads,
     whose per-base accuracy makes ONT consensus polishing unnecessary.
     """
+    assembler = choice("assembler", assembler, "flye", "hifiasm")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

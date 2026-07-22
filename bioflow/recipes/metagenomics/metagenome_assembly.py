@@ -19,7 +19,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -141,6 +141,7 @@ def metagenome_assembly(
     the reads itself).  Both emit ``bins/*.fa`` so CheckM2 downstream is
     unchanged.
     """
+    binner = choice("binner", binner, "metabat2", "maxbin2")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -211,6 +211,7 @@ def rnaseq_deg(
     or ``"kallisto"`` (``--set quantifier=kallisto``).  DESeq2 reads whichever
     one ran, so the rest of the pipeline is unchanged.
     """
+    quantifier = choice("quantifier", quantifier, "salmon", "kallisto")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

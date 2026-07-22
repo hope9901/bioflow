@@ -22,7 +22,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -288,6 +288,7 @@ def prokaryote_assembly(
     bakta_db`` — passed via ``bakta_db``).  The GenoVi genome map is drawn from
     whichever annotator ran.
     """
+    annotator = choice("annotator", annotator, "prokka", "bakta")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

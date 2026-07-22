@@ -26,7 +26,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 # The bwa+samtools mulled BioContainer (bwa 0.7.19 + samtools 1.22.1).  The
 # plain ``quay.io/biocontainers/bwa`` image carries bwa only, so any
@@ -195,6 +195,7 @@ def germline_variants(
     + HaplotypeCaller) or ``"deepvariant"`` (``--set caller=deepvariant``).
     Both write ``{sample_id}.raw.vcf.gz``, so bcftools/SnpEff are unchanged.
     """
+    caller = choice("caller", caller, "gatk4", "deepvariant")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     reference = Path(reference)

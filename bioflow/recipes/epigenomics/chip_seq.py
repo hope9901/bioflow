@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Optional
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -155,6 +155,7 @@ def chip_seq(
     as the BWA reference-FASTA prefix — build it with ``bwa index``).  Both emit
     ``{sample_id}.bam`` so Picard/MACS3 downstream are unchanged.
     """
+    aligner = choice("aligner", aligner, "bowtie2", "bwa")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

@@ -24,7 +24,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -151,6 +151,7 @@ def atac_seq(
     (``--set aligner=bwa``, uses ``bowtie2_index`` as the BWA reference-FASTA
     prefix).  Both emit ``{sample_id}.bam`` so the rest is unchanged.
     """
+    aligner = choice("aligner", aligner, "bowtie2", "bwa")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

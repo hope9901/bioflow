@@ -26,7 +26,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -177,6 +177,7 @@ def scrna_seq(
     ``genome`` + ``gtf``.  Both feed the same Scanpy step, which reads whichever
     count matrix was written.
     """
+    counter = choice("counter", counter, "starsolo", "kb")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

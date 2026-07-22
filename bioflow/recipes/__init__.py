@@ -50,6 +50,25 @@ def names() -> list:
     return sorted(RECIPES.keys())
 
 
+def choice(param: str, value: str, *allowed: str) -> str:
+    """Validate a ``--set`` swap value against its whitelist, else raise.
+
+    Recipes branch on a swap param (``if caller == "deepvariant" ... else ...``)
+    where the ``else`` is the default — so without this guard a typo like
+    ``--set caller=deepvarient`` would silently run the default instead of
+    erroring.  Call this at the top of a recipe (before any I/O) so a bad choice
+    fails fast with the valid options::
+
+        caller = choice("caller", caller, "gatk4", "deepvariant")
+    """
+    if value not in allowed:
+        opts = ", ".join(repr(a) for a in allowed)
+        raise ValueError(
+            f"{param}={value!r} is not a valid choice; pick one of {opts}."
+        )
+    return value
+
+
 # ---------------------------------------------------------------------------
 # Auto-import bundled recipes.  Each module calls register() on import.
 # ---------------------------------------------------------------------------

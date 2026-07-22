@@ -39,7 +39,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -182,6 +182,7 @@ def proteomics_dda(
     ``passing_psms.tsv``.  ``fasta_db`` is target-only; each engine makes its own
     decoys.
     """
+    search = choice("search", search, "comet", "msgf")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

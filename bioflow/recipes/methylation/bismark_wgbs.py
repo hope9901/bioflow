@@ -31,7 +31,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioflow import stage, pipeline
-from bioflow.recipes import register
+from bioflow.recipes import register, choice
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
@@ -183,6 +183,7 @@ def methylation_wgbs(
     ``"hisat2"`` (``--set aligner=hisat2``).  Both ship in the Bismark image and
     write the same ``*.bam`` + CpG report, so methylKit downstream is unchanged.
     """
+    aligner = choice("aligner", aligner, "bowtie2", "hisat2")
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 

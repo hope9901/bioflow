@@ -20,6 +20,13 @@ runs a sensible default tool, overridable with `--set <param>=<tool>`.  (For
 full per-stage tool choice, `bioflow custom <pipeline>` remains the general
 path — its presets are the recommended defaults, and it offers every applicable
 registry tool per stage.)
+- **An invalid `--set` value now fails fast instead of silently running the
+  default.**  Each swap recipe branches `if x == "alt" … else <default>`, so a
+  typo (`--set caller=deepvarient`) used to fall through to the default with no
+  error.  A new `choice()` guard validates the value against its whitelist at
+  the top of every swap recipe (before any I/O) and raises `ValueError` listing
+  the valid options.  Locked by `tests/unit/test_swap_validation.py`, which
+  introspects each recipe's swap param and asserts a bad value raises.
 - `prokaryote_assembly`: `--set annotator=prokka|bakta` (added earlier).
 - `eukaryote_assembly`: `--set assembler=flye|hifiasm` — hifiasm emits the same
   `assembly.fasta` filename so Medaka/compleasm downstream are unchanged.
