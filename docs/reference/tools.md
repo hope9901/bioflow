@@ -1,6 +1,6 @@
 # Tools
 
-**134 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**135 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -227,7 +227,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `snap` | 2017-03-01 | `quay.io/biocontainers/snap:2017_03_01--h7b50bb2_0` | Korf 2004, PMID 15144565 | n/a | n/a |
 | `trnascan_se` | 2.0.12 | `quay.io/biocontainers/trnascan-se:2.0.12--pl5321h7b50bb2_2` | Chan 2021, PMID 34417604 | n/a | n/a |
 
-## variant_calling  (8)
+## variant_calling  (9)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
@@ -237,6 +237,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `ensembl_vep` | 116.0 | `quay.io/biocontainers/ensembl-vep:116.0--pl5321h2a3209d_0` | McLaren 2016, PMID 27268795 | n/a | n/a |
 | `freebayes` | 1.3.10 | `quay.io/biocontainers/freebayes:1.3.10--hbefcdb2_0` | Garrison & Marth 2012, arXiv:1207.3907 | n/a | n/a |
 | `gatk4` | 4.6.2.0 | `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1` | McKenna 2010, PMID 20644199 | 16,785 | 7,994 |
+| `glnexus` | 1.4.1 | `quay.io/biocontainers/glnexus:1.4.1--h40d77a6_0` | Yun 2021, PMID 33399819 | 190 | 166 |
 | `snpeff` | 5.4.0c | `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0` | Cingolani 2012, PMID 22728672 | 9,399 | 5,402 |
 | `vcftools` | 0.1.17 | `quay.io/biocontainers/vcftools:0.1.17--pl5321h077b44d_0` | Danecek 2011, PMID 21653522 | n/a | n/a |
 

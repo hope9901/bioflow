@@ -12,6 +12,7 @@ Each recipe runs a recommended **default** tool per stage (shown in bold), overr
 | `chip_seq` | `--set aligner=…` | **bowtie2** \| bwa |
 | `eukaryote_assembly` | `--set assembler=…` | **flye** \| hifiasm |
 | `germline_variants` | `--set caller=…` | deepvariant \| **gatk4** |
+| `joint_genotyping` | `--set caller=…` | deepvariant \| **gatk4** |
 | `metagenome_assembly` | `--set binner=…` | maxbin2 \| **metabat2** |
 | `metagenomics_profile` | `--set profiler=…` | **kraken2** \| metaphlan |
 | `methylation_wgbs` | `--set aligner=…` | **bowtie2** \| hisat2 |
@@ -128,18 +129,23 @@ Scoary GWAS over a Roary pangenome
 
 ## `joint_genotyping`
 
-Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs → GenotypeGVCFs → hard-filter → SnpEff
+Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs/GLnexus → hard-filter → SnpEff
 
-*8 stage(s):*
+*Swappable:* `--set caller=deepvariant | gatk4` (default `gatk4`).
+
+*11 stage(s):*
 
 - **prepare_reference** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
 - **align_one** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_gvcf** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
+- **call_gvcf_deepvariant** — `google/deepvariant:1.10.0`
 - **combine_gvcfs** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
 - **genotype_cohort** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
 - **hard_filter** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
 - **annotate_cohort** — `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0`
+- **joint_call_glnexus** — `quay.io/biocontainers/glnexus:1.4.1--h40d77a6_0`
+- **glnexus_to_vcf** — `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0`
 
 ## `metagenome_assembly`
 

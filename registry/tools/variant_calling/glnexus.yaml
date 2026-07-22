@@ -1,0 +1,27 @@
+id: glnexus
+name: GLnexus
+version: "1.4.1"
+category: variant_calling
+stage: [variant_calling.joint]
+input_types: [gvcf]
+output_types: [bcf, vcf]
+applicable:
+  species: [any]
+  read_type: [any]
+  mode: [resequencing]
+container:
+  image: quay.io/biocontainers/glnexus:1.4.1--h40d77a6_0
+  pull_policy: if_not_present
+  image_digest: sha256:3e6f96945247584226df92e74595329bcc9855f358c057f374237bf4ba6a2909
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  glnexus_cli --config DeepVariantWGS {gvcf_files} > {out_dir}/cohort.bcf
+references: []
+citation: "Yun 2021, PMID 33399819"
+added: "2026-07-22"
+last_reviewed: "2026-07-22"
+source_repo: dnanexus-rnd/GLnexus

@@ -24,7 +24,7 @@ EXPECTED_RECIPES = {
     "methylation_wgbs":     4,   # trim → bismark_prep → bismark → methylkit
     "proteomics_dda":       3,   # msconvert → comet → percolator
     "germline_variants":    7,   # fastp → prep_ref → bwa → gatk → bcftools → snpeff
-    "joint_genotyping":     8,   # cohort: prep_ref → qc → align → gvcf → combine → genotype → filter → snpeff
+    "joint_genotyping":    11,   # cohort: prep_ref → qc → align → gvcf(gatk|dv) → combine/genotype|glnexus(+bcftools) → filter → snpeff
 }
 
 

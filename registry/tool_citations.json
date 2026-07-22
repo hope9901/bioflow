@@ -7,9 +7,9 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 134,
-  "n_with_pmid": 120,
-  "n_fetched": 98,
+  "n_tools": 135,
+  "n_with_pmid": 121,
+  "n_fetched": 99,
   "n_pmid_mismatch": 5,
   "tools": {
     "abricate": {
@@ -483,6 +483,15 @@
       "verified": true,
       "name": "GlimmerHMM",
       "category": "struct_annot"
+    },
+    "glnexus": {
+      "pmid": "33399819",
+      "doi": "10.1093/bioinformatics/btaa1081",
+      "total": 190,
+      "recent": 166,
+      "verified": true,
+      "name": "GLnexus",
+      "category": "variant_calling"
     },
     "gseapy": {
       "pmid": "36426870",

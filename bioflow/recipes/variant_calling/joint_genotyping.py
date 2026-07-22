@@ -127,6 +127,30 @@ def call_gvcf(sample_id: str, aln, reference: Path, *, out_dir):
     )
 
 
+@stage(image="google/deepvariant:1.10.0",
+       cpu=8, ram_gb=32, depends_on=align_one,
+       retry=2, retry_with={"ram_gb": "2x"})
+def call_gvcf_deepvariant(sample_id: str, aln, reference: Path, *, out_dir,
+                          model_type: str = "WGS"):
+    """DeepVariant per-sample gVCF (``--set caller=deepvariant``).
+
+    Names the gVCF ``{sample_id}.g.vcf.gz`` — **not** the GATK path's fixed
+    ``sample.g.vcf.gz`` — because GLnexus keys its scratch DB on each input's
+    *filename* and rejects a collision, so every sample's gVCF must have a
+    unique basename.  Unlike the GATK path this does not MarkDuplicates first
+    (DeepVariant's model is trained on duplicate-containing reads), so it runs
+    straight off the aligned BAM.  ``model_type`` is WGS / WES / PACBIO / ONT_R104.
+    """
+    return (
+        f"/opt/deepvariant/bin/run_deepvariant "
+        f"--model_type={model_type} --ref={reference} "
+        f"--reads={aln.out_dir}/{sample_id}.bam "
+        f"--output_vcf={out_dir}/{sample_id}.vcf.gz "
+        f"--output_gvcf={out_dir}/{sample_id}.g.vcf.gz "
+        f"--num_shards=8"
+    )
+
+
 # ── Cohort stages (converge) ─────────────────────────────────────────────────
 
 @stage(image="quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1",
@@ -148,6 +172,43 @@ def genotype_cohort(combined, reference: Path, *, out_dir):
         f"gatk GenotypeGVCFs -R {reference} "
         f"-V {combined.out_dir}/cohort.g.vcf.gz "
         f"-O {out_dir}/cohort.vcf.gz"
+    )
+
+
+@stage(image="quay.io/biocontainers/glnexus:1.4.1--h40d77a6_0",
+       cpu=8, ram_gb=32, depends_on=call_gvcf_deepvariant)
+def joint_call_glnexus(gvcfs, *, out_dir):
+    """GLnexus joint-call across the DeepVariant per-sample gVCFs → cohort.bcf.
+
+    GLnexus is DeepVariant's recommended joint caller: GATK ``GenotypeGVCFs``
+    needs the ``<NON_REF>`` symbolic allele that DeepVariant gVCFs don't carry,
+    so this one step replaces *both* GATK ``CombineGVCFs`` and ``GenotypeGVCFs``
+    (merge + re-genotype in one).  ``--dir`` must not pre-exist, hence the rm.
+    Each per-sample out_dir holds exactly one ``*.g.vcf.gz`` (named for its
+    sample), so the glob hands GLnexus the uniquely-named inputs it requires.
+    """
+    gvcf_files = " ".join(f"{g.out_dir}/*.g.vcf.gz" for g in gvcfs)
+    return (
+        f"bash -c '"
+        f"rm -rf {out_dir}/GLnexus.DB && "
+        f"glnexus_cli --config DeepVariantWGS --dir {out_dir}/GLnexus.DB "
+        f"{gvcf_files} > {out_dir}/cohort.bcf'"
+    )
+
+
+@stage(image="quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0",
+       cpu=4, ram_gb=8, depends_on=joint_call_glnexus)
+def glnexus_to_vcf(glnexus, *, out_dir):
+    """GLnexus BCF → the ``cohort.vcf.gz`` the GATK path also produces.
+
+    Emitting the identical filename means ``hard_filter`` → SnpEff downstream is
+    unchanged whichever caller ran.
+    """
+    return (
+        f"bash -c '"
+        f"bcftools view {glnexus.out_dir}/cohort.bcf | bgzip -c "
+        f"> {out_dir}/cohort.vcf.gz && "
+        f"bcftools index -t {out_dir}/cohort.vcf.gz'"
     )
 
 
@@ -222,11 +283,12 @@ def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path]]:
 # ── Pipeline ─────────────────────────────────────────────────────────────────
 
 @pipeline(
-    stages=[prepare_reference, qc_one, align_one, call_gvcf, combine_gvcfs,
-            genotype_cohort, hard_filter, annotate_cohort],
+    stages=[prepare_reference, qc_one, align_one, call_gvcf,
+            call_gvcf_deepvariant, combine_gvcfs, genotype_cohort,
+            joint_call_glnexus, glnexus_to_vcf, hard_filter, annotate_cohort],
     description=(
         "Cohort joint genotyping (GATK best practice): "
-        "per-sample GVCF → CombineGVCFs → GenotypeGVCFs → hard-filter → SnpEff"
+        "per-sample GVCF → CombineGVCFs/GLnexus → hard-filter → SnpEff"
     ),
 )
 def joint_genotyping(
@@ -235,8 +297,18 @@ def joint_genotyping(
     snpeff_db: str,
     *,
     out_dir: Path,
+    caller: str = "gatk4",
 ):
-    """End-to-end multi-sample germline joint genotyping."""
+    """End-to-end multi-sample germline joint genotyping.
+
+    ``caller`` picks the per-sample caller **and** its matching joint step:
+    ``"gatk4"`` (default; HaplotypeCaller gVCF → CombineGVCFs → GenotypeGVCFs) or
+    ``"deepvariant"`` (``--set caller=deepvariant``; DeepVariant gVCF → GLnexus).
+    GATK ``GenotypeGVCFs`` can't consume DeepVariant gVCFs (they lack the
+    ``<NON_REF>`` model), so the DeepVariant branch swaps the whole per-sample-
+    call + converge sub-graph for GLnexus.  Both branches emit the same
+    ``cohort.vcf.gz``, so hard-filter → SnpEff downstream is unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     reference = Path(reference)
@@ -259,17 +331,26 @@ def joint_genotyping(
         parallel="auto", progress=True,
     )
 
-    # 3. Per-sample GVCF in parallel.  Each writes sample.g.vcf.gz into
-    #    its own out_dir, so the converge step needs no sample_id.
-    gvcf_results = call_gvcf.starmap(
-        [(sid, aln, reference)
-         for (sid, _, _), aln in zip(samples, align_results)],
-        parallel="auto", progress=True,
-    )
+    # 3. Per-sample gVCF in parallel (each writes sample.g.vcf.gz into its own
+    #    out_dir), then 4. converge to one cohort.vcf.gz — both are
+    #    caller-specific, since DeepVariant gVCFs need GLnexus, not GATK.
+    if caller == "deepvariant":
+        gvcf_results = call_gvcf_deepvariant.starmap(
+            [(sid, aln, reference)
+             for (sid, _, _), aln in zip(samples, align_results)],
+            parallel="auto", progress=True,
+        )
+        glnexus = joint_call_glnexus(gvcf_results)
+        cohort = glnexus_to_vcf(glnexus)
+    else:
+        gvcf_results = call_gvcf.starmap(
+            [(sid, aln, reference)
+             for (sid, _, _), aln in zip(samples, align_results)],
+            parallel="auto", progress=True,
+        )
+        combined = combine_gvcfs(gvcf_results, reference)
+        cohort = genotype_cohort(combined, reference)
 
-    # 4. Converge: combine → joint genotype → hard filter → annotate.
-    combined = combine_gvcfs(gvcf_results, reference)
-    cohort = genotype_cohort(combined, reference)
     filt = hard_filter(cohort, reference)
     return annotate_cohort(filt, snpeff_db)
 

@@ -63,6 +63,21 @@ registry tool per stage.)
   unchanged.  Verified on a real E. coli run: MaxBin2 accepts the recipe's exact
   command (Bowtie2 self-mapping → abundance → marker-gene seeding) and the
   `maxbin.NNN.fasta → bins/bin.N.fa` normalisation is confirmed.
+- `joint_genotyping`: `--set caller=gatk4|deepvariant` — the **multi-stage** swap
+  (unlike the drop-in swaps above).  GATK `GenotypeGVCFs` can't consume
+  DeepVariant gVCFs (they lack the `<NON_REF>` model), so the DeepVariant branch
+  replaces the whole per-sample-call + converge sub-graph: DeepVariant per-sample
+  gVCF → **GLnexus** joint-call (one step for GATK's CombineGVCFs + GenotypeGVCFs)
+  → bcftools to `cohort.vcf.gz`.  Both branches emit that same file, so
+  hard-filter → SnpEff downstream is unchanged.  Adds a digest-pinned GLnexus
+  registry entry (Yun 2021, PMID 33399819 — verified against NCBI).
+  Verified end-to-end on a 2-sample phix run with 5 planted SNPs: DeepVariant
+  gVCFs → GLnexus (`genotyping complete!`) → a 2-sample `cohort.vcf.gz` with all
+  5 records, which GATK `SelectVariants` reads cleanly.  **Real-verification
+  caught a bug render/unit tests never would:** GLnexus keys its scratch DB on
+  each gVCF's *filename*, so naming every sample's gVCF `sample.g.vcf.gz` (as the
+  GATK path safely does — GATK uses the header `SM`) made GLnexus abort on a
+  collision.  Fixed by naming the DeepVariant gVCF `{sample_id}.g.vcf.gz`.
 - `methylation_wgbs`: `--set aligner=bowtie2|hisat2` — Bismark's alignment
   backend.  Both ship in the one Bismark image (no new image/registry entry),
   and both write a `*.bam` + CpG report the extractor and methylKit read the
