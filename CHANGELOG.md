@@ -66,6 +66,11 @@ registry tool per stage.)
   fixture: both backends run prep → align → extract and emit an identical
   534-line CpG report (only the `_bt2_`/`_hisat2_` name infix differs, which the
   `*.bam` and `CpG_report` globs already tolerate).
+- **The generated recipe reference now lists every `--set` swap point.**
+  `docs/reference/recipes.md` gained a "Swappable stages" table (recipe → flag →
+  options, default in bold) plus a per-recipe `--set` note, both discovered by
+  introspection in `scripts/gen_docs.py` — a new swap shows up automatically once
+  its `<param> == "<alt>"` branch is written, no hand-maintained list.
 - Fungal **structural** annotation at the Structural-Annotation step is covered
   by BRAKER3 (integrated) plus AUGUSTUS / GlimmerHMM / SNAP (ab-initio);
   funannotate stays the fungal **functional** option at the next step.

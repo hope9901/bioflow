@@ -11,7 +11,9 @@ keeps the docs in sync with the registry without hand-editing.
 """
 from __future__ import annotations
 
+import inspect
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -187,6 +189,30 @@ def gen_tools() -> str:
     return "\n".join(lines) + "\n"
 
 
+def _swap_points(pipe) -> "list[tuple[str, str, list[str]]]":
+    """Discover a recipe's ``--set`` swap flags from its source.
+
+    A swap point is a keyword parameter with a string default that the recipe
+    body branches on (``<param> == "<alt>"``).  Returns ``(flag, default,
+    sorted_options)`` per swap.  Purely introspective — nothing hand-listed, so
+    a new swap shows up in the docs automatically once its branch is written.
+    """
+    try:
+        src = Path(inspect.getsourcefile(pipe.func)).read_text(encoding="utf-8")
+        sig = inspect.signature(pipe.func)
+    except (TypeError, OSError):
+        return []
+    out: "list[tuple[str, str, list[str]]]" = []
+    for pname, param in sig.parameters.items():
+        if param.default is inspect.Parameter.empty or not isinstance(param.default, str):
+            continue
+        alts = set(re.findall(rf'\b{re.escape(pname)}\s*(?:==|!=)\s*"([a-z0-9_.]+)"', src))
+        if not alts:
+            continue
+        out.append((pname, param.default, sorted({param.default} | alts)))
+    return out
+
+
 def gen_recipes() -> str:
     # Import after sys.path is set by running from repo root
     import sys
@@ -201,12 +227,44 @@ def gen_recipes() -> str:
         "recipe registry by `scripts/gen_docs.py`.",
         "",
     ]
+
+    # --- Swappable-stage summary (--set) -------------------------------------
+    swap_rows = []
+    for name in sorted(names()):
+        for flag, default, opts in _swap_points(get(name)):
+            pretty = " \\| ".join(
+                (f"**{o}**" if o == default else o) for o in opts
+            )
+            swap_rows.append(f"| `{name}` | `--set {flag}=…` | {pretty} |")
+    if swap_rows:
+        lines += [
+            "## Swappable stages (`--set`)",
+            "",
+            "Each recipe runs a recommended **default** tool per stage (shown in "
+            "bold), overridable with `--set <flag>=<tool>`.  For full per-stage "
+            "tool choice, `bioflow custom <pipeline>` offers every applicable "
+            "registry tool.",
+            "",
+            "| Recipe | Flag | Options |",
+            "|---|---|---|",
+            *swap_rows,
+            "",
+        ]
+
     for name in sorted(names()):
         pipe = get(name)
         lines.append(f"## `{name}`")
         lines.append("")
         lines.append(f"{pipe.description}")
         lines.append("")
+        swaps = _swap_points(pipe)
+        if swaps:
+            for flag, default, opts in swaps:
+                alts = " | ".join(o for o in opts)
+                lines.append(
+                    f"*Swappable:* `--set {flag}={alts}` (default `{default}`)."
+                )
+            lines.append("")
         try:
             plan = pipe.dry_run()
             lines.append(f"*{plan['n_stages']} stage(s):*")

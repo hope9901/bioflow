@@ -2,6 +2,22 @@
 
 **20 recipes**, each invokable as `bioflow recipe run <name> [options]`.  Auto-generated from the recipe registry by `scripts/gen_docs.py`.
 
+## Swappable stages (`--set`)
+
+Each recipe runs a recommended **default** tool per stage (shown in bold), overridable with `--set <flag>=<tool>`.  For full per-stage tool choice, `bioflow custom <pipeline>` offers every applicable registry tool.
+
+| Recipe | Flag | Options |
+|---|---|---|
+| `atac_seq` | `--set aligner=…` | **bowtie2** \| bwa |
+| `chip_seq` | `--set aligner=…` | **bowtie2** \| bwa |
+| `eukaryote_assembly` | `--set assembler=…` | **flye** \| hifiasm |
+| `germline_variants` | `--set caller=…` | deepvariant \| **gatk4** |
+| `metagenome_assembly` | `--set binner=…` | maxbin2 \| **metabat2** |
+| `metagenomics_profile` | `--set profiler=…` | **kraken2** \| metaphlan |
+| `methylation_wgbs` | `--set aligner=…` | **bowtie2** \| hisat2 |
+| `prokaryote_assembly` | `--set annotator=…` | bakta \| **prokka** |
+| `rnaseq_deg` | `--set quantifier=…` | kallisto \| **salmon** |
+
 ## `amr_vf_catalogue`
 
 ABRicate × N genomes × M databases (AMR + VF + plasmid)
@@ -21,6 +37,8 @@ All-vs-all ANI matrix (FastANI 1.34)
 ## `atac_seq`
 
 ATAC-seq: TrimGalore → Bowtie2/BWA → Picard → MACS3 → TOBIAS
+
+*Swappable:* `--set aligner=bowtie2 | bwa` (default `bowtie2`).
 
 *6 stage(s):*
 
@@ -42,6 +60,8 @@ Gene family expansion/contraction (CAFE5)
 ## `chip_seq`
 
 ChIP-seq: TrimGalore → Bowtie2/BWA → Picard → MACS3 → HOMER
+
+*Swappable:* `--set aligner=bowtie2 | bwa` (default `bowtie2`).
 
 *6 stage(s):*
 
@@ -72,6 +92,8 @@ Download every RefSeq assembly for a taxon (no Docker)
 
 Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm
 
+*Swappable:* `--set assembler=flye | hifiasm` (default `flye`).
+
 *5 stage(s):*
 
 - **read_qc** — `quay.io/biocontainers/nanoplot:1.47.1--pyhdfd78af_0`
@@ -83,6 +105,8 @@ Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm
 ## `germline_variants`
 
 Germline variants: fastp → BWA → GATK/DeepVariant → bcftools → SnpEff
+
+*Swappable:* `--set caller=deepvariant | gatk4` (default `gatk4`).
 
 *7 stage(s):*
 
@@ -121,6 +145,8 @@ Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs �
 
 Metagenome assembly + binning: fastp → MEGAHIT → MetaBAT2/MaxBin2 → CheckM2
 
+*Swappable:* `--set binner=maxbin2 | metabat2` (default `metabat2`).
+
 *6 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
@@ -134,6 +160,8 @@ Metagenome assembly + binning: fastp → MEGAHIT → MetaBAT2/MaxBin2 → CheckM
 
 Shotgun metagenomic profiling: fastp → Kraken2+Bracken|MetaPhlAn → Krona
 
+*Swappable:* `--set profiler=kraken2 | metaphlan` (default `kraken2`).
+
 *5 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
@@ -145,6 +173,8 @@ Shotgun metagenomic profiling: fastp → Kraken2+Bracken|MetaPhlAn → Krona
 ## `methylation_wgbs`
 
 WGBS methylation: TrimGalore → Bismark → methylKit
+
+*Swappable:* `--set aligner=bowtie2 | hisat2` (default `bowtie2`).
 
 *4 stage(s):*
 
@@ -175,6 +205,8 @@ Single-copy core gene supermatrix → MAFFT × N → IQ-TREE ML
 
 Prokaryote short-read de novo assembly + structural annotation
 
+*Swappable:* `--set annotator=bakta | prokka` (default `prokka`).
+
 *7 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
@@ -198,6 +230,8 @@ LC-MS/MS DDA proteomics: msconvert → Comet → Percolator
 ## `rnaseq_deg`
 
 RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC
+
+*Swappable:* `--set quantifier=kallisto | salmon` (default `salmon`).
 
 *8 stage(s):*
 
