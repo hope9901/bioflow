@@ -50,7 +50,7 @@ def trim(r1: Path, r2: Path, *, out_dir):
 
 @stage(image="quay.io/biocontainers/bismark:0.25.1--hdfd78af_0",
        cpu=4, ram_gb=8)
-def bismark_prep(genome: Path, *, out_dir):
+def bismark_prep(genome: Path, aligner: str = "bowtie2", *, out_dir):
     """``bismark_genome_preparation`` — bisulfite-convert the reference.
 
     Copies the reference FASTA into a fresh, writable genome directory
@@ -59,27 +59,38 @@ def bismark_prep(genome: Path, *, out_dir):
     FASTA must sit on a writable mount — an external, read-only
     ``--bismark-genome`` reference can't be prepared in place, hence the
     copy into ``out_dir`` (always under the ``/work`` mount).
+
+    ``aligner`` picks the index Bismark builds: ``"bowtie2"`` (default) or
+    ``"hisat2"`` (``--set aligner=hisat2``); the index must match the aligner
+    used at the ``bismark_align`` step.  Both ship in this Bismark image.
     """
+    flag = "--hisat2 " if aligner == "hisat2" else ""
     return (
         f"bash -c 'cp {genome} {out_dir}/ && "
-        f"bismark_genome_preparation {out_dir}'"
+        f"bismark_genome_preparation {flag}{out_dir}'"
     )
 
 
 @stage(image="quay.io/biocontainers/bismark:0.25.1--hdfd78af_0",
        cpu=8, ram_gb=32, depends_on=(trim, bismark_prep),
        retry=2, retry_with={"ram_gb": "2x"})
-def bismark_align(clean, bismark_genome: Path, sample_id: str, *, out_dir):
+def bismark_align(clean, bismark_genome: Path, sample_id: str,
+                  aligner: str = "bowtie2", *, out_dir):
     """Bismark bisulfite alignment + methylation extractor.
 
     Trimmed-read filenames are resolved at runtime via ``ls | head -1``
     so the recipe survives variations in TrimGalore's naming.
+
+    ``aligner`` selects Bismark's backend: ``"bowtie2"`` (default) or
+    ``"hisat2"``.  Either way Bismark writes a ``*.bam`` + ``CpG_report`` that
+    the extractor and methylKit read the same way, so downstream is unchanged.
     """
+    flag = "--hisat2 " if aligner == "hisat2" else ""
     return (
         f"bash -c '"
         f"R1=$(ls {clean.out_dir}/*_val_1.fq.gz | head -1) && "
         f"R2=$(ls {clean.out_dir}/*_val_2.fq.gz | head -1) && "
-        f"bismark --genome {bismark_genome} -1 \"$R1\" -2 \"$R2\" "
+        f"bismark {flag}--genome {bismark_genome} -1 \"$R1\" -2 \"$R2\" "
         f"-o {out_dir} --multicore 4 && "
         f"bismark_methylation_extractor --paired-end --comprehensive "
         f"--cytosine_report --genome_folder {bismark_genome} "
@@ -120,13 +131,13 @@ def methylkit_dmr(bismark, sample_id: str, *, out_dir,
 
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
-def _resolve_genome_dir(bismark_genome: Path) -> Path:
+def _resolve_genome_dir(bismark_genome: Path, aligner: str = "bowtie2") -> Path:
     """Return a prepared Bismark genome directory.
 
     * already-prepared dir (has ``Bisulfite_Genome/``) → use as-is, no
       preparation stage.
-    * reference FASTA, or a dir containing one → run ``bismark_prep`` and
-      return its output dir.
+    * reference FASTA, or a dir containing one → run ``bismark_prep`` (for the
+      chosen ``aligner``) and return its output dir.
     """
     bismark_genome = Path(bismark_genome)
     if (bismark_genome / "Bisulfite_Genome").is_dir():
@@ -148,7 +159,7 @@ def _resolve_genome_dir(bismark_genome: Path) -> Path:
     else:
         genome_fa = bismark_genome  # a FASTA file
 
-    return Path(bismark_prep(genome_fa).out_dir)
+    return Path(bismark_prep(genome_fa, aligner).out_dir)
 
 
 @pipeline(
@@ -162,16 +173,22 @@ def methylation_wgbs(
     *,
     out_dir: Path,
     sample_id: str = "sample",
+    aligner: str = "bowtie2",
     genome_build: str = "hg38",
     context: str = "CpG",
 ):
-    """End-to-end bisulfite alignment + methylation summary for one sample."""
+    """End-to-end bisulfite alignment + methylation summary for one sample.
+
+    ``aligner`` selects Bismark's alignment backend: ``"bowtie2"`` (default) or
+    ``"hisat2"`` (``--set aligner=hisat2``).  Both ship in the Bismark image and
+    write the same ``*.bam`` + CpG report, so methylKit downstream is unchanged.
+    """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     clean = trim(Path(r1), Path(r2))
-    genome_dir = _resolve_genome_dir(bismark_genome)
-    bm = bismark_align(clean, genome_dir, sample_id)
+    genome_dir = _resolve_genome_dir(bismark_genome, aligner)
+    bm = bismark_align(clean, genome_dir, sample_id, aligner)
     return methylkit_dmr(bm, sample_id,
                         genome_build=genome_build, context=context)
 

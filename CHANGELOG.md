@@ -59,6 +59,13 @@ registry tool per stage.)
   unchanged.  Verified on a real E. coli run: MaxBin2 accepts the recipe's exact
   command (Bowtie2 self-mapping → abundance → marker-gene seeding) and the
   `maxbin.NNN.fasta → bins/bin.N.fa` normalisation is confirmed.
+- `methylation_wgbs`: `--set aligner=bowtie2|hisat2` — Bismark's alignment
+  backend.  Both ship in the one Bismark image (no new image/registry entry),
+  and both write a `*.bam` + CpG report the extractor and methylKit read the
+  same way, so downstream is unchanged.  Verified end-to-end on the `methyl_small`
+  fixture: both backends run prep → align → extract and emit an identical
+  534-line CpG report (only the `_bt2_`/`_hisat2_` name infix differs, which the
+  `*.bam` and `CpG_report` globs already tolerate).
 - Fungal **structural** annotation at the Structural-Annotation step is covered
   by BRAKER3 (integrated) plus AUGUSTUS / GlimmerHMM / SNAP (ab-initio);
   funannotate stays the fungal **functional** option at the next step.
