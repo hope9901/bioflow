@@ -18,7 +18,7 @@ EXPECTED_RECIPES = {
     "rnaseq_deg":           8,   # fastp → salmon|kallisto (index+quant) → deseq2 → enrich → multiqc
     "metagenomics_profile": 5,   # fastp → kraken2 → bracken → krona
     "metagenome_assembly":  6,   # fastp → megahit → minimap2 → metabat2 → checkm2
-    "scrna_seq":            2,   # starsolo → scanpy
+    "scrna_seq":            4,   # starsolo | kb_ref → kb_count → scanpy
     "chip_seq":             6,   # trim → align → dedup → peaks → annotate
     "atac_seq":             6,   # trim → align → dedup → peaks → footprint
     "methylation_wgbs":     4,   # trim → bismark_prep → bismark → methylkit

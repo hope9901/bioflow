@@ -1,0 +1,30 @@
+id: kb_python
+name: kb-python
+version: "0.28.2"
+category: single_cell
+stage: [scrna_seq.step1]
+input_types: [short_paired]
+output_types: [count_matrix]
+applicable:
+  species: [eukaryote, eukaryote_small]
+  read_type: [short]
+  mode: [de_novo]
+container:
+  image: quay.io/biocontainers/kb-python:0.28.2--pyhdfd78af_2
+  pull_policy: if_not_present
+  image_digest: sha256:4b5ff9a8f7387c9614d45aeccdd077c68a4de53a0e5aa97ab06e445e3b84eab7
+resources:
+  min: {cpu: 4, ram_gb: 8, disk_gb: 20}
+  recommended: {cpu: 16, ram_gb: 32, disk_gb: 100}
+  gpu: false
+  arch: [x86_64, amd64]
+command_template: |
+  kb ref --tmp {out_dir}/kbtmp -i {out_dir}/index.idx -g {out_dir}/t2g.txt
+  -f1 {out_dir}/cdna.fa {genome} {gtf} &&
+  kb count --tmp {out_dir}/kbtmp -i {out_dir}/index.idx -g {out_dir}/t2g.txt
+  -x 10xv3 -w {whitelist} -o {out_dir} {r1} {r2}
+references: []
+citation: "Melsted 2021, PMID 33795888"
+added: "2026-07-22"
+last_reviewed: "2026-07-22"
+source_repo: pachterlab/kb_python

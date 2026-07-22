@@ -654,6 +654,15 @@
         "count_matrix"
       ]
     },
+    "kb_python": {
+      "version": "0.28.2",
+      "inputs": [
+        "short_paired"
+      ],
+      "outputs": [
+        "count_matrix"
+      ]
+    },
     "kneaddata": {
       "version": "0.12.4",
       "inputs": [

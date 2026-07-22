@@ -7,9 +7,9 @@
     "years": 5
   },
   "fetched_at": "2026-07-06T02:07:49+00:00",
-  "n_tools": 135,
-  "n_with_pmid": 121,
-  "n_fetched": 99,
+  "n_tools": 136,
+  "n_with_pmid": 122,
+  "n_fetched": 100,
   "n_pmid_mismatch": 5,
   "tools": {
     "abricate": {
@@ -591,6 +591,15 @@
       "verified": true,
       "name": "kallisto",
       "category": "rnaseq_align"
+    },
+    "kb_python": {
+      "pmid": "33795888",
+      "doi": "10.1038/s41587-021-00870-2",
+      "total": 332,
+      "recent": 312,
+      "verified": true,
+      "name": "kb-python",
+      "category": "single_cell"
     },
     "kneaddata": {
       "pmid": "31616210",

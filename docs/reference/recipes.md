@@ -18,6 +18,7 @@ Each recipe runs a recommended **default** tool per stage (shown in bold), overr
 | `methylation_wgbs` | `--set aligner=…` | **bowtie2** \| hisat2 |
 | `prokaryote_assembly` | `--set annotator=…` | bakta \| **prokka** |
 | `rnaseq_deg` | `--set quantifier=…` | kallisto \| **salmon** |
+| `scrna_seq` | `--set counter=…` | kb \| **starsolo** |
 
 ## `amr_vf_catalogue`
 
@@ -252,10 +253,14 @@ RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC
 
 ## `scrna_seq`
 
-scRNA-seq (10x): STARsolo + Scanpy QC/cluster/UMAP
+scRNA-seq (10x): STARsolo/kb-python + Scanpy QC/cluster/UMAP
 
-*2 stage(s):*
+*Swappable:* `--set counter=kb | starsolo` (default `starsolo`).
 
+*4 stage(s):*
+
+- **kb_ref** — `quay.io/biocontainers/kb-python:0.28.2--pyhdfd78af_2`
+- **kb_count** — `quay.io/biocontainers/kb-python:0.28.2--pyhdfd78af_2`
 - **starsolo** — `quay.io/biocontainers/star:2.7.11b--h43eeafb_0`
 - **scanpy_analyze** — `ghcr.io/hope9901/bioflow-scanpy:1.12.2`
 

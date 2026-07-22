@@ -78,6 +78,21 @@ registry tool per stage.)
   each gVCF's *filename*, so naming every sample's gVCF `sample.g.vcf.gz` (as the
   GATK path safely does — GATK uses the header `SM`) made GLnexus abort on a
   collision.  Fixed by naming the DeepVariant gVCF `{sample_id}.g.vcf.gz`.
+- `scrna_seq`: `--set counter=starsolo|kb` — a **multi-stage** swap with a
+  counter-specific reference.  STARsolo (default) needs a prebuilt multi-GB STAR
+  index; the kb-python branch instead builds a kallisto index in-recipe from a
+  plain `--genome` + `--gtf` (`kb ref` → `kb count`).  The Scanpy step now reads
+  either counter's matrix — STARsolo's `Solo.out/Gene` 10x-mtx *or* kb's
+  `counts_unfiltered/cells_x_genes.mtx` (already cells×genes) — so it's unchanged
+  for both.  Adds a digest-pinned kb-python registry entry (Melsted 2021,
+  PMID 33795888 — verified) and a 22 KB synthetic 10x fixture
+  (`data/test/scrna_small`, 3 genes × 6 cells).  Verified through the real
+  backend: `kb ref` → `kb count` emit a 6×3 (12-nonzero) matrix that the Scanpy
+  reader loads as a 6-cell × 3-gene AnnData (300 UMIs).  (The Scanpy
+  cluster/UMAP tail needs realistic gene counts and is shared with the STARsolo
+  path, so it isn't exercised on the toy fixture.)  **Real-verification caught a
+  gotcha:** `kb` makes a `tmp/` in the CWD and aborts if one exists, so both kb
+  stages pass an explicit `--tmp {out_dir}/kbtmp`.
 - `methylation_wgbs`: `--set aligner=bowtie2|hisat2` — Bismark's alignment
   backend.  Both ship in the one Bismark image (no new image/registry entry),
   and both write a `*.bam` + CpG report the extractor and methylKit read the

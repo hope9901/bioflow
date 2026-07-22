@@ -1,6 +1,6 @@
 # Tools
 
-**135 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
+**136 tools** across 16 categories, all pulled as BioContainer / public images on first use.  This page is auto-generated from `registry/tools/` by `scripts/gen_docs.py`.
 
 ## Most-used tools · citations in 2021–2025
 
@@ -199,13 +199,14 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `stringtie` | 3.0.3 | `quay.io/biocontainers/stringtie:3.0.3--h29c0135_0` | Pertea 2015, PMID 25690850 | 10,134 | 7,701 |
 | `subread` | 2.1.1 | `quay.io/biocontainers/subread:2.1.1--h577a1d6_0` | Liao 2014, PMID 24227677 | 21,327 | 15,592 |
 
-## single_cell  (8)
+## single_cell  (9)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `bustools` | 0.45.1 | `quay.io/biocontainers/bustools:0.45.1--h6f0a7f7_0` | Melsted 2019, PMID 31073610 | 122 | 108 |
 | `cellranger` | 9.0.1 | `litd/docker-cellranger:v9.0.1` | Zheng et al. 2017, PMID 28091601 | 5,666 | 4,102 |
 | `harmony` | 2.0.0 | `quay.io/biocontainers/harmonypy:2.0.0--py310hd766df8_1` | Korsunsky 2019, PMID 31740819 | 7,697 | 6,723 |
+| `kb_python` | 0.28.2 | `quay.io/biocontainers/kb-python:0.28.2--pyhdfd78af_2` | Melsted 2021, PMID 33795888 | 332 | 312 |
 | `monocle3` | 1.4.26 | `quay.io/biocontainers/r-monocle3:1.4.26--r44h9948957_0` | Cao et al. 2019, PMID 30787392 | 426 | 371 |
 | `scanpy` | 1.12.2 | `ghcr.io/hope9901/bioflow-scanpy:1.12.2` | Wolf et al. 2018, PMID 29409532 | 6,692 | 5,617 |
 | `scrublet` | 0.2.3 | `quay.io/biocontainers/scrublet:0.2.3--pyh5e36f6f_1` | Wolock 2019, PMID 30954476 | 2,184 | 1,854 |

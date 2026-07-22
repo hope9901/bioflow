@@ -1,0 +1,9 @@
+chr1	syn	gene	101	700	.	+	.	gene_id "geneA"; transcript_id "geneA_t1";
+chr1	syn	transcript	101	700	.	+	.	gene_id "geneA"; transcript_id "geneA_t1";
+chr1	syn	exon	101	700	.	+	.	gene_id "geneA"; transcript_id "geneA_t1";
+chr1	syn	gene	1101	1700	.	+	.	gene_id "geneB"; transcript_id "geneB_t1";
+chr1	syn	transcript	1101	1700	.	+	.	gene_id "geneB"; transcript_id "geneB_t1";
+chr1	syn	exon	1101	1700	.	+	.	gene_id "geneB"; transcript_id "geneB_t1";
+chr1	syn	gene	2101	2700	.	+	.	gene_id "geneC"; transcript_id "geneC_t1";
+chr1	syn	transcript	2101	2700	.	+	.	gene_id "geneC"; transcript_id "geneC_t1";
+chr1	syn	exon	2101	2700	.	+	.	gene_id "geneC"; transcript_id "geneC_t1";
