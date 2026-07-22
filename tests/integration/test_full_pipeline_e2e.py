@@ -381,3 +381,37 @@ def test_methylation_wgbs_full_chain(_runtime):
         for cols in (line.split("\t") for line in body.splitlines())
     )
     assert has_call, "CpG report has no covered cytosines"
+
+
+@pytest.mark.skipif(not METHYL_GENOME.exists(), reason="methyl_small fixture missing")
+def test_methylation_wgbs_hisat2_swap_full_chain(_runtime):
+    """The `--set aligner=hisat2` swap path, end-to-end.
+
+    The default methylation e2e uses Bismark's Bowtie2 backend; this proves the
+    HISAT2 backend (genome prep + alignment) runs on the same fixture and feeds
+    methylKit an identical CpG-report layout, so the swap can't rot unnoticed.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("methylation_wgbs")(
+        r1=METHYL_R1.resolve(), r2=METHYL_R2.resolve(),
+        bismark_genome=METHYL_GENOME.resolve(),
+        out_dir=ws / "out", sample_id="sample01", aligner="hisat2",
+    )
+    assert result.ok, \
+        f"methylation_wgbs[hisat2] failed: {(result.stderr or '')[:500]}"
+
+    # Bismark names the HISAT2 BAM `*_hisat2_pe.bam` — proof the swap ran
+    # (the Bowtie2 default would be `*_bt2_pe.bam`).
+    assert _find_one(ws, "*_hisat2_pe.bam") is not None, \
+        "no *_hisat2_pe.bam — the hisat2 backend did not run"
+
+    # Same downstream artefact as the default path: a real CpG report.
+    report = _find_one(ws, "*CpG_report.txt", "*CpG_report.txt.gz")
+    assert report is not None, "no Bismark CpG_report from the hisat2 path"
+    has_call = any(
+        len(cols) >= 5 and (cols[3] != "0" or cols[4] != "0")
+        for cols in (line.split("\t") for line in report.read_text().splitlines())
+    )
+    assert has_call, "hisat2-path CpG report has no covered cytosines"

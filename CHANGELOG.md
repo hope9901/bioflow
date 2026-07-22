@@ -29,7 +29,11 @@ registry tool per stage.)
   unchanged.  (DeepVariant does not MarkDuplicates first, unlike the GATK path.)
 - **Swap paths are now e2e-tested, not just the defaults.**  The nightly suite
   gained `rnaseq_deg[quantifier=kallisto]`, which runs the same fixtures through
-  kallisto and proves DESeq2's dual-format reader handles `abundance.tsv`.
+  kallisto and proves DESeq2's dual-format reader handles `abundance.tsv`, and
+  `methylation_wgbs[aligner=hisat2]`, which runs the full TrimGalore → Bismark
+  (HISAT2 backend) → methylKit chain on `methyl_small` and asserts a
+  `*_hisat2_pe.bam` plus a real CpG report — so both fixture-backed swap
+  alternatives are now guarded, not just their defaults.
   (Other recipes' swaps stay render/liveness-verified: their e2e needs large
   reference DBs — snpEff, kraken2, CheckM2, HOMER genomes — which is exactly
   why those recipes aren't in the fixture-based e2e suite.)
