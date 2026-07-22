@@ -14,6 +14,27 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — opt-in cross-stage concurrency (independent stages overlap)
+Execution stays eager by default (a recipe body is plain Python; each stage
+call blocks), but two opt-ins let independent stages run at the same time
+**without touching recipe bodies or the content-addressed cache** — out_dir is
+hashed from inputs, so results are identical regardless of execution order.
+- `gather(thunk_a, thunk_b, …)` runs independent stage calls concurrently and
+  returns their results in order (small, explicit, safe).
+- `@pipeline(concurrent=True)` uses *implicit futures*: `Stage.__call__` submits
+  to a resource-aware scheduler and returns a `FutureStageResult` immediately; a
+  downstream stage blocks only when it reads an upstream's `out_dir`, so siblings
+  with no dependency overlap.  The scheduler (a) honors `depends_on` as a real
+  ordering edge even when the dependency's result is discarded (the
+  `prepare_reference` pattern), (b) is deadlock-free (a task is submitted only
+  after its upstream futures complete, so no worker blocks on an upstream),
+  (c) serializes identical cache keys with a per-key lock (no `.cache` races),
+  and (d) gates concurrency with a cpu-unit budget (no oversubscription).
+- Verified with a timing backend (overlap, sequential-eager, discarded-
+  `depends_on`, gather) and an identical-cache-key determinism test, plus a real
+  Docker run: two 2 s stages drop a diamond pipeline from 6.0 s (eager) to 3.3 s
+  (concurrent), with the join stage still waiting for both.
+
 ### Changed — recipes run recommended defaults but let you swap the tool per stage
 The convenience `@pipeline` recipes now follow a consistent rule: each stage
 runs a sensible default tool, overridable with `--set <param>=<tool>`.  (For

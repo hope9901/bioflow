@@ -78,6 +78,7 @@ from bioflow.sdk._paths import (  # noqa: F401
 )
 
 # Pipeline composition
+from bioflow.sdk._concurrent import gather  # noqa: F401
 from bioflow.sdk._pipeline import Pipeline, pipeline  # noqa: F401
 
 # StageResult + Stage
@@ -145,6 +146,7 @@ __all__ = [
     # Public Pipeline API
     "pipeline",
     "Pipeline",
+    "gather",
     # Workspace / backend
     "set_workspace",
     "set_backend",

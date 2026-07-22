@@ -9,6 +9,7 @@ from bioflow.sdk import (  # noqa: E402,F401
     StageResult,
     pipeline,
     Pipeline,
+    gather,
     set_workspace,
     set_backend,
     set_cache_enabled,

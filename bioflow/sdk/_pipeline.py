@@ -45,16 +45,41 @@ class Pipeline:
     func: Callable[..., Any]
     stages: tuple = ()
     description: str = ""
+    concurrent: bool = False
+    """Opt-in cross-stage concurrency.  When True, the body's stage calls are
+    dispatched to a resource-aware scheduler so independent stages overlap;
+    the content-addressed cache keeps results identical to eager execution.
+    Default False (eager)."""
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         log.info(f"PIPELINE  start  name={self.name}  stages={len(self.stages)}")
         t0 = time.time()
-        out = self.func(*args, **kwargs)
+        if self.concurrent:
+            out = self._run_concurrent(args, kwargs)
+        else:
+            out = self.func(*args, **kwargs)
         log.info(
             f"PIPELINE  done   name={self.name}  "
             f"elapsed={time.time()-t0:.1f}s"
         )
         return out
+
+    def _run_concurrent(self, args: tuple, kwargs: dict) -> Any:
+        # Import here so the eager path never pays for the concurrency machinery.
+        from bioflow.sdk._concurrent import (  # noqa: PLC0415
+            FutureStageResult, Scheduler, _current,
+        )
+        sched = Scheduler()
+        token = _current.set(sched)
+        try:
+            out = self.func(*args, **kwargs)
+            sched.join()                       # finish every scheduled stage
+            if isinstance(out, FutureStageResult):
+                out = out.result()
+            return out
+        finally:
+            _current.reset(token)
+            sched.shutdown()
 
     run = __call__   # alias
 
@@ -160,6 +185,7 @@ def pipeline(
     stages: Iterable[Stage] = (),
     name: Optional[str] = None,
     description: str = "",
+    concurrent: bool = False,
 ) -> Callable[[Callable], Pipeline]:
     """Decorator: turn a Python function into a named :class:`Pipeline`.
 
@@ -198,6 +224,7 @@ def pipeline(
                 description
                 or (func.__doc__ or "").strip().split("\n")[0]
             ),
+            concurrent=concurrent,
         )
         functools.update_wrapper(p, func, updated=())
         return p

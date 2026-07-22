@@ -17,6 +17,7 @@ from bioflow.core.logger import get_logger
 from bioflow.core.runner import CommandResult
 
 from bioflow.sdk._cache import CACHE_SENTINEL, is_cache_enabled, is_log_streaming_enabled
+from bioflow.sdk._concurrent import _resolve, active_scheduler
 from bioflow.sdk._hashing import _compute_cache_key
 from bioflow.sdk._parallel import (
     _AnsiProgress,
@@ -130,8 +131,24 @@ class Stage:
     # ------------------------------------------------------------------
     # Single-call execution
     # ------------------------------------------------------------------
-    def __call__(self, *args: Any, **kwargs: Any) -> StageResult:
+    def __call__(self, *args: Any, **kwargs: Any):
+        sched = active_scheduler()
+        if sched is not None:
+            # Concurrent pipeline: submit and return a lazy handle that blocks
+            # only when a downstream stage reads it.
+            return sched.submit_call(self, self._run_once, args, kwargs)
         return self._run_once(args, kwargs)
+
+    def _cache_key_for(self, args: tuple, kwargs: dict) -> str:
+        """The cache key this call would use (``""`` when caching is off).
+
+        Read-only — the concurrent scheduler uses it to serialize two stages
+        that would write the same ``.cache`` dir.
+        """
+        if not (self.cache and is_cache_enabled()):
+            return ""
+        kwargs = _apply_param_overrides(self.name, self.func, kwargs)
+        return _compute_cache_key(self, args, kwargs)
 
     def _run_once(self, args: tuple, kwargs: dict) -> StageResult:
         workspace = _get_workspace()
@@ -325,6 +342,13 @@ class Stage:
             ``False`` (default) — silent.
             *callable* — a custom hook ``cb(done, total, last_result)``.
         """
+        sched = active_scheduler()
+        if sched is not None:
+            # In a concurrent pipeline the fan-out runs its own eager pool, so
+            # first wait for implicit depends_on upstreams and resolve any
+            # future-valued inputs to concrete results.
+            sched.await_deps(self.depends_on)
+            inputs = [_resolve(x) for x in inputs]
         return self._fanout(
             ((item,), {}) for item in inputs
         ).run(
@@ -360,6 +384,10 @@ class Stage:
             ], parallel=4)
         """
         items = list(inputs)
+        sched = active_scheduler()
+        if sched is not None:
+            sched.await_deps(self.depends_on)
+            items = [_resolve(it) for it in items]
         normalised = []
         for it in items:
             if (
