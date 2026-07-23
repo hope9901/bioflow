@@ -56,6 +56,17 @@ jobs:
             -v -m docker \
             --junitxml=reports/full_e2e.xml
 
+      # Recipes whose full chain needs more data than a tiny fixture can give
+      # (Scanpy's PCA, Percolator's FDR), so these assert the stage-to-stage
+      # artifacts instead — including the .pin Percolator must be handed.
+      - name: Run fixture-backed swap guards (scrna kb, Comet → Percolator)
+        env:
+          BIOFLOW_LOG_LEVEL: INFO
+        run: |
+          python -m pytest tests/integration/test_fixture_backed_swaps.py \
+            -v -m docker \
+            --junitxml=reports/fixture_swaps.xml
+
       - name: Upload junit reports
         if: always()
         uses: actions/upload-artifact@v4
