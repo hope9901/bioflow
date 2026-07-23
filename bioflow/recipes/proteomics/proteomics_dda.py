@@ -81,7 +81,11 @@ def comet_search(mzml, comet_params: Path, fasta_db: Path, *, out_dir):
         f"cp {comet_params} {params} && "
         f"sed -i \"s/^decoy_search.*/decoy_search = 1/; "
         f"s/^output_percolatorfile.*/output_percolatorfile = 1/\" {params} && "
-        f"for f in {mzml.out_dir}/*.mzML; do "
+        # msconvert writes mzML, but Comet also reads mzXML / mgf / ms2 — accept
+        # them so a spectra set that skipped conversion still searches.
+        f"for f in {mzml.out_dir}/*.mzML {mzml.out_dir}/*.mzXML "
+        f"{mzml.out_dir}/*.mgf {mzml.out_dir}/*.ms2; do "
+        f"  [ -e \"$f\" ] || continue; "
         f"  comet -P{params} -D{fasta_db} \"$f\"; "
         f"done && "
         f"mv {mzml.out_dir}/*.pin {out_dir}/ 2>/dev/null || true'"
@@ -126,8 +130,11 @@ def msgf_search(mzml, fasta_db: Path, *, out_dir, instrument: int = 0):
     """
     return (
         f"bash -c '"
-        f"for f in {mzml.out_dir}/*.mzML; do "
-        f"  base=$(basename \"$f\" .mzML); "
+        # Same input formats Comet takes — MS-GF+ reads them all too.
+        f"for f in {mzml.out_dir}/*.mzML {mzml.out_dir}/*.mzXML "
+        f"{mzml.out_dir}/*.mgf {mzml.out_dir}/*.ms2; do "
+        f"  [ -e \"$f\" ] || continue; "
+        f"  base=$(basename \"$f\"); base=${{base%.*}}; "
         f"  msgf_plus -s \"$f\" -d {fasta_db} -tda 1 -inst {instrument} "
         f"    -t 20ppm -m 0 -o {out_dir}/$base.mzid; "
         f"done'"
