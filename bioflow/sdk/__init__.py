@@ -45,6 +45,11 @@ from bioflow.core.runner import (
     SlurmBackend,
     make_backend,
 )
+from bioflow.core.staging import (  # noqa: F401
+    LocalDirStore,
+    ObjectStore,
+    StagingBackend,
+)
 
 # Cache + log-streaming toggles
 from bioflow.sdk._cache import (  # noqa: F401
@@ -165,6 +170,9 @@ __all__ = [
     "DockerBackend",
     "SingularityBackend",
     "SlurmBackend",
+    "StagingBackend",
+    "LocalDirStore",
+    "ObjectStore",
     "make_backend",
     "CommandResult",
 ]

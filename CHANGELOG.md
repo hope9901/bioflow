@@ -14,6 +14,38 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — `StagingBackend`: run stages on workers that can't see the workspace
+Docker, Apptainer and Slurm all bind-mount the workspace, which assumes the
+machine running the container can reach it — true locally and on an HPC shared
+filesystem, false for a detached worker (cloud batch, Kubernetes without a
+shared volume, a remote host).  `StagingBackend` ships inputs out and results
+back so those work too.
+- **The staging unit is the content-addressed `out_dir`.**  Every stage already
+  writes to `<workspace>/.cache/<stage>__<hash>`, immutable once it succeeds —
+  so the directory name is a ready-made object-store key that dedupes across
+  runs *and* machines.  bioflow's cache design already had the right
+  granularity; staging just uses it.
+- **It wraps, it isn't another executor**: `StagingBackend(inner=DockerBackend())`,
+  `StagingBackend(inner=SlurmBackend())`, … — orthogonal to *where* the job
+  runs, so a cluster without a shared filesystem is just the two composed.
+- **No command rewriting**: the stage command is already translated to
+  `/work/...`, so the sandbox simply reproduces that layout and the inner
+  backend mounts the sandbox as `/work`.
+- **The contract extension is opt-in**: the Stage layer passes
+  `stage_io={out_dir, inputs}` only to backends that set `_WANTS_STAGE_IO`, so
+  `DockerBackend` / `SingularityBackend` (whose signatures take no `**kwargs`)
+  are untouched.
+- `ObjectStore` is a three-method protocol (`exists` / `push` / `pull`);
+  `LocalDirStore` implements it over a filesystem — the verifiable stand-in for
+  S3/GCS and genuinely useful for scratch storage that isn't mounted on workers.
+  A cloud store drops in without touching the backend.
+- Verified with real containers, not just mocks: a two-stage pipeline run
+  normally and then fully staged produces identical output, the workspace never
+  appears in any container's mount table (only the sandbox does), both stages
+  are published under their content-addressed keys, and after deleting the local
+  cache the pipeline still completes from the store alone — i.e. a second
+  machine could pick it up.
+
 ### Added — `SlurmBackend`: run each stage as a cluster job
 `BIOFLOW_BACKEND=slurm` (or `SlurmBackend(...)`) submits every stage as an
 `sbatch` job instead of running a local container.  The blocking backend
