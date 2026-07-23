@@ -52,19 +52,6 @@ def active_scheduler() -> "Optional[Scheduler]":
     return _current.get()
 
 
-def _backend_schedules_remotely() -> bool:
-    """True when the active backend queues work on a cluster (e.g. Slurm).
-
-    Peeks at the already-configured backend rather than constructing one, so
-    building a Scheduler never has side effects.
-    """
-    try:
-        from bioflow.sdk import _runtime  # noqa: PLC0415
-        return bool(getattr(_runtime._active_backend, "_REMOTE_SCHEDULING", False))
-    except Exception:  # pragma: no cover - defensive
-        return False
-
-
 # ---------------------------------------------------------------------------
 # Lazy result handle
 # ---------------------------------------------------------------------------
@@ -140,17 +127,9 @@ class _ResourceGate:
 class Scheduler:
     """Dependency-aware, resource-gated executor for one concurrent pipeline run."""
 
-    #: In-flight job cap when the backend schedules remotely (Slurm & co.).
-    #: The cluster does the real queuing, so gating on local cores would
-    #: throttle submissions to a machine that isn't running the work.
-    REMOTE_INFLIGHT = 64
-
     def __init__(self, cpu_budget: Optional[int] = None,
                  max_workers: Optional[int] = None) -> None:
-        if cpu_budget is None:
-            cpu_budget = (self.REMOTE_INFLIGHT if _backend_schedules_remotely()
-                          else (os.cpu_count() or 2))
-        self._cpu_budget = cpu_budget
+        self._cpu_budget = cpu_budget or (os.cpu_count() or 2)
         self._pool = ThreadPoolExecutor(
             max_workers=max_workers or max(2, self._cpu_budget)
         )

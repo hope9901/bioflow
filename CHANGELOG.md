@@ -14,66 +14,6 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
-### Added — `StagingBackend`: run stages on workers that can't see the workspace
-Docker, Apptainer and Slurm all bind-mount the workspace, which assumes the
-machine running the container can reach it — true locally and on an HPC shared
-filesystem, false for a detached worker (cloud batch, Kubernetes without a
-shared volume, a remote host).  `StagingBackend` ships inputs out and results
-back so those work too.
-- **The staging unit is the content-addressed `out_dir`.**  Every stage already
-  writes to `<workspace>/.cache/<stage>__<hash>`, immutable once it succeeds —
-  so the directory name is a ready-made object-store key that dedupes across
-  runs *and* machines.  bioflow's cache design already had the right
-  granularity; staging just uses it.
-- **It wraps, it isn't another executor**: `StagingBackend(inner=DockerBackend())`,
-  `StagingBackend(inner=SlurmBackend())`, … — orthogonal to *where* the job
-  runs, so a cluster without a shared filesystem is just the two composed.
-- **No command rewriting**: the stage command is already translated to
-  `/work/...`, so the sandbox simply reproduces that layout and the inner
-  backend mounts the sandbox as `/work`.
-- **The contract extension is opt-in**: the Stage layer passes
-  `stage_io={out_dir, inputs}` only to backends that set `_WANTS_STAGE_IO`, so
-  `DockerBackend` / `SingularityBackend` (whose signatures take no `**kwargs`)
-  are untouched.
-- `ObjectStore` is a three-method protocol (`exists` / `push` / `pull`);
-  `LocalDirStore` implements it over a filesystem — the verifiable stand-in for
-  S3/GCS and genuinely useful for scratch storage that isn't mounted on workers.
-  A cloud store drops in without touching the backend.
-- Verified with real containers, not just mocks: a two-stage pipeline run
-  normally and then fully staged produces identical output, the workspace never
-  appears in any container's mount table (only the sandbox does), both stages
-  are published under their content-addressed keys, and after deleting the local
-  cache the pipeline still completes from the store alone — i.e. a second
-  machine could pick it up.
-
-### Added — `SlurmBackend`: run each stage as a cluster job
-`BIOFLOW_BACKEND=slurm` (or `SlurmBackend(...)`) submits every stage as an
-`sbatch` job instead of running a local container.  The blocking backend
-contract maps onto a batch scheduler without a polling loop: `sbatch --wait`
-exits with the job's own exit code, and the job's `--output` file is read back
-for the log tail.
-- **Container runtime is delegated, not re-implemented** — the job body is the
-  exact Apptainer invocation `SingularityBackend` builds (clusters forbid the
-  Docker daemon), so there is one place that knows how to launch a container.
-- **Resources become directives**: `cpu` → `--cpus-per-task`, `ram_gb` →
-  `--mem`, `gpu` → `--gres=gpu:1`, plus partition / account / time-limit and
-  arbitrary extra flags from the constructor or `BIOFLOW_SLURM_*` /
-  `BIOFLOW_SBATCH_ARGS`.  This is precisely what Apptainer cannot enforce
-  itself, which is why the HPC path needed a scheduler-aware backend.
-- **The concurrent scheduler adapts**: the backend declares
-  `_REMOTE_SCHEDULING`, so `@pipeline(concurrent=True)` gates on in-flight job
-  count rather than local CPU cores — otherwise an 8-core submit host would
-  throttle work destined for a 1000-core cluster.
-- **Scope**: assumes the workspace is on shared storage (NFS/Lustre/GPFS), the
-  normal HPC setup, so nothing is staged in or out.  Detached workers over
-  object storage (cloud batch) would need a staging layer and are not covered.
-- **Verification is honest about its limits**: no cluster is available in CI, so
-  the job lifecycle is exercised against a fake `sbatch` (a Python script, so it
-  runs on Linux and Windows) — asserting directive translation, that the wrapped
-  body matches the Apptainer backend token-for-token, log capture, exit-code
-  propagation, the missing-binary message, and that logs land under the shared
-  workspace.  Slurm itself is not simulated.
-
 ### Added — opt-in cross-stage concurrency (independent stages overlap)
 Execution stays eager by default (a recipe body is plain Python; each stage
 call blocks), but two opt-ins let independent stages run at the same time

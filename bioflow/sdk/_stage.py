@@ -81,38 +81,6 @@ def _apply_param_overrides(stage_name: str, func: Callable, kwargs: dict) -> dic
     return kwargs
 
 
-def _input_dirs(args: tuple, kwargs: dict) -> "list[str]":
-    """Upstream ``out_dir`` paths this call reads.
-
-    Only consumed by backends that stage I/O for a worker which can't see the
-    workspace — they need to know what to ship out.  Walks args/kwargs
-    including the lists a fan-out produces.
-    """
-    found: "list[str]" = []
-    seen: set = set()
-
-    def walk(v: Any) -> None:
-        out = getattr(v, "out_dir", None)
-        if out is not None and not isinstance(v, (str, bytes, Path)):
-            s = str(out)
-            if s not in seen:
-                seen.add(s)
-                found.append(s)
-            return
-        if isinstance(v, (list, tuple, set)):
-            for x in v:
-                walk(x)
-        elif isinstance(v, dict):
-            for x in v.values():
-                walk(x)
-
-    for a in args:
-        walk(a)
-    for v in kwargs.values():
-        walk(v)
-    return found
-
-
 # ---------------------------------------------------------------------------
 # Stage object
 # ---------------------------------------------------------------------------
@@ -296,14 +264,6 @@ class Stage:
             # streaming (DockerBackend sets _STREAMING_SUPPORTED=True;
             # MockBackend doesn't accept kwargs it doesn't know about)
             # AND (b) the user opted in.
-            # A staging backend needs to know which directories to ship out and
-            # bring back.  Only backends that opt in are passed it, so the ones
-            # with fixed signatures (Docker, Apptainer) stay untouched.
-            if getattr(backend, "_WANTS_STAGE_IO", False):
-                run_kw["stage_io"] = {
-                    "out_dir": str(out_dir),
-                    "inputs": _input_dirs(args, kwargs),
-                }
             if (
                 is_log_streaming_enabled()
                 and getattr(backend, "_STREAMING_SUPPORTED", False)
