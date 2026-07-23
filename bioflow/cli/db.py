@@ -97,8 +97,8 @@ def db_cmd(
             console.print(f"[red]Unknown database '{name}'.[/red] "
                           "See 'bioflow db list'.")
             raise typer.Exit(code=1)
-        entries = {e.name: e for e in db_usage(dest)}
-        target = entries.get(name)
+        installed = {e.name: e for e in db_usage(dest)}
+        target = installed.get(name)
         if target is None:
             console.print(f"'{name}' is not installed under {dest} — nothing to remove.")
             raise typer.Exit(code=0)
