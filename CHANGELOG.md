@@ -30,10 +30,17 @@ hashed from inputs, so results are identical regardless of execution order.
   after its upstream futures complete, so no worker blocks on an upstream),
   (c) serializes identical cache keys with a per-key lock (no `.cache` races),
   and (d) gates concurrency with a cpu-unit budget (no oversubscription).
+- **The fan-out interleaves across stages too.**  In a concurrent pipeline
+  `.map` / `.starmap` submit one scheduled task per item instead of blocking on
+  their own pool, so a fast sample's next stage starts while a slow sibling is
+  still in the previous one.  The `depends_on` edge is resolved per item: when a
+  dependency's result arrives as an argument that *is* the precise edge, so the
+  stage-wide wait is skipped (otherwise a fan-out would become a barrier).
 - Verified with a timing backend (overlap, sequential-eager, discarded-
-  `depends_on`, gather) and an identical-cache-key determinism test, plus a real
-  Docker run: two 2 s stages drop a diamond pipeline from 6.0 s (eager) to 3.3 s
-  (concurrent), with the join stage still waiting for both.
+  `depends_on`, fan-out interleaving, gather) and an identical-cache-key
+  determinism test, plus two real Docker runs: a 2-stage diamond drops from
+  6.0 s (eager) to 3.3 s (concurrent), and a 2-sample × 2-stage fan-out with
+  anti-correlated durations drops from 8.3 s (batch) to 5.9 s (interleaved).
 
 ### Changed — recipes run recommended defaults but let you swap the tool per stage
 The convenience `@pipeline` recipes now follow a consistent rule: each stage

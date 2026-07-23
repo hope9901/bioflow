@@ -17,7 +17,7 @@ from bioflow.core.logger import get_logger
 from bioflow.core.runner import CommandResult
 
 from bioflow.sdk._cache import CACHE_SENTINEL, is_cache_enabled, is_log_streaming_enabled
-from bioflow.sdk._concurrent import _resolve, active_scheduler
+from bioflow.sdk._concurrent import FutureStageResult, active_scheduler
 from bioflow.sdk._hashing import _compute_cache_key
 from bioflow.sdk._parallel import (
     _AnsiProgress,
@@ -319,7 +319,7 @@ class Stage:
         parallel: Union[int, str] = 1,
         stop_on_error: bool = False,
         progress: Union[bool, _ProgressCallback] = False,
-    ) -> list[StageResult]:
+    ) -> "list[StageResult] | list[FutureStageResult]":
         """Run the stage once per element of *inputs*.
 
         Each element is passed as the **first positional argument** to the
@@ -344,11 +344,15 @@ class Stage:
         """
         sched = active_scheduler()
         if sched is not None:
-            # In a concurrent pipeline the fan-out runs its own eager pool, so
-            # first wait for implicit depends_on upstreams and resolve any
-            # future-valued inputs to concrete results.
-            sched.await_deps(self.depends_on)
-            inputs = [_resolve(x) for x in inputs]
+            # Concurrent pipeline: submit each item to the shared scheduler so
+            # the fan-out interleaves across stages (a fast item's downstream
+            # can start while a slow sibling is still running) instead of
+            # blocking on its own pool.  submit_call resolves future inputs and
+            # honors depends_on per item.
+            return [
+                sched.submit_call(self, self._run_once, (item,), {})
+                for item in inputs
+            ]
         return self._fanout(
             ((item,), {}) for item in inputs
         ).run(
@@ -366,7 +370,7 @@ class Stage:
         parallel: Union[int, str] = 1,
         stop_on_error: bool = False,
         progress: Union[bool, _ProgressCallback] = False,
-    ) -> list[StageResult]:
+    ) -> "list[StageResult] | list[FutureStageResult]":
         """Like :meth:`map` but each element of *inputs* is unpacked as
         positional args (or a ``(args, kwargs)`` 2-tuple for full control).
 
@@ -384,10 +388,6 @@ class Stage:
             ], parallel=4)
         """
         items = list(inputs)
-        sched = active_scheduler()
-        if sched is not None:
-            sched.await_deps(self.depends_on)
-            items = [_resolve(it) for it in items]
         normalised = []
         for it in items:
             if (
@@ -397,6 +397,14 @@ class Stage:
                 normalised.append((it[0], it[1]))
             else:
                 normalised.append((tuple(it), {}))
+        sched = active_scheduler()
+        if sched is not None:
+            # Concurrent pipeline: one scheduled task per item, so the fan-out
+            # interleaves across stages instead of blocking on its own pool.
+            return [
+                sched.submit_call(self, self._run_once, a, k)
+                for (a, k) in normalised
+            ]
         return self._fanout(iter(normalised)).run(
             parallel=parallel,
             stop_on_error=stop_on_error,

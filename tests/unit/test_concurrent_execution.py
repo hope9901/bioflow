@@ -151,6 +151,63 @@ def test_concurrent_honors_discarded_depends_on(timing):
     assert use_iv[0] >= prep_iv[1] - 1e-6, "use ran before its depends_on prep"
 
 
+# ── fan-out interleaving: a fast item's downstream must not wait for a slow
+#    sibling (this is what .map/.starmap returning scheduled futures buys) ────
+
+class UnevenBackend(TimingBackend):
+    """Sleeps per marker, so one fan-out item is slow and the other is fast."""
+
+    DURATION = {"FAN_fast": 0.05, "FAN_slow": 0.60, "NEXT_fast": 0.05,
+                "NEXT_slow": 0.05}
+
+    def run(self, *, image, command, mounts, cpu, ram_gb, workdir,
+            gpu=False, **_ignored) -> CommandResult:
+        marker = next((m for m in self.DURATION if m in command), "other")
+        start = time.monotonic()
+        time.sleep(self.DURATION.get(marker, 0.02))
+        end = time.monotonic()
+        with self._lock:
+            self.events.append((marker, start, end))
+        return CommandResult(exit_code=0)
+
+
+@stage(image="img:1", cpu=1, ram_gb=1)
+def fan(item, *, out_dir):
+    return f"run FAN_{item} > {out_dir}/{item}"
+
+
+@stage(image="img:1", cpu=1, ram_gb=1, depends_on=fan)
+def nxt(upstream, *, out_dir, tag="x"):
+    return f"run NEXT_{tag} {upstream.out_dir} > {out_dir}/o"
+
+
+@pipeline(stages=[fan, nxt], concurrent=True)
+def fanout_pipe():
+    ups = fan.map(["fast", "slow"])
+    return nxt.starmap([((ups[0],), {"tag": "fast"}),
+                        ((ups[1],), {"tag": "slow"})])
+
+
+def test_fanout_interleaves_across_stages(tmp_path):
+    be = UnevenBackend()
+    set_backend(be)
+    set_workspace(tmp_path / "ws")
+    try:
+        fanout_pipe()
+        fast_up = be.interval("FAN_fast")
+        slow_up = be.interval("FAN_slow")
+        next_fast = be.interval("NEXT_fast")
+        # The fast item's downstream starts while the slow sibling is still
+        # running — i.e. the fan-out is not a barrier.
+        assert next_fast[0] < slow_up[1], (
+            "downstream of the fast item waited for the slow sibling "
+            f"(next_fast start={next_fast[0]:.3f}, slow end={slow_up[1]:.3f})"
+        )
+        assert next_fast[0] >= fast_up[1] - 1e-6  # still after its own upstream
+    finally:
+        set_backend(None)
+
+
 def test_gather_runs_thunks_concurrently(timing):
     results = gather(lambda: A("p"), lambda: A("q"))
     assert [r.ok for r in results] == [True, True]

@@ -158,13 +158,33 @@ class Scheduler:
             return lk
 
     def _upstreams(self, stage, args: tuple, kwargs: dict) -> set:
-        ups: set = set()
+        """Futures this call must wait for.
+
+        Two kinds of edge:
+
+        * **explicit** — a result passed in as an argument.  That future *is*
+          the dependency, precisely.
+        * **implicit** — a ``depends_on`` stage whose result was never passed
+          (e.g. ``prepare_reference`` just indexes a shared file).  There is
+          nothing in the args to key on, so wait for all of its invocations.
+
+        A ``depends_on`` stage that *did* supply an argument is deliberately
+        skipped: waiting for its other invocations too would turn a fan-out
+        into a barrier, so a fast item's downstream could never start while a
+        slow sibling is still running.
+        """
+        arg_futs: set = set()
         for a in args:
-            _collect_futures(a, ups)
+            _collect_futures(a, arg_futs)
         for v in kwargs.values():
-            _collect_futures(v, ups)
+            _collect_futures(v, arg_futs)
+
+        ups: set = set(arg_futs)
         for dep in getattr(stage, "depends_on", ()):
-            ups.update(self._futures_for(dep))
+            dep_futs = set(self._futures_for(dep))
+            if dep_futs & arg_futs:
+                continue          # precise edge already captured by the args
+            ups.update(dep_futs)  # implicit dependency — wait for all of it
         return ups
 
     def submit_call(self, stage, run_once: Callable, args: tuple,
@@ -216,14 +236,6 @@ class Scheduler:
 
         for u in pending:
             u.add_done_callback(done_cb)
-
-    def await_deps(self, dep_stages) -> None:
-        """Block (on the calling thread) until every future of *dep_stages* is
-        done.  Used by ``.map`` / ``.starmap``, which run their own eager pool
-        and so must wait for implicit ``depends_on`` upstreams first."""
-        for dep in dep_stages:
-            for f in self._futures_for(dep):
-                f.result()
 
     def join(self) -> None:
         """Wait for every scheduled stage; re-raises the first failure."""
