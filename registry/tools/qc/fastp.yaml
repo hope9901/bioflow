@@ -5,6 +5,8 @@ category: qc
 stage:
   - genome_assembly.step1
   - rnaseq_deg.step1
+  - metagenomics.step1
+  - variant_calling.step1
 input_types: [fastq_short_paired]
 output_types: [fastq_short_paired_clean, qc_json, qc_html]
 applicable:

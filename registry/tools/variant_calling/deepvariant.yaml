@@ -2,7 +2,7 @@ id: deepvariant
 name: DeepVariant
 version: "1.10.0"
 category: variant_calling
-stage: [variant_calling.call]
+stage: [variant_calling.step2]
 input_types: [alignment_bam, reference_fasta]
 output_types: [vcf, gvcf]
 applicable:

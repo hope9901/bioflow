@@ -2,7 +2,7 @@ id: delly
 name: Delly
 version: "2.3.0"
 category: variant_calling
-stage: [variant_calling.sv]
+stage: [variant_calling.step2]
 input_types: [alignment_bam, reference_fasta]
 output_types: [vcf]
 applicable:

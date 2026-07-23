@@ -2,7 +2,7 @@ id: ensembl_vep
 name: Ensembl VEP
 version: "116.0"
 category: variant_calling
-stage: [variant_calling.annotate]
+stage: [variant_calling.step4]
 input_types: [vcf]
 output_types: [annotated_vcf]
 applicable:

@@ -2,7 +2,7 @@ id: vcftools
 name: VCFtools
 version: "0.1.17"
 category: variant_calling
-stage: [variant_calling.filter]
+stage: [variant_calling.step3]
 input_types: [vcf]
 output_types: [vcf, stats_tsv]
 applicable:
