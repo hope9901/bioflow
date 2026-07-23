@@ -10,14 +10,14 @@ import inspect
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterable, Iterator, Optional, Union
+from typing import Any, Callable, Iterable, Iterator, Optional, Union, cast
 
 from bioflow.core import provenance as _prov
 from bioflow.core.logger import get_logger
 from bioflow.core.runner import CommandResult
 
 from bioflow.sdk._cache import CACHE_SENTINEL, is_cache_enabled, is_log_streaming_enabled
-from bioflow.sdk._concurrent import FutureStageResult, active_scheduler
+from bioflow.sdk._concurrent import active_scheduler
 from bioflow.sdk._hashing import _compute_cache_key
 from bioflow.sdk._parallel import (
     _AnsiProgress,
@@ -131,12 +131,13 @@ class Stage:
     # ------------------------------------------------------------------
     # Single-call execution
     # ------------------------------------------------------------------
-    def __call__(self, *args: Any, **kwargs: Any):
+    def __call__(self, *args: Any, **kwargs: Any) -> StageResult:
         sched = active_scheduler()
         if sched is not None:
             # Concurrent pipeline: submit and return a lazy handle that blocks
             # only when a downstream stage reads it.
-            return sched.submit_call(self, self._run_once, args, kwargs)
+            return cast(StageResult,
+                        sched.submit_call(self, self._run_once, args, kwargs))
         return self._run_once(args, kwargs)
 
     def _cache_key_for(self, args: tuple, kwargs: dict) -> str:
@@ -319,7 +320,7 @@ class Stage:
         parallel: Union[int, str] = 1,
         stop_on_error: bool = False,
         progress: Union[bool, _ProgressCallback] = False,
-    ) -> "list[StageResult] | list[FutureStageResult]":
+    ) -> list[StageResult]:
         """Run the stage once per element of *inputs*.
 
         Each element is passed as the **first positional argument** to the
@@ -349,10 +350,10 @@ class Stage:
             # can start while a slow sibling is still running) instead of
             # blocking on its own pool.  submit_call resolves future inputs and
             # honors depends_on per item.
-            return [
+            return cast("list[StageResult]", [
                 sched.submit_call(self, self._run_once, (item,), {})
                 for item in inputs
-            ]
+            ])
         return self._fanout(
             ((item,), {}) for item in inputs
         ).run(
@@ -370,7 +371,7 @@ class Stage:
         parallel: Union[int, str] = 1,
         stop_on_error: bool = False,
         progress: Union[bool, _ProgressCallback] = False,
-    ) -> "list[StageResult] | list[FutureStageResult]":
+    ) -> list[StageResult]:
         """Like :meth:`map` but each element of *inputs* is unpacked as
         positional args (or a ``(args, kwargs)`` 2-tuple for full control).
 
@@ -401,10 +402,10 @@ class Stage:
         if sched is not None:
             # Concurrent pipeline: one scheduled task per item, so the fan-out
             # interleaves across stages instead of blocking on its own pool.
-            return [
+            return cast("list[StageResult]", [
                 sched.submit_call(self, self._run_once, a, k)
                 for (a, k) in normalised
-            ]
+            ])
         return self._fanout(iter(normalised)).run(
             parallel=parallel,
             stop_on_error=stop_on_error,
