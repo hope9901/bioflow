@@ -42,6 +42,7 @@ from bioflow.core.runner import (
     DockerBackend,
     MockBackend,
     SingularityBackend,
+    SlurmBackend,
     make_backend,
 )
 
@@ -163,6 +164,7 @@ __all__ = [
     "MockBackend",
     "DockerBackend",
     "SingularityBackend",
+    "SlurmBackend",
     "make_backend",
     "CommandResult",
 ]

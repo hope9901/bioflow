@@ -14,6 +14,34 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — `SlurmBackend`: run each stage as a cluster job
+`BIOFLOW_BACKEND=slurm` (or `SlurmBackend(...)`) submits every stage as an
+`sbatch` job instead of running a local container.  The blocking backend
+contract maps onto a batch scheduler without a polling loop: `sbatch --wait`
+exits with the job's own exit code, and the job's `--output` file is read back
+for the log tail.
+- **Container runtime is delegated, not re-implemented** — the job body is the
+  exact Apptainer invocation `SingularityBackend` builds (clusters forbid the
+  Docker daemon), so there is one place that knows how to launch a container.
+- **Resources become directives**: `cpu` → `--cpus-per-task`, `ram_gb` →
+  `--mem`, `gpu` → `--gres=gpu:1`, plus partition / account / time-limit and
+  arbitrary extra flags from the constructor or `BIOFLOW_SLURM_*` /
+  `BIOFLOW_SBATCH_ARGS`.  This is precisely what Apptainer cannot enforce
+  itself, which is why the HPC path needed a scheduler-aware backend.
+- **The concurrent scheduler adapts**: the backend declares
+  `_REMOTE_SCHEDULING`, so `@pipeline(concurrent=True)` gates on in-flight job
+  count rather than local CPU cores — otherwise an 8-core submit host would
+  throttle work destined for a 1000-core cluster.
+- **Scope**: assumes the workspace is on shared storage (NFS/Lustre/GPFS), the
+  normal HPC setup, so nothing is staged in or out.  Detached workers over
+  object storage (cloud batch) would need a staging layer and are not covered.
+- **Verification is honest about its limits**: no cluster is available in CI, so
+  the job lifecycle is exercised against a fake `sbatch` (a Python script, so it
+  runs on Linux and Windows) — asserting directive translation, that the wrapped
+  body matches the Apptainer backend token-for-token, log capture, exit-code
+  propagation, the missing-binary message, and that logs land under the shared
+  workspace.  Slurm itself is not simulated.
+
 ### Added — opt-in cross-stage concurrency (independent stages overlap)
 Execution stays eager by default (a recipe body is plain Python; each stage
 call blocks), but two opt-ins let independent stages run at the same time

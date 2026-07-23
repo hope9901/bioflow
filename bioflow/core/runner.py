@@ -448,6 +448,169 @@ class SingularityBackend:
         )
 
 
+class SlurmBackend:
+    """Submit each stage as a Slurm job that runs the container via Apptainer.
+
+    The blocking ``run()`` contract maps cleanly onto a batch scheduler:
+    submit with ``sbatch --wait`` (whose exit code *is* the job's), then read
+    the job's ``--output`` file back for the log tail.  No polling loop.
+
+    Filesystem model
+    ----------------
+    Assumes the workspace lives on **shared storage** (NFS / Lustre / GPFS),
+    the normal HPC setup — compute nodes see the same paths the submitting
+    node does, so nothing is staged in or out.  Detached workers with no shared
+    mount (e.g. cloud batch over object storage) would need a staging layer and
+    are out of scope here.
+
+    Container runtime
+    -----------------
+    Clusters forbid the Docker daemon, so the job body is the very same
+    Apptainer invocation :class:`SingularityBackend` builds — this class only
+    wraps it in a job and translates resources into sbatch directives
+    (``cpu`` → ``--cpus-per-task``, ``ram_gb`` → ``--mem``, ``gpu`` →
+    ``--gres=gpu:1``), which is exactly what Apptainer itself cannot enforce.
+
+    Configuration comes from the constructor or the environment:
+    ``BIOFLOW_SLURM_PARTITION``, ``BIOFLOW_SLURM_ACCOUNT``,
+    ``BIOFLOW_SLURM_TIME``, ``BIOFLOW_SBATCH_ARGS`` (extra flags, shell-split),
+    ``BIOFLOW_SBATCH_BIN``.
+    """
+
+    _STREAMING_SUPPORTED = False
+    """Job output lands in a file, not a live pipe — nothing to stream."""
+
+    _REMOTE_SCHEDULING = True
+    """Tells the concurrent scheduler the *cluster* does the real queuing, so
+    it should gate on in-flight job count rather than local CPU cores."""
+
+    def __init__(
+        self,
+        *,
+        partition: Optional[str] = None,
+        account: Optional[str] = None,
+        time_limit: Optional[str] = None,
+        sbatch_bin: "Optional[str | list[str]]" = None,
+        extra_args: "Optional[list[str]]" = None,
+        apptainer: Optional["SingularityBackend"] = None,
+    ) -> None:
+        import shlex  # noqa: PLC0415
+
+        raw = sbatch_bin or os.environ.get("BIOFLOW_SBATCH_BIN") or "sbatch"
+        self.sbatch: "list[str]" = list(raw) if isinstance(raw, list) else [raw]
+        self.partition = partition or os.environ.get("BIOFLOW_SLURM_PARTITION")
+        self.account = account or os.environ.get("BIOFLOW_SLURM_ACCOUNT")
+        self.time_limit = time_limit or os.environ.get("BIOFLOW_SLURM_TIME")
+        self.extra_args = list(extra_args) if extra_args is not None else shlex.split(
+            os.environ.get("BIOFLOW_SBATCH_ARGS", "")
+        )
+        # Container invocation is delegated, not re-implemented.
+        self._apptainer = apptainer or SingularityBackend()
+
+    # -- helpers ---------------------------------------------------------
+    @staticmethod
+    def _shared_root(mounts: "dict[str, str]", workdir: str) -> Path:
+        """Host path of the shared workspace, used for job log files."""
+        for host, ctr in mounts.items():
+            if ctr == workdir:
+                return Path(host)
+        if mounts:
+            return Path(next(iter(mounts)))
+        import tempfile  # noqa: PLC0415
+        return Path(tempfile.gettempdir())
+
+    def _build_sbatch_argv(
+        self, *, image: str, command: str, mounts: "dict[str, str]",
+        cpu: int, ram_gb: float, workdir: str, gpu: bool, log_path: Path,
+    ) -> "list[str]":
+        import shlex  # noqa: PLC0415
+
+        inner = self._apptainer._build_argv(
+            image=image, command=command, mounts=mounts,
+            workdir=workdir, gpu=gpu,
+        )
+        argv = list(self.sbatch) + [
+            "--wait", "--parsable",
+            "--job-name=bioflow",
+            f"--cpus-per-task={max(1, int(cpu))}",
+            f"--mem={max(1, int(round(ram_gb)))}G",
+            f"--output={log_path}",
+        ]
+        if self.partition:
+            argv.append(f"--partition={self.partition}")
+        if self.account:
+            argv.append(f"--account={self.account}")
+        if self.time_limit:
+            argv.append(f"--time={self.time_limit}")
+        if gpu:
+            argv.append("--gres=gpu:1")
+        argv += self.extra_args
+        argv += ["--wrap", shlex.join(inner)]
+        return argv
+
+    # -- contract --------------------------------------------------------
+    def run(
+        self,
+        *,
+        image: str,
+        command: str,
+        mounts: "dict[str, str]",
+        cpu: int,
+        ram_gb: float,
+        workdir: str,
+        gpu: bool = False,
+        timeout: Optional[int] = None,
+        **_ignored: object,
+    ) -> CommandResult:
+        import subprocess  # noqa: PLC0415
+        import uuid  # noqa: PLC0415
+
+        log_dir = self._shared_root(mounts, workdir) / ".slurm_logs"
+        try:
+            log_dir.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
+        log_path = log_dir / f"bioflow-{uuid.uuid4().hex[:12]}.out"
+
+        argv = self._build_sbatch_argv(
+            image=image, command=command, mounts=mounts, cpu=cpu,
+            ram_gb=ram_gb, workdir=workdir, gpu=gpu, log_path=log_path,
+        )
+        try:
+            proc = subprocess.run(
+                argv, capture_output=True, text=True, timeout=timeout,
+            )
+        except FileNotFoundError:
+            return CommandResult(
+                exit_code=127,
+                stderr=(
+                    f"'{self.sbatch[0]}' not found — run bioflow from a node "
+                    "with Slurm client tools, or set BIOFLOW_SBATCH_BIN."
+                ),
+            )
+        except subprocess.TimeoutExpired:
+            return CommandResult(
+                exit_code=124,
+                stderr=f"slurm job exceeded timeout of {timeout}s",
+            )
+
+        job_log = ""
+        try:
+            job_log = log_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            job_log = ""
+        tail = "\n".join(job_log.splitlines()[-_STDOUT_TAIL_LINES:])
+
+        job_id = (proc.stdout or "").strip().splitlines()
+        if job_id:
+            log.info(f"slurm job {job_id[-1]} exited {proc.returncode}")
+        return CommandResult(
+            exit_code=int(proc.returncode or 0),
+            stdout=tail,
+            stderr=(proc.stderr or "") if proc.returncode else "",
+        )
+
+
 # ---------------------------------------------------------------------------
 # Backend factory
 # ---------------------------------------------------------------------------
@@ -459,15 +622,19 @@ def make_backend(name: Optional[str] = None) -> ContainerBackend:
       the Docker API; point ``BIOFLOW_DOCKER_HOST`` at its socket).
     - ``singularity`` / ``apptainer`` → :class:`SingularityBackend` (HPC, no
       daemon, no ``docker`` Python package needed).
+    - ``slurm`` → :class:`SlurmBackend` (each stage becomes an ``sbatch`` job
+      running Apptainer; assumes a shared filesystem).
     """
     name = (name or os.environ.get("BIOFLOW_BACKEND") or "docker").lower().strip()
+    if name == "slurm":
+        return SlurmBackend()
     if name in ("singularity", "apptainer"):
         return SingularityBackend()
     if name in ("docker", "podman", ""):
         return DockerBackend()
     raise ValueError(
         f"Unknown BIOFLOW_BACKEND '{name}' — expected one of: "
-        "docker, podman, singularity, apptainer."
+        "docker, podman, singularity, apptainer, slurm."
     )
 
 
