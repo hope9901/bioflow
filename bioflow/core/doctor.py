@@ -293,6 +293,30 @@ def _check_ram() -> CheckResult:
     )
 
 
+def _reclaim_hint(workspace: Path) -> str:
+    """What is actually using space here, and the command that frees it.
+
+    A bare "not enough disk" leaves the user guessing which directory to delete;
+    the stage cache and provisioned databases are the two things bioflow put
+    there, so name them with sizes.
+    """
+    try:
+        from bioflow.core.diskusage import cache_usage, human  # noqa: PLC0415
+
+        cached = cache_usage(workspace)
+    except Exception:  # pragma: no cover - reporting must never break the check
+        return ""
+    if not cached:
+        return ""
+    total = sum(e.bytes for e in cached)
+    return (
+        f"{len(cached)} cached stage results are using {human(total)} — "
+        f"`bioflow cache size -w {workspace}` to inspect, "
+        f"`bioflow cache clear -w {workspace}` to reclaim. "
+        f"Provisioned databases: `bioflow db size` / `bioflow db gc <name>`."
+    )
+
+
 def _check_disk(workspace: Path) -> CheckResult:
     try:
         usage = shutil.disk_usage(workspace)
@@ -313,8 +337,9 @@ def _check_disk(workspace: Path) -> CheckResult:
                 f"(minimum {_MIN_DISK_GB:.0f} GB)."
             ),
             fix=(
-                "Free space, or rerun with `--workspace <bigger-disk>` "
-                "so caches and Docker volumes land on a roomy partition."
+                _reclaim_hint(workspace)
+                or "Free space, or rerun with `--workspace <bigger-disk>` "
+                   "so caches and Docker volumes land on a roomy partition."
             ),
             detail={"disk_free_gb": round(free_gb, 2), "path": str(workspace)},
         )
@@ -326,6 +351,7 @@ def _check_disk(workspace: Path) -> CheckResult:
                 f"{free_gb:.1f} GB free at {workspace} — eukaryote_assembly / "
                 f"metagenome_assembly may need ≥ {_WARN_DISK_GB:.0f} GB."
             ),
+            fix=_reclaim_hint(workspace) or None,
             detail={"disk_free_gb": round(free_gb, 2), "path": str(workspace)},
         )
     return CheckResult(

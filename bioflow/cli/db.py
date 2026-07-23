@@ -12,7 +12,7 @@ from bioflow.cli._app import app, console
 
 @app.command("db")
 def db_cmd(
-    action: str = typer.Argument(..., help="fetch | list | verify | manifest | status | update | provision"),
+    action: str = typer.Argument(..., help="fetch | list | verify | manifest | status | update | provision | size | gc"),
     name: Optional[str] = typer.Argument(None, help="Database key (see 'bioflow db list')."),
     dest: Path = typer.Option(
         Path("data/references"),
@@ -50,6 +50,10 @@ def db_cmd(
               ships the downloader). Prints the command; --run executes it.
     ensure    Run-time gate for a TOOL: check each DB's version and auto-update
               only the stale ones (--no-update to just flag).
+    size      Show what each installed DB occupies under --dest, plus free
+              space — the counterpart to provisioning them.
+    gc        Delete an installed DB to reclaim its space (--force to skip the
+              confirmation). Re-provision it any time.
     """
     import json  # noqa: PLC0415
 
@@ -57,6 +61,59 @@ def db_cmd(
         _DB_CATALOG, catalog_version, db_status, ensure_db_current, fetch_db,
         list_dbs, provision_command, refgenie_manifest, update_db, verify_db,
     )
+
+    if action in ("size", "gc"):
+        from bioflow.core.diskusage import (  # noqa: PLC0415
+            db_usage, free_space, human, remove_db,
+        )
+
+        if action == "size":
+            entries = db_usage(dest)
+            if not entries:
+                console.print(
+                    f"No databases installed under [bold]{dest}[/bold]. "
+                    "Provision one with 'bioflow db provision <name>'."
+                )
+                raise typer.Exit(code=0)
+            total = sum(e.bytes for e in entries)
+            console.print(f"[bold]Installed databases[/bold] under {dest}")
+            for e in entries:
+                console.print(f"  {e.size:>10}  {e.name:<18} {e.detail:<10} {e.path}")
+            console.print(f"  {'-' * 10}")
+            console.print(f"  {human(total):>10}  total")
+            try:
+                free, _ = free_space(dest)
+                console.print(f"  {human(free):>10}  free on this filesystem")
+            except OSError:
+                pass
+            raise typer.Exit(code=0)
+
+        # gc
+        if not name:
+            console.print("[red]'bioflow db gc' needs a database name.[/red] "
+                          "See 'bioflow db size'.")
+            raise typer.Exit(code=1)
+        if name not in _DB_CATALOG:
+            console.print(f"[red]Unknown database '{name}'.[/red] "
+                          "See 'bioflow db list'.")
+            raise typer.Exit(code=1)
+        entries = {e.name: e for e in db_usage(dest)}
+        target = entries.get(name)
+        if target is None:
+            console.print(f"'{name}' is not installed under {dest} — nothing to remove.")
+            raise typer.Exit(code=0)
+        if not force:
+            ok = typer.confirm(
+                f"Delete {target.size} at {target.path}? "
+                f"(re-provision with 'bioflow db provision {name}')"
+            )
+            if not ok:
+                console.print("Left untouched.")
+                raise typer.Exit(code=0)
+        freed = remove_db(name, dest)
+        if freed:
+            console.print(f"Removed [bold]{name}[/bold] — reclaimed {freed.size}.")
+        raise typer.Exit(code=0)
 
     if action == "ensure":
         if not name:

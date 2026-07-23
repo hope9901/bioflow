@@ -14,6 +14,48 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — local disk hygiene: see what's using space, and reclaim it
+bioflow could *check* free space (`bioflow doctor`) and *provision* multi-GB
+databases, but offered nothing to inspect the breakdown or get space back — a
+full disk meant deleting directories by hand and guessing which mattered.
+- `bioflow cache size` / `bioflow cache clear` — per-stage cache entries,
+  largest first, with the total and free space; clearing is only ever a time
+  cost, never a correctness one, because each entry is a content-addressed
+  stage result.
+- `bioflow db size` — what each installed database occupies under `--dest`,
+  with its catalogued version; the counterpart to `db provision`.
+- `bioflow db gc <name>` — delete one installed database (confirms first,
+  `--force` to skip); re-provision any time.
+- `bioflow doctor` now says *what* is using the space when it's tight, and
+  which command frees it, instead of just reporting the shortfall.
+- New `bioflow/core/diskusage.py` holds the sizing helpers; everything there is
+  read-only except the one deliberate `remove_db`.
+
+### Fixed — registered tools that `bioflow custom` could never offer
+A tool reaches the interactive planner only when its `stage:` equals a step id
+defined in `bioflow/pipelines/*.py`, and nothing checked that, so the two drifted.
+- **DeepVariant was unselectable**: it declared `variant_calling.call` while the
+  pipeline defines `variant_calling.step2` — a digest-pinned caller that ships as
+  a `--set caller=deepvariant` swap could not be picked in `custom`. Same for
+  `vcftools` (`.filter`), `ensembl_vep` (`.annotate`) and `delly` (`.sv`).
+- **Two QC steps offered no tool at all** (`variant_calling.step1`,
+  `metagenomics.step1`): `fastp` declared only the genome-assembly and RNA-seq
+  QC steps despite six recipes using it.
+- `tests/unit/test_pipeline_step_coverage.py` now guards both directions —
+  every step offers a tool, every `stage:` matches a real step, and every `--set`
+  alternative is selectable in `custom` too. Genuinely empty steps
+  (`proteomics.step5`) and recipe-only vocabularies are explicit allowlists
+  rather than silent passes.
+
+### Added — regression guards for the fixture-backed swaps
+`scrna_small` and `proteomics_small` shipped with nothing exercising them, so
+the swaps they proved could regress unnoticed — including the Comet →
+Percolator fix (Percolator rejects `.pep.xml`; the recipe must emit a `.pin`).
+Both are now covered in `tests/integration/test_fixture_backed_swaps.py`, which
+also surfaced that the search stages globbed only `*.mzML` although Comet and
+MS-GF+ read mzXML/mgf/ms2 too — those are now accepted (msconvert still writes
+mzML, so the default path is unchanged).
+
 ### Added — opt-in cross-stage concurrency (independent stages overlap)
 Execution stays eager by default (a recipe body is plain Python; each stage
 call blocks), but two opt-ins let independent stages run at the same time

@@ -29,6 +29,7 @@ from bioflow.cli._app import app
 
 # Each import registers its commands via @app.command(...) side effects.
 from bioflow.cli import (  # noqa: F401,E402
+    cache,
     cite,
     cohort,
     db,
