@@ -45,8 +45,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Pinned on purpose: `pip install ruff` picks up whatever released last,
+      # so a new minor turning on rules (0.16 added ~850 findings across the
+      # tree, none of them regressions) fails CI on an unrelated commit.
+      # Bump this deliberately, with the fixes in the same PR.
       - name: Install ruff
-        run: pip install ruff
+        run: pip install "ruff==0.15.12"
 
       - name: Run ruff
         run: ruff check .
@@ -66,8 +70,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Pinned for the same reason as ruff: dev extras only set a lower bound
+      # (`mypy>=1.10`), so CI was silently running 2.x against a tree developed
+      # on 1.x. Bump deliberately, with any new findings fixed in the same PR.
       - name: Install mypy
-        run: pip install -e ".[dev]" && pip install types-PyYAML types-requests
+        run: |
+          pip install -e ".[dev]"
+          pip install "mypy==1.19.1" types-PyYAML types-requests
 
       - name: Run mypy
         run: mypy bioflow --ignore-missing-imports
