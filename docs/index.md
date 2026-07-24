@@ -19,7 +19,7 @@ privacy-first LLM companion is available when you want it.
   bisulfite methylation, LC-MS/MS proteomics, **variant calling**
   (single-sample + GATK cohort joint genotyping), and 8
   comparative-genomics analyses.
-- **110 tools** registered across 16 categories, all pulled as
+- **137 tools** registered across 16 categories, all pulled as
   BioContainer images at run time — nothing to install on the host
   beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /

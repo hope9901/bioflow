@@ -27,7 +27,7 @@ and a privacy-first LLM companion is available when you want it.
     rnaseq_deg, metagenomics_profile, metagenome_assembly, scrna_seq,
     chip_seq, atac_seq, methylation_wgbs, proteomics_dda,
     germline_variants, joint_genotyping (GATK cohort best practice).
-- **113 tools** registered across 16 categories, all pulled as
+- **137 tools** registered across 16 categories, all pulled as
   BioContainer images at run time — nothing to install on the host
   beyond Docker + Python.
 - **Hardware-aware**: every tool is classified `installable` /
@@ -405,7 +405,7 @@ bioflow/
 
 registry/
   schema.yaml         JSON Schema for tool YAMLs
-  tools/              58 tools in 15 categories (qc, assembly, alignment, comparative_genomics, …)
+  tools/              137 tools in 16 categories (qc, assembly, alignment, comparative_genomics, …)
   presets/            14 curated preset YAMLs
 
 examples/             config_*.yaml for each pipeline + *_demo.py for the SDK

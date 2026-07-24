@@ -3,7 +3,9 @@
 bioflow ships **three tiers** of automated recipe testing:
 
 * a **smoke matrix** ([`tests/integration/test_recipe_smoke_matrix.py`](https://github.com/hope9901/bioflow/blob/main/tests/integration/test_recipe_smoke_matrix.py))
-  that runs each recipe's *first* stage against its real container, and
+  that runs a recipe's *first* stage against its real container — currently
+  five recipes (`prokaryote_assembly`, `rnaseq_deg`, `amr_vf_catalogue`,
+  `chip_seq`, `germline_variants`), not all of them,
 * a **full end-to-end** suite
   ([`tests/integration/test_full_pipeline_e2e.py`](https://github.com/hope9901/bioflow/blob/main/tests/integration/test_full_pipeline_e2e.py))
   that runs a recipe's **entire chain** on a committed fixture and asserts
@@ -18,9 +20,15 @@ All three run in the nightly Docker job.
 A recipe gets a committed full-e2e fixture only when its inputs are small
 enough to live in git (a few-kb genome, synthetic reads).  Recipes that
 need a **multi-GB reference index or an external database** can't — the
-fixture would dwarf the repo and the download would make CI flaky.  Those
-recipes are still smoke-tested, and their external assets are catalogued
-for `bioflow db fetch`.
+fixture would dwarf the repo and the download would make CI flaky.  Their
+external assets are catalogued for `bioflow db fetch`.
+
+!!! warning "Seven recipes have no automated coverage"
+    `atac_seq`, `cog_enrichment`, `download_taxon`, `eukaryote_assembly`,
+    `joint_genotyping`, `metagenome_assembly` and `metagenomics_profile` appear
+    in none of the three tiers — they are exercised by hand, not by CI.  A
+    change to them is not caught by any test, so treat them as unverified until
+    a smoke case or fixture exists.
 
 ## Validated end to end (9)
 
@@ -53,8 +61,9 @@ hand-off instead.
 
 ## Requires external reference data (10)
 
-These are smoke-tested (first stage), but a full e2e is gated on a
-reference the user supplies.  The **`bioflow db`** column gives the
+A full e2e for these is gated on a reference the user supplies.  Only
+`chip_seq` and `germline_variants` are in the smoke matrix; the rest carry no
+automated check at all (see the warning above).  The **`bioflow db`** column gives the
 catalog key for `bioflow db fetch <key> --dest /refs` where one exists
 (see `bioflow db --help`); otherwise it points at the upstream source.
 
