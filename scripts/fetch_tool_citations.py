@@ -68,7 +68,7 @@ def _get_json(url: str, *, retries: int = 3) -> dict:
             req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
             with urllib.request.urlopen(req, timeout=30) as fh:
                 return json.load(fh)
-        except Exception as exc:  # noqa: BLE001 - network is best-effort
+        except Exception as exc:
             last = exc
             time.sleep(1.5 * (attempt + 1))
     raise RuntimeError(f"GET failed after {retries} tries: {url}\n  {last}")

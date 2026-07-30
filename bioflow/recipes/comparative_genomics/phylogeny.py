@@ -141,7 +141,7 @@ def _build_per_gene_fastas(
         cands = list(gff_dir.parent.rglob("gene_presence_absence.csv"))
         if not cands:
             return []
-        gpa_csv = sorted(cands, key=lambda p: len(str(p)))[0]
+        gpa_csv = min(cands, key=lambda p: len(str(p)))
     if ffn_dir is None:
         ffn_dir = gff_dir   # Prokka emits .ffn next to .gff by default
 

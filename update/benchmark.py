@@ -105,6 +105,7 @@ def _docker_pull(image: str) -> bool:
             ["docker", "pull", image],
             capture_output=True,
             timeout=300,
+            check=False,
         )
         return result.returncode == 0
     except (FileNotFoundError, subprocess.TimeoutExpired):

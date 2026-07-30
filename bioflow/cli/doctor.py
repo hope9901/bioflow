@@ -12,7 +12,7 @@ from bioflow.cli._app import REGISTRY_DEFAULT, app, console
 @app.command("doctor")
 def doctor_cmd(
     workspace: Path = typer.Option(
-        Path.cwd(),
+        Path.cwd(),  # noqa: B008  # typer resolves Option defaults at import; cwd at CLI startup is the intended default
         "--workspace", "-w",
         help="Directory used to test disk space and write permissions.",
     ),

@@ -18,10 +18,11 @@ import csv
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 from bioflow.core.logger import get_logger
 
@@ -122,7 +123,9 @@ def _run_one_subprocess(
         *_flagify({"sample_id": sample_id, **params}),
     ]
     with log_path.open("w", encoding="utf-8") as fh:
-        proc = subprocess.run(argv, stdout=fh, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.run(
+            argv, stdout=fh, stderr=subprocess.STDOUT, text=True, check=False
+        )
     return SampleResult(
         sample_id=sample_id,
         ok=(proc.returncode == 0),

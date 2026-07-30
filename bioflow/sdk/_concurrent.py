@@ -34,9 +34,10 @@ from __future__ import annotations
 
 import os
 import threading
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextvars import ContextVar
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from bioflow.core.logger import get_logger
 
@@ -212,7 +213,7 @@ class Scheduler:
                 finally:
                     self._gate.release(n)
                 result_fut.set_result(sr)
-            except BaseException as exc:  # noqa: BLE001 - propagate to reader
+            except BaseException as exc:
                 result_fut.set_exception(exc)
 
         self._schedule_after(ups, launch)

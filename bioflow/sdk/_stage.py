@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 from bioflow.core import provenance as _prov
 from bioflow.core.logger import get_logger
@@ -251,15 +251,15 @@ class Stage:
             )
             mounts = {str(workspace): str(_CONTAINER_WORKSPACE)}
             mounts.update(ext_mounts)
-            run_kw: dict[str, Any] = dict(
-                image=self.image,
-                command=translated,
-                mounts=mounts,
-                cpu=cur_cpu,
-                ram_gb=cur_ram,
-                workdir=str(_CONTAINER_WORKSPACE),
-                gpu=self.gpu,
-            )
+            run_kw: dict[str, Any] = {
+                "image": self.image,
+                "command": translated,
+                "mounts": mounts,
+                "cpu": cur_cpu,
+                "ram_gb": cur_ram,
+                "workdir": str(_CONTAINER_WORKSPACE),
+                "gpu": self.gpu,
+            }
             # Only pass log_callback when (a) the backend supports
             # streaming (DockerBackend sets _STREAMING_SUPPORTED=True;
             # MockBackend doesn't accept kwargs it doesn't know about)

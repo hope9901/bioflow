@@ -70,24 +70,52 @@ line-length = 100
 target-version = "py39"
 
 [tool.ruff.lint]
-# bioflow still supports Python 3.9 (see requires-python).  Keep the
-# typing-module constructs rather than the modern rewrites ruff proposes:
-# Pydantic / Typer evaluate annotations at import, so PEP 604 unions
-# (`X | None`) would raise TypeError on 3.9.  We also skip the (individually
-# 3.9-safe) List->list rewrite to hold one consistent style while pinned to
-# 3.9.  Drop this whole block when the 3.9 floor is raised, then re-run
-# `ruff check . --fix` to modernize in one sweep.
+# bioflow still supports Python 3.9 (see requires-python).  PEP 604 unions
+# (`X | None`, `X | Y`) are only valid at *runtime* on 3.10+, and Pydantic
+# models / Typer commands resolve annotations via get_type_hints() at import
+# — even under `from __future__ import annotations` — so a stringified
+# `X | None` still raises TypeError on 3.9.  Keep typing.Optional/Union until
+# the 3.9 floor is raised, then delete this block and re-run `ruff check .`.
+# (PEP 585 builtins like list[x] / dict[x] ARE 3.9-safe and have been adopted.)
 ignore = [
-    "UP006",  # non-pep585-annotation           (List[x]    -> list[x])
-    "UP007",  # non-pep604-annotation-union      (Union[x,y] -> x | y)
-    "UP045",  # non-pep604-annotation-optional   (Optional[x]-> x | None)
+    # --- Python 3.9 support (see requires-python) --------------------------
+    "UP007",  # non-pep604-annotation-union     (Union[x, y] -> x | y)
+    "UP045",  # non-pep604-annotation-optional  (Optional[x] -> x | None)
+    # --- Intentional patterns for a Docker/subprocess orchestration CLI ----
+    # bioflow shells out to containers and drives optional native deps
+    # (pynvml), the Docker SDK, LLM HTTP APIs and the filesystem.  A broad
+    # `except Exception` that logs-and-degrades is the deliberate design at
+    # those boundaries; narrowing 60+ call-sites would risk letting a new
+    # error type crash a long pipeline.  The best-effort cleanup that swallows
+    # silently (container.remove() on the error path, config-load fallbacks)
+    # is the same call.
+    "BLE001",  # blind-except
+    "S110",    # try-except-pass      (best-effort cleanup)
+    "S112",    # try-except-continue  (best-effort cleanup)
+    # Naive datetimes here are human-facing LOCAL timestamps — report headers,
+    # CHANGELOG dates, file-mtime freshness — never serialized or compared
+    # across timezones, so tz-aware would only add noise.
+    "DTZ005",  # datetime.now() without tz
+    "DTZ006",  # datetime.fromtimestamp() without tz
+    "DTZ011",  # date.today()
 ]
+
+# Typer's whole API is `param: T = typer.Option(...)` / `typer.Argument(...)`,
+# i.e. a function call in an argument default — exactly what B008 forbids.
+# These calls are immutable sentinels, not shared mutable state, so treat them
+# as immutable rather than sprinkling `# noqa: B008` on every CLI signature.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
 
 [tool.ruff.lint.per-file-ignores]
 # Examples are standalone scripts — sys.path manipulation before imports is intentional
 "examples/*.py" = ["E402", "E701"]
-# Tests use inline semicolons as a compact setup style
-"tests/**/*.py" = ["E702", "E701", "F841"]
+# Tests use inline semicolons as a compact setup style, unpack tuples they only
+# partially assert on, use mutable class attrs as fixtures, and exec generated code.
+"tests/**/*.py" = ["E702", "E701", "F841", "RUF059", "RUF012", "S102", "SIM102"]
+# test_benchmark imports update/ modules after a runtime sys.path.insert, so its
+# import block is deliberately ordered (path shim first) and can't be sorted.
+"tests/unit/test_benchmark.py" = ["I001"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

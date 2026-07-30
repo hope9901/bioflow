@@ -26,9 +26,10 @@ from __future__ import annotations
 
 import math
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Optional, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from rich.progress import TaskID
@@ -479,7 +480,7 @@ def make_backend(name: Optional[str] = None) -> ContainerBackend:
 
 class _NoOpProgress:
     """Fallback when Rich is not available or progress is suppressed."""
-    def __enter__(self) -> _NoOpProgress:
+    def __enter__(self) -> _NoOpProgress:  # noqa: PYI034  # `Self` needs py3.11/typing_extensions; the concrete class is equivalent
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -514,7 +515,7 @@ class _RichProgress:
         self._total = total
         self._task_id: Optional[TaskID] = None
 
-    def __enter__(self) -> _RichProgress:
+    def __enter__(self) -> _RichProgress:  # noqa: PYI034  # `Self` needs py3.11/typing_extensions; the concrete class is equivalent
         self._prog.__enter__()
         self._task_id = self._prog.add_task("Initialising…", total=self._total)
         return self
@@ -653,18 +654,18 @@ def run_plan(
             prog.update_stage(stage.stage_id, tool.id)
 
             # Build kwargs — only pass log_callback if backend supports it
-            run_kwargs: dict = dict(
-                image=image_ref,
-                command=command,
-                mounts=mounts,
-                cpu=tool.resources.min.cpu,
-                ram_gb=tool.resources.min.ram_gb,
-                workdir="/workspace",
-                gpu=bool(tool.resources.gpu),
-            )
+            run_kwargs: dict = {
+                "image": image_ref,
+                "command": command,
+                "mounts": mounts,
+                "cpu": tool.resources.min.cpu,
+                "ram_gb": tool.resources.min.ram_gb,
+                "workdir": "/workspace",
+                "gpu": bool(tool.resources.gpu),
+            }
             if supports_streaming:
-                run_kwargs["log_callback"] = lambda line: log.debug(
-                    f"  [{stage.stage_id}] {line}"
+                run_kwargs["log_callback"] = lambda line, sid=stage.stage_id: log.debug(
+                    f"  [{sid}] {line}"
                 )
                 if stage_timeout is not None:
                     run_kwargs["timeout"] = stage_timeout

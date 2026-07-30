@@ -41,20 +41,20 @@ TOOLS = ROOT / "registry" / "tools"
 # Keep the command list in sync with the recipe stage that uses the tool.
 SMOKE: dict[str, tuple[str, str]] = {
     "bcftools": ("real",
-        'printf "##fileformat=VCFv4.2\\n##contig=<ID=1>\\n#CHROM\\tPOS\\tID\\tREF\\tALT\\tQUAL\\tFILTER\\tINFO\\n1\\t100\\t.\\tA\\tT\\t50\\t.\\t.\\n" > t.vcf; '
-        'bcftools view t.vcf | grep -q "\\t100\\t" && bcftools stats t.vcf | grep -q "number of SNPs"'),
+        ('printf "##fileformat=VCFv4.2\\n##contig=<ID=1>\\n#CHROM\\tPOS\\tID\\tREF\\tALT\\tQUAL\\tFILTER\\tINFO\\n1\\t100\\t.\\tA\\tT\\t50\\t.\\t.\\n" > t.vcf; '
+        'bcftools view t.vcf | grep -q "\\t100\\t" && bcftools stats t.vcf | grep -q "number of SNPs"')),
     "bowtie2": ("real",
-        'printf ">c\\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\\n" > r.fa; bowtie2-build r.fa idx >/dev/null 2>&1; '
-        'printf "@r\\nACGTACGTACGTACGTACGT\\n+\\nIIIIIIIIIIIIIIIIIIII\\n" > q.fq; bowtie2 -x idx -U q.fq -S out.sam >/dev/null 2>&1; test -s out.sam'),
+        ('printf ">c\\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\\n" > r.fa; bowtie2-build r.fa idx >/dev/null 2>&1; '
+        'printf "@r\\nACGTACGTACGTACGTACGT\\n+\\nIIIIIIIIIIIIIIIIIIII\\n" > q.fq; bowtie2 -x idx -U q.fq -S out.sam >/dev/null 2>&1; test -s out.sam')),
     "diamond": ("real",
-        'printf ">p\\nMKVLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLST\\n" > p.faa; '
-        'diamond makedb --in p.faa -d db >/dev/null 2>&1; diamond blastp -q p.faa -d db -o h.tsv >/dev/null 2>&1; test -s h.tsv'),
+        ('printf ">p\\nMKVLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLST\\n" > p.faa; '
+        'diamond makedb --in p.faa -d db >/dev/null 2>&1; diamond blastp -q p.faa -d db -o h.tsv >/dev/null 2>&1; test -s h.tsv')),
     "macs3": ("real",
-        'i=1; while [ $i -le 200 ]; do printf "chr1\\t%d\\t%d\\t.\\t.\\t+\\n" $((i*10)) $((i*10+50)); i=$((i+1)); done > t.bed; '
-        'macs3 callpeak -t t.bed -f BED -g 10000 --nomodel --extsize 100 -n s --outdir o >/dev/null 2>&1; ls o/s_peaks.* >/dev/null 2>&1'),
+        ('i=1; while [ $i -le 200 ]; do printf "chr1\\t%d\\t%d\\t.\\t.\\t+\\n" $((i*10)) $((i*10+50)); i=$((i+1)); done > t.bed; '
+        'macs3 callpeak -t t.bed -f BED -g 10000 --nomodel --extsize 100 -n s --outdir o >/dev/null 2>&1; ls o/s_peaks.* >/dev/null 2>&1')),
     "nanoplot": ("real",
-        'i=1; while [ $i -le 30 ]; do printf "@r%d\\nACGTACGTACGTACGTACGTACGTACGTACGT\\n+\\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\\n" $i; i=$((i+1)); done > q.fastq; '
-        'NanoPlot --fastq q.fastq -o o >/dev/null 2>&1; ls o/NanoPlot-report.html >/dev/null 2>&1'),
+        ('i=1; while [ $i -le 30 ]; do printf "@r%d\\nACGTACGTACGTACGTACGTACGTACGTACGT\\n+\\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\\n" $i; i=$((i+1)); done > q.fastq; '
+        'NanoPlot --fastq q.fastq -o o >/dev/null 2>&1; ls o/NanoPlot-report.html >/dev/null 2>&1')),
     "picard": ("real",
         'printf ">c\\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\\n" > r.fa; picard CreateSequenceDictionary R=r.fa O=r.dict >/dev/null 2>&1; test -s r.dict'),
     "metabat2": ("live", 'metabat2 --help >/dev/null 2>&1'),
@@ -136,22 +136,23 @@ def _run_affected_e2e(recipes: set[str]) -> bool:
         [sys.executable, "-m", "pytest", str(E2E), "-m", "docker",
          "-k", k, "-q", "--no-header"],
         cwd=str(ROOT),
+        check=False,
     )
     return r.returncode == 0
 
 
 def _run_one(tid: str, image: str, kind: str, shell: str) -> bool:
     subprocess.run(["docker", "pull", "-q", image],
-                   capture_output=True, text=True)
+                   capture_output=True, text=True, check=False)
     r = subprocess.run(["docker", "run", "--rm", image, "sh", "-c", shell],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, check=False)
     ok = r.returncode == 0
     tag = f"[{kind}]"
     print(f"  {'PASS' if ok else 'FAIL'} {tag:6} {tid:14} {image.rsplit('/', 1)[-1]}")
     if not ok:
         for ln in (r.stdout + r.stderr).strip().splitlines()[-4:]:
             print(f"        {ln}")
-    subprocess.run(["docker", "rmi", image], capture_output=True, text=True)
+    subprocess.run(["docker", "rmi", image], capture_output=True, text=True, check=False)
     return ok
 
 

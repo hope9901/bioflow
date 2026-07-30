@@ -126,7 +126,7 @@ def test_run_cohort_run_one_exception_is_contained(tmp_path):
 
     report = run_cohort("x", sheet, tmp_path / "o", jobs=1, aggregate=False, run_one=boom)
     assert report.n_failed == 1 and report.n_ok == 1
-    bad = [r for r in report.results if not r.ok][0]
+    bad = next(r for r in report.results if not r.ok)
     assert "kaboom" in bad.error
 
 

@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import List, Tuple
 
 from bioflow import pipeline, stage
 from bioflow.recipes import choice, register
@@ -264,9 +263,9 @@ def annotate_cohort(filtered, snpeff_db: str, *, out_dir):
 
 # ── Sample sheet ─────────────────────────────────────────────────────────────
 
-def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path]]:
+def _parse_sample_sheet(path: Path) -> list[tuple[str, Path, Path]]:
     """Return [(sample_id, r1, r2), ...] from a CSV sample sheet."""
-    rows: List[Tuple[str, Path, Path]] = []
+    rows: list[tuple[str, Path, Path]] = []
     with open(path, encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         required = {"sample_id", "fastq_r1", "fastq_r2"}
