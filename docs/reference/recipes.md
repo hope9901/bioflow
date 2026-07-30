@@ -46,7 +46,7 @@ ATAC-seq: TrimGalore → Bowtie2/BWA → Picard → MACS3 → TOBIAS
 *6 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0`
-- **align** — `staphb/bowtie2:2.5.5`
+- **align** — `staphb/bowtie2:2.5.1`
 - **align_bwa** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **dedup** — `quay.io/biocontainers/picard:3.4.0--hdfd78af_0`
 - **call_peaks** — `quay.io/biocontainers/macs3:3.0.4--py310h5a5e57a_0`
@@ -69,7 +69,7 @@ ChIP-seq: TrimGalore → Bowtie2/BWA → Picard → MACS3 → HOMER
 *6 stage(s):*
 
 - **trim** — `quay.io/biocontainers/trim-galore:0.6.11--hdfd78af_0`
-- **align** — `staphb/bowtie2:2.5.5`
+- **align** — `staphb/bowtie2:2.5.1`
 - **align_bwa** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **dedup** — `quay.io/biocontainers/picard:3.4.0--hdfd78af_0`
 - **call_peaks** — `quay.io/biocontainers/macs3:3.0.4--py310h5a5e57a_0`

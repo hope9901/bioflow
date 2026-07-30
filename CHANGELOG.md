@@ -14,6 +14,17 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — atac_seq / chip_seq default alignment was broken
+The Bowtie2 image both recipes pinned (`staphb/bowtie2:2.5.5`) ships a samtools
+that can't load its shared libraries (`libdeflate.so.0`), so the default
+`bowtie2 | samtools sort | samtools index` align step exited 127 on real data —
+the whole point of the StaPH-B image is that it bundles a working samtools, and
+this build's doesn't. Neither recipe had any automated coverage, so it went
+unnoticed. Pinned to `staphb/bowtie2:2.5.1` (Bowtie2 2.5.1 + samtools 1.15, both
+verified) in the two recipes and the `bowtie2` registry entry (digest updated),
+and added a stage guard (`test_atac_seq_align_dedup_peaks`) that runs trim →
+align → Picard dedup → MACS3 peaks end to end so it can't regress.
+
 ### Added — local disk hygiene: see what's using space, and reclaim it
 bioflow could *check* free space (`bioflow doctor`) and *provision* multi-GB
 databases, but offered nothing to inspect the breakdown or get space back — a

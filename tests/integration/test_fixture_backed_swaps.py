@@ -43,6 +43,31 @@ COHORT = REPO / "data" / "test" / "cohort_small"
 PHIX = REPO / "data" / "test" / "phix_small"
 
 
+def _build_bowtie2_index(ws: Path) -> Path:
+    """Build a Bowtie2 index from the phiX reference inside the workspace.
+
+    ATAC/ChIP take a *prebuilt* index (real ones are large and belong to the
+    user), so the test builds a tiny one rather than committing index files.
+    Uses the same Bowtie2 image the recipe does, via bioflow's backend so the
+    mount works on every OS.  Returns the index prefix.
+    """
+    import shutil
+
+    from bioflow.core.runner import make_backend
+
+    idx = ws / "bt2idx"
+    idx.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(PHIX / "reference.fa", idx / "phix.fa")
+    res = make_backend().run(
+        image="staphb/bowtie2:2.5.1",
+        command="bowtie2-build /idx/phix.fa /idx/phix",
+        mounts={str(idx): "/idx"},
+        cpu=1, ram_gb=2, workdir="/idx",
+    )
+    assert res.exit_code == 0, f"bowtie2-build failed: {res.stderr or res.stdout}"
+    return idx / "phix"
+
+
 @pytest.fixture
 def workspace(tmp_path):
     set_workspace(tmp_path / "ws")
@@ -213,3 +238,42 @@ def test_joint_genotyping_produces_a_multisample_cohort_vcf(workspace):
     assert n_records >= 5, (
         f"expected the 5 planted SNPs in the cohort, got {n_records}"
     )
+
+
+# ── atac_seq: trim → align → dedup → peaks ───────────────────────────────────
+
+@pytest.mark.skipif(not PHIX.exists(), reason="phix_small fixture missing")
+def test_atac_seq_align_dedup_peaks(workspace):
+    """trim → Bowtie2 align → Picard dedup → MACS3 peaks on phiX.
+
+    This recipe had no automated coverage, and the gap hid a real defect: the
+    Bowtie2 image it pinned shipped a samtools that couldn't load
+    (``libdeflate.so.0``), so ``bowtie2 | samtools sort`` — the default align
+    path of *both* atac_seq and chip_seq — failed on real data. The guard runs
+    that chain end to end so it can't regress.
+
+    TOBIAS footprinting (the last stage) needs a motif/genome scale a phiX toy
+    can't provide, so the guard stops at peak calling.
+    """
+    from bioflow.recipes.epigenomics.atac_seq import (
+        align, call_peaks, dedup, trim,
+    )
+
+    idx = _build_bowtie2_index(workspace)
+    clean = trim(PHIX / "sim_R1.fastq.gz", PHIX / "sim_R2.fastq.gz")
+    assert clean.ok, (clean.stderr or clean.stdout)[-300:]
+
+    aln = align(clean, idx, "s1")
+    assert aln.ok, (
+        "Bowtie2 align failed — the pinned image's samtools must load "
+        f"(the libdeflate regression): {(aln.stderr or aln.stdout)[-300:]}"
+    )
+    assert (Path(aln.out_dir) / "s1.bam").exists(), "no sorted BAM"
+
+    dd = dedup(aln, "s1")
+    assert dd.ok, (dd.stderr or dd.stdout)[-300:]
+
+    peaks = call_peaks(dd, "s1", "1e7")
+    assert peaks.ok, (peaks.stderr or peaks.stdout)[-300:]
+    narrow = list(Path(peaks.out_dir).rglob("*.narrowPeak"))
+    assert narrow, "MACS3 wrote no narrowPeak file"

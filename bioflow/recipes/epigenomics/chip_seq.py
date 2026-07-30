@@ -38,7 +38,7 @@ def trim(r1: Path, r2: Path, *, out_dir):
     return f"trim_galore --paired --cores 4 --output_dir {out_dir} {r1} {r2}"
 
 
-@stage(image="staphb/bowtie2:2.5.5",
+@stage(image="staphb/bowtie2:2.5.1",
        cpu=8, ram_gb=16, depends_on=trim)
 def align(clean, bowtie2_index: Path, sample_id: str, *, out_dir):
     """Bowtie2 alignment → sorted, indexed BAM.

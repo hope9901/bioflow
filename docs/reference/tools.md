@@ -31,7 +31,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `bedtools` | 2.31.1 | `quay.io/biocontainers/bedtools:2.31.1--h13024bc_3` | Quinlan & Hall 2010, PMID 20110278 | 22,804 | 13,559 |
-| `bowtie2` | 2.5.5 | `staphb/bowtie2:2.5.5` | Langmead & Salzberg 2012, PMID 22388286 | 43,646 | 25,521 |
+| `bowtie2` | 2.5.1 | `staphb/bowtie2:2.5.1` | Langmead & Salzberg 2012, PMID 22388286 | 43,646 | 25,521 |
 | `bwa` | 0.7.19 | `quay.io/biocontainers/bwa:0.7.19--h577a1d6_1` | Li & Durbin 2009, PMID 19451168 | 36,991 | 18,313 |
 | `bwa_mem2` | 2.3 | `quay.io/biocontainers/bwa-mem2:2.3--he70b90d_0` | Vasimuddin 2019, PMID 31355760 | n/a | n/a |
 | `bwa_samtools` | 0.7.19 | `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0` | Li & Durbin 2009, PMID 19451168 | n/a | n/a |

@@ -98,7 +98,7 @@
       ]
     },
     "bowtie2": {
-      "version": "2.5.5",
+      "version": "2.5.1",
       "inputs": [
         "short_paired"
       ],
