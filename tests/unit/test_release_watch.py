@@ -31,6 +31,29 @@ source_repo: {repo}
 """
 
 
+class TestNormalizeTag:
+    def test_strips_leading_v(self):
+        assert rw._normalize_tag("v2.17.1") == "2.17.1"
+
+    def test_strips_path_prefix(self):
+        assert rw._normalize_tag("release/3.5.0") == "3.5.0"
+
+    def test_strips_name_prefix(self):
+        assert rw._normalize_tag("kraken2-2.1.6") == "2.1.6"
+
+    def test_rolling_tags_are_none(self):
+        for t in ("latest", "nightly", "continuous", "stable", "release"):
+            assert rw._normalize_tag(t) is None
+
+    def test_non_version_is_none(self):
+        assert rw._normalize_tag("") is None
+        assert rw._normalize_tag("main") is None
+
+    def test_plain_version_passthrough(self):
+        assert rw._normalize_tag("1.3.1") == "1.3.1"
+        assert rw._normalize_tag("2026.02.0") == "2026.02.0"
+
+
 class TestIsNewer:
     def test_yes(self):
         assert rw.is_newer("1.1.0", "1.0.9")
@@ -137,6 +160,94 @@ class TestMakeCandidate:
             "ghcr.io/hope9901/bioflow-scanpy:1.12.3"
         )
         assert "image must be built and pushed" in cand["update_meta"]["risks"]
+
+
+class TestPrune:
+
+    def _reg(self, tmp_path: Path, tool: str, version: str) -> Path:
+        reg = tmp_path / "registry" / "tools" / "qc"
+        reg.mkdir(parents=True, exist_ok=True)
+        (reg / f"{tool}.yaml").write_text(
+            f"id: {tool}\nname: {tool}\nversion: \"{version}\"\n"
+            "category: qc\ncontainer: {image: x:1}\n",
+            encoding="utf-8",
+        )
+        return tmp_path / "registry" / "tools"
+
+    def _cand(self, tmp_path: Path, month: str, tool: str, version: str) -> Path:
+        d = tmp_path / "candidates" / month
+        d.mkdir(parents=True, exist_ok=True)
+        p = d / f"{tool}.yaml"
+        p.write_text(f"id: {tool}\nversion: \"{version}\"\n", encoding="utf-8")
+        return p
+
+    def test_prunes_applied_and_superseded(self, tmp_path):
+        reg = self._reg(tmp_path, "bwa", "0.7.19")
+        self._reg(tmp_path, "salmon", "2.3.4")
+        applied = self._cand(tmp_path, "2026-06", "bwa", "0.7.19")     # ==
+        superseded = self._cand(tmp_path, "2026-06", "salmon", "2.2.1")  # reg newer
+        actions = rw.prune(tmp_path / "candidates", reg, dry_run=False)
+        assert not applied.exists()
+        assert not superseded.exists()
+        results = {a["tool"]: a["result"] for a in actions}
+        assert results["bwa"] == "pruned"
+        assert results["salmon"] == "pruned"
+
+    def test_keeps_pending(self, tmp_path):
+        reg = self._reg(tmp_path, "spades", "4.2.0")
+        pending = self._cand(tmp_path, "2026-06", "spades", "4.3.0")   # cand newer
+        actions = rw.prune(tmp_path / "candidates", reg, dry_run=False)
+        assert pending.exists()
+        assert actions[0]["result"] == "pending"
+
+    def test_keeps_orphan(self, tmp_path):
+        reg = self._reg(tmp_path, "bwa", "0.7.19")   # no 'ghost' tool
+        orphan = self._cand(tmp_path, "2026-06", "ghost", "1.0")
+        actions = rw.prune(tmp_path / "candidates", reg, dry_run=False)
+        assert orphan.exists()
+        assert actions[0]["result"] == "orphan"
+
+    def test_dry_run_deletes_nothing(self, tmp_path):
+        reg = self._reg(tmp_path, "bwa", "0.7.19")
+        applied = self._cand(tmp_path, "2026-06", "bwa", "0.7.19")
+        actions = rw.prune(tmp_path / "candidates", reg, dry_run=True)
+        assert applied.exists()
+        assert actions[0]["result"] == "would_prune"
+
+    def test_version_format_quirk_counts_as_applied(self, tmp_path):
+        """A GitHub-tag form like '8-0-4' equals the registry's '8.0.4'."""
+        reg = self._reg(tmp_path, "antismash", "8.0.4")
+        cand = self._cand(tmp_path, "2026-06", "antismash", "8-0-4")
+        actions = rw.prune(tmp_path / "candidates", reg, dry_run=False)
+        assert not cand.exists()
+        assert "applied" in actions[0]["detail"]
+
+    def test_removes_empty_month_dir(self, tmp_path):
+        reg = self._reg(tmp_path, "bwa", "0.7.19")
+        self._cand(tmp_path, "2026-06", "bwa", "0.7.19")
+        rw.prune(tmp_path / "candidates", reg, dry_run=False)
+        assert not (tmp_path / "candidates" / "2026-06").exists()
+
+
+class TestNoStaleCandidatesInRepo:
+    """CI guard: applied/superseded candidates must not linger in the repo.
+    The dry-run prune over the real dirs is the check — if it finds anything to
+    prune, run `python -m update.release_watch --prune`."""
+
+    def test_no_applied_candidate_lingers(self):
+        repo = Path(__file__).resolve().parents[2]
+        cands = repo / "update" / "candidates"
+        reg = repo / "registry" / "tools"
+        if not cands.exists():
+            return
+        stale = [
+            a["detail"] for a in rw.prune(cands, reg, dry_run=True)
+            if a["result"] == "would_prune"
+        ]
+        assert not stale, (
+            "applied/superseded candidates left in update/candidates/ — run "
+            "`python -m update.release_watch --prune`:\n  " + "\n  ".join(stale)
+        )
 
 
 class TestResolveBiocontainer:

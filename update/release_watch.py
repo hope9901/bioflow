@@ -36,9 +36,15 @@ public quay.io tags API (no auth) to resolve BioContainers builds.
 
 Usage::
 
-    python -m update.release_watch                     # default paths
+    python -m update.release_watch                     # scan upstream, file candidates
     python -m update.release_watch --dry-run           # report only
     python -m update.release_watch --token <PAT>       # explicit token
+    python -m update.release_watch --prune             # delete applied candidates
+    python -m update.release_watch --prune --dry-run   # list what would be pruned
+
+Candidates are never removed once applied, so ``--prune`` clears the
+ones the registry has caught up to; a unit guard fails in CI if an
+applied candidate is left lying around.
 """
 from __future__ import annotations
 
@@ -78,8 +84,47 @@ def _http_json(url: str, token: Optional[str] = None,
         return json.loads(resp.read().decode("utf-8"))
 
 
+#: Rolling / non-version release tags some projects reuse forever.  There's no
+#: semver to compare against, so we treat them as "no usable release".
+_ROLLING_TAGS = {
+    "latest", "nightly", "continuous", "dev", "unstable", "edge", "rolling",
+    "stable", "release",
+}
+
+
+def _normalize_tag(tag: str) -> Optional[str]:
+    """Reduce a GitHub ``tag_name`` to a comparable version string, or None if
+    it isn't a version at all.
+
+    Handles the shapes real projects use:
+      * ``v2.17.1``        → ``2.17.1``     (leading ``v``)
+      * ``release/3.5.0``  → ``3.5.0``      (path-style prefix, e.g. OpenMS)
+      * ``kraken2-2.1.6``  → ``2.1.6``      (name- prefix)
+      * ``latest``         → None           (rolling tag, e.g. skani)
+
+    Without this, ``release/3.5.0`` sorts *above* ``3.5.0`` (letters rank over
+    digits) so the watcher re-files an already-applied tool every run, and a
+    rolling ``latest`` becomes a permanent phantom candidate.
+    """
+    if not tag:
+        return None
+    t = tag.strip()
+    if "/" in t:                       # release/3.5.0 → 3.5.0
+        t = t.rsplit("/", 1)[1]
+    if t[:1].lower() == "v" and t[1:2].isdigit():
+        t = t[1:]                      # v2.17.1 → 2.17.1
+    else:                              # kraken2-2.1.6 → 2.1.6
+        m = re.match(r"^[A-Za-z][A-Za-z0-9_]*[-_](\d.*)$", t)
+        if m:
+            t = m.group(1)
+    if t.lower() in _ROLLING_TAGS or not any(c.isdigit() for c in t):
+        return None
+    return t
+
+
 def latest_release_tag(source_repo: str, token: Optional[str] = None) -> Optional[str]:
-    """Return GitHub's "latest" release tag, or None on 404 (no releases)."""
+    """Return GitHub's "latest" release tag as a comparable version, or None on
+    404 (no releases) or when the tag isn't a version (a rolling tag)."""
     url = f"https://api.github.com/repos/{source_repo}/releases/latest"
     try:
         data = _http_json(url, token=token)
@@ -87,9 +132,7 @@ def latest_release_tag(source_repo: str, token: Optional[str] = None) -> Optiona
         if e.code == 404:
             return None
         raise
-    tag = data.get("tag_name", "")
-    # GitHub tags often have a leading "v" — strip for comparison
-    return tag.lstrip("v") if tag else None
+    return _normalize_tag(data.get("tag_name", ""))
 
 
 # ---------------------------------------------------------------------------
@@ -373,6 +416,90 @@ def scan(
 
 
 # ---------------------------------------------------------------------------
+# Prune — drop candidates the registry has already caught up to
+# ---------------------------------------------------------------------------
+
+def _registry_version(registry_dir: Path, tool_stem: str) -> Optional[str]:
+    """Pinned version of the registry tool whose file is ``<tool_stem>.yaml``,
+    or None if there's no such tool any more."""
+    for p in registry_dir.rglob(f"{tool_stem}.yaml"):
+        doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+        if isinstance(doc, dict):
+            return str(doc.get("version", ""))
+    return None
+
+
+def prune(
+    candidates_dir: Path,
+    registry_dir: Path,
+    dry_run: bool = False,
+) -> list[dict]:
+    """Remove candidate files the registry has already applied or moved past.
+
+    A candidate is *stale* when its version is **not strictly newer** than the
+    registry's pinned version — it was applied (equal) or superseded (registry
+    moved ahead).  Those are deleted.  Genuinely pending candidates (still newer
+    than the registry) and orphans (tool gone from the registry) are kept and
+    reported, never deleted — pruning must never drop a real update.
+    """
+    if not candidates_dir.exists():
+        return []
+    actions: list[dict] = []
+    for cand in sorted(candidates_dir.rglob("*.yaml")):
+        try:
+            doc = yaml.safe_load(cand.read_text(encoding="utf-8"))
+        except Exception as e:
+            actions.append({"tool": cand.stem, "result": "unreadable",
+                            "detail": f"{type(e).__name__}: {e}"})
+            continue
+        if not isinstance(doc, dict):
+            continue
+        tool_id = doc.get("id", cand.stem)
+        cand_version = str(doc.get("version", ""))
+        reg_version = _registry_version(registry_dir, cand.stem)
+        try:
+            rel = cand.relative_to(candidates_dir)
+        except ValueError:
+            rel = cand
+
+        if reg_version is None:
+            actions.append({"tool": tool_id, "result": "orphan",
+                            "detail": f"{cand_version}: no registry entry — kept ({rel})"})
+            continue
+
+        # Normalise the candidate's version the same way the scanner now does,
+        # so a pre-fix 'release/3.5.0' or rolling 'latest' is judged correctly.
+        cand_norm = _normalize_tag(cand_version)
+        if cand_norm is None:
+            cand.unlink() if not dry_run else None
+            actions.append({
+                "tool": tool_id,
+                "result": "would_prune" if dry_run else "pruned",
+                "detail": f"non-version tag '{cand_version}' (rolling/junk)  ({rel})",
+            })
+            continue
+        if is_newer(cand_norm, reg_version):
+            actions.append({"tool": tool_id, "result": "pending",
+                            "detail": f"cand {cand_norm} > reg {reg_version} — kept ({rel})"})
+            continue
+
+        why = "applied" if not is_newer(reg_version, cand_norm) else "superseded"
+        detail = f"{why}: cand {cand_norm} ≤ reg {reg_version}  ({rel})"
+        if dry_run:
+            actions.append({"tool": tool_id, "result": "would_prune", "detail": detail})
+        else:
+            cand.unlink()
+            actions.append({"tool": tool_id, "result": "pruned", "detail": detail})
+
+    # drop now-empty month directories
+    if not dry_run:
+        for month in sorted(candidates_dir.glob("*")):
+            if month.is_dir() and not any(month.iterdir()):
+                month.rmdir()
+    return actions
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -387,22 +514,33 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--token", type=str, default=os.environ.get("GITHUB_TOKEN"),
                     help="GitHub PAT (env GITHUB_TOKEN as default).")
     ap.add_argument("--dry-run", action="store_true",
-                    help="Report only; do not write candidate files or state.")
+                    help="Report only; do not write, delete, or touch state.")
+    ap.add_argument("--prune", action="store_true",
+                    help="Delete candidates the registry has already applied or "
+                         "superseded (instead of scanning upstream).")
     args = ap.parse_args(argv)
 
-    actions = scan(
-        args.registry, args.candidates_dir, args.state,
-        token=args.token, dry_run=args.dry_run,
-    )
+    if args.prune:
+        actions = prune(args.candidates_dir, args.registry, dry_run=args.dry_run)
+    else:
+        actions = scan(
+            args.registry, args.candidates_dir, args.state,
+            token=args.token, dry_run=args.dry_run,
+        )
+
     by_result: dict[str, int] = {}
     for a in actions:
         by_result[a["result"]] = by_result.get(a["result"], 0) + 1
         print(f"  [{a['result']:14s}] {a['tool']:20s} {a['detail']}")
-    print(f"\nSummary: {sum(by_result.values())} tools checked")
+    noun = "candidates scanned" if args.prune else "tools checked"
+    print(f"\nSummary: {sum(by_result.values())} {noun}")
     for r, n in sorted(by_result.items()):
         print(f"  {r:14s} {n}")
 
-    # Exit non-zero if any candidate was filed (CI can pick this up)
+    # Exit non-zero if there's action to take (CI can pick this up):
+    # a filed candidate on scan, or a stale one to prune on --prune --dry-run.
+    if args.prune:
+        return 1 if by_result.get("would_prune", 0) > 0 else 0
     return 1 if by_result.get("filed", 0) > 0 else 0
 
 
