@@ -84,6 +84,7 @@ def test_step4_clusterprofiler_gets_deg_table_from_step3(tmp_path):
 def test_rnaseq_plan_pipeline_mismatch_raises(tmp_path):
     """Preset for rnaseq_deg should reject a genome_assembly config."""
     import pytest
+
     from bioflow.core.planner import plan_from_preset
 
     # Write a genome_assembly config but try to use rnaseq preset

@@ -8,8 +8,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
-
 VALID_CANDIDATE_YAML = """\
 id: dummy_tool_xyz
 name: DummyTool
@@ -43,6 +41,7 @@ update_meta:
 def _run(argv, cwd=None):
     """Invoke the CLI with the given args."""
     from typer.testing import CliRunner
+
     from bioflow.cli import app
     return CliRunner().invoke(app, argv)
 
@@ -133,7 +132,7 @@ class TestGitPushMaintainerMode:
     def test_git_commit_invokes_git_add_and_commit(
         self, tmp_path, monkeypatch,
     ):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
         cand_dir = tmp_path / "candidates"
         cand_dir.mkdir()
         (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
@@ -160,7 +159,7 @@ class TestGitPushMaintainerMode:
         assert not any("push" in a for a in called_with), called_with
 
     def test_git_push_implies_push(self, tmp_path, monkeypatch):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
         cand_dir = tmp_path / "candidates"
         cand_dir.mkdir()
         (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
@@ -184,7 +183,7 @@ class TestGitPushMaintainerMode:
     def test_git_commit_skipped_when_nothing_staged(
         self, tmp_path, monkeypatch,
     ):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
         cand_dir = tmp_path / "candidates"
         cand_dir.mkdir()
         (cand_dir / "x.yaml").write_text(VALID_CANDIDATE_YAML, encoding="utf-8")
@@ -213,7 +212,8 @@ class TestRegistryArtifactRefresh:
     the new io-contracts / docs-fresh CI gates would fail on the push."""
 
     def test_regenerate_runs_io_contracts_and_docs(self, tmp_path):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
+
         from bioflow.cli.update import _regenerate_registry_artifacts
 
         with patch("subprocess.run", return_value=MagicMock(
@@ -230,6 +230,7 @@ class TestRegistryArtifactRefresh:
         """When --auto-approve actually promotes a candidate, the artifact
         refresh is invoked (before any git commit)."""
         from unittest.mock import patch
+
         import bioflow.cli.update as upd
         from update.benchmark import BenchmarkResult
 

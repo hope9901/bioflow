@@ -3,23 +3,23 @@
 __version__ = "0.3.1"
 
 # Tier-A SDK — @stage / @pipeline / runtime config
-from bioflow.sdk import (  # noqa: E402,F401
-    stage,
+from bioflow.report import Report  # noqa: F401
+from bioflow.sdk import (  # noqa: F401
+    DockerBackend,
+    MockBackend,
+    Pipeline,
     Stage,
     StageResult,
-    pipeline,
-    Pipeline,
+    clear_cache,
+    container_path,
     gather,
-    set_workspace,
+    is_cache_enabled,
+    is_log_streaming_enabled,
+    pipeline,
     set_backend,
     set_cache_enabled,
-    is_cache_enabled,
-    clear_cache,
     set_log_streaming,
-    is_log_streaming_enabled,
-    container_path,
+    set_workspace,
+    stage,
     stage_input,
-    MockBackend,
-    DockerBackend,
 )
-from bioflow.report import Report  # noqa: E402,F401

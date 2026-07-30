@@ -416,7 +416,7 @@ def _now_iso() -> str:
 
 def _bioflow_version() -> str:
     try:
-        import bioflow  # noqa: PLC0415
+        import bioflow
         return getattr(bioflow, "__version__", "unknown")
     except Exception:
         return "unknown"

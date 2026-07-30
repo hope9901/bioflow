@@ -100,7 +100,7 @@ class TestDockerBackendGpu:
         captured: dict = {}
 
         class _FakeContainer:
-            def logs(self, **_):  # noqa: D401
+            def logs(self, **_):
                 return iter([b"done\n"])
 
             def wait(self, **_):

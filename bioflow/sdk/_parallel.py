@@ -13,7 +13,6 @@ import time
 from typing import Callable, Union
 
 from bioflow.core.logger import get_logger
-
 from bioflow.sdk._result import StageResult
 
 log = get_logger()
@@ -132,10 +131,10 @@ def _bump_resources(
 
 
 __all__ = [
-    "_resolve_parallel",
     "_AnsiProgress",
-    "_bump_resources",
     "_ProgressCallback",
+    "_bump_resources",
+    "_resolve_parallel",
 ]
 
 

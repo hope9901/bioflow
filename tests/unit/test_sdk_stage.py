@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from bioflow import stage, set_workspace, set_backend, MockBackend
+from bioflow import MockBackend, set_backend, set_workspace, stage
 
 
 @pytest.fixture(autouse=True)
@@ -131,7 +131,7 @@ class TestPathTranslation:
             # is built.  So passing a host string outside ws into the command
             # silently keeps it (no error), but using the helper to translate
             # raises.
-            from bioflow.sdk import _to_container_path, _get_workspace
+            from bioflow.sdk import _get_workspace, _to_container_path
             _to_container_path(outside, _get_workspace())
 
 
@@ -182,8 +182,8 @@ class TestFailureHandling:
 
     def test_failed_call_returns_StageResult_with_nonzero_exit(self):
         # Custom failing backend
-        from bioflow.sdk import set_backend
         from bioflow.core.runner import CommandResult
+        from bioflow.sdk import set_backend
 
         class FailBackend:
             def run(self, **kw):
@@ -201,8 +201,8 @@ class TestFailureHandling:
         assert not r.ok
 
     def test_map_with_stop_on_error_raises_first_failure(self):
-        from bioflow.sdk import set_backend
         from bioflow.core.runner import CommandResult
+        from bioflow.sdk import set_backend
 
         class CountingFail:
             def __init__(self): self.n = 0
@@ -223,8 +223,8 @@ class TestFailureHandling:
             go.map(["a", "b", "c"], stop_on_error=True)
 
     def test_map_without_stop_on_error_collects_all_results(self):
-        from bioflow.sdk import set_backend
         from bioflow.core.runner import CommandResult
+        from bioflow.sdk import set_backend
 
         class AlwaysFail:
             def run(self, **kw):

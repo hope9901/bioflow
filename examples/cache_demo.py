@@ -13,7 +13,7 @@ for _s in (sys.stdout, sys.stderr):
     except Exception: pass
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from bioflow import stage, set_workspace, clear_cache
+from bioflow import clear_cache, set_workspace, stage
 
 WS = Path(__file__).resolve().parent / "_cache_demo_ws"
 set_workspace(WS)

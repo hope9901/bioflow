@@ -6,16 +6,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioflow.llm import (
-    recommend_local_model,
-    load_config,
-    save_config,
-    new_tool,
-    suggest_command,
     LlmDisabled,
     LlmError,
     ModelRec,
+    load_config,
+    new_tool,
+    recommend_local_model,
+    save_config,
+    suggest_command,
 )
-
 
 # ---------------------------------------------------------------------------
 # Hardware-based recommendation
@@ -236,6 +235,7 @@ class TestCli:
 
     def _run(self, argv, **kwargs):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner().invoke(app, argv, **kwargs)
 

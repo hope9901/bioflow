@@ -24,7 +24,7 @@ for _s in (sys.stdout, sys.stderr):
 # Make bioflow importable from a checkout (no install needed)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from bioflow import stage, set_workspace
+from bioflow import set_workspace, stage
 
 WS = Path(__file__).resolve().parent.parent / "examples" / "_stage_demo_ws"
 set_workspace(WS)
@@ -52,6 +52,7 @@ def stamp(idx: int, *, out_dir):
 
 print("\n=== Demo 2 — fan-out × 8 with parallel=4 ===")
 import time
+
 t0 = time.time()
 results = stamp.map(list(range(8)), parallel=4)
 elapsed = time.time() - t0

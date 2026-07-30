@@ -12,7 +12,6 @@ from bioflow.core.doctor import (
     summarize,
 )
 
-
 # ---------------------------------------------------------------------------
 # Pure check functions
 # ---------------------------------------------------------------------------
@@ -107,7 +106,7 @@ class TestIndividualChecks:
         import psutil
 
         class _Mem:
-            total = int(2 * 1024**3)  # 2 GB
+            total = 2 * 1024**3  # 2 GB
 
         monkeypatch.setattr(psutil, "virtual_memory", lambda: _Mem())
         r = doctor._check_ram()
@@ -117,7 +116,7 @@ class TestIndividualChecks:
         import psutil
 
         class _Mem:
-            total = int(6 * 1024**3)  # 6 GB
+            total = 6 * 1024**3  # 6 GB
 
         monkeypatch.setattr(psutil, "virtual_memory", lambda: _Mem())
         r = doctor._check_ram()

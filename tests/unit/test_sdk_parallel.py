@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioflow import stage, set_workspace, set_backend, MockBackend
-from bioflow.sdk import _resolve_parallel, _AnsiProgress
+from bioflow import MockBackend, set_backend, set_workspace, stage
+from bioflow.sdk import _AnsiProgress, _resolve_parallel
 
 
 @pytest.fixture(autouse=True)
@@ -214,8 +214,9 @@ class TestEdgeCases:
 class TestAnsiProgress:
 
     def test_counts_cached_and_failed(self):
-        from bioflow.sdk import StageResult
         from pathlib import Path
+
+        from bioflow.sdk import StageResult
 
         bar = _AnsiProgress("test", total=4)
         ok       = StageResult("s", Path("/tmp"), "x", 0, cached=False)

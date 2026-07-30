@@ -24,7 +24,7 @@ def lineage_cmd(
     bioflow lineage "baker's yeast"   → saccharomycetes_odb10
     bioflow lineage --species prokaryote
     """
-    from bioflow.core.lineage import recommend_lineage  # noqa: PLC0415
+    from bioflow.core.lineage import recommend_lineage
 
     rec = recommend_lineage(species=species, taxon=taxon)
     rprint(f"\n[bold]Recommended lineage:[/] [cyan]{rec['lineage']}[/]")

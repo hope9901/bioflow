@@ -42,12 +42,12 @@ from bioflow.core.logger import get_logger
 
 log = get_logger()
 
-_current: "ContextVar[Optional[Scheduler]]" = ContextVar(
+_current: ContextVar[Optional[Scheduler]] = ContextVar(
     "bioflow_scheduler", default=None
 )
 
 
-def active_scheduler() -> "Optional[Scheduler]":
+def active_scheduler() -> Optional[Scheduler]:
     """The scheduler for the pipeline currently executing, or None (eager)."""
     return _current.get()
 
@@ -65,7 +65,7 @@ class FutureStageResult:
 
     __slots__ = ("_future",)
 
-    def __init__(self, future: "Future") -> None:
+    def __init__(self, future: Future) -> None:
         self._future = future
 
     def result(self):
@@ -134,23 +134,23 @@ class Scheduler:
             max_workers=max_workers or max(2, self._cpu_budget)
         )
         self._gate = _ResourceGate(self._cpu_budget)
-        self._stage_futures: "dict[Any, list[Future]]" = {}
-        self._all: "list[Future]" = []
+        self._stage_futures: dict[Any, list[Future]] = {}
+        self._all: list[Future] = []
         self._lock = threading.Lock()
-        self._keylocks: "dict[str, threading.Lock]" = {}
+        self._keylocks: dict[str, threading.Lock] = {}
         self._keylocks_guard = threading.Lock()
 
     # -- future bookkeeping (for depends_on wiring) --
-    def _futures_for(self, stage) -> "list[Future]":
+    def _futures_for(self, stage) -> list[Future]:
         with self._lock:
             return list(self._stage_futures.get(stage, []))
 
-    def _register(self, stage, fut: "Future") -> None:
+    def _register(self, stage, fut: Future) -> None:
         with self._lock:
             self._stage_futures.setdefault(stage, []).append(fut)
             self._all.append(fut)
 
-    def _keylock(self, key: str) -> "threading.Lock":
+    def _keylock(self, key: str) -> threading.Lock:
         with self._keylocks_guard:
             lk = self._keylocks.get(key)
             if lk is None:
@@ -191,7 +191,7 @@ class Scheduler:
                     kwargs: dict) -> FutureStageResult:
         """Schedule ``run_once(resolved_args, resolved_kwargs)`` for *stage*."""
         ups = self._upstreams(stage, args, kwargs)
-        result_fut: "Future" = Future()
+        result_fut: Future = Future()
 
         def launch() -> None:
             try:

@@ -38,7 +38,6 @@ from typing import Callable
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Skip-when-no-Docker preamble (shared with the other integration tests).
 # ---------------------------------------------------------------------------
@@ -130,6 +129,7 @@ def _build_matrix() -> list[SmokeCase]:
     from bioflow.recipes.comparative_genomics import (  # noqa: F401  (import effects)
         amr_vf_catalogue,
     )
+    from bioflow.recipes.epigenomics import chip_seq  # noqa: F401
     from bioflow.recipes.genome_assembly import (  # noqa: F401
         prokaryote_assembly,
     )
@@ -137,7 +137,6 @@ def _build_matrix() -> list[SmokeCase]:
         metagenome_assembly,
         metagenomics_profile,
     )
-    from bioflow.recipes.epigenomics import chip_seq  # noqa: F401
     from bioflow.recipes.rnaseq_deg import rnaseq_deg  # noqa: F401
     from bioflow.recipes.variant_calling import germline_variants  # noqa: F401
 

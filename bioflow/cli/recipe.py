@@ -13,7 +13,7 @@ from rich import print as rprint
 from bioflow.cli._app import app, console
 
 
-def _parse_recipe_extra(extra: "list[str]") -> "dict[str, object]":
+def _parse_recipe_extra(extra: list[str]) -> dict[str, object]:
     """Parse pass-through ``--key value`` / ``--key=value`` / ``--flag``
     tokens (collected by Click's ``ignore_unknown_options``) into a
     kwargs dict.
@@ -23,7 +23,7 @@ def _parse_recipe_extra(extra: "list[str]") -> "dict[str, object]":
     (e.g. ``cb_len + 1``) keep working; everything else stays a string
     and recipes coerce to ``Path`` themselves.
     """
-    out: "dict[str, object]" = {}
+    out: dict[str, object] = {}
     i = 0
     while i < len(extra):
         tok = extra[i]
@@ -98,7 +98,7 @@ def recipe_cmd(
         help="Record run provenance (input SHA-256, image digests, "
              "commands, timestamps) and write provenance.json + "
              "ro-crate-metadata.json into the workspace."),
-    set_overrides: "list[str]" = typer.Option(
+    set_overrides: list[str] = typer.Option(
         [], "--set",
         help="Override a stage parameter without editing the recipe: "
              "--set <stage>.<param>=<value> (repeatable).  "
@@ -115,8 +115,8 @@ def recipe_cmd(
       bioflow recipe run pangenome --taxon Dickeya --max 13
       bioflow recipe run pangenome --taxon Pectobacterium --dry-run
     """
-    from bioflow import recipes  # noqa: PLC0415  — lazy import
-    from bioflow.sdk import set_workspace  # noqa: PLC0415
+    from bioflow import recipes
+    from bioflow.sdk import set_workspace
 
     if action == "list":
         if not recipes.names():
@@ -157,7 +157,7 @@ def recipe_cmd(
         rprint(f"\n[bold]Running recipe[/] [cyan]{name}[/]  workspace=[dim]{out}[/]")
 
         # Stage-parameter overrides (--set <stage>.<param>=<value>)
-        overrides: "dict[str, object]" = {}
+        overrides: dict[str, object] = {}
         for item in set_overrides:
             if "=" not in item:
                 rprint(f"[red]--set expects <key>=<value>, got {item!r}.[/]")
@@ -165,7 +165,7 @@ def recipe_cmd(
             key, val = item.split("=", 1)
             overrides[key.strip()] = val
         if overrides:
-            from bioflow.sdk import set_param_overrides  # noqa: PLC0415
+            from bioflow.sdk import set_param_overrides
             set_param_overrides(overrides)
             rprint(f"[dim]parameter overrides: {overrides}[/]")
 
@@ -173,9 +173,9 @@ def recipe_cmd(
         # Explicit options below cover the comparative-genomics recipes;
         # any other recipe's parameters arrive as pass-through --key value
         # tokens parsed from ctx.args.
-        import inspect  # noqa: PLC0415
+        import inspect
         sig = inspect.signature(pipe.func)
-        candidate: "dict[str, object]" = {
+        candidate: dict[str, object] = {
             "taxon": taxon,
             "out_dir": out,
             "max_genomes": max_genomes,
@@ -222,7 +222,7 @@ def recipe_cmd(
             )
             raise typer.Exit(code=1)
 
-        from bioflow.core import provenance as _prov  # noqa: PLC0415
+        from bioflow.core import provenance as _prov
 
         recorder = None
         if provenance:
@@ -249,7 +249,7 @@ def recipe_cmd(
         rprint(f"\n[green]✓ Recipe done.[/]  result.out_dir = {getattr(result, 'out_dir', '?')}")
 
         # Best-effort results overview (no-op for recipes without a harvester).
-        from bioflow.core.results import maybe_build_overview  # noqa: PLC0415
+        from bioflow.core.results import maybe_build_overview
         ov = maybe_build_overview(name, out)
         if ov:
             rprint(f"[dim]  overview → {ov['overview']}[/]")

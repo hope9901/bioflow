@@ -58,7 +58,7 @@ def run_multiqc(
 
     if backend is None:
         try:
-            from bioflow.core.runner import make_backend  # noqa: PLC0415
+            from bioflow.core.runner import make_backend
             backend = make_backend()
         except Exception as exc:
             log.warning(f"MultiQC skipped — container backend unavailable: {exc}")

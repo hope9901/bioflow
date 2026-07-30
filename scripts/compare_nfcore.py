@@ -52,7 +52,6 @@ import math
 import sys
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # VCF concordance
 # ---------------------------------------------------------------------------
@@ -64,7 +63,7 @@ def _open_text(path: Path):
     return p.open("r", encoding="utf-8")
 
 
-def _read_vcf_sites(path: Path, pass_only: bool) -> "dict[str, str]":
+def _read_vcf_sites(path: Path, pass_only: bool) -> dict[str, str]:
     """Return {``CHROM:POS:REF:ALT``: first-sample GT} for each record.
 
     Multi-allelic ALTs are split so each allele is keyed independently.
@@ -117,7 +116,7 @@ def compare_vcf(bioflow: Path, reference: Path, *, pass_only: bool = True) -> di
 # Count-matrix concordance (Spearman, stdlib)
 # ---------------------------------------------------------------------------
 
-def _read_counts(path: Path) -> "dict[str, float]":
+def _read_counts(path: Path) -> dict[str, float]:
     """Return {gene_id: count} from a 2+-column TSV (gene id, then the
     first numeric column).  Header lines and non-numeric rows skipped."""
     out: dict[str, float] = {}
@@ -134,7 +133,7 @@ def _read_counts(path: Path) -> "dict[str, float]":
     return out
 
 
-def _rank(values: "list[float]") -> "list[float]":
+def _rank(values: list[float]) -> list[float]:
     """Average-rank the values (ties share the mean rank)."""
     order = sorted(range(len(values)), key=lambda i: values[i])
     ranks = [0.0] * len(values)
@@ -150,7 +149,7 @@ def _rank(values: "list[float]") -> "list[float]":
     return ranks
 
 
-def _spearman(xs: "list[float]", ys: "list[float]") -> float:
+def _spearman(xs: list[float], ys: list[float]) -> float:
     n = len(xs)
     if n < 2:
         return float("nan")
@@ -185,7 +184,7 @@ def compare_counts(bioflow: Path, reference: Path) -> dict:
 # CLI
 # ---------------------------------------------------------------------------
 
-def main(argv: "list[str] | None" = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
     sub = p.add_subparsers(dest="kind", required=True)
 

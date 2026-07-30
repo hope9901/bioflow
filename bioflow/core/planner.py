@@ -447,11 +447,7 @@ def _chain_artifact_params(
         if _get("r1_long") and "genome_assembly.step1" in completed_stage_ids:
             params["r1_long"] = running_inputs["r1_long"]
 
-    elif stage_id in ("genome_assembly.step3",):
-        if _get("assembly_fasta"):
-            params["assembly_fasta"] = running_inputs["assembly_fasta"]
-
-    elif stage_id == "genome_assembly.step4":
+    elif stage_id in ("genome_assembly.step3",) or stage_id == "genome_assembly.step4":
         if _get("assembly_fasta"):
             params["assembly_fasta"] = running_inputs["assembly_fasta"]
 
@@ -593,13 +589,7 @@ def _chain_artifact_params(
         # ATAC-seq never uses a control sample → empty control_arg
         params["control_arg"] = ""
 
-    elif stage_id == "atac_seq.step4":
-        if _get("alignment_bam"):
-            params["alignment_bam"] = running_inputs["alignment_bam"]
-        if _get("peaks_bed"):
-            params["peaks_bed"] = running_inputs["peaks_bed"]
-
-    elif stage_id == "atac_seq.step5":
+    elif stage_id == "atac_seq.step4" or stage_id == "atac_seq.step5":
         if _get("alignment_bam"):
             params["alignment_bam"] = running_inputs["alignment_bam"]
         if _get("peaks_bed"):
@@ -854,15 +844,15 @@ def interactive_build(pipeline: str, out: Path, *, registry_dir: Path = Path("re
         )
 
     try:
-        import questionary  # noqa: PLC0415
+        import questionary
     except ImportError as exc:
         raise RuntimeError(
             "questionary is required for interactive mode: pip install questionary"
         ) from exc
 
-    from rich.console import Console  # noqa: PLC0415
+    from rich.console import Console
 
-    from bioflow.core.compatibility import classify, filter_applicable  # noqa: PLC0415
+    from bioflow.core.compatibility import classify, filter_applicable
 
     console = Console()
 
@@ -1024,7 +1014,7 @@ def interactive_build(pipeline: str, out: Path, *, registry_dir: Path = Path("re
         # user can accept or override (bioflow lineage <taxon> for a finer pick).
         default = ""
         if key == "busco_lineage":
-            from bioflow.core.lineage import recommend_lineage  # noqa: PLC0415
+            from bioflow.core.lineage import recommend_lineage
             rec = recommend_lineage(species=species)
             default = rec["lineage"]
             console.print(f"  [dim]recommended lineage for {species}: "

@@ -7,8 +7,9 @@ a single-stage recipe.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 from bioflow import pipeline, stage, stage_input
 from bioflow.io import write_text

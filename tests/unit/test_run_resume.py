@@ -23,7 +23,6 @@ from bioflow.core.planner import ExecutionPlan, StagePlan
 from bioflow.core.registry import Tool
 from bioflow.core.runner import CommandResult, run_plan
 
-
 # ---------------------------------------------------------------------------
 # Fault-injecting backend
 # ---------------------------------------------------------------------------
@@ -211,6 +210,7 @@ class TestStatusCli:
 
     def test_status_json(self, tmp_path):
         import json
+
         from bioflow.core.checkpoint import mark_completed
         mark_completed(tmp_path, "stage_a", {"stage_dir": str(tmp_path / "a")})
 

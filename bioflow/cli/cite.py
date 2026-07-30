@@ -31,8 +31,8 @@ def cite_cmd(
       bioflow cite spades prokka                  # specific tools
       bioflow cite prokaryote_assembly -f bibtex > refs.bib
     """
-    from bioflow.core import citations  # noqa: PLC0415
-    from bioflow.recipes import names as recipe_names  # noqa: PLC0415
+    from bioflow.core import citations
+    from bioflow.recipes import names as recipe_names
 
     if fmt not in ("text", "bibtex"):
         rprint("[red]--format must be 'text' or 'bibtex'[/]")

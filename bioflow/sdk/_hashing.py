@@ -86,8 +86,8 @@ def _referenced_globals_digest(func) -> str:
     Imports from other modules (``Path``, ``re`` …) and builtins are ignored —
     their behaviour is pinned by the dependency set, not the recipe.
     """
-    seen: "set[str]" = set()
-    parts: "list[str]" = []
+    seen: set[str] = set()
+    parts: list[str] = []
 
     def _walk(fn) -> None:
         code = getattr(fn, "__code__", None)

@@ -21,10 +21,9 @@ from pathlib import Path
 
 import pytest
 
-
 _docker_unavailable: str | None = None
 try:
-    import docker as _docker_mod   # type: ignore[import-not-found]
+    import docker as _docker_mod  # type: ignore[import-not-found]
     _docker_mod.from_env().ping()
 except Exception as exc:
     _docker_unavailable = str(exc)
@@ -44,7 +43,7 @@ FIXTURE_R2 = REPO_ROOT / "data" / "test" / "ecoli_small" / "real_R2.fastq.gz"
 
 @pytest.fixture(autouse=True)
 def _runtime(tmp_path):
-    from bioflow import set_workspace, set_backend, DockerBackend
+    from bioflow import DockerBackend, set_backend, set_workspace
     set_workspace(tmp_path / "ws")
     set_backend(DockerBackend())
     yield

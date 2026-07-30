@@ -7,10 +7,11 @@ one Pipeline that fans out N genomes × M databases, parallel='auto'.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Iterable, Optional, Sequence
+from typing import Optional
 
-from bioflow import stage, pipeline
+from bioflow import pipeline, stage
 from bioflow.recipes import register
 
 

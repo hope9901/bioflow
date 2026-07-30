@@ -32,7 +32,7 @@ LB_START = "<!-- LEADERBOARD:START -->"
 LB_END = "<!-- LEADERBOARD:END -->"
 
 
-def _load_citations() -> "tuple[dict, dict | None]":
+def _load_citations() -> tuple[dict, dict | None]:
     """Return (tool_id → {total, recent, category, pmid}, recent_window) from the
     cached ``registry/tool_citations.json``, or ({}, None) if it isn't there —
     the citation columns are additive, so docs still generate without it."""
@@ -46,11 +46,11 @@ def _fmt_cites(n: object) -> str:
     return f"{n:,}" if isinstance(n, int) else "n/a"
 
 
-def _window_label(window: "dict | None") -> str:
+def _window_label(window: dict | None) -> str:
     return f"{window['start']}–{window['end']}" if window else "recent"
 
 
-def _leaderboard(cites: dict, window: "dict | None", *, top: int, level: str) -> str:
+def _leaderboard(cites: dict, window: dict | None, *, top: int, level: str) -> str:
     """Markdown 'most-used tools' table, ranked by recent citations."""
     ranked = sorted(
         ((tid, c) for tid, c in cites.items() if isinstance(c.get("recent"), int)),
@@ -80,7 +80,7 @@ def _leaderboard(cites: dict, window: "dict | None", *, top: int, level: str) ->
     return "\n".join(lines)
 
 
-def _load_by_cat() -> "dict[str, list[dict]]":
+def _load_by_cat() -> dict[str, list[dict]]:
     by_cat: dict[str, list[dict]] = {}
     for p in sorted(TOOLS_DIR.rglob("*.yaml")):
         d = yaml.safe_load(p.read_text(encoding="utf-8"))
@@ -189,7 +189,7 @@ def gen_tools() -> str:
     return "\n".join(lines) + "\n"
 
 
-def _swap_points(pipe) -> "list[tuple[str, str, list[str]]]":
+def _swap_points(pipe) -> list[tuple[str, str, list[str]]]:
     """Discover a recipe's ``--set`` swap flags from its source.
 
     A swap point is a keyword parameter with a string default that the recipe
@@ -202,7 +202,7 @@ def _swap_points(pipe) -> "list[tuple[str, str, list[str]]]":
         sig = inspect.signature(pipe.func)
     except (TypeError, OSError):
         return []
-    out: "list[tuple[str, str, list[str]]]" = []
+    out: list[tuple[str, str, list[str]]] = []
     for pname, param in sig.parameters.items():
         if param.default is inspect.Parameter.empty or not isinstance(param.default, str):
             continue
@@ -217,7 +217,7 @@ def gen_recipes() -> str:
     # Import after sys.path is set by running from repo root
     import sys
     sys.path.insert(0, str(REPO_ROOT))
-    from bioflow.recipes import get, names  # noqa: PLC0415
+    from bioflow.recipes import get, names
 
     lines = [
         "# Recipes",
@@ -277,7 +277,7 @@ def gen_recipes() -> str:
     return "\n".join(lines) + "\n"
 
 
-def _landing_leaderboard_html(cites: dict, window: "dict | None", top: int = 12) -> str:
+def _landing_leaderboard_html(cites: dict, window: dict | None, top: int = 12) -> str:
     """A styled HTML leaderboard table for the promo landing (web/index.html)."""
     ranked = sorted(
         ((tid, c) for tid, c in cites.items() if isinstance(c.get("recent"), int)),

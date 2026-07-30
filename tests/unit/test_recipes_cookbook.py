@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from bioflow import set_backend, set_workspace, MockBackend
+from bioflow import MockBackend, set_backend, set_workspace
 from bioflow.recipes import get, names
 
 
@@ -182,6 +182,7 @@ class TestCli:
 
     def _run(self, argv):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner().invoke(app, argv)
 

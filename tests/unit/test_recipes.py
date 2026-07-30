@@ -1,10 +1,9 @@
 """Phase 3 — recipe registry + CLI bridge tests."""
 from __future__ import annotations
 
-
 import pytest
 
-from bioflow import set_backend, set_workspace, MockBackend
+from bioflow import MockBackend, set_backend, set_workspace
 from bioflow.recipes import RECIPES, get, names, register
 from bioflow.sdk import Pipeline
 
@@ -133,6 +132,7 @@ class TestCliBridge:
 
     def _runner(self):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner(), app
 

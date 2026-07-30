@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioflow import stage, set_workspace, set_backend, MockBackend
+from bioflow import MockBackend, set_backend, set_workspace, stage
 from bioflow.core.runner import CommandResult
 from bioflow.sdk import _bump_resources
 

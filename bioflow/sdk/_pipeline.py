@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import functools
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Optional
 
 from bioflow.core.logger import get_logger
-
 from bioflow.sdk._stage import Stage
 
 log = get_logger()
@@ -66,8 +66,10 @@ class Pipeline:
 
     def _run_concurrent(self, args: tuple, kwargs: dict) -> Any:
         # Import here so the eager path never pays for the concurrency machinery.
-        from bioflow.sdk._concurrent import (  # noqa: PLC0415
-            FutureStageResult, Scheduler, _current,
+        from bioflow.sdk._concurrent import (
+            FutureStageResult,
+            Scheduler,
+            _current,
         )
         sched = Scheduler()
         token = _current.set(sched)

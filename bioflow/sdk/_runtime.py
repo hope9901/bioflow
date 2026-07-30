@@ -20,7 +20,7 @@ _workspace_lock = threading.Lock()
 _active_workspace: Optional[Path] = None
 _active_backend: Optional[ContainerBackend] = None
 _run_counter = 0
-_param_overrides: "dict[str, object]" = {}
+_param_overrides: dict[str, object] = {}
 
 
 def set_workspace(path: Path) -> None:
@@ -44,7 +44,7 @@ def set_backend(backend: ContainerBackend) -> None:
         _active_backend = backend
 
 
-def set_param_overrides(overrides: "dict[str, object]") -> None:
+def set_param_overrides(overrides: dict[str, object]) -> None:
     """Replace the active per-stage parameter overrides.
 
     Keys are ``"<stage>.<param>"`` (stage-scoped) or ``"<param>"`` (any stage
@@ -59,7 +59,7 @@ def set_param_overrides(overrides: "dict[str, object]") -> None:
         _param_overrides = dict(overrides or {})
 
 
-def _get_param_overrides() -> "dict[str, object]":
+def _get_param_overrides() -> dict[str, object]:
     return _param_overrides
 
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from bioflow.core.registry import ContainerSpec, Tool, load_registry
 
-
 # ---------------------------------------------------------------------------
 # ContainerSpec.pinned_image
 # ---------------------------------------------------------------------------

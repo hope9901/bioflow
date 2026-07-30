@@ -9,9 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-
 from bioflow import Report
-
 
 # ---------------------------------------------------------------------------
 # Basic build / write

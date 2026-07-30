@@ -10,11 +10,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioflow.llm import (
-    redact,
-    diagnose_failure,
     LlmDisabled,
+    diagnose_failure,
+    redact,
 )
-
 
 # ---------------------------------------------------------------------------
 # redact() — the core safety net
@@ -196,6 +195,7 @@ class TestCli:
 
     def _run(self, argv, **kwargs):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner().invoke(app, argv, **kwargs)
 

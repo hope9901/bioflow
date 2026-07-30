@@ -93,7 +93,7 @@ def _parse_fastp(path: Path) -> dict:
 def _parse_bracken(path: Path) -> dict:
     """Summarise a Bracken TSV (name / … / new_est_reads / fraction) into a
     per-sample row: total classified reads, taxa count, and the top taxon."""
-    taxa: "list[tuple[str, int, float]]" = []
+    taxa: list[tuple[str, int, float]] = []
     for line in path.read_text(encoding="utf-8").splitlines()[1:]:
         parts = line.split("\t")
         if len(parts) < 7:
@@ -117,13 +117,13 @@ def _parse_bracken(path: Path) -> dict:
 # Harvest — workspace → tidy rows
 # ---------------------------------------------------------------------------
 
-def _find_report(root: Path, pattern: str) -> "Path | None":
+def _find_report(root: Path, pattern: str) -> Path | None:
     """First match of *pattern* under *root*, skipping the staged _cohort_qc
     mirror tree (those are copies for MultiQC, not the originals)."""
     return next((p for p in root.rglob(pattern) if "_cohort_qc" not in p.parts), None)
 
 
-def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
+def harvest_prokaryote_assembly(workspace: Path) -> tuple[list[dict], dict]:
     """Per sample: a tidy metrics row + links to the tools' own report pages.
 
     Works for a single ``recipe run`` (outputs directly under the workspace)
@@ -131,8 +131,8 @@ def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
     ``--prefix`` names the report ``<sample_id>.txt`` and the sample root is the
     dir holding that stage's ``.cache``.
     """
-    rows: "list[dict]" = []
-    reports: "dict[str, dict[str, Path]]" = {}
+    rows: list[dict] = []
+    reports: dict[str, dict[str, Path]] = {}
     for ptxt in sorted(workspace.rglob("prokka/*.txt")):
         sid = ptxt.stem
         root = ptxt.parents[3] if len(ptxt.parents) >= 4 else workspace
@@ -158,14 +158,14 @@ def harvest_prokaryote_assembly(workspace: Path) -> "tuple[list[dict], dict]":
     return rows, reports
 
 
-def harvest_metagenomics_profile(workspace: Path) -> "tuple[list[dict], dict]":
+def harvest_metagenomics_profile(workspace: Path) -> tuple[list[dict], dict]:
     """Per sample: a Bracken profile summary + a link to the Krona sunburst.
 
     The Bracken stage writes ``<sample_id>.bracken.tsv``; the sample root is the
     dir holding that stage's ``.cache``.
     """
-    rows: "list[dict]" = []
-    reports: "dict[str, dict[str, Path]]" = {}
+    rows: list[dict] = []
+    reports: dict[str, dict[str, Path]] = {}
     for bt in sorted(workspace.rglob("*.bracken.tsv")):
         if "_cohort_qc" in bt.parts:
             continue
@@ -197,7 +197,7 @@ def _count_lines(path: Path, skip_prefix: str = "#") -> int:
     return n
 
 
-def harvest_germline_variants(workspace: Path) -> "tuple[list[dict], dict]":
+def harvest_germline_variants(workspace: Path) -> tuple[list[dict], dict]:
     """Per sample: variant counts + a link to snpEff's own annotation report.
 
     The annotate stage writes ``<sample_id>.annotated.vcf`` plus snpEff's
@@ -206,8 +206,8 @@ def harvest_germline_variants(workspace: Path) -> "tuple[list[dict], dict]":
     snpEff's rich report rather than redrawing it.  The sample root is the dir
     holding that stage's ``.cache``.
     """
-    rows: "list[dict]" = []
-    reports: "dict[str, dict[str, Path]]" = {}
+    rows: list[dict] = []
+    reports: dict[str, dict[str, Path]] = {}
     for vcf in sorted(workspace.rglob("*.annotated.vcf")):
         if "_cohort_qc" in vcf.parts:
             continue
@@ -227,7 +227,7 @@ def harvest_germline_variants(workspace: Path) -> "tuple[list[dict], dict]":
 
 
 # recipe → how to harvest it + what its tidy table looks like.
-_RECIPES: "dict[str, dict]" = {
+_RECIPES: dict[str, dict] = {
     "prokaryote_assembly": {
         "harvest": harvest_prokaryote_assembly,
         "table": "assembly_metrics.csv",
@@ -256,7 +256,7 @@ _RECIPES: "dict[str, dict]" = {
 # Layer 1 — write tidy data + manifest
 # ---------------------------------------------------------------------------
 
-def write_results(recipe: str, rows: "list[dict]", reports: dict, out_dir: Path) -> dict:
+def write_results(recipe: str, rows: list[dict], reports: dict, out_dir: Path) -> dict:
     cfg = _RECIPES[recipe]
     columns = cfg["columns"]
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -305,7 +305,7 @@ def _rel(p: Path, base: Path) -> str:
 _IMAGE_SUFFIXES = {".png", ".svg", ".jpg", ".jpeg", ".gif"}
 
 
-def _report_block(sid: str, links: "dict[str, Path]", base: Path) -> str:
+def _report_block(sid: str, links: dict[str, Path], base: Path) -> str:
     """One sample's reports: image outputs are embedded, HTML pages are linked."""
     if not links:
         return (f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> "
@@ -326,7 +326,7 @@ def _report_block(sid: str, links: "dict[str, Path]", base: Path) -> str:
     return f"<div class='rep'><span class='sid'>{html.escape(sid)}</span> {body}</div>"
 
 
-def _table(rows: "list[dict]", columns: "list[str]") -> str:
+def _table(rows: list[dict], columns: list[str]) -> str:
     head = "".join(f"<th>{html.escape(c)}</th>" for c in columns)
     body = []
     for r in rows:
@@ -338,7 +338,7 @@ def _table(rows: "list[dict]", columns: "list[str]") -> str:
     return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
 
 
-def render_overview(recipe: str, rows: "list[dict]", reports: dict,
+def render_overview(recipe: str, rows: list[dict], reports: dict,
                     out_html: Path) -> Path:
     cfg = _RECIPES[recipe]
     base = out_html.parent
@@ -385,7 +385,7 @@ bioflow surfaces those rather than redrawing them.</p>
 # Entry point
 # ---------------------------------------------------------------------------
 
-def build_overview(recipe: str, workspace: Path, out_dir: "Path | None" = None) -> dict:
+def build_overview(recipe: str, workspace: Path, out_dir: Path | None = None) -> dict:
     """Harvest *workspace* into tidy data + an overview report.
 
     Returns ``{"csv", "manifest", "overview", "rows"}``.  Raises ValueError for
@@ -413,7 +413,7 @@ def has_harvester(recipe: str) -> bool:
     return recipe in _RECIPES
 
 
-def maybe_build_overview(recipe: str, workspace: Path) -> "dict | None":
+def maybe_build_overview(recipe: str, workspace: Path) -> dict | None:
     """Build the overview at the end of a run, best-effort — never raises.
 
     Returns the paths dict on success, or ``None`` if the recipe has no

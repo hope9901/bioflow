@@ -17,7 +17,6 @@ from bioflow.core.cohort import (
     run_cohort,
 )
 
-
 # ---------------------------------------------------------------------------
 # read_samplesheet
 # ---------------------------------------------------------------------------
@@ -67,8 +66,8 @@ def test_read_samplesheet_no_data_rows(tmp_path):
 class _Recorder:
     """Fake per-sample runner that records calls and succeeds by default."""
 
-    def __init__(self, fail: "set[str] | None" = None):
-        self.calls: "list[tuple[str, str, Path, dict]]" = []
+    def __init__(self, fail: set[str] | None = None):
+        self.calls: list[tuple[str, str, Path, dict]] = []
         self.fail = fail or set()
 
     def __call__(self, recipe, sample_id, workspace, params) -> SampleResult:

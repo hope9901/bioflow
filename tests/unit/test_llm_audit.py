@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioflow.llm import audit as _audit
 from bioflow.llm import CapExceeded
+from bioflow.llm import audit as _audit
 
 
 @pytest.fixture(autouse=True)
@@ -232,6 +232,7 @@ class TestCli:
 
     def _run(self, argv):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner().invoke(app, argv)
 

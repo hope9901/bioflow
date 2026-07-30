@@ -18,13 +18,13 @@ def recommend_cmd(
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the plan without executing."),
 ) -> None:
     """Run a preset (recommended) pipeline against an input config."""
-    import yaml  # noqa: PLC0415
+    import yaml
 
-    from bioflow.core.compatibility import classify  # noqa: PLC0415
-    from bioflow.core.hardware import detect  # noqa: PLC0415
-    from bioflow.core.planner import plan_from_preset  # noqa: PLC0415
-    from bioflow.core.registry import load_registry  # noqa: PLC0415
-    from bioflow.core.runner import run_plan  # noqa: PLC0415
+    from bioflow.core.compatibility import classify
+    from bioflow.core.hardware import detect
+    from bioflow.core.planner import plan_from_preset
+    from bioflow.core.registry import load_registry
+    from bioflow.core.runner import run_plan
 
     # Resolve registry_dir from config file (may override --registry)
     with config.open("r", encoding="utf-8") as f:
@@ -66,7 +66,7 @@ def custom_cmd(
     registry: Path = typer.Option(REGISTRY_DEFAULT, "--registry", "-r"),
 ) -> None:
     """Interactively pick tools per stage (only hardware-compatible ones shown)."""
-    from bioflow.core.planner import interactive_build  # noqa: PLC0415
+    from bioflow.core.planner import interactive_build
 
     interactive_build(pipeline, out, registry_dir=registry)
     rprint(f"[green]✓ Saved custom pipeline config →[/] {out}")
@@ -100,9 +100,9 @@ def run_cmd(
         rprint("[red]--fresh and --resume are mutually exclusive.[/]")
         raise typer.Exit(code=2)
 
-    from bioflow.core.checkpoint import STATE_FILE  # noqa: PLC0415
-    from bioflow.core.planner import plan_from_config  # noqa: PLC0415
-    from bioflow.core.runner import run_plan  # noqa: PLC0415
+    from bioflow.core.checkpoint import STATE_FILE
+    from bioflow.core.planner import plan_from_config
+    from bioflow.core.runner import run_plan
 
     execution_plan = plan_from_config(config)
 
@@ -136,7 +136,7 @@ def status_cmd(
       • failed_stages    — last error per stage, with stderr tail
       • artifacts        — recorded stage_dir for each completed stage
     """
-    from bioflow.core.checkpoint import STATE_FILE, load  # noqa: PLC0415
+    from bioflow.core.checkpoint import STATE_FILE, load
 
     state_path = workdir / STATE_FILE
     if not state_path.exists():
@@ -149,7 +149,7 @@ def status_cmd(
     state = load(workdir)
 
     if json_out:
-        import json  # noqa: PLC0415
+        import json
         sys.stdout.write(json.dumps(state, indent=2, sort_keys=True) + "\n")
         return
 

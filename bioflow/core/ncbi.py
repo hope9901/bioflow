@@ -43,9 +43,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Callable, Optional
 
 if TYPE_CHECKING:
     from rich.progress import TaskID
@@ -273,9 +274,14 @@ class _NoOpBar:
 
 class _RichBytesBar:
     def __init__(self, description: str) -> None:
-        from rich.progress import (  # noqa: PLC0415
-            BarColumn, DownloadColumn, Progress, SpinnerColumn,
-            TextColumn, TimeElapsedColumn, TransferSpeedColumn,
+        from rich.progress import (
+            BarColumn,
+            DownloadColumn,
+            Progress,
+            SpinnerColumn,
+            TextColumn,
+            TimeElapsedColumn,
+            TransferSpeedColumn,
         )
         self._prog = Progress(
             SpinnerColumn(),
@@ -286,7 +292,7 @@ class _RichBytesBar:
             TimeElapsedColumn(),
         )
         self._desc = description
-        self._task: Optional["TaskID"] = None
+        self._task: Optional[TaskID] = None
 
     def __enter__(self):
         self._prog.__enter__()
@@ -307,9 +313,13 @@ class _RichBytesBar:
 
 class _RichCountBar:
     def __init__(self, description: str, total: int) -> None:
-        from rich.progress import (  # noqa: PLC0415
-            BarColumn, MofNCompleteColumn, Progress,
-            SpinnerColumn, TextColumn, TimeElapsedColumn,
+        from rich.progress import (
+            BarColumn,
+            MofNCompleteColumn,
+            Progress,
+            SpinnerColumn,
+            TextColumn,
+            TimeElapsedColumn,
         )
         self._prog = Progress(
             SpinnerColumn(),
@@ -320,7 +330,7 @@ class _RichCountBar:
         )
         self._desc = description
         self._total = total
-        self._task: Optional["TaskID"] = None
+        self._task: Optional[TaskID] = None
 
     def __enter__(self):
         self._prog.__enter__()

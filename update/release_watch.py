@@ -55,7 +55,6 @@ from typing import Optional
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY = REPO_ROOT / "registry" / "tools"
 DEFAULT_CANDIDATES_DIR = REPO_ROOT / "update" / "candidates"

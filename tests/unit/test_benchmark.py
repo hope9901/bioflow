@@ -17,7 +17,7 @@ SAMPLE_CANDIDATE = REPO_ROOT / "tests" / "fixtures" / "hypo_assembler.yaml"
 
 def test_validate_candidate_passes_for_sample(tmp_path):
     """The bundled sample candidate should pass schema validation."""
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import _validate_candidate
     tool = _validate_candidate(SAMPLE_CANDIDATE)
     assert tool["id"] == "hypo_assembler"
@@ -30,7 +30,7 @@ def test_validate_candidate_fails_for_invalid_yaml(tmp_path):
     bad = tmp_path / "bad_tool.yaml"
     bad.write_text(yaml.dump({"id": "bad", "name": "Bad"}), encoding="utf-8")
 
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import _validate_candidate
     with pytest.raises(ValueError, match="Schema validation"):
         _validate_candidate(bad)
@@ -41,7 +41,7 @@ def test_validate_candidate_fails_for_invalid_yaml(tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_resolve_test_dataset_prokaryote_step2():
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import _resolve_test_dataset
     # ecoli_small must map to genome_assembly.step2 / prokaryote
     # Dataset may not exist in CI — we just check the return type
@@ -51,7 +51,7 @@ def test_resolve_test_dataset_prokaryote_step2():
 
 
 def test_resolve_test_dataset_unknown_stage():
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import _resolve_test_dataset
     result = _resolve_test_dataset("genome_assembly.step99", ["prokaryote"])
     assert result is None
@@ -63,7 +63,7 @@ def test_resolve_test_dataset_unknown_stage():
 
 def test_smoke_test_skips_when_no_dataset():
     """Without a test dataset on disk, smoke_test should skip gracefully."""
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import smoke_test
     result = smoke_test(SAMPLE_CANDIDATE, use_real_docker=False)
     # Either passes (dataset found) or skipped (dataset not yet created)
@@ -76,7 +76,7 @@ def test_smoke_test_fails_on_schema_error(tmp_path):
     bad = tmp_path / "broken.yaml"
     bad.write_text(yaml.dump({"id": "broken"}), encoding="utf-8")
 
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import smoke_test
     result = smoke_test(bad, use_real_docker=False)
     assert not result.passed
@@ -89,7 +89,7 @@ def test_smoke_test_fails_on_schema_error(tmp_path):
 
 def test_cli_main_returns_zero_on_all_skipped(tmp_path, capsys):
     """When all candidates are skipped (no dataset), exit code should be 0."""
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import main
     code = main(["--candidate", str(SAMPLE_CANDIDATE)])
     # 0 = no failures (skips don't count as failures)
@@ -101,7 +101,7 @@ def test_cli_main_returns_one_on_bad_candidate(tmp_path, capsys):
     bad = tmp_path / "bad.yaml"
     bad.write_text(yaml.dump({"id": "oops"}), encoding="utf-8")
 
-    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))  # noqa: E401, E702
+    import sys; sys.path.insert(0, str(REPO_ROOT / "update"))
     from benchmark import main
     code = main(["--candidate", str(bad)])
     assert code == 1

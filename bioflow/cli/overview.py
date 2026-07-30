@@ -34,7 +34,7 @@ def overview_cmd(
     Layer 1 (assembly_metrics.csv + results.json) is tidy data to plot
     yourself; Layer 2 (overview.html) is the canonical at-a-glance view.
     """
-    from bioflow.core.results import build_overview  # noqa: PLC0415
+    from bioflow.core.results import build_overview
 
     try:
         res = build_overview(recipe, workspace, out)

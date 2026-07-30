@@ -53,7 +53,7 @@ def cohort_cmd(
     ``--reference ref.fa``.  Recipes that already loop over a samplesheet
     internally (rnaseq_deg, joint_genotyping) are NOT cohort targets.
     """
-    from bioflow.core.cohort import read_samplesheet, run_cohort  # noqa: PLC0415
+    from bioflow.core.cohort import read_samplesheet, run_cohort
 
     # Shared --key value tokens apply to every sample.
     common = {k: str(v) for k, v in _parse_recipe_extra(ctx.args).items()}
@@ -100,7 +100,7 @@ def cohort_cmd(
         rprint(f"[dim]cohort MultiQC → {report.multiqc_report}[/]")
 
     # Best-effort results overview across the cohort (no-op without a harvester).
-    from bioflow.core.results import maybe_build_overview  # noqa: PLC0415
+    from bioflow.core.results import maybe_build_overview
     ov = maybe_build_overview(recipe, out)
     if ov:
         rprint(f"[dim]results overview → {ov['overview']}[/]")

@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from bioflow import pipeline, stage
-from bioflow.recipes import register, choice
+from bioflow.recipes import choice, register
 
 # Mulled BioContainer carrying both bwa and samtools (the plain bwa
 # image has no samtools, so a ``bwa mem | samtools sort`` chain fails on

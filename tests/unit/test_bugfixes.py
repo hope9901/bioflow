@@ -15,7 +15,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
 # ===========================================================================
 # checkpoint.py
 # ===========================================================================
@@ -26,7 +25,7 @@ class TestCheckpointAtomicWrite:
     subsequent pipeline runs to crash with JSONDecodeError on load()."""
 
     def test_save_produces_valid_json(self, tmp_path):
-        from bioflow.core.checkpoint import save, load
+        from bioflow.core.checkpoint import load, save
 
         state = {"completed_stages": ["s1"], "artifacts": {"s1": {"f": "x"}}}
         save(tmp_path, state)
@@ -191,6 +190,7 @@ class TestRunnerUnresolvedPlaceholderWarning:
 
     def test_unresolved_placeholder_emits_warning(self, tmp_path, caplog):
         import logging
+
         from bioflow.core.planner import ExecutionPlan, StagePlan
         from bioflow.core.registry import load_registry
         from bioflow.core.runner import _render_command
@@ -338,8 +338,8 @@ class TestNcbiZipPathTraversal:
         # A true traversal requires absolute dest_name or os.sep in parts.
         # We exercise the guard by injecting a fake ZipFile with a
         # specially crafted member that resolves outside out_dir.
-        import zipfile as _zf
         import unittest.mock as _mock
+        import zipfile as _zf
 
         buf = io.BytesIO()
         with _zf.ZipFile(buf, "w") as z:
@@ -415,6 +415,7 @@ class TestApproveJsonschemaRequired:
 
     def test_missing_jsonschema_raises_approval_error(self, tmp_path, monkeypatch):
         import sys
+
         import yaml
 
         REGISTRY_DIR = Path(__file__).resolve().parents[2] / "registry"
@@ -498,9 +499,10 @@ class TestReportXssEscape:
 
     def test_error_detail_is_html_escaped(self, tmp_path):
         import yaml as _y
+
+        from bioflow.core.checkpoint import save
         from bioflow.core.planner import plan_from_preset
         from bioflow.core.report import render_summary
-        from bioflow.core.checkpoint import save
 
         cfg_path = tmp_path / "cfg.yaml"
         cfg_path.write_text(_y.safe_dump({
@@ -544,6 +546,7 @@ class TestRegistryGracefulDegradation:
 
     def test_invalid_yaml_is_skipped_not_fatal(self, tmp_path):
         import shutil
+
         from bioflow.core.registry import load_registry
 
         src = Path(__file__).resolve().parents[2] / "registry"
@@ -623,6 +626,7 @@ class TestBowtie2IndexChaining:
 
     def test_chip_seq_step2_maps_bowtie2_index_to_index(self, tmp_path):
         import yaml as _y
+
         from bioflow.core.planner import plan_from_preset
 
         cfg = tmp_path / "cfg.yaml"
@@ -712,8 +716,10 @@ class TestApproveChangelogIsolation:
 
     def test_test_registry_does_not_touch_project_changelog(self, tmp_path):
         import shutil
+
         import yaml as _y
-        from bioflow.core.approve import approve_candidate, _DEFAULT_CHANGELOG_PATH
+
+        from bioflow.core.approve import _DEFAULT_CHANGELOG_PATH, approve_candidate
 
         project_changelog_before = (
             _DEFAULT_CHANGELOG_PATH.read_text(encoding="utf-8")
@@ -818,7 +824,7 @@ class TestNcbiIncludeAliasing:
     and the friendly alias is translated."""
 
     def test_unknown_include_raises_clean_error(self, tmp_path):
-        from bioflow.core.ncbi import download_genomes, NcbiError
+        from bioflow.core.ncbi import NcbiError, download_genomes
         with pytest.raises(NcbiError, match="Unknown --include"):
             download_genomes(
                 "dickeya", tmp_path,
@@ -839,7 +845,7 @@ class TestNcbiDownloadTruncationDetected:
     BadZipFile far from the network error."""
 
     def test_truncated_download_raises_ncbi_error(self, tmp_path):
-        from bioflow.core.ncbi import _stream_to_file, NcbiError
+        from bioflow.core.ncbi import NcbiError, _stream_to_file
 
         class FakeResp:
             headers = {"Content-Length": "1000"}

@@ -6,7 +6,7 @@ rejects --cpus above the host core count.
 """
 from __future__ import annotations
 
-import bioflow.core.runner as runner
+from bioflow.core import runner
 from bioflow.core.runner import _clamp_resources
 
 
@@ -33,7 +33,7 @@ class TestClampResources:
         import psutil
 
         class _Mem:
-            total = int(16 * 1024 ** 3)   # 16 GB host
+            total = 16 * 1024 ** 3   # 16 GB host
 
         monkeypatch.setattr(psutil, "virtual_memory", lambda: _Mem())
         # Stage asks for 64 GB → clamp to ~90% of 16 GB.
@@ -47,7 +47,7 @@ class TestClampResources:
         import psutil
 
         class _Mem:
-            total = int(64 * 1024 ** 3)
+            total = 64 * 1024 ** 3
 
         monkeypatch.setattr(psutil, "virtual_memory", lambda: _Mem())
         _, eff_ram = _clamp_resources(8, 16.0)
