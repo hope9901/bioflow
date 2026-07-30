@@ -23,9 +23,9 @@ need a **multi-GB reference index or an external database** can't — the
 fixture would dwarf the repo and the download would make CI flaky.  Their
 external assets are catalogued for `bioflow db fetch`.
 
-!!! warning "Six recipes have no automated coverage"
-    `atac_seq`, `cog_enrichment`, `download_taxon`, `eukaryote_assembly`,
-    `joint_genotyping` and `metagenomics_profile` appear
+!!! warning "Five recipes have no automated coverage"
+    `atac_seq`, `cog_enrichment`, `download_taxon`, `eukaryote_assembly`
+    and `metagenomics_profile` appear
     in none of the three tiers — they are exercised by hand, not by CI.  A
     change to them is not caught by any test, so treat them as unverified until
     a smoke case or fixture exists.
@@ -59,6 +59,7 @@ hand-off instead.
 | `scrna_seq` | `--set counter=kb`: `kb ref` → `kb count` emits the 6-cell × 3-gene matrix (+ barcode/gene sidecars) Scanpy's reader consumes | `scrna_small/` |
 | `proteomics_dda` | Comet emits a **tab-delimited `.pin`** — Percolator rejects `.pep.xml`, so this is the regression guard for that fix | `proteomics_small/` |
 | `metagenome_assembly` | fastp → MEGAHIT assembles 2 contigs; MetaBAT2 computes depth + writes the `bins/` layout CheckM2 consumes (real bins need marker genes a tiny fixture lacks) | `metagenome_small/` |
+| `joint_genotyping` | 2 samples → HaplotypeCaller gVCF → CombineGVCFs → GenotypeGVCFs yields a 2-sample `cohort.vcf.gz` with 5 planted SNPs (SnpEff excluded — it downloads its DB at run time) | `cohort_small/` + `phix_small/` |
 
 ## Requires external reference data (10)
 
@@ -77,7 +78,7 @@ catalog key for `bioflow db fetch <key> --dest /refs` where one exists
 | `chip_seq` | Bowtie2 index + reference FASTA + GTF | `bowtie2_grch38_noalt`, `gencode_grch38` |
 | `atac_seq` | Bowtie2 index + reference FASTA (± blacklist) | `bowtie2_grch38_noalt`, `encode_blacklist_grch38` |
 | `germline_variants` | reference FASTA + SnpEff DB (± GATK known-sites) | SnpEff DB auto-downloads by name; `dbsnp_grch38`, `mills_indels_grch38` for BQSR |
-| `joint_genotyping` | as `germline_variants` + a cohort sample sheet | as above |
+| `joint_genotyping` | as `germline_variants` + a cohort sample sheet (the gVCF → cohort path is stage-guarded above) | as above |
 | `cog_enrichment` | COG-2024 reference FAA + definitions + a pangenome FAA + Roary GPA | upstream: NCBI COG-2024 |
 | `proteomics_dda` | protein FASTA DB + Comet params + raw spectra (search → `.pin` is stage-guarded above) | `uniprot_sprot` (spectra are vendor files) |
 

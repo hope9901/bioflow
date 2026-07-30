@@ -39,6 +39,8 @@ REPO = Path(__file__).resolve().parents[2]
 SCRNA = REPO / "data" / "test" / "scrna_small"
 PROT = REPO / "data" / "test" / "proteomics_small"
 META = REPO / "data" / "test" / "metagenome_small"
+COHORT = REPO / "data" / "test" / "cohort_small"
+PHIX = REPO / "data" / "test" / "phix_small"
 
 
 @pytest.fixture
@@ -152,3 +154,62 @@ def test_metagenome_assembly_binning_consumes_the_assembly(workspace):
         "MetaBAT2 wrote no per-contig depth table"
     assert (Path(binned.out_dir) / "bins").is_dir(), \
         "no bins/ directory for CheckM2 to consume"
+
+
+# ── joint_genotyping: cohort gVCF → combine → genotype ───────────────────────
+
+@pytest.mark.skipif(not (COHORT.exists() and PHIX.exists()),
+                    reason="cohort_small / phix_small fixture missing")
+def test_joint_genotyping_produces_a_multisample_cohort_vcf(workspace):
+    """The GATK cohort path must merge per-sample gVCFs into one multi-sample VCF.
+
+    This recipe had no automated coverage, so its fan-out + converge — the shape
+    the GLnexus swap plugs into — went unchecked. Two samples (the same phiX
+    reads) are called against a reference with 5 planted SNPs; the cohort must
+    carry both samples and all five variants. The final SnpEff stage is left out
+    on purpose: it downloads its DB from S3 at run time, which would make CI
+    network-dependent.
+    """
+    from bioflow.recipes.variant_calling.joint_genotyping import (
+        align_one, call_gvcf, combine_gvcfs, genotype_cohort, prepare_reference,
+        qc_one,
+    )
+
+    ref = COHORT / "reference.fa"
+    r1, r2 = PHIX / "sim_R1.fastq.gz", PHIX / "sim_R2.fastq.gz"
+
+    prepare_reference(ref)          # BWA index + .fai + .dict, once
+    gvcfs = []
+    for sid in ("sampleA", "sampleB"):
+        clean = qc_one(sid, r1, r2)
+        assert clean.ok, (clean.stderr or clean.stdout)[-300:]
+        aln = align_one(sid, clean, ref)
+        assert aln.ok, (aln.stderr or aln.stdout)[-300:]
+        gvcf = call_gvcf(sid, aln, ref)
+        assert gvcf.ok, (gvcf.stderr or gvcf.stdout)[-300:]
+        gvcfs.append(gvcf)
+
+    combined = combine_gvcfs(gvcfs, ref)
+    assert combined.ok, (combined.stderr or combined.stdout)[-300:]
+
+    cohort = genotype_cohort(combined, ref)
+    assert cohort.ok, (cohort.stderr or cohort.stdout)[-300:]
+    vcf = Path(cohort.out_dir) / "cohort.vcf.gz"
+    assert vcf.exists(), "GenotypeGVCFs wrote no cohort.vcf.gz"
+
+    # bgzipped VCF — read it straight, no second container or path juggling.
+    import gzip
+
+    samples: list[str] = []
+    n_records = 0
+    with gzip.open(vcf, "rt", encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            if line.startswith("#CHROM"):
+                samples = line.rstrip("\n").split("\t")[9:]
+            elif not line.startswith("#"):
+                n_records += 1
+    assert {"sampleA", "sampleB"} <= set(samples), \
+        f"cohort VCF is not multi-sample: {samples}"
+    assert n_records >= 5, (
+        f"expected the 5 planted SNPs in the cohort, got {n_records}"
+    )
