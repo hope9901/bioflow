@@ -12,19 +12,27 @@ file the same candidate twice.
 
 The candidate is a near-copy of the original tool YAML with:
   * ``version:`` bumped to the GitHub release tag
-  * ``container.image:`` tag suffix updated *best-effort*
-    (BioContainers builds usually lag GitHub by a few days — a
-    ``# TODO`` comment instructs the maintainer to confirm before
-    benchmarking)
+  * ``container.image:`` repointed at the **real** BioContainers build
+    for that version — resolved from the quay.io tags API, matching the
+    current image's Python build family (``py311`` etc.) when there are
+    several.  If no build exists yet (or the image is self-built, not a
+    BioContainer) the tag is a best-effort guess and ``update_meta.risks``
+    says so.
+  * ``container.image_digest:`` **dropped**.  Carrying the previous
+    digest onto a new tag would silently pin the *old* image under a new
+    version number — a reproducibility lie.  The digest is left for
+    ``scripts/pin_digests.py`` (the registry's single digest authority) to
+    fill when the candidate is applied; the old value is preserved under
+    ``update_meta.previous_digest`` for traceability.
   * ``last_reviewed:`` set to today
   * ``update_meta.source: release_watch``
 
 This script is read-only against the registry and the network; it
 only writes to ``update/candidates/`` and ``update/release_watch_state.json``.
 
-Network: stdlib only.  GitHub API rate limits unauthenticated callers
-to 60 requests/hour; set the env var ``GITHUB_TOKEN`` to raise this to
-5000/hour.
+Network: stdlib only.  GitHub releases API (rate-limited to 60 req/hour
+unauthenticated — set ``GITHUB_TOKEN`` to raise to 5000/hour) plus the
+public quay.io tags API (no auth) to resolve BioContainers builds.
 
 Usage::
 
@@ -115,20 +123,126 @@ def is_newer(a: str, b: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def _bump_image_tag(image: str, new_version: str) -> str:
-    """Best-effort tag rewrite.  For images like ``foo/bar:1.2.3`` we
-    swap the tag; for BioContainers-style tags with build suffix
-    (``--h12345_0``) we drop the suffix and leave a placeholder."""
+    """Best-effort tag rewrite used only when the real BioContainers build
+    can't be resolved.  For ``foo/bar:1.2.3`` swap the tag; a build suffix
+    (``--h12345_0``) is dropped, leaving a bare-version placeholder that a
+    maintainer must confirm."""
     if ":" not in image:
         return image
     base, _ = image.rsplit(":", 1)
     return f"{base}:{new_version}"
 
 
-def make_candidate(tool_doc: dict, new_version: str, today: str) -> dict:
+_QUAY_BIOCONTAINERS = "quay.io/biocontainers/"
+
+
+def _quay_repo(image: str) -> Optional[str]:
+    """The repo name if *image* is a ``quay.io/biocontainers/`` image, else None."""
+    if not image.startswith(_QUAY_BIOCONTAINERS):
+        return None
+    rest = image[len(_QUAY_BIOCONTAINERS):]
+    return rest.split("@", 1)[0].split(":", 1)[0]
+
+
+def _python_family(image: str) -> Optional[str]:
+    """The ``pyNNN`` build family of a BioContainers tag, if it has one.
+
+    ``…:1.3.0--py311heb3b1e3_0`` → ``py311``.  BioContainers ships one build
+    per Python minor; we keep the family stable across a bump so a swap doesn't
+    silently jump Python versions."""
+    if ":" not in image:
+        return None
+    tag = image.rsplit(":", 1)[1]
+    if "--" not in tag:
+        return None
+    m = re.match(r"(py\d+)", tag.split("--", 1)[1])
+    return m.group(1) if m else None
+
+
+def _quay_tags(repo: str, version: str, opener) -> list[dict]:
+    """Active quay.io tags for *repo* whose version (before the ``--`` build
+    suffix) is exactly *version*, each carrying a manifest digest."""
+    from urllib.parse import quote
+    url = (
+        f"https://quay.io/api/v1/repository/biocontainers/{repo}/tag/"
+        f"?onlyActiveTags=true&limit=100&filter_tag_name=like:{quote(version)}"
+    )
+    data = opener(url)
+    out = []
+    for t in data.get("tags", []):
+        name = t.get("name", "")
+        # exact version match — 'like:1.3.1' would also return 1.3.10
+        if name.split("--", 1)[0] != version:
+            continue
+        if t.get("manifest_digest"):
+            out.append(t)
+    return out
+
+
+def resolve_biocontainer_image(
+    image: str, version: str, opener=None,
+) -> Optional[str]:
+    """Full ``quay.io/biocontainers/<repo>:<version>--<build>`` image string for
+    *version*, preferring the current image's Python build family.  Returns None
+    when *image* isn't a BioContainer, no build exists for *version* yet, or the
+    quay API can't be reached."""
+    repo = _quay_repo(image)
+    if repo is None:
+        return None
+    opener = opener or _http_json
+    try:
+        tags = _quay_tags(repo, version, opener)
+    except Exception:
+        return None
+    if not tags:
+        return None
+    fam = _python_family(image)
+    if fam:
+        same_family = [
+            t for t in tags if t["name"].split("--", 1)[1].startswith(fam)
+        ]
+        if same_family:
+            tags = same_family
+    # newest build wins (quay's start_ts is descending-friendly; name breaks ties)
+    tags.sort(key=lambda t: (t.get("start_ts") or 0, t["name"]), reverse=True)
+    base = image.split("@", 1)[0].rsplit(":", 1)[0]
+    return f"{base}:{tags[0]['name']}"
+
+
+def make_candidate(
+    tool_doc: dict, new_version: str, today: str, *, opener=None,
+) -> dict:
     doc = dict(tool_doc)   # shallow copy is fine — we replace top-level keys
     doc["version"] = new_version
     container = dict(doc.get("container", {}))
-    container["image"] = _bump_image_tag(container.get("image", ""), new_version)
+    old_image = container.get("image", "")
+
+    resolved = resolve_biocontainer_image(old_image, new_version, opener=opener)
+    risks: list[str] = []
+    if resolved:
+        container["image"] = resolved
+        tag_note = "Real BioContainers build resolved from quay.io."
+    else:
+        container["image"] = _bump_image_tag(old_image, new_version)
+        if _quay_repo(old_image):
+            tag_note = (
+                "No BioContainers build for this version on quay.io yet — the "
+                "tag is a best-effort guess; confirm before applying."
+            )
+            risks.append("unverified image tag")
+        else:
+            tag_note = (
+                "Self-built / non-BioContainers image — build and push the new "
+                "tag, then repin."
+            )
+            risks.append("image must be built and pushed")
+
+    # NEVER carry the previous digest onto a new tag: it would pin the OLD image
+    # under a new version number.  Drop it (keeping it for traceability) and let
+    # scripts/pin_digests.py resolve the real one when the candidate is applied.
+    previous_digest = container.pop("image_digest", None)
+    risks.append("digest not pinned — run scripts/pin_digests.py after applying")
+
     doc["container"] = container
     doc["last_reviewed"] = today
     doc["update_meta"] = {
@@ -136,12 +250,9 @@ def make_candidate(tool_doc: dict, new_version: str, today: str) -> dict:
         "source": "release_watch",
         "previous_version": tool_doc.get("version"),
         "previous_image": tool_doc.get("container", {}).get("image"),
-        "note": (
-            "Auto-filed by update/release_watch.py. "
-            "Confirm the BioContainers tag exists before benchmark; "
-            "the bumped tag is a best-effort guess."
-        ),
-        "risks": ["unverified image tag"],
+        "previous_digest": previous_digest,
+        "note": "Auto-filed by update/release_watch.py. " + tag_note,
+        "risks": risks,
     }
     return doc
 
