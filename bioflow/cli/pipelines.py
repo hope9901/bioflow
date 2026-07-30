@@ -179,7 +179,7 @@ def status_cmd(
     # Pick the first stage not yet completed; we don't know the full plan
     # here, so we surface this only as a hint.
     if failed:
-        next_stage = sorted(failed.keys())[0]
+        next_stage = min(failed.keys())
     console.print(
         f"\n[dim]Resume would re-run from:[/] [cyan]{next_stage}[/]  "
         f"(use `bioflow run <config>` to continue, or add `--fresh` to start over)"

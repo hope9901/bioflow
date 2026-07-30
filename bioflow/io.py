@@ -31,9 +31,9 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
-from typing import Callable, Optional, Tuple, TypeVar
+from typing import Optional, TypeVar
 
 from bioflow.core.logger import get_logger
 
@@ -154,7 +154,7 @@ def retry(
     initial_delay: float = 1.0,
     backoff: float = 2.0,
     max_delay: float = 60.0,
-    exceptions: Tuple[type, ...] = (Exception,),
+    exceptions: tuple[type, ...] = (Exception,),
     on_retry: Optional[Callable[[int, Exception], None]] = None,
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """Exponential-backoff retry decorator for transient failures.
@@ -302,7 +302,7 @@ def batched_urls(
     max_url_length: int = 3500,
     separator: str = ",",
     placeholder: str = "{ITEMS}",
-) -> Iterator[Tuple[str, list]]:
+) -> Iterator[tuple[str, list]]:
     """Yield ``(url, batch_of_items)`` pairs whose URL stays under a budget.
 
     *template* must contain *placeholder* exactly once.  Items are joined

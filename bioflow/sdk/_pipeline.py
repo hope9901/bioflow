@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import functools
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from bioflow.core.logger import get_logger
 from bioflow.sdk._stage import Stage
@@ -136,8 +136,8 @@ class Pipeline:
         lines = [
             f"# Pipeline: {self.name}",
             f"#   {self.description}" if self.description else "",
-            f"#   {len(order)} stages, "
-            f"{sum(s.cpu for s in order)} cpu-units total",
+            (f"#   {len(order)} stages, "
+            f"{sum(s.cpu for s in order)} cpu-units total"),
             "",
         ]
         for i, s in enumerate(order):

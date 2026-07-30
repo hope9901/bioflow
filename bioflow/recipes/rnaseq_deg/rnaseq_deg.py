@@ -29,7 +29,6 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import List, Tuple
 
 from bioflow import pipeline, stage
 from bioflow.recipes import choice, register
@@ -171,9 +170,9 @@ def multiqc_report(qc_results, quant_results, *, out_dir):
 
 # ── Pipeline ────────────────────────────────────────────────────────────────
 
-def _parse_sample_sheet(path: Path) -> List[Tuple[str, Path, Path, str]]:
+def _parse_sample_sheet(path: Path) -> list[tuple[str, Path, Path, str]]:
     """Return [(sample_id, r1, r2, condition), ...] from a CSV sample sheet."""
-    rows: List[Tuple[str, Path, Path, str]] = []
+    rows: list[tuple[str, Path, Path, str]] = []
     with open(path, encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         required = {"sample_id", "fastq_r1", "fastq_r2", "condition"}

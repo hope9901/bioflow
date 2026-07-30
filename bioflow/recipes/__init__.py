@@ -17,11 +17,9 @@ Adding a recipe
 """
 from __future__ import annotations
 
-from typing import Dict
-
 from bioflow.sdk import Pipeline
 
-RECIPES: Dict[str, Pipeline] = {}
+RECIPES: dict[str, Pipeline] = {}
 
 
 def register(name: str, pipe: Pipeline) -> Pipeline:

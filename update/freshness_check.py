@@ -234,9 +234,8 @@ def check_tool(tool_path: Path) -> dict:
 
     newer = find_newer_tags(parsed["tag"], tags)
     rec["newer_tags"] = newer[:5]   # cap report size
-    if newer:
-        if rec["status"] == "ok":
-            rec["status"] = "update_available"
+    if newer and rec["status"] == "ok":
+        rec["status"] = "update_available"
     return rec
 
 

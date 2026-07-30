@@ -186,7 +186,7 @@ def _extract_tools(cmd: str) -> tuple[set[str], set[str]]:
         if tok in _WRAPPERS:
             tools.add(tok)                        # the wrapper must be present
             for w in seg.split()[1:]:             # first real arg = wrapped exe
-                if w.startswith("-") or "=" in w or w.startswith("/"):
+                if w.startswith(("-", "/")) or "=" in w:
                     continue
                 wm = _LEAD.match(w)
                 if wm:
@@ -275,12 +275,12 @@ def test_image_provides_invoked_tools(image: str):
         # tool missing.
         proc = subprocess.run(
             ["docker", "run", "--rm", image, "sh", "-c", check],
-            capture_output=True, text=True, timeout=1200,
+            capture_output=True, text=True, timeout=1200, check=False,
         )
     finally:
         if os.environ.get("BIOFLOW_PRUNE_IMAGES"):
             subprocess.run(["docker", "rmi", "-f", image],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, check=False)
 
     if proc.returncode != 0 and "MISSING:" not in proc.stdout:
         pytest.fail(

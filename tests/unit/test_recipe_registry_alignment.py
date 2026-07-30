@@ -50,8 +50,8 @@ class TestRecipeRegistryAlignment:
         missing = {img: refs for img, refs in usage.items() if img not in reg}
         if missing:
             lines = [
-                "The following images are used by recipes but missing "
-                "from registry/tools/:"
+                ("The following images are used by recipes but missing "
+                "from registry/tools/:")
             ]
             for img, refs in sorted(missing.items()):
                 lines.append(f"\n  {img}")

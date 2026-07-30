@@ -5,8 +5,6 @@ ready-to-paste list (or BibTeX) for a whole recipe or specific tools.
 """
 from __future__ import annotations
 
-from typing import List
-
 import typer
 from rich import print as rprint
 
@@ -15,7 +13,7 @@ from bioflow.cli._app import app
 
 @app.command("cite")
 def cite_cmd(
-    targets: List[str] = typer.Argument(
+    targets: list[str] = typer.Argument(
         ..., help="A recipe name (e.g. prokaryote_assembly) OR one or more tool "
                   "ids (e.g. spades prokka).",
     ),
@@ -38,7 +36,7 @@ def cite_cmd(
         rprint("[red]--format must be 'text' or 'bibtex'[/]")
         raise typer.Exit(code=2)
 
-    unknown: List[str] = []
+    unknown: list[str] = []
     if len(targets) == 1 and targets[0] in set(recipe_names()):
         entries = citations.citations_for_recipe(targets[0])
         header = f"Tools used by recipe '{targets[0]}' — please cite:"

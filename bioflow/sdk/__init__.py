@@ -137,32 +137,32 @@ def stage_input(path, subdir: str = "staged_inputs") -> str:
 
 
 __all__ = [
-    "container_path",
-    "stage_input",
-    # Public Stage API
-    "stage",
-    "Stage",
-    "StageResult",
-    # Public Pipeline API
-    "pipeline",
-    "Pipeline",
-    "gather",
-    # Workspace / backend
-    "set_workspace",
-    "set_backend",
-    "set_param_overrides",
-    # Cache controls
-    "set_cache_enabled",
-    "is_cache_enabled",
-    "clear_cache",
     "CACHE_SENTINEL",
-    # Log streaming
-    "set_log_streaming",
-    "is_log_streaming_enabled",
+    "CommandResult",
+    "DockerBackend",
     # Backends
     "MockBackend",
-    "DockerBackend",
+    "Pipeline",
     "SingularityBackend",
+    "Stage",
+    "StageResult",
+    "clear_cache",
+    "container_path",
+    "gather",
+    "is_cache_enabled",
+    "is_log_streaming_enabled",
     "make_backend",
-    "CommandResult",
+    # Public Pipeline API
+    "pipeline",
+    "set_backend",
+    # Cache controls
+    "set_cache_enabled",
+    # Log streaming
+    "set_log_streaming",
+    "set_param_overrides",
+    # Workspace / backend
+    "set_workspace",
+    # Public Stage API
+    "stage",
+    "stage_input",
 ]

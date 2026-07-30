@@ -10,7 +10,8 @@ import os
 import sys
 import threading
 import time
-from typing import Callable, Union
+from collections.abc import Callable
+from typing import Union
 
 from bioflow.core.logger import get_logger
 from bioflow.sdk._result import StageResult
