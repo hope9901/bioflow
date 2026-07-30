@@ -33,13 +33,13 @@ FULL_E2E = {
 
 #: Recipes guarded at the stage level (their tail needs more data than a
 #: committed fixture can honestly provide).
-STAGE_GUARDED = {"scrna_seq", "proteomics_dda"}
+STAGE_GUARDED = {"scrna_seq", "proteomics_dda", "metagenome_assembly"}
 
 #: Recipes with **no** automated coverage. Not an allowlist to hide behind —
 #: a documented gap. Shrinking it is the goal.
 UNCOVERED = {
     "atac_seq", "cog_enrichment", "download_taxon", "eukaryote_assembly",
-    "joint_genotyping", "metagenome_assembly", "metagenomics_profile",
+    "joint_genotyping", "metagenomics_profile",
 }
 
 

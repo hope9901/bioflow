@@ -38,6 +38,7 @@ pytestmark = [
 REPO = Path(__file__).resolve().parents[2]
 SCRNA = REPO / "data" / "test" / "scrna_small"
 PROT = REPO / "data" / "test" / "proteomics_small"
+META = REPO / "data" / "test" / "metagenome_small"
 
 
 @pytest.fixture
@@ -111,3 +112,43 @@ def test_comet_emits_a_percolator_pin_not_pepxml(workspace):
     assert "\t" in header, ".pin must be tab-delimited for Percolator"
     for column in ("SpecId", "Label", "Peptide"):
         assert column in header, f".pin header missing {column}"
+
+
+# ── metagenome_assembly: assemble → coverage → binning ───────────────────────
+
+@pytest.mark.skipif(not META.exists(), reason="metagenome_small fixture missing")
+def test_metagenome_assembly_binning_consumes_the_assembly(workspace):
+    """fastp → MEGAHIT must produce contigs that the binner then consumes.
+
+    This recipe had no automated coverage at all, and the maxbin2 swap it gained
+    was never guarded. A tiny synthetic metagenome can't yield real bins (the
+    binners need marker genes / many contigs the fixture doesn't have), so this
+    stops at the hand-off: MEGAHIT assembles, MetaBAT2 reads the contigs, and the
+    ``bins/`` layout CheckM2 expects exists.
+    """
+    from bioflow.recipes.metagenomics.metagenome_assembly import (
+        assemble, bin_genomes, map_back, qc_trim,
+    )
+
+    clean = qc_trim(META / "reads_R1.fastq.gz", META / "reads_R2.fastq.gz")
+    assert clean.ok, (clean.stderr or clean.stdout)[-400:]
+
+    asm = assemble(clean)
+    assert asm.ok, (asm.stderr or asm.stdout)[-400:]
+    contigs = Path(asm.out_dir) / "megahit" / "final.contigs.fa"
+    assert contigs.exists(), "MEGAHIT wrote no final.contigs.fa"
+    n_contigs = contigs.read_text(encoding="utf-8").count(">")
+    assert n_contigs >= 2, f"expected the 2-organism assembly, got {n_contigs} contigs"
+
+    mapped = map_back(asm, clean)
+    assert mapped.ok, (mapped.stderr or mapped.stdout)[-400:]
+    assert (Path(mapped.out_dir) / "mapped.bam").exists(), "no coverage BAM"
+
+    binned = bin_genomes(mapped, asm)
+    assert binned.ok, (binned.stderr or binned.stdout)[-400:]
+    # MetaBAT2 computes a real depth table over both contigs and writes bins/.
+    depth = Path(binned.out_dir) / "depth.txt"
+    assert depth.exists() and depth.read_text().count("\n") >= 3, \
+        "MetaBAT2 wrote no per-contig depth table"
+    assert (Path(binned.out_dir) / "bins").is_dir(), \
+        "no bins/ directory for CheckM2 to consume"
