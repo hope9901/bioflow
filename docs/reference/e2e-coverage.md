@@ -23,14 +23,14 @@ need a **multi-GB reference index or an external database** can't — the
 fixture would dwarf the repo and the download would make CI flaky.  Their
 external assets are catalogued for `bioflow db fetch`.
 
-!!! warning "Five recipes have no automated coverage"
-    `atac_seq`, `cog_enrichment`, `download_taxon`, `eukaryote_assembly`
-    and `metagenomics_profile` appear
+!!! warning "Four recipes have no automated coverage"
+    `atac_seq`, `download_taxon`, `eukaryote_assembly` and
+    `metagenomics_profile` appear
     in none of the three tiers — they are exercised by hand, not by CI.  A
     change to them is not caught by any test, so treat them as unverified until
     a smoke case or fixture exists.
 
-## Validated end to end (9)
+## Validated end to end (10)
 
 Each runs its full chain in CI (the nightly job) on a fixture under
 [`data/test/`](https://github.com/hope9901/bioflow/tree/main/data/test).
@@ -46,6 +46,7 @@ Each runs its full chain in CI (the nightly job) on a fixture under
 | `phylogeny` | single-copy core → MAFFT × N → IQ-TREE | `phylo_small/` |
 | `rnaseq_deg` | fastp → Salmon → DESeq2 → enrichment + MultiQC | `rnaseq_small/` |
 | `methylation_wgbs` | TrimGalore → Bismark (prep + align) → methylKit | `methyl_small/` |
+| `cog_enrichment` | DIAMOND makedb → blastp → per-bucket COG-category aggregation | `cog_small/` + `gwas_small/` |
 
 ## Guarded at the stage level on a tiny fixture (2)
 
@@ -79,7 +80,6 @@ catalog key for `bioflow db fetch <key> --dest /refs` where one exists
 | `atac_seq` | Bowtie2 index + reference FASTA (± blacklist) | `bowtie2_grch38_noalt`, `encode_blacklist_grch38` |
 | `germline_variants` | reference FASTA + SnpEff DB (± GATK known-sites) | SnpEff DB auto-downloads by name; `dbsnp_grch38`, `mills_indels_grch38` for BQSR |
 | `joint_genotyping` | as `germline_variants` + a cohort sample sheet (the gVCF → cohort path is stage-guarded above) | as above |
-| `cog_enrichment` | COG-2024 reference FAA + definitions + a pangenome FAA + Roary GPA | upstream: NCBI COG-2024 |
 | `proteomics_dda` | protein FASTA DB + Comet params + raw spectra (search → `.pin` is stage-guarded above) | `uniprot_sprot` (spectra are vendor files) |
 
 !!! note "BWA / SnpEff indexes are built for you"

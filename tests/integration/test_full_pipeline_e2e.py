@@ -52,6 +52,8 @@ GWAS = REPO / "data" / "test" / "gwas_small"
 GWAS_GPA = GWAS / "gene_presence_absence.csv"
 GWAS_TRAITS = GWAS / "traits.csv"
 
+COG = REPO / "data" / "test" / "cog_small"
+
 CAFE = REPO / "data" / "test" / "cafe_small"
 CAFE_TREE = CAFE / "tree.nwk"
 CAFE_FAMILIES = CAFE / "families.tsv"
@@ -221,6 +223,46 @@ def test_gwas_full_chain(_runtime):
     assert "Benjamini_H_p" in text.splitlines()[0], "missing Scoary stat columns"
     # The perfectly-associated gene must surface as a hit.
     assert "gene_0005" in text, "Scoary missed the planted association"
+
+
+@pytest.mark.skipif(not COG.exists(), reason="cog_small fixture missing")
+def test_cog_enrichment_full_chain(_runtime):
+    """DIAMOND makedb → blastp → per-bucket COG-category aggregation.
+
+    No external database — DIAMOND builds its DB from the reference FAA
+    in-recipe — so this is a genuine full chain, not a stage guard. Each of the
+    12 pangenome proteins is homologous to a COG reference, so all map to a
+    category and get bucketed by the GPA's prevalence.
+    """
+    from bioflow.recipes import get
+
+    ws = _runtime
+    result = get("cog_enrichment")(
+        pangenome_faa=COG / "pangenome.faa",
+        cog_faa=COG / "cog_reps.faa",
+        cog_def=COG / "cog-24.def.tab",
+        gpa_csv=GWAS_GPA,          # reuse the Roary GPA (gene_0001…)
+        out_dir=ws / "out",
+    )
+    assert result.ok, f"cog_enrichment failed: {(result.stderr or '')[:500]}"
+
+    per_cluster = _find_one(ws, "cog_per_cluster.tsv")
+    assert per_cluster is not None, "no cog_per_cluster.tsv"
+    lines = per_cluster.read_text().splitlines()
+    assert lines[0].split("\t") == ["cluster", "cog", "categories"]
+    # Every query hit a COG (12 clusters + header).
+    assert len(lines) >= 13, f"expected 12 mapped clusters, got {len(lines) - 1}"
+    assert any(row.startswith("gene_0001\tCOG") for row in lines[1:]), \
+        "gene_0001 was not mapped to a COG"
+
+    counts = _find_one(ws, "cog_counts_by_bucket.tsv")
+    assert counts is not None, "no cog_counts_by_bucket.tsv"
+    header = counts.read_text().splitlines()[0]
+    assert header.split("\t") == ["category", "core", "soft_core", "shell", "cloud"]
+    # core-bucket genes (in all 10 isolates) must contribute counts.
+    core_total = sum(int(r.split("\t")[1]) for r in
+                     counts.read_text().splitlines()[1:])
+    assert core_total > 0, "no category counts landed in the core bucket"
 
 
 @pytest.mark.skipif(not CAFE_TREE.exists(), reason="cafe_small fixture missing")

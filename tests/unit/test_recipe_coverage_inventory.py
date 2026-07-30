@@ -29,6 +29,7 @@ SMOKE = {
 FULL_E2E = {
     "prokaryote_assembly", "amr_vf_catalogue", "ani_matrix", "pangenome",
     "gwas", "cafe_evolution", "phylogeny", "rnaseq_deg", "methylation_wgbs",
+    "cog_enrichment",
 }
 
 #: Recipes guarded at the stage level (their tail needs more data than a
@@ -39,7 +40,7 @@ STAGE_GUARDED = {"scrna_seq", "proteomics_dda", "metagenome_assembly",
 #: Recipes with **no** automated coverage. Not an allowlist to hide behind —
 #: a documented gap. Shrinking it is the goal.
 UNCOVERED = {
-    "atac_seq", "cog_enrichment", "download_taxon", "eukaryote_assembly",
+    "atac_seq", "download_taxon", "eukaryote_assembly",
     "metagenomics_profile",
 }
 
