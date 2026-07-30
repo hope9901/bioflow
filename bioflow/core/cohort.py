@@ -45,7 +45,7 @@ class SampleResult:
 class CohortReport:
     recipe: str
     out_dir: Path
-    results: "list[SampleResult]" = field(default_factory=list)
+    results: list[SampleResult] = field(default_factory=list)
     multiqc_report: Optional[Path] = None
 
     @property
@@ -61,7 +61,7 @@ class CohortReport:
         return bool(self.results) and self.n_failed == 0
 
 
-def read_samplesheet(path: Path) -> "list[dict[str, str]]":
+def read_samplesheet(path: Path) -> list[dict[str, str]]:
     """Read a CSV samplesheet into a list of per-sample param dicts.
 
     One column identifies the sample (``sample_id`` / ``sample`` / ``id`` /
@@ -81,8 +81,8 @@ def read_samplesheet(path: Path) -> "list[dict[str, str]]":
                 f"Samplesheet {path} needs a sample-id column (one of: "
                 f"{', '.join(_ID_COLUMNS)}).  Got: {reader.fieldnames}"
             )
-        rows: "list[dict[str, str]]" = []
-        seen: "set[str]" = set()
+        rows: list[dict[str, str]] = []
+        seen: set[str] = set()
         for raw in reader:
             sid = (raw.get(id_col) or "").strip()
             if not sid or sid.startswith("#"):
@@ -102,16 +102,16 @@ def read_samplesheet(path: Path) -> "list[dict[str, str]]":
     return rows
 
 
-def _flagify(params: "dict[str, str]") -> "list[str]":
+def _flagify(params: dict[str, str]) -> list[str]:
     """Turn ``{key: value}`` into ``['--key', 'value', …]`` for the CLI."""
-    argv: "list[str]" = []
+    argv: list[str] = []
     for k, v in params.items():
         argv += [f"--{k.replace('_', '-')}", str(v)]
     return argv
 
 
 def _run_one_subprocess(
-    recipe: str, sample_id: str, workspace: Path, params: "dict[str, str]",
+    recipe: str, sample_id: str, workspace: Path, params: dict[str, str],
 ) -> SampleResult:
     """Default per-sample runner: an isolated ``bioflow recipe run`` subprocess."""
     workspace.mkdir(parents=True, exist_ok=True)
@@ -138,10 +138,10 @@ def run_cohort(
     samplesheet: Path,
     out_dir: Path,
     *,
-    common: "Optional[dict[str, str]]" = None,
+    common: Optional[dict[str, str]] = None,
     jobs: int = 1,
     aggregate: bool = True,
-    run_one: "Optional[Callable[..., SampleResult]]" = None,
+    run_one: Optional[Callable[..., SampleResult]] = None,
 ) -> CohortReport:
     """Run *recipe* across every sample in *samplesheet*.
 
@@ -157,7 +157,7 @@ def run_cohort(
     rows = read_samplesheet(Path(samplesheet))
     report = CohortReport(recipe=recipe, out_dir=out_dir)
 
-    def _do(row: "dict[str, str]") -> SampleResult:
+    def _do(row: dict[str, str]) -> SampleResult:
         sid = row["sample_id"]
         params = {**common, **{k: v for k, v in row.items() if k != "sample_id"}}
         ws = out_dir / sid
@@ -226,7 +226,7 @@ def _stage_qc(out_dir: Path, qc_root: Path) -> int:
     return staged
 
 
-def _aggregate(out_dir: Path) -> "Optional[Path]":
+def _aggregate(out_dir: Path) -> Optional[Path]:
     """Run MultiQC across all per-sample QC → one cohort report.
 
     Stage outputs sit under each sample's hidden ``.cache/`` dir, which MultiQC
@@ -241,7 +241,7 @@ def _aggregate(out_dir: Path) -> "Optional[Path]":
         if not staged:
             log.warning("Cohort aggregation: no per-sample QC files found.")
             return None
-        from bioflow.core.report import run_multiqc  # noqa: PLC0415
+        from bioflow.core.report import run_multiqc
         return run_multiqc(qc_root, out_dir / "cohort_multiqc")
     except Exception as exc:   # aggregation is best-effort, never fatal
         log.warning(f"Cohort MultiQC aggregation skipped: {exc}")

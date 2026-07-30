@@ -16,7 +16,6 @@ import re
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-
 _CONTAINER_WORKSPACE = PurePosixPath("/work")
 _CONTAINER_INPUTS = PurePosixPath("/inputs")
 
@@ -89,7 +88,7 @@ def _translate_command(command: str, workspace: Path) -> str:
 
 def _collect_external_mounts(
     args: tuple, kwargs: dict, workspace: Path,
-) -> "tuple[dict[str, str], dict[str, str]]":
+) -> tuple[dict[str, str], dict[str, str]]:
     """Scan call arguments for ``Path`` inputs that live *outside* the
     workspace and build (a) extra read-only-ish bind mounts and (b) a
     host→container string-translation map.
@@ -117,9 +116,9 @@ def _collect_external_mounts(
     ``(mounts, translation)`` where ``mounts`` is host-dir→container-dir
     and ``translation`` is host-path-string→container-path-string.
     """
-    mounts: "dict[str, str]" = {}
-    translation: "dict[str, str]" = {}
-    _dir_index: "dict[str, str]" = {}
+    mounts: dict[str, str] = {}
+    translation: dict[str, str] = {}
+    _dir_index: dict[str, str] = {}
 
     def _container_dir_for(host_dir: Path) -> str:
         key = str(host_dir)
@@ -180,7 +179,7 @@ def _collect_external_mounts(
 
 
 def _apply_external_translation(
-    command: str, translation: "dict[str, str]",
+    command: str, translation: dict[str, str],
 ) -> str:
     """Rewrite host paths in *command* to their container paths.
 

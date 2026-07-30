@@ -168,8 +168,8 @@ def main(argv: list[str]) -> int:
     for tid, path, image, new_image, curver, new_version in plan:
         t = path.read_text(encoding="utf-8")
         t = t.replace(image, new_image)  # image: line (and any inline)
-        t = re.sub(r'(^version:\s*)"?[^"\n]*"?', rf'\g<1>"{new_version}"', t, count=1, flags=re.M)
-        t = re.sub(r'(^last_reviewed:\s*)"?[^"\n]*"?', rf'\g<1>"{today}"', t, count=1, flags=re.M)
+        t = re.sub(r'(^version:\s*)"?[^"\n]*"?', rf'\g<1>"{new_version}"', t, count=1, flags=re.MULTILINE)
+        t = re.sub(r'(^last_reviewed:\s*)"?[^"\n]*"?', rf'\g<1>"{today}"', t, count=1, flags=re.MULTILINE)
         path.write_text(t, encoding="utf-8")
         n = 0
         for rp in RECIPES.rglob("*.py"):

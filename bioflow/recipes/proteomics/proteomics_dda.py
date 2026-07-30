@@ -38,9 +38,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioflow import stage, pipeline
-from bioflow.recipes import register, choice
-
+from bioflow import pipeline, stage
+from bioflow.recipes import choice, register
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 

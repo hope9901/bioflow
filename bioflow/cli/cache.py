@@ -30,7 +30,7 @@ def cache_cmd(
     Each entry is one content-addressed stage result (``<stage>__<hash>``), so
     deleting is only ever a time cost, never a correctness one.
     """
-    from bioflow.core.diskusage import cache_usage, free_space, human  # noqa: PLC0415
+    from bioflow.core.diskusage import cache_usage, free_space, human
 
     entries = cache_usage(workspace)
     total = sum(e.bytes for e in entries)
@@ -66,7 +66,7 @@ def cache_cmd(
             if not ok:
                 console.print("Left untouched.")
                 raise typer.Exit(code=0)
-        from bioflow.sdk import clear_cache  # noqa: PLC0415
+        from bioflow.sdk import clear_cache
 
         removed = clear_cache(workspace)
         console.print(f"Cleared {removed} entries — reclaimed {human(total)}.")

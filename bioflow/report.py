@@ -36,9 +36,10 @@ from __future__ import annotations
 
 import datetime
 import html
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
 from bioflow.core.logger import get_logger
 

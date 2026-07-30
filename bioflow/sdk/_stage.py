@@ -7,22 +7,22 @@ from __future__ import annotations
 
 import functools
 import inspect
+from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterable, Iterator, Optional, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 from bioflow.core import provenance as _prov
 from bioflow.core.logger import get_logger
 from bioflow.core.runner import CommandResult
-
 from bioflow.sdk._cache import CACHE_SENTINEL, is_cache_enabled, is_log_streaming_enabled
 from bioflow.sdk._concurrent import active_scheduler
 from bioflow.sdk._hashing import _compute_cache_key
 from bioflow.sdk._parallel import (
     _AnsiProgress,
-    _ProgressCallback,
     _bump_resources,
+    _ProgressCallback,
     _resolve_parallel,
 )
 from bioflow.sdk._paths import (
@@ -220,7 +220,7 @@ class Stage:
         # first and auto-update only the stale ones before the container runs.
         # Opt-in via $BIOFLOW_REFS (no-op otherwise); best-effort, never fatal.
         try:
-            from bioflow.core.db import ensure_dbs_for_image  # noqa: PLC0415
+            from bioflow.core.db import ensure_dbs_for_image
             ensure_dbs_for_image(self.image)
         except Exception:  # pragma: no cover - defensive
             pass
@@ -457,7 +457,7 @@ class _FanoutPlan:
     don't duplicate logic.
     """
 
-    def __init__(self, stage_obj: "Stage", plan: list[tuple[tuple, dict]]):
+    def __init__(self, stage_obj: Stage, plan: list[tuple[tuple, dict]]):
         self.stage = stage_obj
         self.plan = plan
 
@@ -568,7 +568,7 @@ def stage(
     gpu: bool = False,
     description: str = "",
     cache: bool = True,
-    depends_on: Optional[Union["Stage", Iterable["Stage"]]] = None,
+    depends_on: Optional[Union[Stage, Iterable[Stage]]] = None,
     retry: int = 0,
     retry_with: Optional[dict] = None,
 ) -> Callable[[Callable[..., str]], Stage]:

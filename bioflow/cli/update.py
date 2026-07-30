@@ -24,8 +24,8 @@ def _regenerate_registry_artifacts(repo_root: Path) -> None:
     Best effort: a failure is surfaced but does not abort the run — the commit
     then trips the CI gate, which is the intended safety net.
     """
-    import subprocess as _sub  # noqa: PLC0415
-    import sys as _sys  # noqa: PLC0415
+    import subprocess as _sub
+    import sys as _sys
 
     for script, arg in (("io_contracts.py", "update"), ("gen_docs.py", None)):
         cmd = [_sys.executable, str(repo_root / "scripts" / script)]
@@ -108,7 +108,7 @@ def update_cmd(
               scripts/install-schedule-windows.ps1 and
               scripts/install-schedule-cron.sh.
     """
-    from bioflow.core.approve import (  # noqa: PLC0415
+    from bioflow.core.approve import (
         ApprovalError,
         approve_all_candidates,
         approve_candidate,
@@ -178,9 +178,10 @@ def update_cmd(
 
     elif action == "auto":
         # Unattended pipeline for OS-level schedulers (Task Scheduler / cron)
-        import datetime as _dt  # noqa: PLC0415
-        import json  # noqa: PLC0415
-        from update import benchmark as _b  # noqa: PLC0415
+        import datetime as _dt
+        import json
+
+        from update import benchmark as _b
 
         # Walk every */ subdir under update/candidates/ — Deep Research
         # drops monthly batches under update/candidates/<YYYY-MM>/
@@ -261,8 +262,9 @@ def update_cmd(
         if auto_approve and n_pass > 0:
             rprint(f"\n[bold]Auto-approving {n_pass} passing candidate(s) "
                    "→ registry[/]")
-            from bioflow.core.approve import (  # noqa: PLC0415
-                approve_candidate, ApprovalError,
+            from bioflow.core.approve import (
+                ApprovalError,
+                approve_candidate,
             )
             for r in results:
                 if not r["passed"]:
@@ -294,8 +296,8 @@ def update_cmd(
 
         # ── Maintainer-only: commit + push to GitHub ────────────────────
         if (git_commit or git_push) and not dry_run:
-            from datetime import date as _date  # noqa: PLC0415
-            import subprocess as _sub  # noqa: PLC0415
+            import subprocess as _sub
+            from datetime import date as _date
 
             def _git(*args, check=True):
                 """Run git in the repo root.  Returns CompletedProcess."""

@@ -5,13 +5,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # list_dbs
 # ---------------------------------------------------------------------------
 
 def test_list_dbs_returns_entries():
-    from bioflow.core.db import list_dbs, _DB_CATALOG
+    from bioflow.core.db import _DB_CATALOG, list_dbs
     rows = list_dbs()
     assert len(rows) == len(_DB_CATALOG)
     for r in rows:
@@ -90,7 +89,7 @@ def test_fetch_db_unknown_name_raises(tmp_path):
 
 def test_fetch_db_skip_if_exists(tmp_path):
     """When destination file already exists, download must be skipped."""
-    from bioflow.core.db import fetch_db, _DB_CATALOG
+    from bioflow.core.db import _DB_CATALOG, fetch_db
     key = "busco_bacteria"
     dest_file = tmp_path / _DB_CATALOG[key]["dest_file"]
     dest_file.parent.mkdir(parents=True, exist_ok=True)
@@ -109,7 +108,7 @@ def test_fetch_db_skip_if_exists(tmp_path):
 
 def test_fetch_db_downloads_when_missing(tmp_path):
     """fetch_db creates the destination file from the mock response."""
-    from bioflow.core.db import fetch_db, _DB_CATALOG
+    from bioflow.core.db import _DB_CATALOG, fetch_db
     key = "busco_bacteria"
     payload = b"mock database content"
     dest_file = tmp_path / _DB_CATALOG[key]["dest_file"]
@@ -158,7 +157,7 @@ def test_verify_db_returns_false_when_missing(tmp_path):
 
 def test_verify_db_returns_true_when_present_no_md5(tmp_path):
     """When catalog has no MD5, presence check is sufficient."""
-    from bioflow.core.db import verify_db, _DB_CATALOG
+    from bioflow.core.db import _DB_CATALOG, verify_db
     key = "busco_bacteria"
     dest = tmp_path / _DB_CATALOG[key]["dest_file"]
     dest.parent.mkdir(parents=True, exist_ok=True)

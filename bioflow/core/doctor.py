@@ -29,9 +29,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Iterable, Literal, Optional
+from typing import Callable, Literal, Optional
 
 Status = Literal["ok", "warn", "fail"]
 
@@ -88,7 +89,7 @@ def _check_python() -> CheckResult:
     )
 
 
-def _container_runtime() -> "tuple[Optional[str], Optional[str]]":
+def _container_runtime() -> tuple[Optional[str], Optional[str]]:
     """Return (cli_name, path) — prefers docker, falls back to podman.
 
     Podman ships a Docker-compatible CLI + API socket, so bioflow's
@@ -219,7 +220,7 @@ def _check_docker_socket() -> CheckResult:
 
 def _check_cpu() -> CheckResult:
     try:
-        import psutil  # noqa: PLC0415
+        import psutil
         n = psutil.cpu_count(logical=True) or 1
     except Exception as exc:
         return CheckResult(
@@ -253,7 +254,7 @@ def _check_cpu() -> CheckResult:
 
 def _check_ram() -> CheckResult:
     try:
-        import psutil  # noqa: PLC0415
+        import psutil
         gb = psutil.virtual_memory().total / (1024 ** 3)
     except Exception as exc:
         return CheckResult(
@@ -301,7 +302,7 @@ def _reclaim_hint(workspace: Path) -> str:
     there, so name them with sizes.
     """
     try:
-        from bioflow.core.diskusage import cache_usage, human  # noqa: PLC0415
+        from bioflow.core.diskusage import cache_usage, human
 
         cached = cache_usage(workspace)
     except Exception:  # pragma: no cover - reporting must never break the check
@@ -363,7 +364,7 @@ def _check_disk(workspace: Path) -> CheckResult:
 
 
 def _check_arch() -> CheckResult:
-    from bioflow.core.hardware import _ARCH_ALIASES  # noqa: PLC0415
+    from bioflow.core.hardware import _ARCH_ALIASES
 
     raw = platform.machine()
     arch = _ARCH_ALIASES.get(raw.lower(), raw.lower())
@@ -387,7 +388,7 @@ def _check_arch() -> CheckResult:
 
 
 def _check_registry(registry_dir: Optional[Path] = None) -> CheckResult:
-    from bioflow.core.registry import (  # noqa: PLC0415
+    from bioflow.core.registry import (
         default_registry_dir,
         load_registry,
     )
@@ -477,7 +478,7 @@ def _check_gpu() -> CheckResult:
     """GPU is purely informational — incompatible recipes are already
     filtered by `bioflow tools` against the hardware profile."""
     try:
-        from bioflow.core.hardware import _detect_gpu  # noqa: PLC0415
+        from bioflow.core.hardware import _detect_gpu
         present, names, cuda = _detect_gpu()
     except Exception as exc:
         return CheckResult(

@@ -13,7 +13,6 @@ import yaml
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, Field
 
-
 # Location of the registry bundled into the installed wheel
 # (see pyproject [tool.hatch.build.targets.wheel.force-include]).
 _BUNDLED_REGISTRY = Path(__file__).resolve().parent.parent / "_bundled_registry"
@@ -105,7 +104,7 @@ def load_registry(registry_dir: Path) -> list[Tool]:
     tools_root = registry_dir / "tools"
     if not tools_root.exists():
         return tools
-    from bioflow.core.logger import get_logger  # noqa: PLC0415
+    from bioflow.core.logger import get_logger
     log = get_logger()
     for path in tools_root.rglob("*.yaml"):
         try:

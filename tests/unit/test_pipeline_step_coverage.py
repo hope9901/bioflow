@@ -48,8 +48,8 @@ RECIPE_ONLY_STAGES = {
 }
 
 
-def _pipeline_steps() -> "dict[str, str]":
-    steps: "dict[str, str]" = {}
+def _pipeline_steps() -> dict[str, str]:
+    steps: dict[str, str] = {}
     for mod_info in pkgutil.iter_modules(pipelines_pkg.__path__):
         mod = importlib.import_module(f"bioflow.pipelines.{mod_info.name}")
         for stage in getattr(mod, "STAGES", []):
@@ -57,8 +57,8 @@ def _pipeline_steps() -> "dict[str, str]":
     return steps
 
 
-def _declared_stages() -> "dict[str, list[str]]":
-    declared: "dict[str, list[str]]" = {}
+def _declared_stages() -> dict[str, list[str]]:
+    declared: dict[str, list[str]] = {}
     for path in (REGISTRY / "tools").rglob("*.yaml"):
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for stage in data.get("stage") or []:

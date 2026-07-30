@@ -61,12 +61,27 @@ packages = ["bioflow"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+# Match requires-python (>=3.9).  Previously "py311", which let ruff's
+# pyupgrade rules rewrite annotations to 3.10/3.11-only syntax (PEP 604
+# `X | None`, `datetime.UTC`) that crashes at *import* time on 3.9 — Pydantic
+# models and Typer commands resolve annotations via get_type_hints(), even
+# under `from __future__ import annotations`, so lazy stringified annotations
+# don't save us.
+target-version = "py39"
 
 [tool.ruff.lint]
-# E402: standalone scripts do sys.path.insert before bioflow imports (intentional)
-# E701: single-line try/except used in examples for cp949-safe stdout setup
-ignore = []
+# bioflow still supports Python 3.9 (see requires-python).  Keep the
+# typing-module constructs rather than the modern rewrites ruff proposes:
+# Pydantic / Typer evaluate annotations at import, so PEP 604 unions
+# (`X | None`) would raise TypeError on 3.9.  We also skip the (individually
+# 3.9-safe) List->list rewrite to hold one consistent style while pinned to
+# 3.9.  Drop this whole block when the 3.9 floor is raised, then re-run
+# `ruff check . --fix` to modernize in one sweep.
+ignore = [
+    "UP006",  # non-pep585-annotation           (List[x]    -> list[x])
+    "UP007",  # non-pep604-annotation-union      (Union[x,y] -> x | y)
+    "UP045",  # non-pep604-annotation-optional   (Optional[x]-> x | None)
+]
 
 [tool.ruff.lint.per-file-ignores]
 # Examples are standalone scripts — sys.path manipulation before imports is intentional

@@ -9,17 +9,16 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioflow.io import (
-    write_text,
-    read_text,
-    write_bytes,
-    read_bytes,
-    atomic_replace,
-    download_url,
     DownloadError,
-    retry,
+    atomic_replace,
     batched_urls,
+    download_url,
+    read_bytes,
+    read_text,
+    retry,
+    write_bytes,
+    write_text,
 )
-
 
 # ---------------------------------------------------------------------------
 # Text IO — CRLF / encoding traps

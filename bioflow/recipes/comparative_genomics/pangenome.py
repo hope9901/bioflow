@@ -17,13 +17,12 @@ Programmatic (Tier A) usage
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
-from bioflow import stage, pipeline
+from bioflow import pipeline, stage
 from bioflow.core.ncbi import download_genomes
 from bioflow.recipes import register
-
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 
@@ -59,7 +58,7 @@ def pangenome(
     max_genomes: int = 30,
     reference_only: bool = True,
     identity: int = 90,
-    _genome_paths: "Iterable[Path] | None" = None,
+    _genome_paths: Iterable[Path] | None = None,
 ):
     """End-to-end pangenome on every RefSeq assembly of *taxon*.
 

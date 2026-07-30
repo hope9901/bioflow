@@ -138,9 +138,9 @@ def test_docker_backend_log_streaming(docker_backend, tmp_path):
 @docker_required
 def test_run_plan_with_docker_backend_single_stage(tmp_path):
     """Full pipeline run with real Docker: 1 stage that echoes and exits 0."""
-    from bioflow.core.planner import ExecutionPlan, StagePlan  # noqa: PLC0415
-    from bioflow.core.registry import load_registry  # noqa: PLC0415
-    from bioflow.core.runner import DockerBackend, run_plan  # noqa: PLC0415
+    from bioflow.core.planner import ExecutionPlan, StagePlan
+    from bioflow.core.registry import load_registry
+    from bioflow.core.runner import DockerBackend, run_plan
 
     registry_dir = Path(__file__).resolve().parents[2] / "registry"
 
@@ -149,7 +149,7 @@ def test_run_plan_with_docker_backend_single_stage(tmp_path):
     fastp = next(t for t in tools if t.id == "fastp")
 
     # We monkey-patch the fastp tool's image + command template in a temp registry
-    import copy  # noqa: PLC0415
+    import copy
     fastp_patched = copy.deepcopy(fastp)
     fastp_patched.container.image = ALPINE
     fastp_patched.command_template = "echo fastp-mock-ok"
@@ -178,7 +178,7 @@ def test_run_plan_with_docker_backend_single_stage(tmp_path):
         ts = original_load(d)
         return [fastp_patched if t.id == "fastp" else t for t in ts]
 
-    import bioflow.core.runner as runner_mod  # noqa: PLC0415
+    import bioflow.core.runner as runner_mod
     runner_mod.load_registry = _patched_load
 
     try:
@@ -186,6 +186,6 @@ def test_run_plan_with_docker_backend_single_stage(tmp_path):
     finally:
         runner_mod.load_registry = original_load
 
-    from bioflow.core.checkpoint import load as load_state  # noqa: PLC0415
+    from bioflow.core.checkpoint import load as load_state
     state = load_state(workdir)
     assert "genome_assembly.step1" in state["completed_stages"]

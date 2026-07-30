@@ -66,10 +66,10 @@ class Entry:
         return human(self.bytes)
 
 
-def db_usage(refs_root: Path) -> "list[Entry]":
+def db_usage(refs_root: Path) -> list[Entry]:
     """Installed reference databases under *refs_root*, largest first."""
     refs_root = Path(refs_root)
-    seen: "dict[str, Entry]" = {}
+    seen: dict[str, Entry] = {}
     for key in _DB_CATALOG:
         try:
             top = _db_top_dir(key)
@@ -84,7 +84,7 @@ def db_usage(refs_root: Path) -> "list[Entry]":
     return sorted(seen.values(), key=lambda e: e.bytes, reverse=True)
 
 
-def cache_usage(workspace: Path) -> "list[Entry]":
+def cache_usage(workspace: Path) -> list[Entry]:
     """Per-stage cache directories under ``<workspace>/.cache``, largest first."""
     cache_root = Path(workspace) / ".cache"
     if not cache_root.is_dir():
@@ -96,13 +96,13 @@ def cache_usage(workspace: Path) -> "list[Entry]":
     return sorted(entries, key=lambda e: e.bytes, reverse=True)
 
 
-def free_space(path: Path) -> "tuple[int, int]":
+def free_space(path: Path) -> tuple[int, int]:
     """``(free_bytes, total_bytes)`` for the filesystem holding *path*."""
     usage = shutil.disk_usage(Path(path))
     return usage.free, usage.total
 
 
-def remove_db(name: str, refs_root: Path) -> "Optional[Entry]":
+def remove_db(name: str, refs_root: Path) -> Optional[Entry]:
     """Delete a provisioned database. Returns what was freed, or None.
 
     The only destructive call in this module — callers are expected to confirm

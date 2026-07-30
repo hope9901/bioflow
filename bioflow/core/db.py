@@ -434,7 +434,7 @@ _DB_CATALOG: dict[str, dict] = {
 # Cache the upstream "latest version" probe per DB for the life of the process,
 # so a fan-out pipeline that runs the same annotation tool many times only hits
 # the network once (the run-time hook calls this on every stage).
-_LATEST_CACHE: "dict[str, str | None]" = {}
+_LATEST_CACHE: dict[str, str | None] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -554,7 +554,7 @@ def fetch_db(
     log.info(f"Fetching '{name}' ({size_gb:.2f} GB) from {url}")
 
     try:
-        from rich.progress import (  # noqa: PLC0415, F401
+        from rich.progress import (  # noqa: F401
             BarColumn,
             DownloadColumn,
             Progress,
@@ -657,18 +657,18 @@ def _db_top_dir(name: str) -> str:
     return Path(_DB_CATALOG[name]["dest_file"]).parts[0]
 
 
-def catalog_version(name: str) -> "str | None":
+def catalog_version(name: str) -> str | None:
     """The DB version pinned in the catalog, or None if unversioned."""
     return _DB_CATALOG.get(name, {}).get("version")
 
 
-def dbs_for_tool(tool_id: str) -> "list[str]":
+def dbs_for_tool(tool_id: str) -> list[str]:
     """Catalog keys of every *versioned* DB a tool consumes (in catalog order)."""
     return [k for k, e in _DB_CATALOG.items()
             if tool_id in e.get("used_by", []) and e.get("version")]
 
 
-def installed_db_version(name: str, dest_root: Path) -> "str | None":
+def installed_db_version(name: str, dest_root: Path) -> str | None:
     """Read the version marker written at fetch/provision time, or None."""
     if name not in _DB_CATALOG:
         raise KeyError(f"Unknown database '{name}'.")
@@ -678,7 +678,7 @@ def installed_db_version(name: str, dest_root: Path) -> "str | None":
     return None
 
 
-def write_db_version(name: str, dest_root: Path, version: "str | None" = None) -> Path:
+def write_db_version(name: str, dest_root: Path, version: str | None = None) -> Path:
     """Stamp the installed DB version (defaults to the catalog version)."""
     version = version or catalog_version(name) or ""
     marker = dest_root / _db_top_dir(name) / _VERSION_MARKER
@@ -691,7 +691,7 @@ def _vt(s: str) -> tuple:
     return tuple(int(x) for x in re.findall(r"\d+", s or ""))
 
 
-def latest_db_version(name: str, *, _fetch=None) -> "str | None":
+def latest_db_version(name: str, *, _fetch=None) -> str | None:
     """Best-effort probe of the newest available version for *name*.
 
     Fetches the DB's ``latest`` spec (a small index/relnotes URL, never the
@@ -714,7 +714,7 @@ def latest_db_version(name: str, *, _fetch=None) -> "str | None":
         log.debug(f"latest_db_version({name}) probe failed: {exc}")
         result = None
     else:
-        matches = re.findall(spec["regex"], body, re.S)
+        matches = re.findall(spec["regex"], body, re.DOTALL)
         result = max(matches, key=_vt) if matches else None
     if _fetch is None:
         _LATEST_CACHE[name] = result
@@ -745,7 +745,7 @@ def db_status(name: str, dest_root: Path, *, check_latest: bool = False,
     }
 
 
-def provision_command(name: str, dest_root: Path) -> "str | None":
+def provision_command(name: str, dest_root: Path) -> str | None:
     """The shell command that builds/downloads DB *name* into ``dest_root``.
 
     Runs *inside the consuming tool's container* (the BioContainer ships the
@@ -760,7 +760,7 @@ def provision_command(name: str, dest_root: Path) -> "str | None":
 
 
 def ensure_db_current(tool_id: str, dest_root: Path, *, auto_update: bool = True,
-                      check_latest: bool = True, _fetch=None) -> "list[dict]":
+                      check_latest: bool = True, _fetch=None) -> list[dict]:
     """Run-time gate: for every DB *tool_id* uses, check the version first and
     update **only when a newer one exists** — the check is cheap and runs each
     time, the download does not (an up-to-date DB is a no-op).
@@ -821,20 +821,20 @@ REFS_ENV = "BIOFLOW_REFS"
 
 
 @functools.lru_cache(maxsize=1)
-def _image_to_tool() -> "dict[str, str]":
+def _image_to_tool() -> dict[str, str]:
     """{container image -> tool id} from the registry (built once)."""
     tools_dir = Path(__file__).resolve().parents[2] / "registry" / "tools"
-    out: "dict[str, str]" = {}
+    out: dict[str, str] = {}
     for p in tools_dir.rglob("*.yaml"):
         text = p.read_text(encoding="utf-8")
-        gid = re.search(r"^id:\s*(\S+)", text, re.M)
-        img = re.search(r"^\s*image:\s*(\S+)", text, re.M)
+        gid = re.search(r"^id:\s*(\S+)", text, re.MULTILINE)
+        img = re.search(r"^\s*image:\s*(\S+)", text, re.MULTILINE)
         if gid and img:
             out[img.group(1)] = gid.group(1)
     return out
 
 
-def refs_root() -> "Path | None":
+def refs_root() -> Path | None:
     """The references root DB management writes to, from ``$BIOFLOW_REFS``.
 
     Returns None when unset — DB auto-management is opt-in: without a refs
@@ -845,8 +845,8 @@ def refs_root() -> "Path | None":
     return Path(root) if root else None
 
 
-def ensure_dbs_for_image(image: str, dest_root: "Path | None" = None, *,
-                         auto_update: bool = True, _fetch=None) -> "list[dict]":
+def ensure_dbs_for_image(image: str, dest_root: Path | None = None, *,
+                         auto_update: bool = True, _fetch=None) -> list[dict]:
     """Version-gate the DBs of whatever tool *image* is, just before it runs.
 
     Called by the stage runner.  Resolves the refs root from ``$BIOFLOW_REFS``
@@ -886,9 +886,13 @@ def _download_plain(response, dest: Path) -> None:
 
 
 def _download_with_rich(response, dest: Path, total: int, label: str) -> None:
-    from rich.progress import (  # noqa: PLC0415
-        BarColumn, DownloadColumn, Progress,
-        TextColumn, TimeRemainingColumn, TransferSpeedColumn,
+    from rich.progress import (
+        BarColumn,
+        DownloadColumn,
+        Progress,
+        TextColumn,
+        TimeRemainingColumn,
+        TransferSpeedColumn,
     )
     with Progress(
         TextColumn(f"[bold cyan]{label}"),

@@ -84,7 +84,7 @@ def _validate_candidate(candidate_path: Path) -> dict:
     schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
 
     try:
-        import jsonschema  # noqa: PLC0415
+        import jsonschema
         jsonschema.validate(instance=raw, schema=schema)
     except jsonschema.ValidationError as exc:
         raise ValueError(f"Schema validation failed: {exc.message}") from exc
@@ -187,7 +187,7 @@ def smoke_test(candidate_path: Path, *, use_real_docker: bool = False) -> Benchm
     #    Candidates are NOT in the registry yet, so we bypass run_plan
     #    (which requires registry presence) and call the backend directly.
     try:
-        from bioflow.core.runner import MockBackend  # noqa: PLC0415
+        from bioflow.core.runner import MockBackend
 
         out_dir = dataset / "out_benchmark" / tool_dict["id"]
         out_dir.mkdir(parents=True, exist_ok=True)

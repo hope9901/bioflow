@@ -1,16 +1,15 @@
 """Phase 1D — depends_on metadata + @pipeline composition tests."""
 from __future__ import annotations
 
-
 import pytest
 
 from bioflow import (
-    stage,
-    pipeline,
-    Pipeline,
-    set_workspace,
-    set_backend,
     MockBackend,
+    Pipeline,
+    pipeline,
+    set_backend,
+    set_workspace,
+    stage,
 )
 
 
@@ -95,7 +94,7 @@ class TestPipelineDecorator:
         @pipeline()
         def my_pipeline():
             """Compute pangenome from a list of genomes."""
-            return None
+            return
         assert "pangenome" in my_pipeline.description
 
     def test_run_alias_works(self, _isolated_runtime):

@@ -11,7 +11,6 @@ import pytest
 
 from bioflow.recipes import get, names
 
-
 EXPECTED_RECIPES = {
     "prokaryote_assembly":  7,   # fastp → spades → quast → bandage → prokka|bakta → genovi
     "eukaryote_assembly":   5,   # nanoplot → flye|hifiasm → medaka → compleasm

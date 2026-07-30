@@ -142,7 +142,7 @@ _KEYWORDS = r"\b(?:do|then|else|elif|fi|done|while|if|case|esac)\b"
 _LEAD = re.compile(r"\s*([A-Za-z_][\w.\-/]*)")
 
 
-def _extract_tools(cmd: str) -> "tuple[set[str], set[str]]":
+def _extract_tools(cmd: str) -> tuple[set[str], set[str]]:
     """Return ``(tools, wine_exes)`` the command invokes (best-effort parse).
 
     ``tools`` are binaries that must be on ``PATH``; ``wine_exes`` are the
@@ -199,7 +199,7 @@ def _extract_tools(cmd: str) -> "tuple[set[str], set[str]]":
     return tools, wine_exes
 
 
-def _collect() -> "tuple[dict[str, set[str]], dict[str, set[str]], dict[str, set[str]], list[str]]":
+def _collect() -> tuple[dict[str, set[str]], dict[str, set[str]], dict[str, set[str]], list[str]]:
     """Return (image→tools, image→wine_exes, image→sources, render-failures)."""
     from bioflow import recipes
 

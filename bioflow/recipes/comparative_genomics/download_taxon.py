@@ -8,8 +8,8 @@ remembering the helper API.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from bioflow import pipeline
 from bioflow.core.ncbi import download_genomes

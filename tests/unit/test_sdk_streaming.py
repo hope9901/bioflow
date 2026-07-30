@@ -6,12 +6,12 @@ import logging
 import pytest
 
 from bioflow import (
-    stage,
-    set_workspace,
+    MockBackend,
+    is_log_streaming_enabled,
     set_backend,
     set_log_streaming,
-    is_log_streaming_enabled,
-    MockBackend,
+    set_workspace,
+    stage,
 )
 from bioflow.core.runner import CommandResult
 

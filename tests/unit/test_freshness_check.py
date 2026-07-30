@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "update"))
 
-import freshness_check as fc   # noqa: E402
+import freshness_check as fc
 
 
 class TestParseImage:

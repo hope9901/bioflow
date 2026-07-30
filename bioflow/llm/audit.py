@@ -187,7 +187,7 @@ def _load_cap() -> Optional[float]:
             log.warning(f"Bad BIOFLOW_LLM_DAILY_CAP_USD={env!r}; ignoring")
     # Then config file
     try:
-        from bioflow.llm import load_config   # noqa: PLC0415
+        from bioflow.llm import load_config
         v = load_config().get("daily_cost_cap_usd")
         if v is not None:
             return float(v)

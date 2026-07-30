@@ -11,13 +11,13 @@ import time
 import pytest
 
 from bioflow import (
-    stage,
-    set_workspace,
+    MockBackend,
+    clear_cache,
+    is_cache_enabled,
     set_backend,
     set_cache_enabled,
-    is_cache_enabled,
-    clear_cache,
-    MockBackend,
+    set_workspace,
+    stage,
 )
 
 # Module-level constant a builder splices into its command — used to prove the
@@ -217,8 +217,8 @@ class TestStageDefinitionInvalidation:
 class TestFailureNoPoisoning:
 
     def test_failed_run_not_cached(self):
-        from bioflow.sdk import set_backend
         from bioflow.core.runner import CommandResult
+        from bioflow.sdk import set_backend
 
         class FlakyBackend:
             def __init__(self): self.n = 0

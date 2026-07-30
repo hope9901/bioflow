@@ -41,7 +41,7 @@ def doctor_cmd(
     Exit code: 1 if any check FAILs, 0 otherwise (warnings do not block).
     Use --json in CI to consume the structured report.
     """
-    from bioflow.core.doctor import (  # noqa: PLC0415
+    from bioflow.core.doctor import (
         exit_code,
         run_checks,
         summarize,
@@ -50,7 +50,7 @@ def doctor_cmd(
     results = run_checks(workspace=workspace, registry_dir=registry)
 
     if json_out:
-        import json  # noqa: PLC0415
+        import json
 
         payload = {
             "summary": summarize(results),

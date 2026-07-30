@@ -24,11 +24,10 @@ from pathlib import Path
 
 import pytest
 
-
 # Skip the whole module if Docker isn't reachable
 _docker_unavailable: str | None = None
 try:
-    import docker as _docker_mod   # type: ignore[import-not-found]
+    import docker as _docker_mod  # type: ignore[import-not-found]
     _client = _docker_mod.from_env()
     _client.ping()
 except Exception as exc:
@@ -45,7 +44,7 @@ pytestmark = [
 
 @pytest.fixture(autouse=True)
 def _runtime(tmp_path):
-    from bioflow import set_workspace, set_backend, DockerBackend
+    from bioflow import DockerBackend, set_backend, set_workspace
     set_workspace(tmp_path / "ws")
     set_backend(DockerBackend())
     yield

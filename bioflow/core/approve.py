@@ -102,7 +102,7 @@ def approve_candidate(
     schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
 
     try:
-        import jsonschema  # noqa: PLC0415
+        import jsonschema
     except ImportError:
         raise ApprovalError(
             "jsonschema is required for tool approval: pip install jsonschema. "

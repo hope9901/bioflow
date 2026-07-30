@@ -55,7 +55,7 @@ _PMID_RE = re.compile(r"PMID\s*[:#]?\s*(\d{4,9})", re.IGNORECASE)
 _USER_AGENT = "bioflow-citation-fetcher (+https://github.com/hope9901/bioflow)"
 
 
-def _recent_window() -> "tuple[int, int]":
+def _recent_window() -> tuple[int, int]:
     """Last RECENT_YEARS complete calendar years (ends last year)."""
     end = _dt.date.today().year - 1
     return end - RECENT_YEARS + 1, end
@@ -87,7 +87,7 @@ def _total_citations(pmid: str) -> int:
     ).get("hitCount", 0))
 
 
-def _verify(pmid: str, surname: str, year: "int | None") -> "tuple[bool, str]":
+def _verify(pmid: str, surname: str, year: int | None) -> tuple[bool, str]:
     """A PMID is trusted only if the paper it points to actually matches the
     citation's author surname + year (±1).  Several registry PMIDs turned out
     to reference unrelated papers; without this guard we'd publish citation

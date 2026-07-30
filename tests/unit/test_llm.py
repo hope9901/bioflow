@@ -11,8 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioflow.llm import explain, LlmDisabled, LlmError, _build_prompt
-
+from bioflow.llm import LlmDisabled, LlmError, _build_prompt, explain
 
 # ---------------------------------------------------------------------------
 # Defaults — safety
@@ -134,6 +133,7 @@ class TestCli:
 
     def _run(self, argv):
         from typer.testing import CliRunner
+
         from bioflow.cli import app
         return CliRunner().invoke(app, argv)
 

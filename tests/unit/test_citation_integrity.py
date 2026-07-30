@@ -68,8 +68,8 @@ def test_every_registry_pmid_is_tracked():
     missing = []
     for p in sorted(TOOLS.rglob("*.yaml")):
         text = p.read_text(encoding="utf-8")
-        tid = re.search(r"^id:\s*(\S+)", text, re.M)
-        has_pmid = re.search(r"^citation:.*PMID", text, re.M)
+        tid = re.search(r"^id:\s*(\S+)", text, re.MULTILINE)
+        has_pmid = re.search(r"^citation:.*PMID", text, re.MULTILINE)
         if tid and has_pmid and tid.group(1) not in tracked:
             missing.append(tid.group(1))
     assert not missing, (

@@ -1,5 +1,6 @@
 """Demo — @pipeline composition + show_graph + dry_run."""
 from __future__ import annotations
+
 import sys
 import time
 from pathlib import Path
@@ -9,7 +10,7 @@ for _s in (sys.stdout, sys.stderr):
     except Exception: pass
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from bioflow import stage, pipeline, set_workspace, clear_cache
+from bioflow import clear_cache, pipeline, set_workspace, stage
 
 WS = Path(__file__).resolve().parent / "_pipeline_demo_ws"
 set_workspace(WS)

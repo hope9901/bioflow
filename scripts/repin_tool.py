@@ -37,7 +37,7 @@ def main() -> int:
     yaml_path = next(
         (p for p in sorted(TOOLS.rglob("*.yaml"))
          if re.search(rf"^id:\s*{re.escape(tool_id)}\s*$",
-                      p.read_text(encoding="utf-8"), re.M)),
+                      p.read_text(encoding="utf-8"), re.MULTILINE)),
         None,
     )
     if yaml_path is None:
@@ -45,18 +45,18 @@ def main() -> int:
         return 1
 
     text = yaml_path.read_text(encoding="utf-8")
-    m = re.search(r"^\s*image:\s*(\S+)", text, re.M)
+    m = re.search(r"^\s*image:\s*(\S+)", text, re.MULTILINE)
     if not m:
         print(f"{yaml_path} has no image: line")
         return 1
     old_image = m.group(1)
 
-    text = re.sub(r"(^\s*image:\s*)\S+", r"\g<1>" + new_image, text, count=1, flags=re.M)
-    text = re.sub(r"(^\s*image_digest:\s*)\S+", r"\g<1>" + new_digest, text, count=1, flags=re.M)
+    text = re.sub(r"(^\s*image:\s*)\S+", r"\g<1>" + new_image, text, count=1, flags=re.MULTILINE)
+    text = re.sub(r"(^\s*image_digest:\s*)\S+", r"\g<1>" + new_digest, text, count=1, flags=re.MULTILINE)
     if version:
-        text = re.sub(r'(^version:\s*)"?[^"\n]*"?', rf'\g<1>"{version}"', text, count=1, flags=re.M)
+        text = re.sub(r'(^version:\s*)"?[^"\n]*"?', rf'\g<1>"{version}"', text, count=1, flags=re.MULTILINE)
     today = _dt.date.today().isoformat()
-    text = re.sub(r'(^last_reviewed:\s*)"?[^"\n]*"?', rf'\g<1>"{today}"', text, count=1, flags=re.M)
+    text = re.sub(r'(^last_reviewed:\s*)"?[^"\n]*"?', rf'\g<1>"{today}"', text, count=1, flags=re.MULTILINE)
     yaml_path.write_text(text, encoding="utf-8")
     print(f"registry: {tool_id} -> {new_image}  ({new_digest})")
 

@@ -22,10 +22,9 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from bioflow import stage, pipeline
+from bioflow import pipeline, stage
 from bioflow.io import write_text
 from bioflow.recipes import register
-
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 

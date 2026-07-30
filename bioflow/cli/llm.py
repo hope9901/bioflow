@@ -69,9 +69,13 @@ def llm_cmd(
     Default backend is ``disabled`` so a fresh install never makes
     network calls without explicit opt-in.
     """
-    from bioflow.llm import (  # noqa: PLC0415
-        explain, diagnose_failure, redact,
-        LlmDisabled, LlmError, CapExceeded,
+    from bioflow.llm import (
+        CapExceeded,
+        LlmDisabled,
+        LlmError,
+        diagnose_failure,
+        explain,
+        redact,
     )
 
     if action == "explain":
@@ -101,7 +105,7 @@ def llm_cmd(
         stderr_text = ""
         if stderr_path:
             try:
-                from bioflow.io import read_text  # noqa: PLC0415
+                from bioflow.io import read_text
                 stderr_text = read_text(stderr_path)
             except OSError as exc:
                 rprint(f"[red]Could not read stderr file:[/] {exc}")
@@ -131,13 +135,13 @@ def llm_cmd(
     if action == "redact":
         # Read from stdin, emit redacted output (also a Tier-B safety
         # check: paste a stderr log to see what would have been sent)
-        import sys as _sys  # noqa: PLC0415
+        import sys as _sys
         raw = _sys.stdin.read()
         rprint(redact(raw, workspace=str(workspace) if workspace else None))
         return
 
     if action == "new-tool":
-        from bioflow.llm import new_tool  # noqa: PLC0415
+        from bioflow.llm import new_tool
         if not tool_name:
             rprint("[red]--tool is required.[/]")
             raise typer.Exit(code=1)
@@ -146,7 +150,7 @@ def llm_cmd(
                    "(capture `<tool> --help` into a file first).[/]")
             raise typer.Exit(code=1)
         try:
-            from bioflow.io import read_text  # noqa: PLC0415
+            from bioflow.io import read_text
             help_txt = read_text(help_path)
         except OSError as exc:
             rprint(f"[red]Could not read --help-file: {exc}[/]")
@@ -171,7 +175,7 @@ def llm_cmd(
         return
 
     if action == "audit":
-        from bioflow.llm import audit as _audit  # noqa: PLC0415
+        from bioflow.llm import audit as _audit
         entries = _audit.read_entries(limit=20)
         if not entries:
             rprint("[yellow]No LLM calls recorded yet.[/]")
@@ -195,7 +199,7 @@ def llm_cmd(
         return
 
     if action == "suggest":
-        from bioflow.llm import suggest_command  # noqa: PLC0415
+        from bioflow.llm import suggest_command
         if not tool_name or not intent:
             rprint("[red]--tool and --intent are required.[/]")
             raise typer.Exit(code=1)

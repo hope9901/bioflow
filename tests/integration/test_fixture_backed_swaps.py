@@ -156,7 +156,10 @@ def test_metagenome_assembly_binning_consumes_the_assembly(workspace):
     ``bins/`` layout CheckM2 expects exists.
     """
     from bioflow.recipes.metagenomics.metagenome_assembly import (
-        assemble, bin_genomes, map_back, qc_trim,
+        assemble,
+        bin_genomes,
+        map_back,
+        qc_trim,
     )
 
     clean = qc_trim(META / "reads_R1.fastq.gz", META / "reads_R2.fastq.gz")
@@ -198,7 +201,11 @@ def test_joint_genotyping_produces_a_multisample_cohort_vcf(workspace):
     network-dependent.
     """
     from bioflow.recipes.variant_calling.joint_genotyping import (
-        align_one, call_gvcf, combine_gvcfs, genotype_cohort, prepare_reference,
+        align_one,
+        call_gvcf,
+        combine_gvcfs,
+        genotype_cohort,
+        prepare_reference,
         qc_one,
     )
 
@@ -258,7 +265,10 @@ def test_atac_seq_align_dedup_peaks(workspace):
     can't provide, so the guard stops at peak calling.
     """
     from bioflow.recipes.epigenomics.atac_seq import (
-        align, call_peaks, dedup, trim,
+        align,
+        call_peaks,
+        dedup,
+        trim,
     )
 
     idx = _build_bowtie2_index(workspace)
@@ -293,7 +303,8 @@ def test_eukaryote_assembly_hifiasm_produces_assembly(workspace):
     carry — so the guard stops at the assembly the rest of the chain consumes.
     """
     from bioflow.recipes.genome_assembly.eukaryote_assembly import (
-        assemble_hifiasm, read_qc,
+        assemble_hifiasm,
+        read_qc,
     )
 
     reads = HIFI / "hifi_reads.fastq.gz"
@@ -327,7 +338,8 @@ def test_metagenomics_profile_kraken2_classifies(workspace):
     kmer_distrib files.
     """
     from bioflow.recipes.metagenomics.metagenomics_profile import (
-        kraken2_classify, qc_trim,
+        kraken2_classify,
+        qc_trim,
     )
 
     clean = qc_trim(KRAKEN / "reads_R1.fastq.gz", KRAKEN / "reads_R2.fastq.gz")

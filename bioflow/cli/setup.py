@@ -36,9 +36,10 @@ def setup_cmd(
       bioflow setup --backend disabled       # explicit no-LLM mode
       bioflow setup --backend anthropic      # use cloud Anthropic
     """
-    from bioflow.core.hardware import detect  # noqa: PLC0415
-    from bioflow.llm import (  # noqa: PLC0415
-        recommend_local_model, save_config,
+    from bioflow.core.hardware import detect
+    from bioflow.llm import (
+        recommend_local_model,
+        save_config,
     )
 
     hw = detect()

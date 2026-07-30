@@ -22,9 +22,10 @@ Usage::
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 from bioflow.core.logger import get_logger
 
@@ -32,7 +33,7 @@ log = get_logger()
 
 # Re-export L6 cap exception so callers don't have to know about the
 # audit submodule directly.
-from bioflow.llm.audit import CapExceeded  # noqa: E402
+from bioflow.llm.audit import CapExceeded
 
 
 def _coerce_int(v, *, default: int) -> int:
@@ -48,17 +49,17 @@ def _coerce_int(v, *, default: int) -> int:
         return int(default)
 
 __all__ = [
-    "explain",
-    "diagnose_failure",
-    "suggest_command",
-    "new_tool",
-    "redact",
-    "recommend_local_model",
-    "load_config",
-    "save_config",
-    "LlmError",
-    "LlmDisabled",
     "CapExceeded",
+    "LlmDisabled",
+    "LlmError",
+    "diagnose_failure",
+    "explain",
+    "load_config",
+    "new_tool",
+    "recommend_local_model",
+    "redact",
+    "save_config",
+    "suggest_command",
 ]
 
 
@@ -90,7 +91,7 @@ def load_config() -> dict:
     if not CONFIG_PATH.exists():
         return {}
     try:
-        import yaml as _y   # noqa: PLC0415
+        import yaml as _y
         data = _y.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
         return data.get("llm", {}) if isinstance(data, dict) else {}
     except Exception as exc:   # parse / permission error
@@ -100,7 +101,7 @@ def load_config() -> dict:
 
 def save_config(cfg: dict) -> Path:
     """Write LLM settings to ``~/.bioflow/config.yaml``.  Creates parents."""
-    import yaml as _y   # noqa: PLC0415
+    import yaml as _y
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     # Merge with whatever else is in the file (don't blow away unrelated keys)
     existing: dict = {}
@@ -183,7 +184,7 @@ def recommend_local_model(
     """
     if ram_gb is None or gpu_present is None or cpu_count is None:
         try:
-            from bioflow.core.hardware import detect   # noqa: PLC0415
+            from bioflow.core.hardware import detect
             hw = detect()
             if ram_gb is None:
                 ram_gb = hw.ram_gb
@@ -333,7 +334,7 @@ def _build_prompt(term: str, context: str) -> dict:
 # Redaction — for L2 (error diagnosis)
 # ---------------------------------------------------------------------------
 
-import re as _re  # noqa: E402
+import re as _re
 
 _DEFAULT_REDACT_PATTERNS: tuple = (
     # Windows user paths: C:\Users\someone\... → C:\Users\<USER>\...
@@ -412,7 +413,7 @@ def diagnose_failure(
     extra_patterns: Optional[Iterable[tuple]] = None,
     max_tokens: int = 400,
     backend: Optional[str] = None,
-    audit_log: Optional["Path"] = None,
+    audit_log: Optional[Path] = None,
 ) -> str:
     """Ask the configured LLM to diagnose a failed stage.
 
@@ -461,7 +462,9 @@ def diagnose_failure(
 
     if audit_log is not None:
         from pathlib import Path as _P
-        from bioflow.io import write_text as _wt, read_text as _rt
+
+        from bioflow.io import read_text as _rt
+        from bioflow.io import write_text as _wt
         ap = _P(audit_log)
         old = _rt(ap) if ap.exists() else ""
         _wt(ap, old + (
@@ -483,12 +486,12 @@ def _call_anthropic(prompt: dict, *, max_tokens: int) -> str:
             "ANTHROPIC_API_KEY env var not set; cannot use anthropic backend."
         )
     try:
-        import anthropic   # type: ignore[import-not-found]
+        import anthropic  # type: ignore[import-not-found]
     except ImportError as exc:
         raise LlmError(
             "Install the `anthropic` package: pip install anthropic"
         ) from exc
-    from bioflow.llm import audit as _audit   # noqa: PLC0415
+    from bioflow.llm import audit as _audit
     client = anthropic.Anthropic(api_key=api_key)
     model = _model_for_backend("anthropic")
     # Pre-call cap check using a rough input-token estimate
@@ -533,12 +536,12 @@ def _call_openai(prompt: dict, *, max_tokens: int) -> str:
             "OPENAI_API_KEY env var not set; cannot use openai backend."
         )
     try:
-        from openai import OpenAI   # type: ignore[import-not-found,attr-defined]
+        from openai import OpenAI  # type: ignore[import-not-found,attr-defined]
     except ImportError as exc:
         raise LlmError(
             "Install the `openai` package: pip install openai"
         ) from exc
-    from bioflow.llm import audit as _audit   # noqa: PLC0415
+    from bioflow.llm import audit as _audit
     client = OpenAI(api_key=api_key)
     model = _model_for_backend("openai")
     est_input = _audit.estimate_input_tokens(prompt["system"] + prompt["user"])
@@ -608,7 +611,7 @@ def _call_ollama(prompt: dict, *, max_tokens: int) -> str:
         raise LlmError(f"ollama call failed: {exc}") from exc
     text = data.get("response", "").strip() or "(empty response)"
     # Local model — free, but still audited for completeness
-    from bioflow.llm import audit as _audit   # noqa: PLC0415
+    from bioflow.llm import audit as _audit
     _audit.record(
         action="ollama_call", backend="ollama", model=model,
         input_tokens=_audit.estimate_input_tokens(prompt["system"] + prompt["user"]),

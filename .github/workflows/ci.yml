@@ -46,11 +46,13 @@ jobs:
           python-version: "3.12"
 
       # Pinned on purpose: `pip install ruff` picks up whatever released last,
-      # so a new minor turning on rules (0.16 added ~850 findings across the
-      # tree, none of them regressions) fails CI on an unrelated commit.
-      # Bump this deliberately, with the fixes in the same PR.
+      # so a new minor turning on rules (0.16 expanded the default rule set by
+      # ~850 findings across the tree, none of them regressions) fails CI on an
+      # unrelated commit.  Bump this deliberately, with the fixes in the same PR.
+      # Tree cleaned + config aligned for 0.16 in this PR; UP006/UP007/UP045 are
+      # ignored (pyproject) because we still support Python 3.9.
       - name: Install ruff
-        run: pip install "ruff==0.15.12"
+        run: pip install "ruff==0.16.0"
 
       - name: Run ruff
         run: ruff check .

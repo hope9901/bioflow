@@ -73,7 +73,7 @@ def choice(param: str, value: str, *allowed: str) -> str:
 # Auto-import bundled recipes.  Each module calls register() on import.
 # ---------------------------------------------------------------------------
 
-# noqa: E402,F401 — these imports trigger registration as a side effect
+
 
 # Comparative genomics (8 recipes)
 from bioflow.recipes.comparative_genomics import pangenome as _pangenome   # noqa

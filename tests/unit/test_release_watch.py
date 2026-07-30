@@ -11,8 +11,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "update"))
 
-import release_watch as rw   # noqa: E402
-
+import release_watch as rw
 
 TOOL_TEMPLATE = """\
 id: dummytool

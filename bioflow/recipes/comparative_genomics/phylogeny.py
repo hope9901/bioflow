@@ -29,10 +29,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from bioflow import stage, pipeline
+from bioflow import pipeline, stage
 from bioflow.io import write_text
 from bioflow.recipes import register
-
 
 # ── Stages ───────────────────────────────────────────────────────────────────
 

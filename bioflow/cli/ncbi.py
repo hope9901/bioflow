@@ -46,9 +46,12 @@ def ncbi_cmd(
       bioflow ncbi genome  --taxon dickeya --out /data/genomes --level complete --max 20
       bioflow ncbi protein --taxon pectobacteriaceae --out /data/proteins --max 2000
     """
-    from bioflow.core.ncbi import (  # noqa: PLC0415
-        NcbiError, download_genomes, download_proteins,
-        list_genomes, list_proteins,
+    from bioflow.core.ncbi import (
+        NcbiError,
+        download_genomes,
+        download_proteins,
+        list_genomes,
+        list_proteins,
     )
 
     # ------------------------------------------------------------------ search
@@ -161,7 +164,7 @@ def ncbi_cmd(
         raise typer.Exit(code=1)
 
 
-def _parse_recipe_extra(extra: "list[str]") -> "dict[str, object]":
+def _parse_recipe_extra(extra: list[str]) -> dict[str, object]:
     """Parse pass-through ``--key value`` / ``--key=value`` / ``--flag``
     tokens (collected by Click's ``ignore_unknown_options``) into a
     kwargs dict.
@@ -171,7 +174,7 @@ def _parse_recipe_extra(extra: "list[str]") -> "dict[str, object]":
     (e.g. ``cb_len + 1``) keep working; everything else stays a string
     and recipes coerce to ``Path`` themselves.
     """
-    out: "dict[str, object]" = {}
+    out: dict[str, object] = {}
     i = 0
     while i < len(extra):
         tok = extra[i]

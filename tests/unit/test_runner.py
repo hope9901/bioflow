@@ -11,7 +11,6 @@ from bioflow.core.checkpoint import STATE_FILE
 from bioflow.core.planner import ExecutionPlan, StagePlan
 from bioflow.core.runner import MockBackend, run_plan
 
-
 REGISTRY_DIR = Path(__file__).resolve().parents[2] / "registry"
 
 

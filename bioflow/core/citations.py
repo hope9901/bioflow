@@ -19,18 +19,18 @@ _TOOLS_DIR = _ROOT / "registry" / "tools"
 _CITES_JSON = _ROOT / "registry" / "tool_citations.json"
 
 
-def _registry_tools() -> "dict[str, dict]":
+def _registry_tools() -> dict[str, dict]:
     """``id -> {id, name, version, image, citation}`` from the tool YAMLs."""
-    tools: "dict[str, dict]" = {}
+    tools: dict[str, dict] = {}
     for p in sorted(_TOOLS_DIR.rglob("*.yaml")):
         t = p.read_text(encoding="utf-8")
-        gid = re.search(r"^id:\s*(\S+)", t, re.M)
+        gid = re.search(r"^id:\s*(\S+)", t, re.MULTILINE)
         if not gid:
             continue
-        name = re.search(r"^name:\s*(.+)", t, re.M)
-        ver = re.search(r'^version:\s*"?([^"\n]+?)"?\s*$', t, re.M)
-        img = re.search(r"^\s*image:\s*(\S+)", t, re.M)
-        cit = re.search(r'^citation:\s*"?(.*?)"?\s*$', t, re.M)
+        name = re.search(r"^name:\s*(.+)", t, re.MULTILINE)
+        ver = re.search(r'^version:\s*"?([^"\n]+?)"?\s*$', t, re.MULTILINE)
+        img = re.search(r"^\s*image:\s*(\S+)", t, re.MULTILINE)
+        cit = re.search(r'^citation:\s*"?(.*?)"?\s*$', t, re.MULTILINE)
         tools[gid.group(1)] = {
             "id": gid.group(1),
             "name": name.group(1).strip().strip("\"'") if name else gid.group(1),
@@ -41,21 +41,21 @@ def _registry_tools() -> "dict[str, dict]":
     return tools
 
 
-def _dois() -> "dict[str, str | None]":
+def _dois() -> dict[str, str | None]:
     if not _CITES_JSON.exists():
         return {}
     data = json.loads(_CITES_JSON.read_text(encoding="utf-8"))
     return {tid: c.get("doi") for tid, c in data.get("tools", {}).items()}
 
 
-def _tool_dbs(tool_id: str) -> "list[dict]":
+def _tool_dbs(tool_id: str) -> list[dict]:
     """[{name, version}] for the versioned reference DBs a tool annotates with.
 
     So a methods section can cite not just eggNOG-mapper's *version* but the
     eggNOG *database version* it ran against — the two move independently.
     """
     try:
-        from bioflow.core import db as _db  # noqa: PLC0415
+        from bioflow.core import db as _db
     except Exception:
         return []
     out = []
@@ -66,7 +66,7 @@ def _tool_dbs(tool_id: str) -> "list[dict]":
     return out
 
 
-def _entry(tool: dict, doi: "str | None") -> dict:
+def _entry(tool: dict, doi: str | None) -> dict:
     return {
         "id": tool["id"], "name": tool["name"], "version": tool["version"],
         "citation": tool["citation"], "doi": doi,
@@ -74,7 +74,7 @@ def _entry(tool: dict, doi: "str | None") -> dict:
     }
 
 
-def citations_for_tools(ids: "list[str]") -> "tuple[list[dict], list[str]]":
+def citations_for_tools(ids: list[str]) -> tuple[list[dict], list[str]]:
     """(entries, unknown_ids) for the given tool ids, in the order requested."""
     reg = _registry_tools()
     dois = _dois()
@@ -87,17 +87,17 @@ def citations_for_tools(ids: "list[str]") -> "tuple[list[dict], list[str]]":
     return entries, unknown
 
 
-def citations_for_recipe(name: str) -> "list[dict]":
+def citations_for_recipe(name: str) -> list[dict]:
     """Citations for every distinct tool a recipe's stages run (dedup, in
     stage order).  Raises ``KeyError`` if the recipe is unknown."""
-    from bioflow.recipes import get  # noqa: PLC0415
+    from bioflow.recipes import get
 
     pipe = get(name)
     reg = _registry_tools()
     dois = _dois()
     by_image = {t["image"]: t for t in reg.values() if t["image"]}
-    seen: "set[str]" = set()
-    entries: "list[dict]" = []
+    seen: set[str] = set()
+    entries: list[dict] = []
     for stage in getattr(pipe, "stages", ()):
         tool = by_image.get(getattr(stage, "image", None))
         if tool and tool["id"] not in seen:
@@ -106,7 +106,7 @@ def citations_for_recipe(name: str) -> "list[dict]":
     return entries
 
 
-def _author_year(citation: str) -> "tuple[str, str]":
+def _author_year(citation: str) -> tuple[str, str]:
     m = re.match(r"\s*([A-Za-z\-]+).*?((?:19|20)\d{2})", citation)
     return (m.group(1), m.group(2)) if m else ("", "")
 
@@ -118,7 +118,7 @@ def _db_suffix(entry: dict) -> str:
     return f" (databases: {'; '.join(parts)})" if parts else ""
 
 
-def format_text(entries: "list[dict]") -> str:
+def format_text(entries: list[dict]) -> str:
     lines = []
     for e in entries:
         ver = f" v{e['version']}" if e["version"] else ""
@@ -128,7 +128,7 @@ def format_text(entries: "list[dict]") -> str:
     return "\n".join(lines)
 
 
-def format_bibtex(entries: "list[dict]") -> str:
+def format_bibtex(entries: list[dict]) -> str:
     blocks = []
     for e in entries:
         key = re.sub(r"[^A-Za-z0-9]", "", e["id"]) or "tool"

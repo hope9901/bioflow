@@ -9,10 +9,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-
-from bioflow.core.hardware import _ARCH_ALIASES, detect
 from bioflow.core.compatibility import _arch_status, _status
-
+from bioflow.core.hardware import _ARCH_ALIASES, detect
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -27,7 +25,11 @@ def _make_tool(arch: list[str], min_cpu: int = 1, min_ram: float = 1.0,
       Resources     — leaf with .cpu / .ram_gb / .disk_gb
     """
     from bioflow.core.registry import (
-        Applicable, ContainerSpec, ResourceSpec, Resources, Tool,
+        Applicable,
+        ContainerSpec,
+        Resources,
+        ResourceSpec,
+        Tool,
     )
     return Tool(
         id="test_tool",

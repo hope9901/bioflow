@@ -30,9 +30,9 @@ def provenance_cmd(
     This reads provenance.json and prints a per-stage summary: image +
     pinned digest, exit code, and each input file's SHA-256.
     """
-    import json  # noqa: PLC0415
+    import json
 
-    from bioflow.core.provenance import PROVENANCE_JSON  # noqa: PLC0415
+    from bioflow.core.provenance import PROVENANCE_JSON
 
     if action != "show":
         rprint(f"[red]Unknown action {action!r}.[/]  Use: show")

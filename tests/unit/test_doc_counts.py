@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOLS_DIR = REPO_ROOT / "registry" / "tools"
 
 
-def _actual() -> "tuple[int, int]":
+def _actual() -> tuple[int, int]:
     yamls = list(TOOLS_DIR.rglob("*.yaml"))
     return len(yamls), len({p.parent.name for p in yamls})
 

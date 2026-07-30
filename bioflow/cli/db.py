@@ -55,16 +55,27 @@ def db_cmd(
     gc        Delete an installed DB to reclaim its space (--force to skip the
               confirmation). Re-provision it any time.
     """
-    import json  # noqa: PLC0415
+    import json
 
-    from bioflow.core.db import (  # noqa: PLC0415
-        _DB_CATALOG, catalog_version, db_status, ensure_db_current, fetch_db,
-        list_dbs, provision_command, refgenie_manifest, update_db, verify_db,
+    from bioflow.core.db import (
+        _DB_CATALOG,
+        catalog_version,
+        db_status,
+        ensure_db_current,
+        fetch_db,
+        list_dbs,
+        provision_command,
+        refgenie_manifest,
+        update_db,
+        verify_db,
     )
 
     if action in ("size", "gc"):
-        from bioflow.core.diskusage import (  # noqa: PLC0415
-            db_usage, free_space, human, remove_db,
+        from bioflow.core.diskusage import (
+            db_usage,
+            free_space,
+            human,
+            remove_db,
         )
 
         if action == "size":
@@ -205,7 +216,7 @@ def db_cmd(
         return
 
     if action == "manifest":
-        import sys  # noqa: PLC0415
+        import sys
         manifest = refgenie_manifest(dest_root=dest)
         sys.stdout.write(json.dumps(manifest, indent=2) + "\n")
         return

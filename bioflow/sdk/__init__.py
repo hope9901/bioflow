@@ -56,6 +56,9 @@ from bioflow.sdk._cache import (  # noqa: F401
     set_log_streaming,
 )
 
+# Pipeline composition
+from bioflow.sdk._concurrent import gather
+
 # Hashing (private, used by tests)
 from bioflow.sdk._hashing import (  # noqa: F401
     _compute_cache_key,
@@ -76,13 +79,10 @@ from bioflow.sdk._paths import (  # noqa: F401
     _to_container_path,
     _translate_command,
 )
-
-# Pipeline composition
-from bioflow.sdk._concurrent import gather  # noqa: F401
-from bioflow.sdk._pipeline import Pipeline, pipeline  # noqa: F401
+from bioflow.sdk._pipeline import Pipeline, pipeline
 
 # StageResult + Stage
-from bioflow.sdk._result import StageResult  # noqa: F401
+from bioflow.sdk._result import StageResult
 
 # Runtime globals
 from bioflow.sdk._runtime import (  # noqa: F401
@@ -93,7 +93,7 @@ from bioflow.sdk._runtime import (  # noqa: F401
     set_param_overrides,
     set_workspace,
 )
-from bioflow.sdk._stage import Stage, stage  # noqa: F401
+from bioflow.sdk._stage import Stage, stage
 
 
 def container_path(path) -> str:
@@ -108,7 +108,7 @@ def container_path(path) -> str:
 
     Raises ``ValueError`` if *path* is outside the active workspace.
     """
-    from pathlib import Path  # noqa: PLC0415
+    from pathlib import Path
     return _to_container_path(Path(path), _get_workspace())
 
 
@@ -124,8 +124,8 @@ def stage_input(path, subdir: str = "staged_inputs") -> str:
     container path to write into the list, so it works regardless of
     whether the caller's ``out_dir`` equals the workspace.
     """
-    import shutil  # noqa: PLC0415
-    from pathlib import Path  # noqa: PLC0415
+    import shutil
+    from pathlib import Path
 
     src = Path(path)
     dest_dir = _get_workspace() / subdir

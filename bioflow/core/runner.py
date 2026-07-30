@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 
 from bioflow.core.checkpoint import (
     load as _load_state,
+)
+from bioflow.core.checkpoint import (
     mark_completed,
     mark_failed,
 )
@@ -123,7 +125,7 @@ class MockBackend:
 _STDOUT_TAIL_LINES = 5000
 
 
-def _clamp_resources(cpu: int, ram_gb: float) -> "tuple[int, float]":
+def _clamp_resources(cpu: int, ram_gb: float) -> tuple[int, float]:
     """Clamp a stage's requested CPU / RAM to the host's capacity.
 
     Docker refuses to create a container whose ``--cpus`` exceeds the host
@@ -137,7 +139,7 @@ def _clamp_resources(cpu: int, ram_gb: float) -> "tuple[int, float]":
 
     eff_ram = ram_gb
     try:
-        import psutil  # noqa: PLC0415
+        import psutil
 
         host_ram_gb = psutil.virtual_memory().total / (1024 ** 3)
         # Leave a little headroom for the host/OS.
@@ -251,7 +253,7 @@ class DockerBackend:
             # kills the container is the only thing that actually bounds
             # the runtime.
             if timeout is not None and timeout > 0:
-                import threading  # noqa: PLC0415
+                import threading
 
                 def _kill() -> None:
                     timed_out["flag"] = True
@@ -270,9 +272,9 @@ class DockerBackend:
             # (Roary, IQ-TREE) can emit millions of lines, which would
             # OOM the orchestrator if kept in full.  Every line is still
             # streamed live to log_callback.
-            from collections import deque  # noqa: PLC0415
+            from collections import deque
 
-            stdout_lines: "deque[str]" = deque(maxlen=_STDOUT_TAIL_LINES)
+            stdout_lines: deque[str] = deque(maxlen=_STDOUT_TAIL_LINES)
             for chunk in container.logs(stream=True, follow=True):
                 line = chunk.decode(errors="replace").rstrip("\n")
                 stdout_lines.append(line)
@@ -313,7 +315,7 @@ class DockerBackend:
 def _apptainer_bin() -> str:
     """Resolve the container CLI: ``BIOFLOW_APPTAINER_BIN``, then apptainer,
     then singularity (apptainer is the renamed successor)."""
-    import shutil  # noqa: PLC0415
+    import shutil
 
     override = os.environ.get("BIOFLOW_APPTAINER_BIN")
     if override:
@@ -356,7 +358,7 @@ class SingularityBackend:
     def _build_argv(
         self, *, image: str, command: str, mounts: dict[str, str],
         workdir: str, gpu: bool,
-    ) -> "list[str]":
+    ) -> list[str]:
         argv = [self.binary, "exec", "--cleanenv"]
         if gpu:
             argv.append("--nv")
@@ -383,8 +385,8 @@ class SingularityBackend:
         log_callback: Optional[Callable[[str], None]] = None,
         timeout: Optional[int] = None,
     ) -> CommandResult:
-        import subprocess  # noqa: PLC0415
-        from collections import deque  # noqa: PLC0415
+        import subprocess
+        from collections import deque
 
         argv = self._build_argv(
             image=image, command=command, mounts=mounts,
@@ -410,7 +412,7 @@ class SingularityBackend:
         timed_out = {"flag": False}
         timer = None
         if timeout is not None and timeout > 0:
-            import threading  # noqa: PLC0415
+            import threading
 
             def _kill() -> None:
                 timed_out["flag"] = True
@@ -425,7 +427,7 @@ class SingularityBackend:
 
         # Retain only the tail in memory (the real artifacts are files in the
         # workspace); every line still streams live to log_callback.
-        stdout_lines: "deque[str]" = deque(maxlen=_STDOUT_TAIL_LINES)
+        stdout_lines: deque[str] = deque(maxlen=_STDOUT_TAIL_LINES)
         if proc.stdout is not None:
             for line in proc.stdout:
                 line = line.rstrip("\n")
@@ -477,7 +479,7 @@ def make_backend(name: Optional[str] = None) -> ContainerBackend:
 
 class _NoOpProgress:
     """Fallback when Rich is not available or progress is suppressed."""
-    def __enter__(self) -> "_NoOpProgress":
+    def __enter__(self) -> _NoOpProgress:
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -494,7 +496,7 @@ class _RichProgress:
     """Thin wrapper around ``rich.progress.Progress`` for pipeline stages."""
 
     def __init__(self, total: int) -> None:
-        from rich.progress import (  # noqa: PLC0415
+        from rich.progress import (
             BarColumn,
             MofNCompleteColumn,
             Progress,
@@ -510,9 +512,9 @@ class _RichProgress:
             TimeElapsedColumn(),
         )
         self._total = total
-        self._task_id: Optional["TaskID"] = None
+        self._task_id: Optional[TaskID] = None
 
-    def __enter__(self) -> "_RichProgress":
+    def __enter__(self) -> _RichProgress:
         self._prog.__enter__()
         self._task_id = self._prog.add_task("Initialising…", total=self._total)
         return self
@@ -537,7 +539,7 @@ class _RichProgress:
             self._prog.advance(self._task_id)
 
 
-def _progress_ctx(total: int, show: bool) -> "_NoOpProgress | _RichProgress":
+def _progress_ctx(total: int, show: bool) -> _NoOpProgress | _RichProgress:
     if not show or total == 0:
         return _NoOpProgress()
     try:

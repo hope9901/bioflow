@@ -25,10 +25,8 @@ Subcommands (MVP scope):
 """
 from __future__ import annotations
 
-from bioflow.cli._app import app
-
 # Each import registers its commands via @app.command(...) side effects.
-from bioflow.cli import (  # noqa: F401,E402
+from bioflow.cli import (  # noqa: F401
     cache,
     cite,
     cohort,
@@ -45,12 +43,12 @@ from bioflow.cli import (  # noqa: F401,E402
     setup,
     update,
 )
+from bioflow.cli._app import app
 
 # Public surface — kept stable for the test suite + console script entry.
-from bioflow.cli.recipe import _parse_recipe_extra  # noqa: F401,E402
+from bioflow.cli.recipe import _parse_recipe_extra
 
-
-__all__ = ["app", "_parse_recipe_extra"]
+__all__ = ["_parse_recipe_extra", "app"]
 
 
 if __name__ == "__main__":
