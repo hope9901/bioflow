@@ -134,7 +134,7 @@ def deseq2_diff(quants, sample_sheet: Path, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0",
+@stage(image="quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0",
        cpu=2, ram_gb=4, depends_on=deseq2_diff)
 def enrich_go(deg, *, out_dir, gene_set: str = "GO_Biological_Process_2021",
               padj_cutoff: float = 0.05):

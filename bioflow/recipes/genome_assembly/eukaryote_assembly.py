@@ -71,7 +71,7 @@ def polish_consensus(asm, long_reads: Path, *, out_dir, medaka_model: str = "r10
     )
 
 
-@stage(image="quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0",
+@stage(image="quay.io/biocontainers/compleasm:0.2.9--pyhdfd78af_0",
        cpu=8, ram_gb=16, depends_on=polish_consensus)
 def assess(polished, *, out_dir, busco_lineage: str = "eukaryota_odb10",
            busco_db: Path = Path("/refs/busco")):

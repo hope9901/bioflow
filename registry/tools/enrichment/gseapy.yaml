@@ -1,6 +1,6 @@
 id: gseapy
 name: GSEApy
-version: "1.3.0"
+version: "1.3.1"
 category: enrichment
 stage: [rnaseq_deg.step4]
 input_types: [deg_table, gene_set_gmt]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0
+  image: quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0
   pull_policy: if_not_present
-  image_digest: sha256:2e3edf3b41d9d011880985756b0e61c7882d8b5e04d037732ccb58f29286bd53
+  image_digest: sha256:2996b0803f09742135d64fb382b5bd203cb5d0d41f7df7c6e78591a9d0f72eea
 resources:
   min: {cpu: 2, ram_gb: 8, disk_gb: 10}
   recommended: {cpu: 8, ram_gb: 16, disk_gb: 30}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Fang 2023, PMID 36426870"
 added: "2026-05-15"
-last_reviewed: "2026-07-06"
+last_reviewed: "2026-07-30"
 source_repo: zqfang/GSEApy

@@ -103,7 +103,7 @@ Eukaryote long-read assembly: NanoPlot → Flye/hifiasm → Medaka → compleasm
 - **assemble** — `quay.io/biocontainers/flye:2.9.6--py313h7fbb527_1`
 - **assemble_hifiasm** — `quay.io/biocontainers/hifiasm:0.25.0--h5ca1c30_0`
 - **polish_consensus** — `quay.io/biocontainers/medaka:2.2.2--py312h3050eb1_0`
-- **assess** — `quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0`
+- **assess** — `quay.io/biocontainers/compleasm:0.2.9--pyhdfd78af_0`
 
 ## `germline_variants`
 
@@ -254,7 +254,7 @@ RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC
 - **salmon_index** — `quay.io/biocontainers/salmon:2.3.4--hfa8f182_0`
 - **salmon_quant** — `quay.io/biocontainers/salmon:2.3.4--hfa8f182_0`
 - **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0`
-- **enrich_go** — `quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0`
+- **enrich_go** — `quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0`
 
 ## `scrna_seq`
 

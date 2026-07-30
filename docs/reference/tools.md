@@ -66,7 +66,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bandage` | 0.9.0 | `staphb/bandage:0.9.0` | Wick 2015, PMID 26099265 | 2,190 | 1,623 |
 | `busco` | 6.1.0 | `quay.io/biocontainers/busco:6.1.0--pyhdfd78af_1` | Manni 2021, PMID 34320186 | 5,713 | 5,173 |
 | `checkm2` | 1.1.0 | `quay.io/biocontainers/checkm2:1.1.0--pyh7e72e81_1` | Chklovski 2023, PMID 37500759 | 1,011 | 783 |
-| `compleasm` | 0.2.8 | `quay.io/biocontainers/compleasm:0.2.8--pyh106432d_0` | Huang & Li 2023, PMID 37758247 | 260 | 210 |
+| `compleasm` | 0.2.9 | `quay.io/biocontainers/compleasm:0.2.9--pyhdfd78af_0` | Huang & Li 2023, PMID 37758247 | 260 | 210 |
 | `genovi` | 0.4.3 | `staphb/genovi:0.4.3` | Cumsille et al. 2023, PMID 37014908 | 80 | 71 |
 | `gfastats` | 1.3.11 | `quay.io/biocontainers/gfastats:1.3.11--h077b44d_0` | Formenti 2022, PMID 35799367 | 1,395 | 1,188 |
 | `merqury` | 1.3 | `quay.io/biocontainers/merqury:1.3--hdfd78af_1` | Rhie 2020, PMID 32928274 | 3,771 | 3,358 |
@@ -104,8 +104,8 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
 | `clusterprofiler` | 4.18.4 | `quay.io/biocontainers/bioconductor-clusterprofiler:4.18.4--r45hdfd78af_0` | Wu 2021, PMID 34557778 | 9,455 | 8,823 |
-| `enrichr` | 1.3.0 | `quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0` | Kuleshov 2016, PMID 27141961 | 8,495 | 6,133 |
-| `gseapy` | 1.3.0 | `quay.io/biocontainers/gseapy:1.3.0--py311heb3b1e3_0` | Fang 2023, PMID 36426870 | 786 | 678 |
+| `enrichr` | 1.3.1 | `quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0` | Kuleshov 2016, PMID 27141961 | 8,495 | 6,133 |
+| `gseapy` | 1.3.1 | `quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0` | Fang 2023, PMID 36426870 | 786 | 678 |
 | `topgo` | 2.62.0 | `quay.io/biocontainers/bioconductor-topgo:2.62.0--r45hdfd78af_0` | Alexa & Rahnenfuhrer 2010, https://bioconductor.org/packages/topGO/ | n/a | n/a |
 
 ## epigenomics  (8)
