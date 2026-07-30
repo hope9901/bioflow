@@ -42,6 +42,7 @@ META = REPO / "data" / "test" / "metagenome_small"
 COHORT = REPO / "data" / "test" / "cohort_small"
 PHIX = REPO / "data" / "test" / "phix_small"
 HIFI = REPO / "data" / "test" / "hifi_small"
+KRAKEN = REPO / "data" / "test" / "kraken_small"
 
 
 def _build_bowtie2_index(ws: Path) -> Path:
@@ -311,3 +312,43 @@ def test_eukaryote_assembly_hifiasm_produces_assembly(workspace):
     seq_bp = sum(len(line.strip()) for line in body.splitlines()
                  if not line.startswith(">"))
     assert seq_bp >= 4000, f"assembly implausibly short ({seq_bp} bp)"
+
+
+# ── metagenomics_profile: fastp → Kraken2 classify ───────────────────────────
+
+@pytest.mark.skipif(not KRAKEN.exists(), reason="kraken_small fixture missing")
+def test_metagenomics_profile_kraken2_classifies(workspace):
+    """fastp → Kraken2 classify against a tiny hand-built DB.
+
+    This recipe had no automated coverage. It runs against a 68 KB custom Kraken2
+    DB (two synthetic taxa) so CI needs no multi-GB standard database. Bracken is
+    left out: Bracken 3.1 crashes on a DB this small (a bug in its own taxonomy
+    walk, not the recipe), and real runs use the standard DB that ships Bracken's
+    kmer_distrib files.
+    """
+    from bioflow.recipes.metagenomics.metagenomics_profile import (
+        kraken2_classify, qc_trim,
+    )
+
+    clean = qc_trim(KRAKEN / "reads_R1.fastq.gz", KRAKEN / "reads_R2.fastq.gz")
+    assert clean.ok, (clean.stderr or clean.stdout)[-300:]
+
+    k2 = kraken2_classify(clean, KRAKEN / "db", "s1")
+    assert k2.ok, (
+        "kraken2 classify failed against the custom DB: "
+        f"{(k2.stderr or k2.stdout)[-300:]}"
+    )
+    report = next(iter(Path(k2.out_dir).rglob("*report*")), None)
+    assert report is not None, "Kraken2 wrote no report"
+    # Kraken's report has a taxid column (5th); the two synthetic taxa are 1000
+    # and 1001. (The DB carries their taxids, not readable names.)
+    taxids = {cols[4].strip() for line in report.read_text().splitlines()
+              if len(cols := line.split("\t")) >= 5}
+    assert {"1000", "1001"} & taxids, (
+        f"Kraken2 classified nothing to the fixture's taxa; taxids seen: {taxids}"
+    )
+    # And it should have classified reads, not left everything unclassified.
+    assigned = sum(int(cols[1]) for line in report.read_text().splitlines()
+                   if len(cols := line.split("\t")) >= 5
+                   and cols[4].strip() in {"1000", "1001"})
+    assert assigned > 0, "no reads assigned to either taxon"

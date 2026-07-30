@@ -23,11 +23,10 @@ need a **multi-GB reference index or an external database** can't — the
 fixture would dwarf the repo and the download would make CI flaky.  Their
 external assets are catalogued for `bioflow db fetch`.
 
-!!! warning "Two recipes have no automated coverage"
-    `download_taxon` and `metagenomics_profile` appear
-    in none of the three tiers — they are exercised by hand, not by CI.  A
-    change to them is not caught by any test, so treat them as unverified until
-    a smoke case or fixture exists.
+!!! warning "One recipe has no automated coverage"
+    `download_taxon` appears in none of the three tiers — it is exercised by
+    hand, not by CI.  A change to it is not caught by any test, so treat it as
+    unverified until a smoke case or fixture exists.
 
 ## Validated end to end (10)
 
@@ -47,7 +46,7 @@ Each runs its full chain in CI (the nightly job) on a fixture under
 | `methylation_wgbs` | TrimGalore → Bismark (prep + align) → methylKit | `methyl_small/` |
 | `cog_enrichment` | DIAMOND makedb → blastp → per-bucket COG-category aggregation | `cog_small/` + `gwas_small/` |
 
-## Guarded at the stage level on a tiny fixture (2)
+## Guarded at the stage level on a tiny fixture (3)
 
 A full chain isn't meaningful for these — Scanpy's PCA/clustering needs far
 more than a 3-gene toy, and Percolator's semi-supervised FDR far more than 3
@@ -62,6 +61,7 @@ hand-off instead.
 | `joint_genotyping` | 2 samples → HaplotypeCaller gVCF → CombineGVCFs → GenotypeGVCFs yields a 2-sample `cohort.vcf.gz` with 5 planted SNPs (SnpEff excluded — it downloads its DB at run time) | `cohort_small/` + `phix_small/` |
 | `atac_seq` | trim → Bowtie2 align → Picard dedup → MACS3 peaks (index built in-test; TOBIAS footprinting needs a real motif/genome) | `phix_small/` |
 | `eukaryote_assembly` | NanoPlot → hifiasm → assembly.fasta (`--set assembler=hifiasm`; Flye SIGFPEs on a tiny genome, Medaka/compleasm need model/DB) | `hifi_small/` |
+| `metagenomics_profile` | fastp → Kraken2 classifies 600 read-pairs against a hand-built 2-taxon DB (Bracken excluded — it crashes walking a DB this small; real runs use the 8 GB standard DB) | `kraken_small/` |
 
 ## Requires external reference data (10)
 
@@ -73,7 +73,7 @@ catalog key for `bioflow db fetch <key> --dest /refs` where one exists
 
 | Recipe | Needs | `bioflow db fetch` |
 |---|---|---|
-| `metagenomics_profile` | Kraken2 database | `kraken2_standard_8gb` |
+| `metagenomics_profile` | Kraken2 database (fastp → classify is stage-guarded above) | `kraken2_standard_8gb` |
 | `metagenome_assembly` | CheckM2 diamond DB (assemble → binning is stage-guarded above) | upstream: `checkm2 database --download` |
 | `scrna_seq` | STAR genome index + 10x barcode whitelist (the `kb` swap is stage-guarded above) | `10x_whitelist_v3` (+ build STAR index from `gencode_grch38` + genome FASTA) |
 | `chip_seq` | Bowtie2 index + reference FASTA + GTF | `bowtie2_grch38_noalt`, `gencode_grch38` |
