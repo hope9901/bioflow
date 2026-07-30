@@ -23,8 +23,8 @@ need a **multi-GB reference index or an external database** can't — the
 fixture would dwarf the repo and the download would make CI flaky.  Their
 external assets are catalogued for `bioflow db fetch`.
 
-!!! warning "Three recipes have no automated coverage"
-    `download_taxon`, `eukaryote_assembly` and `metagenomics_profile` appear
+!!! warning "Two recipes have no automated coverage"
+    `download_taxon` and `metagenomics_profile` appear
     in none of the three tiers — they are exercised by hand, not by CI.  A
     change to them is not caught by any test, so treat them as unverified until
     a smoke case or fixture exists.
@@ -61,6 +61,7 @@ hand-off instead.
 | `metagenome_assembly` | fastp → MEGAHIT assembles 2 contigs; MetaBAT2 computes depth + writes the `bins/` layout CheckM2 consumes (real bins need marker genes a tiny fixture lacks) | `metagenome_small/` |
 | `joint_genotyping` | 2 samples → HaplotypeCaller gVCF → CombineGVCFs → GenotypeGVCFs yields a 2-sample `cohort.vcf.gz` with 5 planted SNPs (SnpEff excluded — it downloads its DB at run time) | `cohort_small/` + `phix_small/` |
 | `atac_seq` | trim → Bowtie2 align → Picard dedup → MACS3 peaks (index built in-test; TOBIAS footprinting needs a real motif/genome) | `phix_small/` |
+| `eukaryote_assembly` | NanoPlot → hifiasm → assembly.fasta (`--set assembler=hifiasm`; Flye SIGFPEs on a tiny genome, Medaka/compleasm need model/DB) | `hifi_small/` |
 
 ## Requires external reference data (10)
 
@@ -72,7 +73,6 @@ catalog key for `bioflow db fetch <key> --dest /refs` where one exists
 
 | Recipe | Needs | `bioflow db fetch` |
 |---|---|---|
-| `eukaryote_assembly` | long reads + BUSCO/compleasm lineage DB | `busco_bacteria` / `busco_insecta` / `busco_vertebrata` |
 | `metagenomics_profile` | Kraken2 database | `kraken2_standard_8gb` |
 | `metagenome_assembly` | CheckM2 diamond DB (assemble → binning is stage-guarded above) | upstream: `checkm2 database --download` |
 | `scrna_seq` | STAR genome index + 10x barcode whitelist (the `kb` swap is stage-guarded above) | `10x_whitelist_v3` (+ build STAR index from `gencode_grch38` + genome FASTA) |

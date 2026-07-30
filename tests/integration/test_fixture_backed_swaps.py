@@ -41,6 +41,7 @@ PROT = REPO / "data" / "test" / "proteomics_small"
 META = REPO / "data" / "test" / "metagenome_small"
 COHORT = REPO / "data" / "test" / "cohort_small"
 PHIX = REPO / "data" / "test" / "phix_small"
+HIFI = REPO / "data" / "test" / "hifi_small"
 
 
 def _build_bowtie2_index(ws: Path) -> Path:
@@ -277,3 +278,36 @@ def test_atac_seq_align_dedup_peaks(workspace):
     assert peaks.ok, (peaks.stderr or peaks.stdout)[-300:]
     narrow = list(Path(peaks.out_dir).rglob("*.narrowPeak"))
     assert narrow, "MACS3 wrote no narrowPeak file"
+
+
+# ── eukaryote_assembly: NanoPlot → hifiasm ───────────────────────────────────
+
+@pytest.mark.skipif(not HIFI.exists(), reason="hifi_small fixture missing")
+def test_eukaryote_assembly_hifiasm_produces_assembly(workspace):
+    """NanoPlot QC → hifiasm → assembly.fasta (the `--set assembler=hifiasm` path).
+
+    This recipe had no automated coverage. Only the hifiasm path is exercised:
+    Flye (the default) crashes with SIGFPE on a genome this small, and the
+    Medaka/compleasm tail needs a basecaller model / BUSCO DB a fixture can't
+    carry — so the guard stops at the assembly the rest of the chain consumes.
+    """
+    from bioflow.recipes.genome_assembly.eukaryote_assembly import (
+        assemble_hifiasm, read_qc,
+    )
+
+    reads = HIFI / "hifi_reads.fastq.gz"
+    qc = read_qc(reads)
+    assert qc.ok, (qc.stderr or qc.stdout)[-300:]
+    # NanoPlot emits a report + plots.
+    assert list(Path(qc.out_dir).rglob("*NanoPlot*")) or \
+        list(Path(qc.out_dir).rglob("*.html")), "NanoPlot produced no report"
+
+    asm = assemble_hifiasm(qc, reads)
+    assert asm.ok, (asm.stderr or asm.stdout)[-300:]
+    fasta = Path(asm.out_dir) / "assembly.fasta"
+    assert fasta.exists(), "hifiasm/GFA→FASTA wrote no assembly.fasta"
+    body = fasta.read_text(encoding="utf-8", errors="replace")
+    assert body.count(">") >= 1, "assembly.fasta has no contigs"
+    seq_bp = sum(len(line.strip()) for line in body.splitlines()
+                 if not line.startswith(">"))
+    assert seq_bp >= 4000, f"assembly implausibly short ({seq_bp} bp)"
