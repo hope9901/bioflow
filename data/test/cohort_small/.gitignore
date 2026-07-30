@@ -1,0 +1,8 @@
+# prepare_reference builds these in-place; they are not part of the fixture.
+reference.dict
+reference.fa.amb
+reference.fa.ann
+reference.fa.bwt
+reference.fa.fai
+reference.fa.pac
+reference.fa.sa
