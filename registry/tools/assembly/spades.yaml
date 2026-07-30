@@ -1,6 +1,6 @@
 id: spades
 name: SPAdes
-version: "4.2.0"
+version: "4.3.0"
 category: assembly
 stage: [genome_assembly.step2]
 input_types: [fastq_short_paired_clean]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [de_novo]
 container:
-  image: staphb/spades:4.2.0
+  image: staphb/spades:4.3.0
   pull_policy: if_not_present
-  image_digest: sha256:2c79850a052320df8c6176322c2cd5b1577a4656460356a733592e6acba57552
+  image_digest: sha256:6e337eb2729c5417b630d0eb00cb2c4a697b985f68a8e73f9e052db4aa62d6bd
 resources:
   min: {cpu: 4, ram_gb: 8, disk_gb: 20}
   recommended: {cpu: 16, ram_gb: 64, disk_gb: 200}
@@ -23,5 +23,5 @@ command_template: |
   {extra_args}
 citation: "Prjibelski 2020, PMID 32559359"
 added: "2026-04-16"
-last_reviewed: "2026-07-06"
+last_reviewed: "2026-07-30"
 source_repo: ablab/spades

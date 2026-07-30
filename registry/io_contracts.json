@@ -682,7 +682,7 @@
       ]
     },
     "kraken2": {
-      "version": "2.1.6",
+      "version": "2.17.1",
       "inputs": [
         "clean_fastq"
       ],
@@ -1244,7 +1244,7 @@
       ]
     },
     "spades": {
-      "version": "4.2.0",
+      "version": "4.3.0",
       "inputs": [
         "fastq_short_paired_clean"
       ],

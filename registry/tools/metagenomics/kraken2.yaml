@@ -1,6 +1,6 @@
 id: kraken2
 name: kraken2
-version: "2.1.6"
+version: "2.17.1"
 category: metagenomics
 stage: [metagenomics.step3]
 input_types: [clean_fastq]
@@ -10,9 +10,9 @@ applicable:
   read_type: [short]
   mode: [profiling]
 container:
-  image: quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0
+  image: quay.io/biocontainers/kraken2:2.17.1--pl5321h077b44d_0
   pull_policy: if_not_present
-  image_digest: sha256:e34b3c44d75897c6ef640fbccbc49427a1ad60ec0e51388c255055c8f0ad1c66
+  image_digest: sha256:c5eb4764f23e9db975cbc3e545d330e1fe468307f5e59a99c0ce8f4c1f6f09e2
 resources:
   min: {cpu: 8, ram_gb: 32, disk_gb: 100}
   recommended: {cpu: 32, ram_gb: 128, disk_gb: 500}
@@ -25,5 +25,5 @@ command_template: |
 references: []
 citation: "Wood et al. 2019, PMID 31779668"
 added: "2026-04-20"
-last_reviewed: "2026-07-06"
+last_reviewed: "2026-07-30"
 source_repo: DerrickWood/kraken2

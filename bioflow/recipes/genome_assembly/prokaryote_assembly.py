@@ -43,7 +43,7 @@ def qc_trim(r1: Path, r2: Path, *, out_dir, min_qual: int = 15):
     )
 
 
-@stage(image="staphb/spades:4.2.0", cpu=8, ram_gb=16, depends_on=qc_trim,
+@stage(image="staphb/spades:4.3.0", cpu=8, ram_gb=16, depends_on=qc_trim,
        retry=2, retry_with={"ram_gb": "2x"})
 def assemble(clean, *, out_dir, kmer: str = "auto"):
     """SPAdes de novo assembly from QC-cleaned reads.

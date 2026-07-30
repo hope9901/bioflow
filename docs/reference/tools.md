@@ -55,7 +55,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `racon` | 1.5.0 | `quay.io/biocontainers/racon:1.5.0--h21ec9f0_2` | Vaser 2017, PMID 28100585 | 2,476 | 1,921 |
 | `raven` | 1.8.3 | `quay.io/biocontainers/raven-assembler:1.8.3--h5ca1c30_3` | Vaser & Sikic 2021, PMID 38217213 | 360 | 317 |
 | `shasta` | 0.14.0 | `quay.io/biocontainers/shasta:0.14.0--h9948957_0` | Shafin 2020, PMID 32686750 | 424 | 370 |
-| `spades` | 4.2.0 | `staphb/spades:4.2.0` | Prjibelski 2020, PMID 32559359 | 2,447 | 2,199 |
+| `spades` | 4.3.0 | `staphb/spades:4.3.0` | Prjibelski 2020, PMID 32559359 | 2,447 | 2,199 |
 | `unicycler` | 0.5.1 | `quay.io/biocontainers/unicycler:0.5.1--py312hdcc493e_5` | Wick 2017, PMID 28594827 | 6,765 | 5,353 |
 | `verkko` | 2.3.2 | `quay.io/biocontainers/verkko:2.3.2--hb0edd9e_0` | Rautiainen 2023, PMID 36797493 | 302 | 275 |
 
@@ -143,7 +143,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `bracken` | 3.1 | `quay.io/biocontainers/bracken:3.1--h9948957_0` | Lu et al. 2017, PMID 28655956 | n/a | n/a |
 | `humann3` | 3.9 | `quay.io/biocontainers/humann:3.9--py312hdfd78af_0` | Beghini et al. 2021, PMID 33944776 | 1,715 | 1,553 |
 | `kneaddata` | 0.12.4 | `quay.io/biocontainers/kneaddata:0.12.4--pyhdfd78af_0` | McIver et al. 2018, PMID 31616210 | n/a | n/a |
-| `kraken2` | 2.1.6 | `quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0` | Wood et al. 2019, PMID 31779668 | 4,969 | 4,333 |
+| `kraken2` | 2.17.1 | `quay.io/biocontainers/kraken2:2.17.1--pl5321h077b44d_0` | Wood et al. 2019, PMID 31779668 | 4,969 | 4,333 |
 | `krona` | 2.8.1 | `staphb/krona:2.8.1` | Ondov 2011, PMID 21961884 | 1,382 | 763 |
 | `lefse` | 1.1.2 | `quay.io/biocontainers/lefse:1.1.2--pyhdfd78af_0` | Segata et al. 2011, PMID 21702898 | 11,286 | 7,340 |
 | `maxbin2` | 2.2.7 | `quay.io/biocontainers/maxbin2:2.2.7--h503566f_8` | Wu 2016, PMID 26515820 | 2,059 | 1,583 |

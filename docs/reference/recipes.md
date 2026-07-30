@@ -173,7 +173,7 @@ Shotgun metagenomic profiling: fastp → Kraken2+Bracken|MetaPhlAn → Krona
 *5 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
-- **kraken2_classify** — `quay.io/biocontainers/kraken2:2.1.6--pl5321h077b44d_0`
+- **kraken2_classify** — `quay.io/biocontainers/kraken2:2.17.1--pl5321h077b44d_0`
 - **bracken_abundance** — `quay.io/biocontainers/bracken:3.1--h9948957_0`
 - **krona_chart** — `staphb/krona:2.8.1`
 - **metaphlan_profile** — `quay.io/biocontainers/metaphlan:4.2.4--pyhdfd78af_0`
@@ -218,7 +218,7 @@ Prokaryote short-read de novo assembly + structural annotation
 *7 stage(s):*
 
 - **qc_trim** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
-- **assemble** — `staphb/spades:4.2.0`
+- **assemble** — `staphb/spades:4.3.0`
 - **annotate** — `staphb/prokka:1.14.6`
 - **annotate_bakta** — `quay.io/biocontainers/bakta:1.12.0--pyhdfd78af_0`
 - **assembly_qc** — `staphb/quast:5.3.0`
