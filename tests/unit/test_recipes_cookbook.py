@@ -113,6 +113,67 @@ class TestCogEnrichment:
         assert result is not None
 
 
+class TestDownloadTaxon:
+    """`download_taxon` runs zero containers — it's a host-side wrapper around
+    ``bioflow.core.ncbi.download_genomes`` (whose batching/retry/extraction are
+    unit-tested in test_ncbi.py).  A real run hits NCBI, so CI can't drive the
+    whole thing; but the wrapper's *wiring* is exactly the kind of thing that
+    breaks silently — the recipe renames ``max_genomes`` to ``max_assemblies``,
+    coerces ``include`` to a tuple, and resolves + creates ``out_dir``.  Pin it
+    with the network mocked."""
+
+    def test_forwards_args_and_creates_out_dir(self, tmp_path, monkeypatch):
+        from bioflow.recipes.comparative_genomics import download_taxon as mod
+
+        captured = {}
+
+        def _fake_download_genomes(taxon, out_dir, **kwargs):
+            captured["taxon"] = taxon
+            captured["out_dir"] = out_dir
+            captured["kwargs"] = kwargs
+            # out_dir must already exist by the time the engine is called
+            captured["out_dir_exists"] = Path(out_dir).is_dir()
+            return [Path(out_dir) / "GCF_1.fna", Path(out_dir) / "GCF_2.fna"]
+
+        monkeypatch.setattr(mod, "download_genomes", _fake_download_genomes)
+
+        dest = tmp_path / "genomes"
+        result = get("download_taxon")(
+            "Pectobacterium",
+            out_dir=dest,
+            max_genomes=7,
+            reference_only=False,
+            include=["GENOME_FASTA", "GFF3"],
+        )
+
+        # out_dir was created (and existed before the engine ran)
+        assert dest.is_dir()
+        assert captured["out_dir_exists"] is True
+        # taxon forwarded; out_dir resolved to an absolute path
+        assert captured["taxon"] == "Pectobacterium"
+        assert Path(captured["out_dir"]) == dest.resolve()
+        # the rename and the tuple coercion — the easy-to-break bits
+        assert captured["kwargs"]["max_assemblies"] == 7
+        assert captured["kwargs"]["reference_only"] is False
+        assert captured["kwargs"]["include"] == ("GENOME_FASTA", "GFF3")
+        # the engine's return value passes straight back out
+        assert [p.name for p in result] == ["GCF_1.fna", "GCF_2.fna"]
+
+    def test_defaults_match_the_documented_cli(self, tmp_path, monkeypatch):
+        """The docstring advertises reference-only, FASTA-only, max 200."""
+        from bioflow.recipes.comparative_genomics import download_taxon as mod
+
+        captured = {}
+        monkeypatch.setattr(
+            mod, "download_genomes",
+            lambda taxon, out_dir, **kw: captured.update(kw) or [],
+        )
+        get("download_taxon")("Pectobacterium", out_dir=tmp_path / "g")
+        assert captured["reference_only"] is True
+        assert captured["max_assemblies"] == 200
+        assert captured["include"] == ("GENOME_FASTA",)
+
+
 # ---------------------------------------------------------------------------
 # CLI smoke
 # ---------------------------------------------------------------------------

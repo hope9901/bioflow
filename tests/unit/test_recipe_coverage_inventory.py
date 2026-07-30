@@ -38,15 +38,20 @@ STAGE_GUARDED = {"scrna_seq", "proteomics_dda", "metagenome_assembly",
                  "joint_genotyping", "atac_seq", "eukaryote_assembly",
                  "metagenomics_profile"}
 
-#: Recipes with **no** automated coverage. Not an allowlist to hide behind —
-#: a documented gap. Shrinking it is the goal.
-UNCOVERED = {
-    "download_taxon",
-}
+#: Recipes that run **zero containers** (pure host-side I/O), so there's no
+#: pipeline to drive on a fixture.  Their engine is unit-tested elsewhere and
+#: the recipe's own wiring (arg forwarding, out_dir handling) is pinned with the
+#: network mocked.  The only unexercised part is the live network call itself,
+#: which no CI should make.
+WIRING_ONLY = {"download_taxon"}
+
+#: Recipes with **no** automated coverage at all. Not an allowlist to hide
+#: behind — a documented gap. Shrinking it is the goal; it is now empty.
+UNCOVERED: set[str] = set()
 
 
 def test_inventory_accounts_for_every_recipe():
-    covered = SMOKE | FULL_E2E | STAGE_GUARDED
+    covered = SMOKE | FULL_E2E | STAGE_GUARDED | WIRING_ONLY
     registered = set(names())
     unaccounted = registered - covered - UNCOVERED
     assert not unaccounted, (
@@ -58,10 +63,23 @@ def test_inventory_accounts_for_every_recipe():
 
 
 def test_uncovered_and_covered_do_not_overlap():
-    both = UNCOVERED & (SMOKE | FULL_E2E | STAGE_GUARDED)
+    both = UNCOVERED & (SMOKE | FULL_E2E | STAGE_GUARDED | WIRING_ONLY)
     assert not both, (
         f"these are listed as uncovered but have a test: {sorted(both)} — "
         "move them out of UNCOVERED and update docs/reference/e2e-coverage.md"
+    )
+
+
+def test_wiring_only_recipes_are_actually_guarded():
+    """A WIRING_ONLY recipe must have a real test driving it — otherwise it
+    belongs in UNCOVERED, not in a tier that claims it's covered."""
+    src = (REPO_ROOT / "tests" / "unit" / "test_recipes_cookbook.py").read_text(
+        encoding="utf-8"
+    )
+    called = set(re.findall(r'get\("([a-z_]+)"\)', src))
+    missing = WIRING_ONLY - called
+    assert not missing, (
+        f"declared WIRING_ONLY but no wiring test drives them: {sorted(missing)}"
     )
 
 

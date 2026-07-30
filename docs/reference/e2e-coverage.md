@@ -23,10 +23,12 @@ need a **multi-GB reference index or an external database** can't — the
 fixture would dwarf the repo and the download would make CI flaky.  Their
 external assets are catalogued for `bioflow db fetch`.
 
-!!! warning "One recipe has no automated coverage"
-    `download_taxon` appears in none of the three tiers — it is exercised by
-    hand, not by CI.  A change to it is not caught by any test, so treat it as
-    unverified until a smoke case or fixture exists.
+!!! note "Every recipe now has some automated check"
+    The three container tiers cover all recipes that run containers.  The one
+    that runs none — `download_taxon`, a pure NCBI fetch — is guarded at the
+    wiring level instead (see *Host-side only* below): its engine is unit-tested
+    and the recipe's arg-forwarding is pinned with the network mocked.  Only the
+    live NCBI call is unexercised, which no CI should make.
 
 ## Validated end to end (10)
 
@@ -89,8 +91,10 @@ catalog key for `bioflow db fetch <key> --dest /refs` where one exists
     and a realistic reference make a committed, deterministic fixture
     impractical, not because setup is heavy.
 
-## Utility (1)
+## Host-side only — guarded at the wiring level (1)
 
-| Recipe | Note |
-|---|---|
-| `download_taxon` | Pure NCBI Datasets fetch (no Docker); network-dependent, so it has no committed fixture. |
+Runs zero containers, so there's no pipeline to drive on a fixture.
+
+| Recipe | Guarded | Where |
+|---|---|---|
+| `download_taxon` | Engine (`download_genomes`: batching/HTTP-414/retry/extraction) is unit-tested; the recipe's own arg-forwarding (`max_genomes`→`max_assemblies`, `include` tuple coercion, `out_dir` resolve+mkdir, return pass-through) is pinned with the network mocked. The live NCBI fetch is the only unexercised part. | `test_ncbi.py`, `test_recipes_cookbook.py::TestDownloadTaxon` |
