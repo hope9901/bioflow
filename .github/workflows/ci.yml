@@ -72,9 +72,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Pinned for the same reason as ruff: dev extras only set a lower bound
-      # (`mypy>=1.10`), so CI was silently running 2.x against a tree developed
-      # on 1.x. Bump deliberately, with any new findings fixed in the same PR.
+      # Pinned for the same reason as ruff: the dev extras only set a lower
+      # bound (`mypy>=1.10`), so an unpinned install silently tracks whatever
+      # released last (1.19.1 today — mypy has no 2.x), and a new minor can
+      # introduce stricter checks that break an unrelated PR. Bump deliberately,
+      # fixing any new findings in the same PR.
       - name: Install mypy
         run: |
           pip install -e ".[dev]"
