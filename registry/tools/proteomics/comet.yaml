@@ -1,6 +1,6 @@
 id: comet
 name: Comet
-version: "2024.02.0"
+version: "2026.01.1"
 category: proteomics
 stage: [proteomics.step2]
 input_types: [mzml, protein_fasta]
@@ -23,5 +23,5 @@ command_template: |
 references: []
 citation: "Eng 2013, PMID 23148064"
 added: "2026-05-15"
-last_reviewed: "2026-05-15"
+last_reviewed: "2026-07-30"
 source_repo: UWPR/Comet

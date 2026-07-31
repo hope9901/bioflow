@@ -10,6 +10,7 @@ instead of after the README is published.
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -103,6 +104,54 @@ class TestOutputTypesPlausible:
 # ---------------------------------------------------------------------------
 # No duplicates with different category
 # ---------------------------------------------------------------------------
+
+class TestVersionMatchesImageTag:
+    """The ``version`` label must match the tool actually shipped in the image.
+
+    Catches the drift where the image is bumped but the label is left stale —
+    comet was pinned to a 2026.01.1 image yet still labelled ``2024.02.0``, so
+    provenance and `bioflow db` reported the wrong version.  Bundle / mulled
+    images legitimately differ (their tag is the *bundle*'s version or a content
+    hash, not the tool's) and are allowlisted with the reason.
+    """
+
+    #: tool id → why its version can't match the image tag
+    BUNDLE_IMAGES = {
+        "bwa_samtools": "mulled bwa+samtools combo — the tag is a content hash",
+        "repeatmasker": "dfam/tetools bundle — tag is the tetools version, not RepeatMasker's",
+        "repeatmodeler": "dfam/tetools bundle — tag is the tetools version, not RepeatModeler's",
+    }
+
+    @staticmethod
+    def _digits(s: str) -> str:
+        return re.sub(r"\D", "", s)
+
+    def test_version_matches_image_tag(self, all_tools):
+        bad = []
+        for t in all_tools:
+            if t.id in self.BUNDLE_IMAGES:
+                continue
+            image = t.container.image
+            if ":" not in image:
+                continue
+            # tag before the BioContainers build suffix (`--pyXXX_0`)
+            tag = image.rsplit(":", 1)[1].split("--", 1)[0]
+            if not tag or tag == "latest":
+                continue
+            ver = t.version
+            # exact / substring match, or the same digit-run (comet's compact
+            # `2026011` == labelled `2026.01.1`)
+            if ver == tag or ver in tag or tag in ver:
+                continue
+            if self._digits(ver) == self._digits(tag):
+                continue
+            bad.append(
+                f"{t.id}: version={ver!r} but image tag={tag!r} ({image}) — "
+                "bump the version label to match the image, or add the tool to "
+                "BUNDLE_IMAGES if the tag is a bundle version / content hash."
+            )
+        assert not bad, "version/image drift:\n  " + "\n  ".join(bad)
+
 
 class TestNoCrossCategoryDuplicates:
 

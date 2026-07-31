@@ -1,6 +1,6 @@
 {
   "_comment": "I/O format contract snapshot \u2014 regenerate with `python scripts/io_contracts.py update`.  See scripts/io_contracts.py.",
-  "generated": "2026-07-30",
+  "generated": "2026-07-31",
   "tools": {
     "abricate": {
       "version": "1.4.0",
@@ -229,7 +229,7 @@
       ]
     },
     "comet": {
-      "version": "2024.02.0",
+      "version": "2026.01.1",
       "inputs": [
         "mzml",
         "protein_fasta"
