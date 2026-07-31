@@ -118,7 +118,7 @@ Germline variants: fastp → BWA → GATK/DeepVariant → bcftools → SnpEff
 - **align** — `quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:f45ad9036aa41bb10f875a330fa877d8869018a1-0`
 - **call_variants** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
 - **call_variants_deepvariant** — `google/deepvariant:1.10.0`
-- **filter_variants** — `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0`
+- **filter_variants** — `quay.io/biocontainers/bcftools:1.24--h487d631_1`
 - **annotate_variants** — `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0`
 
 ## `gwas`
@@ -147,7 +147,7 @@ Cohort joint genotyping (GATK best practice): per-sample GVCF → CombineGVCFs/G
 - **hard_filter** — `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1`
 - **annotate_cohort** — `quay.io/biocontainers/snpeff:5.4.0c--hdfd78af_0`
 - **joint_call_glnexus** — `quay.io/biocontainers/glnexus:1.4.1--h40d77a6_0`
-- **glnexus_to_vcf** — `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0`
+- **glnexus_to_vcf** — `quay.io/biocontainers/bcftools:1.24--h487d631_1`
 
 ## `metagenome_assembly`
 
@@ -251,8 +251,8 @@ RNA-seq DEG: fastp → Salmon/kallisto → DESeq2 → GO enrichment + MultiQC
 - **kallisto_quant** — `quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0`
 - **multiqc_report** — `quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1`
 - **qc_one** — `quay.io/biocontainers/fastp:1.3.6--h43da1c4_0`
-- **salmon_index** — `quay.io/biocontainers/salmon:2.3.4--hfa8f182_0`
-- **salmon_quant** — `quay.io/biocontainers/salmon:2.3.4--hfa8f182_0`
+- **salmon_index** — `quay.io/biocontainers/salmon:2.4.1--hfa8f182_0`
+- **salmon_quant** — `quay.io/biocontainers/salmon:2.4.1--hfa8f182_0`
 - **deseq2_diff** — `quay.io/biocontainers/bioconductor-deseq2:1.50.2--r45ha27e39d_0`
 - **enrich_go** — `quay.io/biocontainers/gseapy:1.3.1--py311heb3b1e3_0`
 

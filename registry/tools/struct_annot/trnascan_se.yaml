@@ -1,6 +1,6 @@
 id: trnascan_se
 name: tRNAscan-SE
-version: "2.0.12"
+version: "2.0.13"
 category: struct_annot
 stage: [genome_assembly.trna]
 input_types: [assembly_fasta]
@@ -10,9 +10,9 @@ applicable:
   read_type: [any]
   mode: [any]
 container:
-  image: quay.io/biocontainers/trnascan-se:2.0.12--pl5321h7b50bb2_2
+  image: quay.io/biocontainers/trnascan-se:2.0.13--pl5321hab16a5f_0
   pull_policy: if_not_present
-  image_digest: sha256:b1697934598572cca7f512eb31ce969afcc8180ba21c82b058ee536b9b2d05a8
+  image_digest: sha256:e573090368974ff1228e6894828c6c8a132dfecc3198f5e9fb76832f8f434f29
 resources:
   min: {cpu: 2, ram_gb: 4, disk_gb: 5}
   recommended: {cpu: 4, ram_gb: 8, disk_gb: 10}
@@ -22,5 +22,5 @@ command_template: |
   tRNAscan-SE -B -o {out_dir}/trna.txt -j {out_dir}/trna.gff {assembly_fasta}
 citation: "Chan 2021, PMID 34417604"
 added: "2026-07-07"
-last_reviewed: "2026-07-07"
+last_reviewed: "2026-07-31"
 source_repo: UCSC-LoweLab/tRNAscan-SE

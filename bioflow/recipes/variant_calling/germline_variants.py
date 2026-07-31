@@ -134,7 +134,7 @@ def call_variants_deepvariant(aln, reference: Path, sample_id: str, *, out_dir,
     )
 
 
-@stage(image="quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0",
+@stage(image="quay.io/biocontainers/bcftools:1.24--h487d631_1",
        cpu=4, ram_gb=8, depends_on=call_variants)
 def filter_variants(vcf, sample_id: str, *, out_dir,
                     min_qual: int = 30, min_depth: int = 10):

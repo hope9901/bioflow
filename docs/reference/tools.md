@@ -195,7 +195,7 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `htseq` | 2.1.2 | `quay.io/biocontainers/htseq:2.1.2--py311h483b626_2` | Anders 2015, PMID 25260700 | n/a | n/a |
 | `kallisto` | 0.52.0 | `quay.io/biocontainers/kallisto:0.52.0--h13ff97a_0` | Bray 2016, PMID 27043002 | 7,856 | 5,298 |
 | `rsem` | 1.3.3 | `quay.io/biocontainers/rsem:1.3.3--pl5321h077b44d_12` | Li & Dewey 2011, PMID 21816040 | 16,258 | 9,456 |
-| `salmon` | 2.3.4 | `quay.io/biocontainers/salmon:2.3.4--hfa8f182_0` | Patro 2017, PMID 28263959 | 9,687 | 7,499 |
+| `salmon` | 2.4.1 | `quay.io/biocontainers/salmon:2.4.1--hfa8f182_0` | Patro 2017, PMID 28263959 | 9,687 | 7,499 |
 | `star` | 2.7.11b | `quay.io/biocontainers/star:2.7.11b--h43eeafb_0` | Dobin 2013, PMID 23104886 | 41,990 | 29,078 |
 | `stringtie` | 3.0.3 | `quay.io/biocontainers/stringtie:3.0.3--h29c0135_0` | Pertea 2015, PMID 25690850 | 10,134 | 7,701 |
 | `subread` | 2.1.1 | `quay.io/biocontainers/subread:2.1.1--h577a1d6_0` | Liao 2014, PMID 24227677 | 21,327 | 15,592 |
@@ -227,15 +227,15 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 | `prodigal` | 2.6.3 | `quay.io/biocontainers/prodigal:2.6.3--h577a1d6_11` | Hyatt 2010, PMID 20211023 | n/a | n/a |
 | `prokka` | 1.14.6 | `staphb/prokka:1.14.6` | Seemann 2014, PMID 24642063 | 14,442 | 9,722 |
 | `snap` | 2017-03-01 | `quay.io/biocontainers/snap:2017_03_01--h7b50bb2_0` | Korf 2004, PMID 15144565 | n/a | n/a |
-| `trnascan_se` | 2.0.12 | `quay.io/biocontainers/trnascan-se:2.0.12--pl5321h7b50bb2_2` | Chan 2021, PMID 34417604 | n/a | n/a |
+| `trnascan_se` | 2.0.13 | `quay.io/biocontainers/trnascan-se:2.0.13--pl5321hab16a5f_0` | Chan 2021, PMID 34417604 | n/a | n/a |
 
 ## variant_calling  (9)
 
 | Tool | Version | Image | Citation | Total cites | Cites 2021–2025 |
 |---|---|---|---|--:|--:|
-| `bcftools` | 1.23.1 | `quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0` | Danecek 2021, PMID 33590861 | 11,759 | 10,492 |
+| `bcftools` | 1.24 | `quay.io/biocontainers/bcftools:1.24--h487d631_1` | Danecek 2021, PMID 33590861 | 11,759 | 10,492 |
 | `deepvariant` | 1.10.0 | `google/deepvariant:1.10.0` | Poplin 2018, PMID 30247488 | n/a | n/a |
-| `delly` | 2.3.0 | `quay.io/biocontainers/delly:2.3.0--h3752d28_0` | Rausch 2012, PMID 22962449 | n/a | n/a |
+| `delly` | 2.5.1 | `quay.io/biocontainers/delly:2.5.1--h3752d28_0` | Rausch 2012, PMID 22962449 | n/a | n/a |
 | `ensembl_vep` | 116.0 | `quay.io/biocontainers/ensembl-vep:116.0--pl5321h2a3209d_0` | McLaren 2016, PMID 27268795 | n/a | n/a |
 | `freebayes` | 1.3.10 | `quay.io/biocontainers/freebayes:1.3.10--hbefcdb2_0` | Garrison & Marth 2012, arXiv:1207.3907 | n/a | n/a |
 | `gatk4` | 4.6.2.0 | `quay.io/biocontainers/gatk4:4.6.2.0--py310hdfd78af_1` | McKenna 2010, PMID 20644199 | 16,785 | 7,994 |

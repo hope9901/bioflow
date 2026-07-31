@@ -195,7 +195,7 @@ def joint_call_glnexus(gvcfs, *, out_dir):
     )
 
 
-@stage(image="quay.io/biocontainers/bcftools:1.23.1--hb2cee57_0",
+@stage(image="quay.io/biocontainers/bcftools:1.24--h487d631_1",
        cpu=4, ram_gb=8, depends_on=joint_call_glnexus)
 def glnexus_to_vcf(glnexus, *, out_dir):
     """GLnexus BCF → the ``cohort.vcf.gz`` the GATK path also produces.
