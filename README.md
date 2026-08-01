@@ -81,16 +81,16 @@ Ranked by how many papers cited each tool's canonical reference in the last 5 fu
 
 | # | Tool | Category | Cites 2021–2025 | Total |
 |--:|---|---|--:|--:|
-| 1 | `deseq2` | deg | 52,540 | 72,197 |
-| 2 | `star` | rnaseq_align | 29,078 | 41,990 |
-| 3 | `starsolo` | single_cell | 29,078 | 41,990 |
-| 4 | `bowtie2` | alignment | 25,521 | 43,646 |
-| 5 | `mafft` | comparative_genomics | 19,262 | 31,071 |
-| 6 | `edger` | deg | 19,177 | 33,219 |
-| 7 | `bwa` | alignment | 18,313 | 36,991 |
-| 8 | `fastp` | qc | 17,361 | 19,916 |
-| 9 | `subread` | rnaseq_align | 15,592 | 21,327 |
-| 10 | `bedtools` | alignment | 13,559 | 22,804 |
+| 1 | `deseq2` | deg | 52,954 | 73,988 |
+| 2 | `star` | rnaseq_align | 29,334 | 42,990 |
+| 3 | `starsolo` | single_cell | 29,334 | 42,990 |
+| 4 | `bowtie2` | alignment | 25,726 | 44,452 |
+| 5 | `mafft` | comparative_genomics | 19,382 | 31,681 |
+| 6 | `edger` | deg | 19,299 | 33,699 |
+| 7 | `bwa` | alignment | 18,432 | 37,459 |
+| 8 | `bwa_samtools` | alignment | 18,432 | 37,459 |
+| 9 | `fastp` | qc | 17,472 | 20,593 |
+| 10 | `subread` | rnaseq_align | 15,722 | 21,908 |
 Full per-tool counts: [docs/reference/tools.md](docs/reference/tools.md).
 
 <!-- TOOLS-TABLE:END -->
