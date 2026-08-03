@@ -154,7 +154,7 @@ def retry(
     initial_delay: float = 1.0,
     backoff: float = 2.0,
     max_delay: float = 60.0,
-    exceptions: tuple[type, ...] = (Exception,),
+    exceptions: tuple[type[Exception], ...] = (Exception,),
     on_retry: Optional[Callable[[int, Exception], None]] = None,
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """Exponential-backoff retry decorator for transient failures.

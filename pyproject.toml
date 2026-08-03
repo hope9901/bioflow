@@ -40,6 +40,13 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "mypy>=1.10",
+    # Type stubs so mypy actually checks these libs instead of blanket-ignoring
+    # every un-stubbed import (see [tool.mypy]).
+    "types-jsonschema",
+    "types-psutil",
+    "types-PyYAML",
+    "types-requests",
+    "pandas-stubs",
 ]
 docs = [
     "mkdocs>=1.6",
@@ -116,6 +123,22 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 # test_benchmark imports update/ modules after a runtime sys.path.insert, so its
 # import block is deliberately ordered (path shim first) and can't be sorted.
 "tests/unit/test_benchmark.py" = ["I001"]
+
+[tool.mypy]
+# Type-check as the supported floor (see requires-python), not the runner's
+# interpreter, so use of 3.10+ stdlib APIs is caught.
+python_version = "3.9"
+# Check the bodies of un-annotated functions too — that's where the real bugs
+# hide (it surfaced a bad `except <untyped tuple>` and a docker.types access).
+check_untyped_defs = true
+
+# The Docker / Anthropic / OpenAI SDKs are shelled-out optional deps that may
+# be absent in a dev env and aren't type-checked here — exempt just those, so
+# everything else (incl. jsonschema / psutil / pandas via installed stubs) is
+# checked for real instead of a blanket --ignore-missing-imports.
+[[tool.mypy.overrides]]
+module = ["docker.*", "anthropic.*", "openai.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

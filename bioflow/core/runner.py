@@ -197,7 +197,7 @@ class DockerBackend:
     def _gpu_device_requests(self):
         """Return device_requests for all GPUs, or None if unavailable."""
         try:
-            import docker  # type: ignore[import-not-found]
+            import docker.types  # type: ignore[import-not-found]
             return [docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])]
         except Exception as exc:
             log.warning(f"GPU requested but device request could not be built: {exc}")
