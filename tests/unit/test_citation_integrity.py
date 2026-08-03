@@ -28,10 +28,10 @@ TOOLS = ROOT / "registry" / "tools"
 # 'meta'omics environment paper, …), so their citation count is legitimately
 # n/a.  Keep this list TIGHT: anything else unverified means a PMID points at
 # the wrong paper and should be corrected, not allow-listed.
-# Tools with no MEDLINE PMID: funannotate (Zenodo), GECCO (bioRxiv), sourmash
-# (JOSS), seqtk (no paper) — their entries carry a DOI (or none) + verified=False.
-KNOWN_UNVERIFIED = {"bracken", "bwa_mem2", "cafe5", "fragpipe", "kneaddata",
-                    "funannotate", "gecco", "sourmash", "seqtk"}
+# Tools whose citation carries no MEDLINE PMID (a preprint / software DOI, or no
+# paper), so verified=False is expected.  funannotate / gecco / sourmash / seqtk
+# were dropped 2026-08 once the monthly citation refresh found PMIDs for them.
+KNOWN_UNVERIFIED = {"bracken", "bwa_mem2", "cafe5", "fragpipe", "kneaddata"}
 
 
 def _load() -> dict:
