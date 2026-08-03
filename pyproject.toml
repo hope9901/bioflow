@@ -125,19 +125,24 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 "tests/unit/test_benchmark.py" = ["I001"]
 
 [tool.mypy]
-# Type-check as the supported floor (see requires-python), not the runner's
-# interpreter, so use of 3.10+ stdlib APIs is caught.
-python_version = "3.9"
 # Check the bodies of un-annotated functions too — that's where the real bugs
 # hide (it surfaced a bad `except <untyped tuple>` and a docker.types access).
 check_untyped_defs = true
+# No `python_version = "3.9"`: pinning the target to 3.9 makes mypy reject
+# newer numpy's bundled stubs (they use 3.12 `type` statements), and it caught
+# nothing extra. The 3.9 floor is enforced by the 3.9 unit-test job instead.
 
-# The Docker / Anthropic / OpenAI SDKs are shelled-out optional deps that may
-# be absent in a dev env and aren't type-checked here — exempt just those, so
-# everything else (incl. jsonschema / psutil / pandas via installed stubs) is
-# checked for real instead of a blanket --ignore-missing-imports.
+# Optional shelled-out / native deps that may be absent or ship no stubs
+# (Docker/Anthropic/OpenAI SDKs, pynvml) — exempt just those, so everything else
+# (incl. jsonschema / psutil / pandas via installed stubs) is checked for real
+# instead of a blanket --ignore-missing-imports.
 [[tool.mypy.overrides]]
-module = ["docker.*", "anthropic.*", "openai.*"]
+module = [
+    "docker", "docker.*",
+    "anthropic", "anthropic.*",
+    "openai", "openai.*",
+    "pynvml", "pynvml.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
