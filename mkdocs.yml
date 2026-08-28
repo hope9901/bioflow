@@ -58,6 +58,7 @@ nav:
       - nf-core concordance: benchmarks/nfcore-concordance.md
   - Maintainer:
       - Guide: MAINTAINER.md
+      - Operational notes: maintainer/operational-notes.md
       - Update cadences: maintainer/UPDATE_CADENCES.md
       - Cowork research prompt: maintainer/research_prompt.md
       - Cowork schedule prompt: maintainer/cowork_schedule_prompt.md

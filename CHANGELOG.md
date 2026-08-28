@@ -14,6 +14,132 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Added — mypy actually type-checks now (config, stubs, and two real bugs)
+mypy ran with no config file and a blanket `--ignore-missing-imports`, which
+masked *every* un-stubbed import — a typo'd internal import would not have
+failed CI — and checked only annotated function bodies.
+- New `[tool.mypy]` in `pyproject.toml`: `check_untyped_defs = true`, and
+  `ignore_missing_imports` scoped to just the shelled-out optional deps
+  (`docker`, `anthropic`, `openai`, `pynvml`) instead of everything.
+- Real type stubs moved into the dev extras (`types-jsonschema`, `types-psutil`,
+  `types-PyYAML`, `types-requests`, `pandas-stubs`), so jsonschema / psutil /
+  pandas are checked for real rather than skipped.
+- Checking un-annotated bodies surfaced exactly two defects, both fixed:
+  `bioflow/io.py`'s `retry(exceptions: tuple[type, ...])` was too loose for the
+  `except exceptions` it feeds (now `tuple[type[Exception], ...]`), and
+  `bioflow/core/runner.py` reached `docker.types.DeviceRequest` after a bare
+  `import docker`, which only works by accident (now `import docker.types`).
+- **Do not add `python_version = "3.9"` here.** It was tried and reverted: it
+  makes mypy parse numpy 2.x's bundled stubs as 3.9 and reject their PEP 695
+  `type` statements. The 3.9 floor is enforced by the 3.9 unit-test job instead.
+  Local mypy (3.9 + numpy 1.26) and CI mypy (3.12 + numpy 2.x + pynvml) disagree,
+  so verify config changes in a py3.11+ venv with numpy 2.x before pushing.
+
+### Changed — bcftools 1.24, delly 2.5.1, tRNAscan-SE 2.0.13, Salmon 2.4.1
+A token-authenticated `release_watch --dry-run` sweep (5000 req/h instead of 60)
+found six tools behind upstream; the four with a working BioContainer were
+verified in a real container and applied.  Salmon was checked by the full
+`rnaseq_deg` chain (fastp → Salmon → DESeq2 → enrichment); the other three by
+loading the binary and confirming the reported version — `delly` and
+`trnascan_se` are registry-only (offered through `bioflow custom`, no recipe
+hard-codes them) and bcftools' full chains need external reference data.
+`gecco` 0.11.0 and `comet` 2026.02.1 were left unapplied — neither had a
+BioContainer at the time, so there was nothing to pin.  (gecco's has since been
+built; see [Operational notes](docs/maintainer/operational-notes.md).)
+
+### Fixed — comet's version label didn't match the image it pins
+The `comet` entry pinned `comet-ms:2026011` — which reports
+`Comet version "2026.01 rev. 1"` — while its `version:` field still read
+`2024.02.0`.  The image had been bumped without updating the label, so
+provenance and `bioflow db` reported a version the container doesn't ship.
+Corrected to `2026.01.1` (image and digest were already right), and added
+`TestVersionMatchesImageTag` so the drift class can't recur: a tool's version
+must match its image tag (exact, substring, or same digit-run, so `2026011`
+matches `2026.01.1`).  Bundle images legitimately differ and are allowlisted
+with the reason — `bwa_samtools` (mulled, content-hash tag) and
+`repeatmasker` / `repeatmodeler` (dfam/tetools bundle, tag is the tetools
+version, not the tool's).  A sweep of all 134 active tools found comet was the
+only real drift.
+
+### Changed — ruff pinned to 0.16.0, with the whole tree brought up to it
+The pin sat at 0.15.12 to keep an unrelated commit from failing on new rules;
+0.16 surfaced ~853 findings tree-wide, none of them regressions.  Cleared in
+three passes: the safe autofixes (123 files — import sorting, `RUF100` unused
+`noqa`, PEP 585 builtins), then the judgment calls (27 files), then marking the
+six shebang scripts executable for `EXE001`.  `pyproject.toml`'s ignore list now
+documents *why* each suppressed rule is suppressed: `UP007` / `UP045` stay off
+because bioflow still supports Python 3.9 (PEP 604 unions crash at import there,
+even under `from __future__ import annotations`, because Pydantic and Typer
+resolve annotations via `get_type_hints()`), and `BLE001` / `S110` / `S112` /
+the naive-datetime DTZ rules are deliberate patterns at the Docker/subprocess
+boundaries.
+
+### Changed — SPAdes 4.3.0 and Kraken2 2.17.1
+Both verified against a real recipe before applying, not just pulled: SPAdes by
+the `prokaryote_assembly` full end-to-end chain, Kraken2 by the
+`metagenomics_profile` stage guard (600 read-pairs, 100 % classified against the
+committed 2-taxon database).
+
+### Added — `release_watch --prune`, and tag normalisation
+Candidate files were never removed once applied, so `update/candidates/` had
+accumulated 34 stale June drafts (21 already applied, 7 superseded).  Two fixes
+to the lifecycle:
+- `--prune` deletes candidates the registry has caught up to — a candidate is
+  stale when its normalised version is not strictly newer than the pinned one.
+  Genuinely pending candidates and orphans are kept and reported, never deleted;
+  pruning must never drop a real update.  `test_no_applied_candidate_lingers`
+  fails in CI if an applied candidate is left lying around.
+- `_normalize_tag` reduces a GitHub `tag_name` to something comparable and
+  rejects the shapes that fooled the old comparison: `release/3.5.0` (OpenMS)
+  sorted *above* `3.5.0` because letters rank over digits, so the watcher
+  re-filed an already-applied tool every run, and skani's rolling `latest`
+  release became a permanent phantom candidate.
+Running it cleared 31 files, leaving only candidates that are genuinely ahead of
+the registry.
+
+### Fixed — release_watch filed candidates that pinned the *old* image
+The watcher bumped `version:` and rewrote the image tag by string substitution,
+dropping the BioContainers build suffix (`compleasm:0.2.8--pyh106432d_0` became
+a bare `compleasm:0.2.9`, which doesn't exist), and left the previous
+`image_digest` untouched — so a candidate looked digest-pinned while actually
+pinning the *old* image under a *new* version number.  Every candidate carried
+`risks: [unverified image tag]`, and the defect had been worked around by hand
+each month (see the Salmon entries below).
+- Candidates now resolve the real BioContainers build from the quay.io tags API,
+  preferring the current image's Python build family so a bump doesn't silently
+  jump `py311` → `py313`.
+- The digest is **dropped**, never inherited — `scripts/pin_digests.py` is the
+  single digest authority and fills it when the candidate is applied.  The old
+  value is kept under `update_meta.previous_digest` for traceability.
+- Self-built (non-BioContainer) images say so in `risks` instead of pretending
+  the tag was verified.
+
+### Added — every recipe now has automated coverage
+Seven recipes had no test driving them at all; a change to any of them was
+caught by nothing.  All seven are now covered, and the inventory guard
+(`tests/unit/test_recipe_coverage_inventory.py`) tracks four tiers so coverage
+can't quietly shrink — **UNCOVERED is now empty**.
+- **Stage-guarded on new committed fixtures**: `metagenome_assembly`
+  (assemble → binning, `metagenome_small/`), `joint_genotyping` (2-sample gVCF →
+  CombineGVCFs → GenotypeGVCFs → cohort VCF, `cohort_small/`),
+  `eukaryote_assembly` (hifiasm path, `hifi_small/`), `metagenomics_profile`
+  (fastp → Kraken2 against a hand-built 2-taxon database, `kraken_small/`), and
+  `atac_seq` (trim → align → dedup → peaks) — which is how the broken Bowtie2
+  image below was found.
+- **Full end-to-end**: `cog_enrichment` (DIAMOND makedb → blastp → per-bucket
+  aggregation, `cog_small/`).
+- **Wiring-only**: `download_taxon` runs zero containers, so there is no
+  pipeline to drive on a fixture.  Its engine was already unit-tested; the
+  recipe's own arg-forwarding (`max_genomes` → `max_assemblies`, `include`
+  tuple coercion, `out_dir` resolve + mkdir) is now pinned with the network
+  mocked.  The live NCBI call is the only unexercised part, which no CI should
+  make.
+Each guard stops at an **honest boundary** — where synthetic tiny data stops
+being meaningful — and `docs/reference/e2e-coverage.md` records why: MaxBin2
+needs marker genes a random contig lacks, Flye divides by zero below multi-Mb
+genomes, Bracken 3.1 crashes walking a database this small, SnpEff downloads its
+database at run time.  Don't "fix" these by extending the chain.
+
 ### Fixed — atac_seq / chip_seq default alignment was broken
 The Bowtie2 image both recipes pinned (`staphb/bowtie2:2.5.5`) ships a samtools
 that can't load its shared libraries (`libdeflate.so.0`), so the default
