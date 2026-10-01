@@ -6,7 +6,7 @@
     "end": 2025,
     "years": 5
   },
-  "fetched_at": "2026-09-01T09:37:36+00:00",
+  "fetched_at": "2026-10-01T11:05:22+00:00",
   "n_tools": 137,
   "n_with_pmid": 123,
   "n_fetched": 118,
@@ -24,7 +24,7 @@
     "abyss": {
       "pmid": "28232478",
       "doi": "10.1101/gr.214346.116",
-      "total": 507,
+      "total": 509,
       "recent": 320,
       "verified": true,
       "name": "ABySS",
@@ -33,8 +33,8 @@
     "antismash": {
       "pmid": "37140036",
       "doi": "10.1093/nar/gkad344",
-      "total": 1784,
-      "recent": 1441,
+      "total": 1842,
+      "recent": 1446,
       "verified": true,
       "name": "antiSMASH",
       "category": "func_annot"
@@ -42,8 +42,8 @@
     "augustus": {
       "pmid": "18218656",
       "doi": "10.1093/bioinformatics/btn013",
-      "total": 2111,
-      "recent": 1293,
+      "total": 2146,
+      "recent": 1294,
       "verified": true,
       "name": "AUGUSTUS",
       "category": "struct_annot"
@@ -51,8 +51,8 @@
     "bakta": {
       "pmid": "34739369",
       "doi": "10.1099/mgen.0.000685",
-      "total": 1178,
-      "recent": 814,
+      "total": 1245,
+      "recent": 815,
       "verified": true,
       "name": "Bakta",
       "category": "struct_annot"
@@ -60,8 +60,8 @@
     "bandage": {
       "pmid": "26099265",
       "doi": "10.1093/bioinformatics/btv383",
-      "total": 2397,
-      "recent": 1655,
+      "total": 2448,
+      "recent": 1657,
       "verified": true,
       "name": "Bandage",
       "category": "assembly_qc"
@@ -69,8 +69,8 @@
     "bcftools": {
       "pmid": "33590861",
       "doi": "10.1093/gigascience/giab008",
-      "total": 13414,
-      "recent": 10774,
+      "total": 13934,
+      "recent": 10793,
       "verified": true,
       "name": "bcftools",
       "category": "variant_calling"
@@ -78,8 +78,8 @@
     "bedtools": {
       "pmid": "20110278",
       "doi": "10.1093/bioinformatics/btq033",
-      "total": 24013,
-      "recent": 13851,
+      "total": 24281,
+      "recent": 13865,
       "verified": true,
       "name": "bedtools",
       "category": "alignment"
@@ -87,8 +87,8 @@
     "bismark": {
       "pmid": "21493656",
       "doi": "10.1093/bioinformatics/btr167",
-      "total": 4452,
-      "recent": 2506,
+      "total": 4485,
+      "recent": 2508,
       "verified": true,
       "name": "bismark",
       "category": "epigenomics"
@@ -96,8 +96,8 @@
     "bowtie2": {
       "pmid": "22388286",
       "doi": "10.1038/nmeth.1923",
-      "total": 46019,
-      "recent": 26180,
+      "total": 46502,
+      "recent": 26202,
       "verified": true,
       "name": "bowtie2",
       "category": "alignment"
@@ -115,8 +115,8 @@
     "braker3": {
       "pmid": "38866550",
       "doi": "10.1101/gr.278090.123",
-      "total": 622,
-      "recent": 387,
+      "total": 669,
+      "recent": 389,
       "verified": true,
       "name": "BRAKER3",
       "category": "struct_annot"
@@ -124,8 +124,8 @@
     "busco": {
       "pmid": "34320186",
       "doi": "10.1093/molbev/msab199",
-      "total": 6249,
-      "recent": 5253,
+      "total": 6445,
+      "recent": 5255,
       "verified": true,
       "name": "BUSCO",
       "category": "assembly_qc"
@@ -133,7 +133,7 @@
     "bustools": {
       "pmid": "31073610",
       "doi": "10.1093/bioinformatics/btz279",
-      "total": 129,
+      "total": 131,
       "recent": 111,
       "verified": true,
       "name": "bustools",
@@ -142,8 +142,8 @@
     "bwa": {
       "pmid": "19451168",
       "doi": "10.1093/bioinformatics/btp324",
-      "total": 38853,
-      "recent": 18875,
+      "total": 38911,
+      "recent": 18828,
       "verified": true,
       "name": "BWA",
       "category": "alignment"
@@ -161,8 +161,8 @@
     "bwa_samtools": {
       "pmid": "19451168",
       "doi": "10.1093/bioinformatics/btp324",
-      "total": 38853,
-      "recent": 18875,
+      "total": 38911,
+      "recent": 18828,
       "verified": true,
       "name": "BWA-MEM",
       "category": "alignment"
@@ -180,8 +180,8 @@
     "canu": {
       "pmid": "28298431",
       "doi": "10.1101/gr.215087.116",
-      "total": 6074,
-      "recent": 3992,
+      "total": 6116,
+      "recent": 3996,
       "verified": true,
       "name": "Canu",
       "category": "assembly"
@@ -189,8 +189,8 @@
     "cellranger": {
       "pmid": "28091601",
       "doi": "10.1038/ncomms14049",
-      "total": 6154,
-      "recent": 4200,
+      "total": 6257,
+      "recent": 4203,
       "verified": true,
       "name": "cellranger",
       "category": "single_cell"
@@ -198,8 +198,8 @@
     "checkm2": {
       "pmid": "37500759",
       "doi": "10.1038/s41592-023-01940-w",
-      "total": 1306,
-      "recent": 821,
+      "total": 1394,
+      "recent": 823,
       "verified": true,
       "name": "CheckM2",
       "category": "assembly_qc"
@@ -207,8 +207,8 @@
     "clusterprofiler": {
       "pmid": "34557778",
       "doi": "10.1016/j.xinn.2021.100141",
-      "total": 10809,
-      "recent": 9003,
+      "total": 11154,
+      "recent": 9037,
       "verified": true,
       "name": "clusterProfiler",
       "category": "enrichment"
@@ -216,7 +216,7 @@
     "comet": {
       "pmid": "23148064",
       "doi": "10.1002/pmic.201200439",
-      "total": 1344,
+      "total": 1354,
       "recent": 753,
       "verified": true,
       "name": "Comet",
@@ -225,7 +225,7 @@
     "compleasm": {
       "pmid": "37758247",
       "doi": "10.1093/bioinformatics/btad595",
-      "total": 318,
+      "total": 336,
       "recent": 219,
       "verified": true,
       "name": "compleasm",
@@ -243,8 +243,8 @@
     "dbcan": {
       "pmid": "29771380",
       "doi": "10.1093/nar/gky418",
-      "total": 1781,
-      "recent": 1385,
+      "total": 1796,
+      "recent": 1388,
       "verified": true,
       "name": "dbCAN",
       "category": "func_annot"
@@ -252,8 +252,8 @@
     "deeptools": {
       "pmid": "27079975",
       "doi": "10.1093/nar/gkw257",
-      "total": 7214,
-      "recent": 5239,
+      "total": 7321,
+      "recent": 5245,
       "verified": true,
       "name": "deeptools",
       "category": "epigenomics"
@@ -261,7 +261,7 @@
     "deepvariant": {
       "pmid": "30247488",
       "doi": "10.1038/nbt.4235",
-      "total": 1333,
+      "total": 1362,
       "recent": 998,
       "verified": true,
       "name": "DeepVariant",
@@ -270,8 +270,8 @@
     "delly": {
       "pmid": "22962449",
       "doi": "10.1093/bioinformatics/bts378",
-      "total": 2009,
-      "recent": 1108,
+      "total": 2031,
+      "recent": 1109,
       "verified": true,
       "name": "Delly",
       "category": "variant_calling"
@@ -279,8 +279,8 @@
     "deseq2": {
       "pmid": "25516281",
       "doi": "10.1186/s13059-014-0550-8",
-      "total": 77941,
-      "recent": 53896,
+      "total": 79248,
+      "recent": 53956,
       "verified": true,
       "name": "DESeq2",
       "category": "deg"
@@ -288,7 +288,7 @@
     "dfast": {
       "pmid": "29106469",
       "doi": "10.1093/bioinformatics/btx713",
-      "total": 1076,
+      "total": 1090,
       "recent": 773,
       "verified": true,
       "name": "DFAST",
@@ -297,8 +297,8 @@
     "diamond": {
       "pmid": "33828273",
       "doi": "10.1038/s41592-021-01101-x",
-      "total": 4533,
-      "recent": 3563,
+      "total": 4744,
+      "recent": 3568,
       "verified": true,
       "name": "DIAMOND",
       "category": "comparative_genomics"
@@ -306,8 +306,8 @@
     "dram": {
       "pmid": "32766782",
       "doi": "10.1093/nar/gkaa621",
-      "total": 957,
-      "recent": 791,
+      "total": 981,
+      "recent": 792,
       "verified": true,
       "name": "DRAM",
       "category": "func_annot"
@@ -315,8 +315,8 @@
     "earlgrey": {
       "pmid": "38577785",
       "doi": "10.1093/molbev/msae068",
-      "total": 209,
-      "recent": 135,
+      "total": 219,
+      "recent": 136,
       "verified": true,
       "name": "Earl Grey",
       "category": "repeat"
@@ -324,8 +324,8 @@
     "edger": {
       "pmid": "19910308",
       "doi": "10.1093/bioinformatics/btp616",
-      "total": 34777,
-      "recent": 19647,
+      "total": 35089,
+      "recent": 19669,
       "verified": true,
       "name": "edgeR",
       "category": "deg"
@@ -333,8 +333,8 @@
     "eggnog_mapper": {
       "pmid": "34597405",
       "doi": "10.1093/molbev/msab293",
-      "total": 3843,
-      "recent": 2967,
+      "total": 3977,
+      "recent": 2971,
       "verified": true,
       "name": "eggNOG-mapper",
       "category": "func_annot"
@@ -342,8 +342,8 @@
     "enrichr": {
       "pmid": "27141961",
       "doi": "10.1093/nar/gkw377",
-      "total": 9108,
-      "recent": 6269,
+      "total": 9241,
+      "recent": 6272,
       "verified": true,
       "name": "Enrichr (via gseapy)",
       "category": "enrichment"
@@ -351,8 +351,8 @@
     "ensembl_vep": {
       "pmid": "27268795",
       "doi": "10.1186/s13059-016-0974-4",
-      "total": 6703,
-      "recent": 4575,
+      "total": 6824,
+      "recent": 4585,
       "verified": true,
       "name": "Ensembl VEP",
       "category": "variant_calling"
@@ -360,8 +360,8 @@
     "fastani": {
       "pmid": "30504855",
       "doi": "10.1038/s41467-018-07641-9",
-      "total": 4602,
-      "recent": 3556,
+      "total": 4696,
+      "recent": 3559,
       "verified": true,
       "name": "FastANI",
       "category": "comparative_genomics"
@@ -369,8 +369,8 @@
     "fastp": {
       "pmid": "30423086",
       "doi": "10.1093/bioinformatics/bty560",
-      "total": 22342,
-      "recent": 17822,
+      "total": 22928,
+      "recent": 17840,
       "verified": true,
       "name": "fastp",
       "category": "qc"
@@ -387,8 +387,8 @@
     "fasttree": {
       "pmid": "20224823",
       "doi": "10.1371/journal.pone.0009490",
-      "total": 11898,
-      "recent": 6562,
+      "total": 12016,
+      "recent": 6570,
       "verified": true,
       "name": "FastTree",
       "category": "comparative_genomics"
@@ -405,8 +405,8 @@
     "flye": {
       "pmid": "30936562",
       "doi": "10.1038/s41587-019-0072-8",
-      "total": 5071,
-      "recent": 4019,
+      "total": 5187,
+      "recent": 4024,
       "verified": true,
       "name": "Flye",
       "category": "assembly"
@@ -442,8 +442,8 @@
     "gatk4": {
       "pmid": "20644199",
       "doi": "10.1101/gr.107524.110",
-      "total": 17362,
-      "recent": 8152,
+      "total": 17551,
+      "recent": 8174,
       "verified": true,
       "name": "GATK4",
       "category": "variant_calling"
@@ -460,7 +460,7 @@
     "genovi": {
       "pmid": "37014908",
       "doi": "10.1371/journal.pcbi.1010998",
-      "total": 96,
+      "total": 102,
       "recent": 73,
       "verified": true,
       "name": "GenoVi",
@@ -469,8 +469,8 @@
     "gfastats": {
       "pmid": "35799367",
       "doi": "10.1093/bioinformatics/btac460",
-      "total": 1588,
-      "recent": 1205,
+      "total": 1680,
+      "recent": 1206,
       "verified": true,
       "name": "gfastats",
       "category": "assembly_qc"
@@ -478,7 +478,7 @@
     "glimmerhmm": {
       "pmid": "15145805",
       "doi": "10.1093/bioinformatics/bth315",
-      "total": 1566,
+      "total": 1576,
       "recent": 975,
       "verified": true,
       "name": "GlimmerHMM",
@@ -487,7 +487,7 @@
     "glnexus": {
       "pmid": "33399819",
       "doi": "10.1093/bioinformatics/btaa1081",
-      "total": 215,
+      "total": 220,
       "recent": 169,
       "verified": true,
       "name": "GLnexus",
@@ -496,8 +496,8 @@
     "gseapy": {
       "pmid": "36426870",
       "doi": "10.1093/bioinformatics/btac757",
-      "total": 991,
-      "recent": 709,
+      "total": 1044,
+      "recent": 710,
       "verified": true,
       "name": "GSEApy",
       "category": "enrichment"
@@ -505,8 +505,8 @@
     "gtdbtk": {
       "pmid": "36218463",
       "doi": "10.1093/bioinformatics/btac672",
-      "total": 1724,
-      "recent": 1254,
+      "total": 1811,
+      "recent": 1256,
       "verified": true,
       "name": "GTDB-Tk",
       "category": "func_annot"
@@ -514,8 +514,8 @@
     "harmony": {
       "pmid": "31740819",
       "doi": "10.1038/s41592-019-0619-0",
-      "total": 8812,
-      "recent": 6907,
+      "total": 9121,
+      "recent": 6923,
       "verified": true,
       "name": "Harmony",
       "category": "single_cell"
@@ -523,8 +523,8 @@
     "hifiasm": {
       "pmid": "33526886",
       "doi": "10.1038/s41592-020-01056-5",
-      "total": 6140,
-      "recent": 5088,
+      "total": 6347,
+      "recent": 5095,
       "verified": true,
       "name": "hifiasm",
       "category": "assembly"
@@ -532,8 +532,8 @@
     "hisat2": {
       "pmid": "31375807",
       "doi": "10.1038/s41587-019-0201-4",
-      "total": 12110,
-      "recent": 9933,
+      "total": 12440,
+      "recent": 9960,
       "verified": true,
       "name": "HISAT2",
       "category": "rnaseq_align"
@@ -541,8 +541,8 @@
     "homer": {
       "pmid": "20513432",
       "doi": "10.1016/j.molcel.2010.05.004",
-      "total": 11736,
-      "recent": 6489,
+      "total": 11856,
+      "recent": 6496,
       "verified": true,
       "name": "homer",
       "category": "epigenomics"
@@ -550,8 +550,8 @@
     "htseq": {
       "pmid": "25260700",
       "doi": "10.1093/bioinformatics/btu638",
-      "total": 17682,
-      "recent": 9414,
+      "total": 17819,
+      "recent": 9418,
       "verified": true,
       "name": "HTSeq",
       "category": "rnaseq_align"
@@ -559,8 +559,8 @@
     "humann3": {
       "pmid": "33944776",
       "doi": "10.7554/elife.65088",
-      "total": 1914,
-      "recent": 1590,
+      "total": 1981,
+      "recent": 1593,
       "verified": true,
       "name": "humann3",
       "category": "metagenomics"
@@ -568,8 +568,8 @@
     "interproscan": {
       "pmid": "33156333",
       "doi": "10.1093/nar/gkaa977",
-      "total": 1825,
-      "recent": 1687,
+      "total": 1850,
+      "recent": 1688,
       "verified": true,
       "name": "InterProScan",
       "category": "func_annot"
@@ -577,8 +577,8 @@
     "iqtree": {
       "pmid": "32011700",
       "doi": "10.1093/molbev/msaa015",
-      "total": 12634,
-      "recent": 10064,
+      "total": 13017,
+      "recent": 10076,
       "verified": true,
       "name": "IQ-TREE",
       "category": "comparative_genomics"
@@ -586,8 +586,8 @@
     "kallisto": {
       "pmid": "27043002",
       "doi": "10.1038/nbt.3519",
-      "total": 8295,
-      "recent": 5420,
+      "total": 8393,
+      "recent": 5423,
       "verified": true,
       "name": "kallisto",
       "category": "rnaseq_align"
@@ -595,8 +595,8 @@
     "kb_python": {
       "pmid": "33795888",
       "doi": "10.1038/s41587-021-00870-2",
-      "total": 346,
-      "recent": 316,
+      "total": 355,
+      "recent": 317,
       "verified": true,
       "name": "kb-python",
       "category": "single_cell"
@@ -614,8 +614,8 @@
     "kofamscan": {
       "pmid": "31742321",
       "doi": "10.1093/bioinformatics/btz859",
-      "total": 1559,
-      "recent": 1265,
+      "total": 1598,
+      "recent": 1266,
       "verified": true,
       "name": "KofamScan",
       "category": "func_annot"
@@ -623,8 +623,8 @@
     "kraken2": {
       "pmid": "31779668",
       "doi": "10.1186/s13059-019-1891-0",
-      "total": 5584,
-      "recent": 4456,
+      "total": 5752,
+      "recent": 4462,
       "verified": true,
       "name": "kraken2",
       "category": "metagenomics"
@@ -632,7 +632,7 @@
     "krona": {
       "pmid": "21961884",
       "doi": "10.1186/1471-2105-12-385",
-      "total": 1462,
+      "total": 1478,
       "recent": 785,
       "verified": true,
       "name": "Krona",
@@ -641,8 +641,8 @@
     "lefse": {
       "pmid": "21702898",
       "doi": "10.1186/gb-2011-12-6-r60",
-      "total": 12010,
-      "recent": 7555,
+      "total": 12133,
+      "recent": 7561,
       "verified": true,
       "name": "lefse",
       "category": "metagenomics"
@@ -650,7 +650,7 @@
     "liftoff": {
       "pmid": "33320174",
       "doi": "10.1093/bioinformatics/btaa1016",
-      "total": 842,
+      "total": 867,
       "recent": 688,
       "verified": true,
       "name": "Liftoff",
@@ -659,8 +659,8 @@
     "limma_voom": {
       "pmid": "24485249",
       "doi": "10.1186/gb-2014-15-2-r29",
-      "total": 5300,
-      "recent": 2986,
+      "total": 5353,
+      "recent": 2987,
       "verified": true,
       "name": "limma-voom",
       "category": "deg"
@@ -668,8 +668,8 @@
     "macs3": {
       "pmid": "18798982",
       "doi": "10.1186/gb-2008-9-9-r137",
-      "total": 16061,
-      "recent": 8674,
+      "total": 16231,
+      "recent": 8685,
       "verified": true,
       "name": "macs3",
       "category": "epigenomics"
@@ -677,8 +677,8 @@
     "mafft": {
       "pmid": "23329690",
       "doi": "10.1093/molbev/mst010",
-      "total": 33251,
-      "recent": 19719,
+      "total": 33718,
+      "recent": 19735,
       "verified": true,
       "name": "MAFFT",
       "category": "comparative_genomics"
@@ -686,8 +686,8 @@
     "mash": {
       "pmid": "27323842",
       "doi": "10.1186/s13059-016-0997-x",
-      "total": 2670,
-      "recent": 1794,
+      "total": 2726,
+      "recent": 1799,
       "verified": true,
       "name": "Mash",
       "category": "comparative_genomics"
@@ -695,7 +695,7 @@
     "masurca": {
       "pmid": "28130360",
       "doi": "10.1101/gr.213405.116",
-      "total": 367,
+      "total": 368,
       "recent": 224,
       "verified": true,
       "name": "MaSuRCA",
@@ -704,8 +704,8 @@
     "maxbin2": {
       "pmid": "26515820",
       "doi": "10.1093/bioinformatics/btv638",
-      "total": 2252,
-      "recent": 1640,
+      "total": 2290,
+      "recent": 1641,
       "verified": true,
       "name": "MaxBin 2",
       "category": "metagenomics"
@@ -713,8 +713,8 @@
     "maxquant": {
       "pmid": "19029910",
       "doi": "10.1038/nbt.1511",
-      "total": 13144,
-      "recent": 5790,
+      "total": 13228,
+      "recent": 5795,
       "verified": true,
       "name": "maxquant",
       "category": "proteomics"
@@ -731,8 +731,8 @@
     "megahit": {
       "pmid": "25609793",
       "doi": "10.1093/bioinformatics/btv033",
-      "total": 7262,
-      "recent": 5398,
+      "total": 7401,
+      "recent": 5403,
       "verified": true,
       "name": "MEGAHIT",
       "category": "assembly"
@@ -740,8 +740,8 @@
     "merqury": {
       "pmid": "32928274",
       "doi": "10.1186/s13059-020-02134-9",
-      "total": 4158,
-      "recent": 3400,
+      "total": 4304,
+      "recent": 3402,
       "verified": true,
       "name": "Merqury",
       "category": "assembly_qc"
@@ -749,8 +749,8 @@
     "metabat2": {
       "pmid": "31388474",
       "doi": "10.7717/peerj.7359",
-      "total": 3168,
-      "recent": 2585,
+      "total": 3237,
+      "recent": 2588,
       "verified": true,
       "name": "MetaBAT 2",
       "category": "metagenomics"
@@ -758,8 +758,8 @@
     "metaphlan4": {
       "pmid": "36823356",
       "doi": "10.1038/s41587-023-01688-w",
-      "total": 1210,
-      "recent": 869,
+      "total": 1265,
+      "recent": 871,
       "verified": true,
       "name": "metaphlan4",
       "category": "metagenomics"
@@ -767,8 +767,8 @@
     "methylkit": {
       "pmid": "23034086",
       "doi": "10.1186/gb-2012-13-10-r87",
-      "total": 1761,
-      "recent": 1035,
+      "total": 1780,
+      "recent": 1037,
       "verified": true,
       "name": "methylkit",
       "category": "epigenomics"
@@ -776,7 +776,7 @@
     "methylpy": {
       "pmid": "26030523",
       "doi": "10.1038/nature14465",
-      "total": 567,
+      "total": 571,
       "recent": 226,
       "verified": true,
       "name": "methylpy",
@@ -785,8 +785,8 @@
     "minimap2": {
       "pmid": "29750242",
       "doi": "10.1093/bioinformatics/bty191",
-      "total": 13499,
-      "recent": 10447,
+      "total": 13839,
+      "recent": 10456,
       "verified": true,
       "name": "minimap2",
       "category": "alignment"
@@ -803,8 +803,8 @@
     "msconvert": {
       "pmid": "23051804",
       "doi": "10.1038/nbt.2377",
-      "total": 3410,
-      "recent": 2121,
+      "total": 3468,
+      "recent": 2124,
       "verified": true,
       "name": "msconvert",
       "category": "proteomics"
@@ -812,8 +812,8 @@
     "msfragger": {
       "pmid": "28394336",
       "doi": "10.1038/nmeth.4256",
-      "total": 2226,
-      "recent": 1694,
+      "total": 2278,
+      "recent": 1697,
       "verified": true,
       "name": "msfragger",
       "category": "proteomics"
@@ -821,7 +821,7 @@
     "msgf_plus": {
       "pmid": "25358478",
       "doi": "10.1038/ncomms6277",
-      "total": 932,
+      "total": 943,
       "recent": 458,
       "verified": true,
       "name": "MS-GF+",
@@ -830,8 +830,8 @@
     "multiqc": {
       "pmid": "27312411",
       "doi": "10.1093/bioinformatics/btw354",
-      "total": 8782,
-      "recent": 6639,
+      "total": 9025,
+      "recent": 6641,
       "verified": true,
       "name": "MultiQC",
       "category": "qc"
@@ -839,8 +839,8 @@
     "muscle": {
       "pmid": "36379955",
       "doi": "10.1038/s41467-022-34630-w",
-      "total": 857,
-      "recent": 606,
+      "total": 899,
+      "recent": 610,
       "verified": true,
       "name": "MUSCLE",
       "category": "comparative_genomics"
@@ -848,8 +848,8 @@
     "nanoplot": {
       "pmid": "37171891",
       "doi": "10.1093/bioinformatics/btad311",
-      "total": 707,
-      "recent": 471,
+      "total": 764,
+      "recent": 472,
       "verified": true,
       "name": "NanoPlot",
       "category": "qc"
@@ -857,7 +857,7 @@
     "nextdenovo": {
       "pmid": "38671502",
       "doi": "10.1186/s13059-024-03252-4",
-      "total": 412,
+      "total": 430,
       "recent": 308,
       "verified": true,
       "name": "NextDenovo",
@@ -866,8 +866,8 @@
     "nextpolish": {
       "pmid": "31778144",
       "doi": "10.1093/bioinformatics/btz891",
-      "total": 1042,
-      "recent": 923,
+      "total": 1058,
+      "recent": 924,
       "verified": true,
       "name": "NextPolish",
       "category": "assembly"
@@ -875,8 +875,8 @@
     "openms": {
       "pmid": "27575624",
       "doi": "10.1038/nmeth.3959",
-      "total": 536,
-      "recent": 329,
+      "total": 539,
+      "recent": 330,
       "verified": true,
       "name": "OpenMS",
       "category": "proteomics"
@@ -884,8 +884,8 @@
     "panaroo": {
       "pmid": "32698896",
       "doi": "10.1186/s13059-020-02090-4",
-      "total": 1137,
-      "recent": 878,
+      "total": 1173,
+      "recent": 879,
       "verified": true,
       "name": "Panaroo",
       "category": "comparative_genomics"
@@ -893,7 +893,7 @@
     "percolator": {
       "pmid": "17952086",
       "doi": "10.1038/nmeth1113",
-      "total": 2062,
+      "total": 2083,
       "recent": 953,
       "verified": true,
       "name": "percolator",
@@ -902,8 +902,8 @@
     "pfam_scan": {
       "pmid": "33125078",
       "doi": "10.1093/nar/gkaa913",
-      "total": 5247,
-      "recent": 4614,
+      "total": 5347,
+      "recent": 4619,
       "verified": true,
       "name": "PfamScan",
       "category": "func_annot"
@@ -920,8 +920,8 @@
     "pilon": {
       "pmid": "25409509",
       "doi": "10.1371/journal.pone.0112963",
-      "total": 7827,
-      "recent": 5257,
+      "total": 7913,
+      "recent": 5261,
       "verified": true,
       "name": "Pilon",
       "category": "assembly"
@@ -929,8 +929,8 @@
     "prodigal": {
       "pmid": "20211023",
       "doi": "10.1186/1471-2105-11-119",
-      "total": 9890,
-      "recent": 5658,
+      "total": 10035,
+      "recent": 5663,
       "verified": true,
       "name": "Prodigal",
       "category": "struct_annot"
@@ -938,8 +938,8 @@
     "prokka": {
       "pmid": "24642063",
       "doi": "10.1093/bioinformatics/btu153",
-      "total": 15509,
-      "recent": 9935,
+      "total": 15760,
+      "recent": 9947,
       "verified": true,
       "name": "Prokka",
       "category": "struct_annot"
@@ -947,7 +947,7 @@
     "quast": {
       "pmid": "29949969",
       "doi": "10.1093/bioinformatics/bty266",
-      "total": 1263,
+      "total": 1290,
       "recent": 982,
       "verified": true,
       "name": "QUAST",
@@ -956,8 +956,8 @@
     "racon": {
       "pmid": "28100585",
       "doi": "10.1101/gr.214270.116",
-      "total": 2642,
-      "recent": 1960,
+      "total": 2684,
+      "recent": 1962,
       "verified": true,
       "name": "Racon",
       "category": "assembly"
@@ -965,7 +965,7 @@
     "raven": {
       "pmid": "38217213",
       "doi": "10.1038/s43588-021-00073-4",
-      "total": 395,
+      "total": 405,
       "recent": 324,
       "verified": true,
       "name": "Raven",
@@ -983,8 +983,8 @@
     "repeatmodeler": {
       "pmid": "32300014",
       "doi": "10.1073/pnas.1921046117",
-      "total": 3388,
-      "recent": 2836,
+      "total": 3477,
+      "recent": 2838,
       "verified": true,
       "name": "RepeatModeler",
       "category": "repeat"
@@ -992,8 +992,8 @@
     "roary": {
       "pmid": "26198102",
       "doi": "10.1093/bioinformatics/btv421",
-      "total": 4793,
-      "recent": 3163,
+      "total": 4863,
+      "recent": 3167,
       "verified": true,
       "name": "Roary",
       "category": "comparative_genomics"
@@ -1001,8 +1001,8 @@
     "rsem": {
       "pmid": "21816040",
       "doi": "10.1186/1471-2105-12-323",
-      "total": 17224,
-      "recent": 9740,
+      "total": 17397,
+      "recent": 9755,
       "verified": true,
       "name": "RSEM",
       "category": "rnaseq_align"
@@ -1010,8 +1010,8 @@
     "salmon": {
       "pmid": "28263959",
       "doi": "10.1038/nmeth.4197",
-      "total": 10538,
-      "recent": 7715,
+      "total": 10741,
+      "recent": 7723,
       "verified": true,
       "name": "Salmon",
       "category": "rnaseq_align"
@@ -1019,8 +1019,8 @@
     "samtools": {
       "pmid": "33590861",
       "doi": "10.1093/gigascience/giab008",
-      "total": 13414,
-      "recent": 10774,
+      "total": 13934,
+      "recent": 10793,
       "verified": true,
       "name": "samtools",
       "category": "alignment"
@@ -1028,8 +1028,8 @@
     "scanpy": {
       "pmid": "29409532",
       "doi": "10.1186/s13059-017-1382-0",
-      "total": 7536,
-      "recent": 5778,
+      "total": 7780,
+      "recent": 5788,
       "verified": true,
       "name": "scanpy",
       "category": "single_cell"
@@ -1037,7 +1037,7 @@
     "scoary": {
       "pmid": "27887642",
       "doi": "10.1186/s13059-016-1108-8",
-      "total": 594,
+      "total": 599,
       "recent": 412,
       "verified": true,
       "name": "Scoary",
@@ -1046,8 +1046,8 @@
     "scrublet": {
       "pmid": "30954476",
       "doi": "10.1016/j.cels.2018.11.005",
-      "total": 2430,
-      "recent": 1911,
+      "total": 2487,
+      "recent": 1916,
       "verified": true,
       "name": "Scrublet",
       "category": "single_cell"
@@ -1055,8 +1055,8 @@
     "seqkit": {
       "pmid": "27706213",
       "doi": "10.1371/journal.pone.0163962",
-      "total": 2797,
-      "recent": 2241,
+      "total": 2858,
+      "recent": 2242,
       "verified": true,
       "name": "SeqKit",
       "category": "qc"
@@ -1073,8 +1073,8 @@
     "seurat": {
       "pmid": "37231261",
       "doi": "10.1038/s41587-023-01767-y",
-      "total": 4647,
-      "recent": 2979,
+      "total": 4944,
+      "recent": 2990,
       "verified": true,
       "name": "seurat",
       "category": "single_cell"
@@ -1082,8 +1082,8 @@
     "shasta": {
       "pmid": "32686750",
       "doi": "10.1038/s41587-020-0503-6",
-      "total": 440,
-      "recent": 376,
+      "total": 446,
+      "recent": 377,
       "verified": true,
       "name": "Shasta",
       "category": "assembly"
@@ -1091,8 +1091,8 @@
     "skani": {
       "pmid": "37735570",
       "doi": "10.1038/s41592-023-02018-3",
-      "total": 189,
-      "recent": 121,
+      "total": 204,
+      "recent": 122,
       "verified": true,
       "name": "skani",
       "category": "comparative_genomics"
@@ -1100,8 +1100,8 @@
     "snap": {
       "pmid": "15144565",
       "doi": "10.1186/1471-2105-5-59",
-      "total": 2654,
-      "recent": 1469,
+      "total": 2684,
+      "recent": 1470,
       "verified": true,
       "name": "SNAP",
       "category": "struct_annot"
@@ -1109,8 +1109,8 @@
     "snpeff": {
       "pmid": "22728672",
       "doi": "10.4161/fly.19695",
-      "total": 9873,
-      "recent": 5511,
+      "total": 9999,
+      "recent": 5519,
       "verified": true,
       "name": "SnpEff",
       "category": "variant_calling"
@@ -1127,8 +1127,8 @@
     "spades": {
       "pmid": "32559359",
       "doi": "10.1002/cpbi.102",
-      "total": 2798,
-      "recent": 2246,
+      "total": 2891,
+      "recent": 2250,
       "verified": true,
       "name": "SPAdes",
       "category": "assembly"
@@ -1136,8 +1136,8 @@
     "star": {
       "pmid": "23104886",
       "doi": "10.1093/bioinformatics/bts635",
-      "total": 44698,
-      "recent": 29725,
+      "total": 45286,
+      "recent": 29739,
       "verified": true,
       "name": "STAR",
       "category": "rnaseq_align"
@@ -1145,8 +1145,8 @@
     "starsolo": {
       "pmid": "23104886",
       "doi": "10.1093/bioinformatics/bts635",
-      "total": 44698,
-      "recent": 29725,
+      "total": 45286,
+      "recent": 29739,
       "verified": true,
       "name": "starsolo",
       "category": "single_cell"
@@ -1154,8 +1154,8 @@
     "stringtie": {
       "pmid": "25690850",
       "doi": "10.1038/nbt.3122",
-      "total": 10933,
-      "recent": 7924,
+      "total": 11117,
+      "recent": 7931,
       "verified": true,
       "name": "StringTie",
       "category": "rnaseq_align"
@@ -1163,8 +1163,8 @@
     "subread": {
       "pmid": "24227677",
       "doi": "10.1093/bioinformatics/btt656",
-      "total": 22956,
-      "recent": 15970,
+      "total": 23344,
+      "recent": 15979,
       "verified": true,
       "name": "Subread / featureCounts",
       "category": "rnaseq_align"
@@ -1172,8 +1172,8 @@
     "tobias": {
       "pmid": "32848148",
       "doi": "10.1038/s41467-020-18035-1",
-      "total": 638,
-      "recent": 540,
+      "total": 660,
+      "recent": 541,
       "verified": true,
       "name": "tobias",
       "category": "epigenomics"
@@ -1190,8 +1190,8 @@
     "trimal": {
       "pmid": "19505945",
       "doi": "10.1093/bioinformatics/btp348",
-      "total": 10124,
-      "recent": 6334,
+      "total": 10308,
+      "recent": 6340,
       "verified": true,
       "name": "trimAl",
       "category": "comparative_genomics"
@@ -1208,7 +1208,7 @@
     "trnascan_se": {
       "pmid": "34417604",
       "doi": "10.1093/nar/gkab688",
-      "total": 1575,
+      "total": 1624,
       "recent": 1247,
       "verified": true,
       "name": "tRNAscan-SE",
@@ -1217,8 +1217,8 @@
     "unicycler": {
       "pmid": "28594827",
       "doi": "10.1371/journal.pcbi.1005595",
-      "total": 7344,
-      "recent": 5461,
+      "total": 7464,
+      "recent": 5466,
       "verified": true,
       "name": "Unicycler",
       "category": "assembly"
@@ -1226,8 +1226,8 @@
     "vcftools": {
       "pmid": "21653522",
       "doi": "10.1093/bioinformatics/btr330",
-      "total": 12684,
-      "recent": 7596,
+      "total": 12840,
+      "recent": 7606,
       "verified": true,
       "name": "VCFtools",
       "category": "variant_calling"
@@ -1235,7 +1235,7 @@
     "verkko": {
       "pmid": "36797493",
       "doi": "10.1038/s41587-023-01662-6",
-      "total": 357,
+      "total": 365,
       "recent": 288,
       "verified": true,
       "name": "Verkko",
@@ -1244,7 +1244,7 @@
     "xtandem": {
       "pmid": "14976030",
       "doi": "10.1093/bioinformatics/bth092",
-      "total": 1973,
+      "total": 1977,
       "recent": 330,
       "verified": true,
       "name": "X!Tandem",
