@@ -6,10 +6,10 @@
     "end": 2025,
     "years": 5
   },
-  "fetched_at": "2026-10-01T11:05:22+00:00",
+  "fetched_at": "2026-11-01T11:41:18+00:00",
   "n_tools": 137,
   "n_with_pmid": 123,
-  "n_fetched": 118,
+  "n_fetched": 0,
   "n_pmid_mismatch": 5,
   "tools": {
     "abricate": {
