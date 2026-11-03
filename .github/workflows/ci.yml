@@ -14,10 +14,20 @@ env:
 jobs:
   unit-tests:
     name: Unit tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # ubuntu-latest moved to Ubuntu 26.04, for which actions/python-versions
+    # ships no Python 3.9 build ("version '3.9' ... was not found for Ubuntu
+    # 26.04").  3.9 is still the supported floor (see pyproject.toml), so its
+    # job stays on 24.04; the other versions track ubuntu-latest.
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.9", "3.11", "3.12"]
+        include:
+          - python-version: "3.9"
+            os: ubuntu-24.04
+          - python-version: "3.11"
+            os: ubuntu-latest
+          - python-version: "3.12"
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
