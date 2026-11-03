@@ -39,6 +39,7 @@ import os
 import re
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -251,6 +252,38 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("image", images, ids=[i.split("/")[-1] for i in images])
 
 
+# Registry pulls on shared CI runners fail transiently (TLS handshake
+# timeouts against quay.io's S3/Akamai backend have reddened the nightly
+# job twice).  Pull explicitly, with backoff, *before* probing, so a flaky
+# network is retried and — if it never recovers — reported as a pull
+# failure rather than being confused with "image is missing a tool".
+_PULL_ATTEMPTS = 4
+_PULL_BACKOFF_S = (10, 30, 60)
+
+
+def _pull_with_retry(image: str) -> None:
+    """``docker pull`` *image*, retrying transient failures.
+
+    Fails the test with a ``PULL FAILED`` message (distinct from the
+    missing-tool assertion) once every attempt is exhausted.
+    """
+    last_err = ""
+    for attempt in range(1, _PULL_ATTEMPTS + 1):
+        proc = subprocess.run(
+            ["docker", "pull", "--quiet", image],
+            capture_output=True, text=True, timeout=1200, check=False,
+        )
+        if proc.returncode == 0:
+            return
+        last_err = (proc.stderr or proc.stdout)[-500:]
+        if attempt < _PULL_ATTEMPTS:
+            time.sleep(_PULL_BACKOFF_S[min(attempt, len(_PULL_BACKOFF_S)) - 1])
+    pytest.fail(
+        f"PULL FAILED for {image} after {_PULL_ATTEMPTS} attempts — a "
+        f"registry/network problem, not a missing tool:\n{last_err}"
+    )
+
+
 def test_image_provides_invoked_tools(image: str):
     """Assert *image* contains every binary the recipes invoke from it."""
     tools = sorted(_IMAGE_TOOLS.get(image, set()))
@@ -268,13 +301,14 @@ def test_image_provides_invoked_tools(image: str):
     ]
     check = "; ".join(checks)
     try:
+        _pull_with_retry(image)
         # Mirror how the DockerBackend invokes a stage — ``sh -c`` as the
         # *command*, keeping the image's entrypoint (some biocontainers
         # use a conda-activation entrypoint that sets up PATH).  Probing
         # with ``--entrypoint sh`` would bypass that and wrongly report a
         # tool missing.
         proc = subprocess.run(
-            ["docker", "run", "--rm", image, "sh", "-c", check],
+            ["docker", "run", "--rm", "--pull=never", image, "sh", "-c", check],
             capture_output=True, text=True, timeout=1200, check=False,
         )
     finally:
