@@ -151,8 +151,8 @@ opt in.  See [LLM companion](#llm-companion) for the safety model.
 
 ## Quick start — Cookbook recipes
 
-Eight curated end-to-end pipelines.  Run from the CLI; no Python
-required.
+Twenty curated end-to-end pipelines — 8 comparative-genomics recipes plus
+one per pipeline area.  Run from the CLI; no Python required.
 
 ```bash
 bioflow recipe list                          # show every recipe + its DAG
@@ -189,6 +189,7 @@ bioflow recipe run pangenome --taxon Pectobacterium --dry-run
 | `methylation_wgbs`      | Bisulfite      | TrimGalore → Bismark → methylKit |
 | `proteomics_dda`        | LC-MS/MS       | msconvert → Comet → Percolator (open-source) |
 | `germline_variants`     | Variant calling | fastp → BWA → GATK → bcftools → SnpEff |
+| `joint_genotyping`      | Variant calling | per-sample GVCF → CombineGVCFs/GLnexus → GenotypeGVCFs → hard-filter → SnpEff (cohort) |
 
 Recipes use input-hash caching automatically — a second run with the
 same inputs returns in seconds.  Failed stages retry with bumped
@@ -373,8 +374,8 @@ explicit argument → env var → `~/.bioflow/config.yaml` → `disabled`.
               │                  │
    ┌──────────▼──────┐  ┌────────▼────────────────┐
    │  Tool Registry  │  │  Docker Engine          │
-   │  58 YAML tools  │  │  Sibling-container ptn  │
-   │  in 15 categories│  │  Live log streaming    │
+   │ 137 YAML tools  │  │  Sibling-container ptn  │
+   │ in 16 categories│  │  Live log streaming     │
    └─────────────────┘  └─────────────────────────┘
 ```
 
@@ -387,7 +388,7 @@ work, and exits.
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/unit -q       # 426 unit tests
+python -m pytest tests/unit -q       # ~800 unit tests
 python -m pytest tests/integration/  # requires Docker daemon
 ```
 
@@ -399,7 +400,7 @@ bioflow/
   sdk.py              @stage / @pipeline / parallel='auto' / cache / retry
   report.py           HTML report accumulator (Report.add_section / add_figure / …)
   io.py               CRLF-safe text, atomic write, HTTP download with retry
-  recipes/            8 cookbook pipelines (auto-registered)
+  recipes/            20 cookbook recipes (auto-registered)
   llm/                Opt-in LLM companion (explain / diagnose / new-tool / suggest / audit)
   core/               Hardware profiler · registry loader · runner · planner · checkpoint · NCBI
 
