@@ -122,6 +122,8 @@ jobs:
       - name: Fail the job on red results
         if: failure()
         run: |
-          echo "::error::An image is missing a tool one of its stages invokes."
-          echo "         See the failing parametrization for image + tool + recipe."
+          echo "::error::Image capability guard failed — either an image is missing a tool"
+          echo "         one of its stages invokes, or an image could not be pulled."
+          echo "         'PULL FAILED' in the log = registry/network problem (retried 4x);"
+          echo "         'is missing tool(s)' = a real image defect (image + tool + recipe listed)."
           exit 1
