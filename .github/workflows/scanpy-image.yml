@@ -12,6 +12,11 @@ name: scanpy image
 on:
   workflow_dispatch:
   push:
+    # Branch filter is required: GitHub does not evaluate `paths` for tag
+    # pushes, so without it every release tag (v0.4.0) re-ran this workflow,
+    # rebuilt the image, and failed at "Commit the repin" because a tag
+    # checkout is a detached HEAD with no branch to push to.
+    branches: [main]
     paths:
       - 'docker/scanpy/Dockerfile'
       - '.github/workflows/scanpy-image.yml'
