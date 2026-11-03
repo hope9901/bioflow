@@ -1,6 +1,6 @@
 """bioflow - bioinformatics pipeline platform."""
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 # Tier-A SDK — @stage / @pipeline / runtime config
 from bioflow.report import Report  # noqa: F401

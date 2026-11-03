@@ -14,6 +14,26 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-11-03
+
+A minor release: everything that landed since 0.3.1 — new features (opt-in
+cross-stage concurrency, per-stage tool swaps, `--set` overrides, cohort runner,
+Apptainer/Singularity backend, `bioflow cite`, results overviews), a large
+registry refresh, and a long list of fixes found by running every recipe for
+real.
+
+### Fixed — nightly image-capability guard no longer cries wolf on pull errors
+The guard let `docker run` pull each image implicitly, so a transient registry
+error (a quay.io TLS handshake timeout on `scoary`, 2026-10-31 and 2026-11-03)
+failed the job as "An image is missing a tool".  Images are now pulled
+explicitly with 4 attempts and 10/30/60 s backoff before probing
+(`--pull=never`), and a pull that never recovers fails with a distinct
+`PULL FAILED … not a missing tool` message.
+
+### Changed — README brought up to date
+Stale counts corrected (20 recipes, 137 tools in 16 categories, ~800 unit
+tests) and `joint_genotyping` added to the recipe table.
+
 ### Added — mypy actually type-checks now (config, stubs, and two real bugs)
 mypy ran with no config file and a blanket `--ignore-missing-imports`, which
 masked *every* un-stubbed import — a typo'd internal import would not have
