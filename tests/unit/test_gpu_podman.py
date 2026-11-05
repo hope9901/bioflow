@@ -114,8 +114,13 @@ class TestDockerBackendGpu:
                 captured.update(kw)
                 return _FakeContainer()
 
+        class _FakeImages:
+            def get(self, name):   # image already present: no pull
+                return name
+
         class _FakeClient:
             containers = _FakeContainers()
+            images = _FakeImages()
 
         b = DockerBackend.__new__(DockerBackend)   # bypass __init__/docker
         b.client = _FakeClient()
@@ -148,8 +153,13 @@ class TestDockerBackendGpu:
                 captured.update(kw)
                 return _FakeContainer()
 
+        class _FakeImages:
+            def get(self, name):   # image already present: no pull
+                return name
+
         class _FakeClient:
             containers = _FakeContainers()
+            images = _FakeImages()
 
         b = DockerBackend.__new__(DockerBackend)
         b.client = _FakeClient()

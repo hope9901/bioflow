@@ -57,8 +57,13 @@ def _backend_with(container):
         def run(self, **_):
             return container
 
+    class _Images:
+        def get(self, name):   # image already present: no pull
+            return name
+
     class _Client:
         containers = _Containers()
+        images = _Images()
 
     b.client = _Client()
     return b

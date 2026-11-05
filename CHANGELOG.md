@@ -14,6 +14,23 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+### Fixed — a transient registry error no longer fails a stage as "No such image"
+When a stage's image wasn't present locally, the Docker backend let
+`containers.run` pull it.  docker-py's `images.pull` discards the pull stream,
+so a registry error mid-pull (a quay.io TLS handshake timeout) was silently
+dropped and the stage then failed with a misleading `404 … No such image`,
+with no retry.  The nightly run of 2026-11-04 hit exactly this on `metabat2`
+in `metagenome_assembly`.  `DockerBackend` now pulls missing images itself
+through the low-level API, surfaces `{"error": …}` messages, retries 4 times
+(5/15/45 s backoff), and reports a pull that never succeeds as
+`could not pull image … (registry/network problem)`.
+
+### Fixed — release tags no longer re-run the scanpy image workflow
+GitHub ignores `paths` filters on tag pushes, so `v0.4.0` re-ran
+`scanpy-image.yml`, which rebuilt and re-pushed the image and then failed at
+its commit step (a tag checkout has no branch to push to).  Its push trigger
+is now limited to `main`.
+
 ## [0.4.0] — 2026-11-03
 
 A minor release: everything that landed since 0.3.1 — new features (opt-in
