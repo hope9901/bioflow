@@ -14,6 +14,10 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-11-05
+
+A patch release: two bug fixes found by the first nightly runs after 0.4.0.
+
 ### Fixed — a transient registry error no longer fails a stage as "No such image"
 When a stage's image wasn't present locally, the Docker backend let
 `containers.run` pull it.  docker-py's `images.pull` discards the pull stream,
