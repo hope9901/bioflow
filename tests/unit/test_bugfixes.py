@@ -592,8 +592,13 @@ class TestRunnerRamCeiling:
                 captured.update(kw)
                 return FakeContainer()
 
+        class FakeImages:
+            def get(self, name):   # image already present: no pull
+                return name
+
         class FakeClient:
             containers = FakeContainers()
+            images = FakeImages()
 
         from bioflow.core import runner
         backend = runner.DockerBackend.__new__(runner.DockerBackend)

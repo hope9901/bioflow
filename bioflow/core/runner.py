@@ -154,6 +154,17 @@ def _clamp_resources(cpu: int, ram_gb: float) -> tuple[int, float]:
 # Docker backend (production)
 # ---------------------------------------------------------------------------
 
+# Image pulls are retried: registry pulls fail transiently (quay.io TLS
+# handshake timeouts, CDN hiccups), and one failed pull should not sink a
+# multi-hour recipe run.  Backoff between attempts, in seconds.
+_PULL_ATTEMPTS = 4
+_PULL_BACKOFF_S = (5, 15, 45)
+
+
+class ImagePullError(RuntimeError):
+    """An image could not be pulled after every retry."""
+
+
 class DockerBackend:
     """Real Docker SDK backend (sibling-container pattern).
 
@@ -193,6 +204,52 @@ class DockerBackend:
         else:
             self.client = docker.from_env()  # type: ignore[attr-defined]
         self.runtime = os.environ.get("BIOFLOW_CONTAINER_RUNTIME", "docker")
+
+    def _ensure_image(self, image: str) -> None:
+        """Make sure *image* is present locally, pulling it with retries.
+
+        ``containers.run`` would pull a missing image itself, but docker-py's
+        ``images.pull`` discards the pull stream — an ``{"error": ...}``
+        message from the registry (e.g. a TLS handshake timeout) is silently
+        dropped, and the run then fails with a misleading ``404 No such
+        image``, with no retry.  Pulling through the low-level API lets us
+        see those errors, retry them, and report them as what they are.
+        """
+        import time
+
+        import docker.errors  # type: ignore[import-not-found]
+
+        try:
+            self.client.images.get(image)
+            return
+        except docker.errors.ImageNotFound:
+            pass
+
+        from docker.utils import parse_repository_tag  # type: ignore[import-not-found]
+
+        repo, tag = parse_repository_tag(image)
+        tag = tag or "latest"
+        last_err = ""
+        for attempt in range(1, _PULL_ATTEMPTS + 1):
+            try:
+                for msg in self.client.api.pull(repo, tag=tag, stream=True, decode=True):
+                    if isinstance(msg, dict) and msg.get("error"):
+                        raise ImagePullError(str(msg["error"]))
+                self.client.images.get(image)   # confirm it actually landed
+                return
+            except Exception as exc:
+                last_err = str(exc)
+            if attempt < _PULL_ATTEMPTS:
+                delay = _PULL_BACKOFF_S[min(attempt, len(_PULL_BACKOFF_S)) - 1]
+                log.warning(
+                    f"pull of {image} failed (attempt {attempt}/{_PULL_ATTEMPTS}): "
+                    f"{last_err} — retrying in {delay}s"
+                )
+                time.sleep(delay)
+        raise ImagePullError(
+            f"could not pull image {image} after {_PULL_ATTEMPTS} attempts "
+            f"(registry/network problem): {last_err}"
+        )
 
     def _gpu_device_requests(self):
         """Return device_requests for all GPUs, or None if unavailable."""
@@ -235,6 +292,7 @@ class DockerBackend:
         timer = None
         timed_out = {"flag": False}
         try:
+            self._ensure_image(image)
             container = self.client.containers.run(
                 image=image,
                 command=["sh", "-c", command],
