@@ -51,9 +51,15 @@ def assemble_hifiasm(qc, long_reads: Path, *, out_dir):
 
     Writes the primary contigs to ``assembly.fasta`` — the same filename Flye
     produces — so Medaka/compleasm downstream need no changes.
+
+    The two commands are chained with ``&&``, not a newline: with a newline
+    the stage's exit status was awk's, so a hifiasm crash (OOM kill,
+    segfault — anything that dies without printing) surfaced only as "awk:
+    asm.bp.p_ctg.gfa: No such file or directory", and the real exit code
+    was lost.
     """
     return (
-        f"hifiasm -o {out_dir}/asm -t 16 {long_reads}\n"
+        f"hifiasm -o {out_dir}/asm -t 16 {long_reads} && "
         f"awk '/^S/{{print \">\"$2\"\\n\"$3}}' "
         f"{out_dir}/asm.bp.p_ctg.gfa > {out_dir}/assembly.fasta"
     )

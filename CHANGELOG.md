@@ -14,6 +14,20 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-11-23
+
+A patch release: bug fixes found by the nightly runs after 0.4.0.
+
+### Fixed — a hifiasm failure is reported with hifiasm's own exit code
+`eukaryote_assembly`'s `assemble_hifiasm` stage ran `hifiasm` and the
+GFA→FASTA `awk` as two newline-separated commands, so the stage's exit status
+was awk's.  When hifiasm died without printing anything (nightly of
+2026-11-23, three attempts on the same runner), the only error left was
+`awk: asm.bp.p_ctg.gfa: No such file or directory`, and the real cause was
+lost.  The commands are now chained with `&&`, so a crash or OOM kill
+surfaces as hifiasm's exit code (e.g. 137) and awk no longer runs on a
+missing file.
+
 ### Fixed — a transient registry error no longer fails a stage as "No such image"
 When a stage's image wasn't present locally, the Docker backend let
 `containers.run` pull it.  docker-py's `images.pull` discards the pull stream,
