@@ -14,7 +14,7 @@ ship bug fixes only.  Breaking changes to the documented public API
 
 ## [Unreleased]
 
-## [0.4.1] — 2026-11-05
+## [0.4.1] — 2026-11-23
 
 A patch release: bug fixes found by the nightly runs after 0.4.0.
 
